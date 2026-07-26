@@ -1,9 +1,10 @@
 import { Platform } from 'react-native';
 
-const localApiHost = Platform.OS === 'android' ? 'http://10.0.2.2:9998' : 'http://localhost:9998';
+const localApiHost = Platform.OS === 'android' ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
 
 export const config = {
   apiBaseUrl: `${process.env.EXPO_PUBLIC_API_URL || localApiHost}/api/v1`,
+  webBaseUrl: process.env.EXPO_PUBLIC_WEB_URL || 'https://almonium.com',
   firebase: {
     apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCotfh0KzDpP3HniEfxyxoAw9HUFAA8gFs',
     authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || 'almonium.firebaseapp.com',

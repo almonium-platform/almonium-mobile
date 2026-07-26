@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Crypto from 'expo-crypto';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   createContext,
   PropsWithChildren,
@@ -18,6 +19,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -29,6 +31,7 @@ import type { UserInfo } from '@/src/types';
 interface AuthState {
   firebaseUser: User | null;
   profile: UserInfo | null;
+  profileError: string | null;
   loading: boolean;
   signIn(email: string, password: string): Promise<void>;
   signInWithApple(): Promise<void>;
@@ -36,14 +39,18 @@ interface AuthState {
   resetPassword(email: string): Promise<void>;
   logOut(): Promise<void>;
   refreshProfile(): Promise<void>;
+  retryProfile(): Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
+const profileCacheKey = (uid: string) => `almonium:profile:${uid}`;
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserInfo | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const previousUid = useRef<string | null>(null);
 
   const loadProfile = useCallback(async (user: User) => {
     if (!user.emailVerified) {
@@ -51,16 +58,40 @@ export function AuthProvider({ children }: PropsWithChildren) {
       return;
     }
     const nextProfile = await api.me();
+    await AsyncStorage.setItem(profileCacheKey(user.uid), JSON.stringify(nextProfile)).catch(
+      () => undefined,
+    );
     setProfile(nextProfile);
   }, []);
 
   useEffect(
     () =>
       onAuthStateChanged(auth, async (user) => {
+        if (previousUid.current !== user?.uid) {
+          queryClient.clear();
+          previousUid.current = user?.uid ?? null;
+        }
         setFirebaseUser(user);
+        setProfileError(null);
         try {
-          if (user) await loadProfile(user);
+          if (user) {
+            setProfile(null);
+            await loadProfile(user);
+          }
           else setProfile(null);
+        } catch (error) {
+          const cached = user
+            ? await AsyncStorage.getItem(profileCacheKey(user.uid)).catch(() => null)
+            : null;
+          if (cached) {
+            try {
+              setProfile(JSON.parse(cached) as UserInfo);
+            } catch {
+              setProfileError(error instanceof Error ? error.message : 'Could not load your profile.');
+            }
+          } else {
+            setProfileError(error instanceof Error ? error.message : 'Could not load your profile.');
+          }
         } finally {
           setLoading(false);
         }
@@ -72,6 +103,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     () => ({
       firebaseUser,
       profile,
+      profileError,
       loading,
       async signIn(email, password) {
         const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
@@ -106,22 +138,42 @@ export function AuthProvider({ children }: PropsWithChildren) {
       },
       async register(email, password) {
         const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
-        await sendEmailVerification(credential.user);
-        await signOut(auth);
+        try {
+          await sendEmailVerification(credential.user);
+        } finally {
+          await signOut(auth);
+        }
       },
       async resetPassword(email) {
         await sendPasswordResetEmail(auth, email.trim());
       },
       async logOut() {
+        const uid = auth.currentUser?.uid;
         await signOut(auth);
         queryClient.clear();
+        if (uid) await AsyncStorage.removeItem(profileCacheKey(uid));
         setProfile(null);
       },
       async refreshProfile() {
-        if (auth.currentUser) await loadProfile(auth.currentUser);
+        if (auth.currentUser) {
+          setProfileError(null);
+          await loadProfile(auth.currentUser);
+        }
+      },
+      async retryProfile() {
+        if (!auth.currentUser) return;
+        setLoading(true);
+        setProfileError(null);
+        try {
+          await loadProfile(auth.currentUser);
+        } catch (error) {
+          setProfileError(error instanceof Error ? error.message : 'Could not load your profile.');
+        } finally {
+          setLoading(false);
+        }
       },
     }),
-    [firebaseUser, profile, loading, loadProfile],
+    [firebaseUser, profile, profileError, loading, loadProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useQueryClient } from '@tanstack/react-query';
+import { Picker } from '@react-native-picker/picker';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   Alert,
+  Linking,
   Pressable,
   StyleSheet,
   Switch,
@@ -15,6 +17,8 @@ import { Screen } from '@/components/screen';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { config } from '@/src/config';
+import { languageName, sortLanguages } from '@/src/languages';
 import { colors } from '@/src/theme';
 import type { CefrLevel, Learner } from '@/src/types';
 
@@ -23,9 +27,13 @@ const levels: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 function LanguageRow({
   learner,
   onChanged,
+  canDelete,
+  onDelete,
 }: {
   learner: Learner;
   onChanged(): Promise<void>;
+  canDelete: boolean;
+  onDelete(): void;
 }) {
   const [saving, setSaving] = useState(false);
 
@@ -48,16 +56,25 @@ function LanguageRow({
           <Text style={styles.languageName}>{learner.language.toUpperCase()}</Text>
           <Text style={styles.caption}>{learner.active ? 'Shown in your library' : 'Paused'}</Text>
         </View>
-        <Switch
-          value={learner.active}
-          onValueChange={(active) => update({ active })}
-          trackColor={{ false: colors.line, true: colors.primary }}
-        />
+        <View style={styles.languageActions}>
+          {canDelete && (
+            <Pressable disabled={saving} onPress={onDelete} hitSlop={8}>
+              <Ionicons name="trash-outline" size={19} color={colors.danger} />
+            </Pressable>
+          )}
+          <Switch
+            disabled={saving}
+            value={learner.active}
+            onValueChange={(active) => update({ active })}
+            trackColor={{ false: colors.line, true: colors.primary }}
+          />
+        </View>
       </View>
       <View style={styles.levels}>
         {levels.map((level) => (
           <Pressable
             key={level}
+            disabled={saving}
             onPress={() => update({ level })}
             style={[styles.level, learner.selfReportedLevel === level && styles.levelActive]}>
             <Text
@@ -80,8 +97,30 @@ export default function SettingsScreen() {
   const [username, setUsername] = useState(profile?.username || '');
   const [savingName, setSavingName] = useState(false);
   const [savingPrivacy, setSavingPrivacy] = useState(false);
+  const [savingInterests, setSavingInterests] = useState(false);
+  const [selectedInterests, setSelectedInterests] = useState<number[]>(
+    profile?.interests.map((interest) => interest.id) || [],
+  );
+  const [showAddLanguage, setShowAddLanguage] = useState(false);
+  const [newLanguage, setNewLanguage] = useState('');
+  const [newLevel, setNewLevel] = useState<CefrLevel>('A1');
+  const [addingLanguage, setAddingLanguage] = useState(false);
+  const interestsQuery = useQuery({
+    queryKey: ['interests'],
+    queryFn: api.interests,
+    staleTime: Infinity,
+  });
+  const languagesQuery = useQuery({
+    queryKey: ['supported-languages'],
+    queryFn: api.supportedLanguages,
+    staleTime: Infinity,
+  });
 
   useEffect(() => setUsername(profile?.username || ''), [profile?.username]);
+  useEffect(
+    () => setSelectedInterests(profile?.interests.map((interest) => interest.id) || []),
+    [profile?.interests],
+  );
 
   async function changed() {
     await refreshProfile();
@@ -115,6 +154,92 @@ export default function SettingsScreen() {
   async function signOut() {
     await logOut();
     router.replace('/(auth)/sign-in');
+  }
+
+  async function saveInterests() {
+    setSavingInterests(true);
+    try {
+      await api.updateInterests(selectedInterests);
+      await changed();
+    } catch (error) {
+      Alert.alert('Could not save interests', error instanceof Error ? error.message : 'Try again.');
+    } finally {
+      setSavingInterests(false);
+    }
+  }
+
+  async function addLanguage() {
+    if (!newLanguage) return;
+    setAddingLanguage(true);
+    try {
+      await api.addLearner(newLanguage, newLevel);
+      setNewLanguage('');
+      setShowAddLanguage(false);
+      await changed();
+    } catch (error) {
+      Alert.alert('Could not add language', error instanceof Error ? error.message : 'Try again.');
+    } finally {
+      setAddingLanguage(false);
+    }
+  }
+
+  function deleteLanguage(learner: Learner) {
+    Alert.alert(
+      `Remove ${languageName(learner.language)}?`,
+      'Its flashcards and learning progress will also be removed.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.deleteLearner(learner.language);
+              await changed();
+            } catch (error) {
+              Alert.alert('Could not remove language', error instanceof Error ? error.message : 'Try again.');
+            }
+          },
+        },
+      ],
+    );
+  }
+
+  function confirmAccountDeletion() {
+    Alert.alert(
+      'Delete your Almonium account?',
+      'This permanently removes your profile, learning data, and Firebase login. It cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete permanently',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert('Final confirmation', 'Delete everything associated with this account?', [
+              { text: 'Keep account', style: 'cancel' },
+              {
+                text: 'Delete everything',
+                style: 'destructive',
+                onPress: async () => {
+                  try {
+                    await api.deleteAccount();
+                    await logOut();
+                    router.replace('/(auth)/sign-in');
+                  } catch (error) {
+                    Alert.alert(
+                      'Could not delete account',
+                      error instanceof Error
+                        ? `${error.message}\n\nIf your login is no longer recent, sign out and back in first.`
+                        : 'Please sign out, sign back in, and try again.',
+                    );
+                  }
+                },
+              },
+            ]);
+          },
+        },
+      ],
+    );
   }
 
   return (
@@ -164,6 +289,46 @@ export default function SettingsScreen() {
 
       <Card>
         <View style={styles.sectionTitle}>
+          <Ionicons name="heart-outline" color={colors.primary} size={20} />
+          <Text style={styles.sectionTitleText}>Interests</Text>
+        </View>
+        <Text style={styles.caption}>These help Almonium shape future recommendations.</Text>
+        <View style={styles.chips}>
+          {interestsQuery.data?.map((interest) => {
+            const selected = selectedInterests.includes(interest.id);
+            return (
+              <Pressable
+                key={interest.id}
+                disabled={savingInterests}
+                onPress={() =>
+                  setSelectedInterests((current) =>
+                    selected
+                      ? current.filter((id) => id !== interest.id)
+                      : [...current, interest.id],
+                  )
+                }
+                style={[styles.chip, selected && styles.chipSelected]}>
+                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+                  {interest.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Button
+          variant="secondary"
+          loading={savingInterests}
+          disabled={
+            JSON.stringify([...selectedInterests].sort()) ===
+            JSON.stringify([...(profile?.interests.map((interest) => interest.id) || [])].sort())
+          }
+          onPress={saveInterests}>
+          Save interests
+        </Button>
+      </Card>
+
+      <Card>
+        <View style={styles.sectionTitle}>
           <Ionicons name="language-outline" color={colors.primary} size={20} />
           <Text style={styles.sectionTitleText}>Reading languages</Text>
         </View>
@@ -171,10 +336,62 @@ export default function SettingsScreen() {
           Set your level and choose which shelves are active. Book recommendations update automatically.
         </Text>
         {profile?.learners.map((learner) => (
-          <LanguageRow key={learner.id} learner={learner} onChanged={changed} />
+          <LanguageRow
+            key={learner.id}
+            learner={learner}
+            onChanged={changed}
+            canDelete={(profile?.learners.length || 0) > 1}
+            onDelete={() => deleteLanguage(learner)}
+          />
         ))}
         {!profile?.learners.length && (
-          <Text style={styles.caption}>Add your first target language in the web app.</Text>
+          <Text style={styles.caption}>No target languages are configured for this account.</Text>
+        )}
+        {showAddLanguage ? (
+          <View style={styles.addLanguage}>
+            <View style={styles.pickerFrame}>
+              <Picker selectedValue={newLanguage} onValueChange={setNewLanguage}>
+                <Picker.Item label="Choose a language…" value="" />
+                {sortLanguages(languagesQuery.data || [])
+                  .filter(
+                    (code) =>
+                      !profile?.learners.some((learner) => learner.language === code) &&
+                      !profile?.fluentLangs.includes(code),
+                  )
+                  .map((code) => (
+                    <Picker.Item key={code} label={languageName(code)} value={code} />
+                  ))}
+              </Picker>
+            </View>
+            <View style={styles.levels}>
+              {levels.map((level) => (
+                <Pressable
+                  key={level}
+                  onPress={() => setNewLevel(level)}
+                  style={[styles.level, newLevel === level && styles.levelActive]}>
+                  <Text style={[styles.levelText, newLevel === level && styles.levelTextActive]}>
+                    {level}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <Button loading={addingLanguage} disabled={!newLanguage} onPress={addLanguage}>
+              Add language
+            </Button>
+            <Button variant="secondary" onPress={() => setShowAddLanguage(false)}>
+              Cancel
+            </Button>
+          </View>
+        ) : (
+          <Button
+            variant="secondary"
+            disabled={
+              (profile?.learners.length || 0) >=
+              (profile?.subscription.limits.MAX_TARGET_LANGS ?? 1)
+            }
+            onPress={() => setShowAddLanguage(true)}>
+            Add target language
+          </Button>
         )}
       </Card>
 
@@ -191,9 +408,20 @@ export default function SettingsScreen() {
           <Text style={styles.settingLabel}>Plan</Text>
           <Text style={styles.stat}>{profile?.premium ? 'Premium' : 'Free'}</Text>
         </View>
+        <View style={styles.legalRow}>
+          <Pressable onPress={() => Linking.openURL(`${config.webBaseUrl}/privacy-policy`)}>
+            <Text style={styles.legalText}>Privacy policy</Text>
+          </Pressable>
+          <Pressable onPress={() => Linking.openURL(`${config.webBaseUrl}/terms-of-use`)}>
+            <Text style={styles.legalText}>Terms of use</Text>
+          </Pressable>
+        </View>
         <Button variant="danger" onPress={signOut}>
           Sign out
         </Button>
+        <Pressable onPress={confirmAccountDeletion} style={styles.deleteLink}>
+          <Text style={styles.deleteText}>Delete account permanently</Text>
+        </Pressable>
       </Card>
     </Screen>
   );
@@ -212,6 +440,7 @@ const styles = StyleSheet.create({
   settingLabel: { color: colors.ink, fontWeight: '700', fontSize: 15 },
   language: { borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 14, gap: 12 },
   languageHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  languageActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   languageName: { color: colors.ink, fontWeight: '900', fontSize: 16, letterSpacing: 0.8 },
   levels: { flexDirection: 'row', gap: 6 },
   level: { flex: 1, minHeight: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
@@ -221,4 +450,15 @@ const styles = StyleSheet.create({
   saving: { opacity: 0.6 },
   statRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 },
   stat: { color: colors.primary, fontWeight: '800' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.line },
+  chipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  chipText: { color: colors.ink, fontSize: 13, fontWeight: '600' },
+  chipTextSelected: { color: colors.white },
+  deleteLink: { alignItems: 'center', paddingVertical: 8 },
+  deleteText: { color: colors.danger, fontSize: 13, fontWeight: '700' },
+  addLanguage: { gap: 10, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 14 },
+  pickerFrame: { borderWidth: 1, borderColor: colors.line, borderRadius: 14, overflow: 'hidden', backgroundColor: colors.white },
+  legalRow: { flexDirection: 'row', justifyContent: 'center', gap: 20, paddingVertical: 4 },
+  legalText: { color: colors.primary, fontSize: 13, fontWeight: '700' },
 });

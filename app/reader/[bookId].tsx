@@ -1,124 +1,290 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useRef } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  AppState,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
+import { Button } from '@/components/ui';
 import { api } from '@/src/api';
+import { useAuth } from '@/src/auth-context';
+import { ReadingProgressSync } from '@/src/reading-progress';
 import { colors } from '@/src/theme';
 
-const readerScript = `
+type ReaderTheme = 'paper' | 'night';
+const settingsKey = 'almonium:reader-settings';
+
+const baseProgressScript = `
   (function () {
     let last = -1;
     function report() {
       const root = document.documentElement;
       const max = Math.max(1, root.scrollHeight - window.innerHeight);
       const percentage = Math.max(0, Math.min(100, Math.round((window.scrollY / max) * 100)));
-      if (Math.abs(percentage - last) >= 2) {
+      if (Math.abs(percentage - last) >= 1) {
         last = percentage;
         window.ReactNativeWebView.postMessage(String(percentage));
       }
     }
     document.addEventListener('scroll', report, { passive: true });
     window.addEventListener('load', report);
-    true;
   })();
 `;
 
+function appearanceScript(fontSize: number, theme: ReaderTheme, progress: number) {
+  const background = theme === 'night' ? '#18211d' : '#fffdf8';
+  const foreground = theme === 'night' ? '#e5ebe7' : '#202824';
+  return `
+    (function () {
+      let style = document.getElementById('almonium-reader-style');
+      if (!style) {
+        style = document.createElement('style');
+        style.id = 'almonium-reader-style';
+        document.head.appendChild(style);
+      }
+      style.textContent = \`
+        html, body { background: ${background} !important; color: ${foreground} !important; }
+        body {
+          margin: 0 auto !important;
+          padding: 28px 24px 110px !important;
+          max-width: 720px !important;
+          font-family: Georgia, "Times New Roman", serif !important;
+          font-size: ${fontSize}px !important;
+          line-height: 1.72 !important;
+        }
+        p { margin: 0 0 1.15em !important; }
+        img { max-width: 100% !important; height: auto !important; }
+        a { color: #58a98d !important; }
+      \`;
+      document.documentElement.style.background = '${background}';
+      setTimeout(function () {
+        const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        window.scrollTo(0, max * ${Math.max(0, Math.min(100, progress)) / 100});
+      }, 250);
+      true;
+    })();
+  `;
+}
+
 function readerHtml(content: string) {
-  const isDocument = /<html[\s>]/i.test(content);
-  if (isDocument) return content;
-  return `<!doctype html>
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-        <style>
-          :root { color-scheme: light; }
-          body {
-            margin: 0 auto;
-            padding: 28px 24px 100px;
-            max-width: 720px;
-            background: #fffdf8;
-            color: #202824;
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: 20px;
-            line-height: 1.72;
-          }
-          h1, h2, h3 { color: #17221d; line-height: 1.2; margin-top: 1.8em; }
-          p { margin: 0 0 1.15em; }
-          img { max-width: 100%; height: auto; }
-          a { color: #26735b; }
-        </style>
-      </head>
-      <body>${content}</body>
-    </html>`;
+  if (/<html[\s>]/i.test(content)) return content;
+  return `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body>${content}</body></html>`;
 }
 
 export default function ReaderScreen() {
   const params = useLocalSearchParams<{ bookId: string; language?: string; title?: string }>();
   const bookId = Number(params.bookId);
+  const { firebaseUser, profile } = useAuth();
   const queryClient = useQueryClient();
-  const latestProgress = useRef<number | null>(null);
-  const lastSaved = useRef(-1);
+  const webView = useRef<WebView>(null);
+  const sync = useMemo(
+    () =>
+      Number.isInteger(bookId) && firebaseUser
+        ? new ReadingProgressSync(bookId, firebaseUser.uid)
+        : null,
+    [bookId, firebaseUser],
+  );
+  const [progress, setProgress] = useState<number | null>(null);
+  const progressRef = useRef(0);
+  const [fontSize, setFontSize] = useState(20);
+  const [theme, setTheme] = useState<ReaderTheme>('paper');
+  const [parallel, setParallel] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const query = useQuery({
-    queryKey: ['book-text', bookId],
+  const textQuery = useQuery({
+    queryKey: ['book-text', firebaseUser?.uid, bookId],
     queryFn: () => api.bookText(bookId),
-    enabled: Number.isFinite(bookId),
+    enabled: Number.isInteger(bookId) && bookId > 0 && Boolean(firebaseUser),
+    staleTime: 10 * 60_000,
+  });
+  const infoQuery = useQuery({
+    queryKey: ['book-info', firebaseUser?.uid, bookId],
+    queryFn: () => api.bookInfo(bookId),
+    enabled: Number.isInteger(bookId) && bookId > 0 && Boolean(firebaseUser),
+  });
+  const parallelLanguage = infoQuery.data?.languageVariants.find(
+    (variant) =>
+      variant.language !== infoQuery.data.language &&
+      profile?.fluentLangs.includes(variant.language),
+  )?.language;
+  const parallelQuery = useQuery({
+    queryKey: ['book-parallel', firebaseUser?.uid, bookId, parallelLanguage],
+    queryFn: () => api.parallelText(bookId, parallelLanguage!),
+    enabled: parallel && Boolean(parallelLanguage),
+    staleTime: 10 * 60_000,
   });
 
-  const save = useCallback(
-    async (percentage: number) => {
-      if (Math.abs(percentage - lastSaved.current) < 2) return;
-      lastSaved.current = percentage;
-      await api.saveProgress(bookId, percentage);
-      await queryClient.invalidateQueries({ queryKey: ['bookshelf'] });
-    },
-    [bookId, queryClient],
-  );
+  useEffect(() => {
+    void AsyncStorage.getItem(settingsKey).then((value) => {
+      if (!value) return;
+      try {
+        const settings = JSON.parse(value) as { fontSize?: number; theme?: ReaderTheme };
+        if (settings.fontSize) setFontSize(settings.fontSize);
+        if (settings.theme) setTheme(settings.theme);
+      } catch {
+        // Ignore stale settings from an incompatible app version.
+      }
+    });
+  }, []);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    if (!sync || !infoQuery.data) return;
+    void sync.restorePending().then((pending) => {
+      const restored = pending ?? infoQuery.data.progressPercentage ?? 0;
+      progressRef.current = restored;
+      setProgress(restored);
+      if (pending !== null) void sync.flush().catch(() => undefined);
+    });
+  }, [sync, infoQuery.data]);
+
+  const flush = useCallback(async () => {
+    if (!sync) return;
+    try {
+      await sync.flush();
+      await queryClient.invalidateQueries({ queryKey: ['bookshelf', firebaseUser?.uid] });
+    } catch {
+      // Pending progress remains in AsyncStorage and is retried next time.
+    }
+  }, [sync, queryClient, firebaseUser?.uid]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') void flush();
+    });
+    return () => {
+      subscription.remove();
       if (saveTimer.current) clearTimeout(saveTimer.current);
-      if (latestProgress.current !== null) void save(latestProgress.current);
-    },
-    [save],
-  );
+      void flush();
+    };
+  }, [flush]);
+
+  useEffect(() => {
+    void AsyncStorage.setItem(settingsKey, JSON.stringify({ fontSize, theme }));
+    webView.current?.injectJavaScript(appearanceScript(fontSize, theme, progressRef.current));
+  }, [fontSize, theme]);
 
   function onProgress(event: WebViewMessageEvent) {
     const percentage = Number(event.nativeEvent.data);
-    if (!Number.isFinite(percentage)) return;
-    latestProgress.current = percentage;
+    if (!sync || !Number.isFinite(percentage)) return;
+    const next = Math.max(0, Math.min(100, Math.round(percentage)));
+    progressRef.current = next;
+    setProgress(next);
+    void sync.record(next);
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => void save(percentage), 1500);
+    saveTimer.current = setTimeout(() => void flush(), 1500);
   }
 
+  if (!Number.isInteger(bookId) || bookId <= 0) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorTitle}>This reader link is invalid.</Text>
+        <Button onPress={() => router.back()}>Back to library</Button>
+      </View>
+    );
+  }
+
+  const loading = textQuery.isLoading || infoQuery.isLoading || (parallel && parallelQuery.isLoading);
+  const error = textQuery.error || infoQuery.error || (parallel ? parallelQuery.error : null);
+  const content = parallel ? parallelQuery.data : textQuery.data;
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, theme === 'night' && styles.containerNight]}>
       <Stack.Screen options={{ title: params.title || 'Reader' }} />
-      {query.isLoading && (
+      {loading && (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.status}>Opening your book…</Text>
+          <Text style={styles.status}>Opening at your last page…</Text>
         </View>
       )}
-      {query.isError && (
+      {error && (
         <View style={styles.center}>
           <Text style={styles.errorTitle}>This page would not open.</Text>
-          <Text style={styles.status}>
-            {query.error instanceof Error ? query.error.message : 'Please try again.'}
-          </Text>
+          <Text style={styles.status}>{error instanceof Error ? error.message : 'Please try again.'}</Text>
+          <Button
+            onPress={() => {
+              void textQuery.refetch();
+              void infoQuery.refetch();
+              if (parallel) void parallelQuery.refetch();
+            }}>
+            Try again
+          </Button>
         </View>
       )}
-      {query.data && (
-        <WebView
-          source={{ html: readerHtml(query.data) }}
-          injectedJavaScript={readerScript}
-          onMessage={onProgress}
-          originWhitelist={['*']}
-          style={styles.webview}
-        />
+      {content && infoQuery.data && progress !== null && !loading && !error && (
+        <>
+          <WebView
+            key={parallel ? `parallel-${parallelLanguage}` : 'single'}
+            ref={webView}
+            source={{ html: readerHtml(content) }}
+            injectedJavaScript={`${appearanceScript(fontSize, theme, progress)}${baseProgressScript}true;`}
+            onMessage={onProgress}
+            onShouldStartLoadWithRequest={(request) => {
+              if (request.url.startsWith('about:blank')) return true;
+              if (/^https?:|^mailto:/i.test(request.url)) void Linking.openURL(request.url);
+              return false;
+            }}
+            originWhitelist={['about:*']}
+            style={styles.webview}
+          />
+          <View style={[styles.toolbar, theme === 'night' && styles.toolbarNight]}>
+            <View style={styles.progressCopy}>
+              <Text style={[styles.progressValue, theme === 'night' && styles.nightText]}>
+                {progress}%
+              </Text>
+              <View style={styles.track}>
+                <View style={[styles.bar, { width: `${progress}%` }]} />
+              </View>
+            </View>
+            <Pressable
+              accessibilityLabel="Toggle parallel translation"
+              disabled={!parallelLanguage}
+              onPress={() => setParallel((value) => !value)}
+              style={[styles.toolButton, !parallelLanguage && styles.toolButtonDisabled]}>
+              <Ionicons
+                name={parallel ? 'git-compare' : 'git-compare-outline'}
+                size={20}
+                color={
+                  parallel
+                    ? colors.primary
+                    : theme === 'night'
+                      ? colors.white
+                      : colors.ink
+                }
+              />
+            </Pressable>
+            <Pressable
+              accessibilityLabel="Decrease text size"
+              onPress={() => setFontSize((size) => Math.max(16, size - 2))}
+              style={styles.toolButton}>
+              <Text style={[styles.smallA, theme === 'night' && styles.nightText]}>A</Text>
+            </Pressable>
+            <Pressable
+              accessibilityLabel="Increase text size"
+              onPress={() => setFontSize((size) => Math.min(30, size + 2))}
+              style={styles.toolButton}>
+              <Text style={[styles.largeA, theme === 'night' && styles.nightText]}>A</Text>
+            </Pressable>
+            <Pressable
+              accessibilityLabel="Toggle reader theme"
+              onPress={() => setTheme((value) => (value === 'paper' ? 'night' : 'paper'))}
+              style={styles.toolButton}>
+              <Ionicons
+                name={theme === 'paper' ? 'moon-outline' : 'sunny-outline'}
+                size={20}
+                color={theme === 'night' ? colors.white : colors.ink}
+              />
+            </Pressable>
+          </View>
+        </>
       )}
     </View>
   );
@@ -126,8 +292,20 @@ export default function ReaderScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  webview: { flex: 1, backgroundColor: colors.surface },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32 },
+  containerNight: { backgroundColor: '#18211d' },
+  webview: { flex: 1, backgroundColor: 'transparent' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32, backgroundColor: colors.canvas },
   status: { color: colors.muted, fontSize: 15, textAlign: 'center' },
-  errorTitle: { color: colors.ink, fontSize: 20, fontWeight: '800' },
+  errorTitle: { color: colors.ink, fontSize: 20, fontWeight: '800', textAlign: 'center' },
+  toolbar: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingBottom: 5, borderTopWidth: 1, borderTopColor: colors.line, backgroundColor: colors.surface },
+  toolbarNight: { backgroundColor: '#202c27', borderTopColor: '#34443d' },
+  progressCopy: { flex: 1, gap: 5 },
+  progressValue: { color: colors.ink, fontSize: 12, fontWeight: '900' },
+  track: { height: 4, borderRadius: 2, backgroundColor: colors.line, overflow: 'hidden' },
+  bar: { height: 4, borderRadius: 2, backgroundColor: colors.gold },
+  toolButton: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
+  toolButtonDisabled: { opacity: 0.3 },
+  smallA: { color: colors.ink, fontSize: 14, fontWeight: '800' },
+  largeA: { color: colors.ink, fontSize: 21, fontWeight: '800' },
+  nightText: { color: colors.white },
 });

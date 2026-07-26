@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Link, router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Card, Field, Title } from '@/components/ui';
@@ -13,12 +13,19 @@ export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      void AppleAuthentication.isAvailableAsync().then(setAppleAvailable);
+    }
+  }, []);
 
   async function submit() {
     setLoading(true);
     try {
       await signIn(email, password);
-      router.replace('/(tabs)/books');
+      router.replace('/');
     } catch (error) {
       Alert.alert('Could not sign in', error instanceof Error ? error.message : 'Please try again.');
     } finally {
@@ -30,7 +37,7 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await signInWithApple();
-      router.replace('/(tabs)/books');
+      router.replace('/');
     } catch (error) {
       if (
         error instanceof Error &&
@@ -79,7 +86,7 @@ export default function SignInScreen() {
             onPress={submit}>
             Sign in
           </Button>
-          {Platform.OS === 'ios' && (
+          {appleAvailable && (
             <AppleAuthentication.AppleAuthenticationButton
               buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
               buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}

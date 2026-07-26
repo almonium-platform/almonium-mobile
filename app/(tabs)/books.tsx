@@ -1,80 +1,101 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
-import { router } from 'expo-router';
-import { Image } from 'expo-image';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
+  Alert,
   Pressable,
   RefreshControl,
+  SectionList,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BookCard } from '@/components/book-card';
+import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
-import { colors, shadows } from '@/src/theme';
-import type { Book } from '@/src/types';
+import { languageName } from '@/src/languages';
+import { colors } from '@/src/theme';
+import type { BookSummary } from '@/src/types';
 
-function BookCard({ book, language }: { book: Book; language: string }) {
-  return (
-    <Pressable
-      onPress={() =>
-        router.push({
-          pathname: '/reader/[bookId]',
-          params: { bookId: String(book.id), language, title: book.title },
-        })
-      }
-      style={({ pressed }) => [styles.book, pressed && { opacity: 0.8 }]}>
-      <Image source={book.coverImageUrl} style={styles.cover} contentFit="cover" transition={180} />
-      <View style={styles.bookCopy}>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>
-            {book.levelFrom}–{book.levelTo}
-          </Text>
-        </View>
-        <Text style={styles.bookTitle} numberOfLines={2}>
-          {book.title}
-        </Text>
-        <Text style={styles.author} numberOfLines={1}>
-          {book.author}
-        </Text>
-        {book.progressPercentage !== null && (
-          <View style={styles.progressTrack}>
-            <View style={[styles.progress, { width: `${book.progressPercentage}%` }]} />
-          </View>
-        )}
-      </View>
-      <Ionicons name="chevron-forward" size={20} color={colors.muted} />
-    </Pressable>
-  );
-}
+const shelfLanguageKey = 'almonium:shelf-language';
 
 export default function BooksScreen() {
-  const { profile } = useAuth();
-  const language = profile?.learners.find((learner) => learner.active)?.language;
+  const { firebaseUser, profile } = useAuth();
+  const activeLanguages = useMemo(
+    () =>
+      profile?.learners
+        .filter((learner) => learner.active)
+        .map((learner) => learner.language) || [],
+    [profile?.learners],
+  );
+  const [language, setLanguage] = useState(activeLanguages[0] || '');
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    void AsyncStorage.getItem(shelfLanguageKey).then((stored) => {
+      if (stored && activeLanguages.includes(stored)) setLanguage(stored);
+    });
+  }, [activeLanguages]);
+
+  function chooseLanguage(nextLanguage: string) {
+    setLanguage(nextLanguage);
+    void AsyncStorage.setItem(shelfLanguageKey, nextLanguage);
+  }
+
   const query = useQuery({
-    queryKey: ['bookshelf', language],
-    queryFn: () => api.bookshelf(language!),
-    enabled: Boolean(language),
+    queryKey: ['bookshelf', firebaseUser?.uid, language],
+    queryFn: () => api.bookshelf(language),
+    enabled: Boolean(language && firebaseUser),
   });
 
-  const books = query.data
-    ? [...query.data.continueReading, ...query.data.favorites, ...query.data.available].filter(
-        (book, index, all) => all.findIndex((candidate) => candidate.id === book.id) === index,
-      )
-    : [];
+  const sections = useMemo(() => {
+    if (!query.data) return [];
+    const needle = search.trim().toLocaleLowerCase();
+    const filter = (books: BookSummary[]) =>
+      books.filter(
+        (book) =>
+          !needle ||
+          book.title.toLocaleLowerCase().includes(needle) ||
+          book.author.toLocaleLowerCase().includes(needle),
+      );
+    return [
+      { title: 'Continue reading', data: filter(query.data.continueReading) },
+      { title: 'Favorites', data: filter(query.data.favorites) },
+      { title: 'Available', data: filter(query.data.available) },
+    ].filter((section) => section.data.length);
+  }, [query.data, search]);
+
+  async function resetProgress(book: BookSummary) {
+    if (!book.progressPercentage) return;
+    Alert.alert('Reset reading progress?', `${book.title} will return to the beginning.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await api.deleteProgress(book.id);
+            await query.refetch();
+          } catch (error) {
+            Alert.alert('Could not reset progress', error instanceof Error ? error.message : 'Try again.');
+          }
+        },
+      },
+    ]);
+  }
 
   if (!language) {
     return (
       <SafeAreaView style={styles.empty}>
         <Ionicons name="language" size={42} color={colors.primary} />
         <Text style={styles.emptyTitle}>Choose a reading language</Text>
-        <Text style={styles.emptyText}>
-          Add a target language on the web app for now; it will appear here automatically.
-        </Text>
+        <Text style={styles.emptyText}>Activate a target language in Settings to build this shelf.</Text>
       </SafeAreaView>
     );
   }
@@ -87,63 +108,113 @@ export default function BooksScreen() {
     );
   }
 
+  if (query.isError && !query.data) {
+    return (
+      <SafeAreaView style={styles.empty}>
+        <Ionicons name="cloud-offline-outline" size={42} color={colors.primary} />
+        <Text style={styles.emptyTitle}>Your shelf is out of reach</Text>
+        <Text style={styles.emptyText}>
+          {query.error instanceof Error ? query.error.message : 'Check your connection and try again.'}
+        </Text>
+        <Button onPress={() => query.refetch()}>Try again</Button>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <FlatList
-      data={books}
-      keyExtractor={(book) => String(book.id)}
+    <SectionList
+      sections={sections}
+      keyExtractor={(book, index) => `${book.id}-${index}`}
       contentContainerStyle={styles.list}
+      stickySectionHeadersEnabled={false}
       refreshControl={
-        <RefreshControl refreshing={query.isRefetching} onRefresh={query.refetch} tintColor={colors.primary} />
+        <RefreshControl
+          refreshing={query.isRefetching}
+          onRefresh={query.refetch}
+          tintColor={colors.primary}
+        />
       }
       ListHeaderComponent={
-        <View style={styles.hero}>
-          <Text style={styles.eyebrow}>{language.toUpperCase()} SHELF</Text>
-          <Text style={styles.heroTitle}>
-            {query.data?.continueReading.length ? 'Keep the story moving.' : 'Pick your next page.'}
-          </Text>
-          <Text style={styles.heroText}>
-            {books.length} {books.length === 1 ? 'book' : 'books'} matched to your learning profile.
-          </Text>
+        <View style={styles.header}>
+          <Text style={styles.eyebrow}>YOUR LIBRARY</Text>
+          <Text style={styles.heroTitle}>Keep the story moving.</Text>
+          {activeLanguages.length > 1 && (
+            <View style={styles.languageChips}>
+              {activeLanguages.map((code) => (
+                <Pressable
+                  key={code}
+                  onPress={() => chooseLanguage(code)}
+                  style={[styles.languageChip, language === code && styles.languageChipActive]}>
+                  <Text
+                    style={[
+                      styles.languageChipText,
+                      language === code && styles.languageChipTextActive,
+                    ]}>
+                    {languageName(code)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+          <View style={styles.search}>
+            <Ionicons name="search" size={19} color={colors.muted} />
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder={`Search ${languageName(language)} books`}
+              placeholderTextColor={colors.muted}
+              style={styles.searchInput}
+            />
+          </View>
+          <Text style={styles.hint}>Tip: hold a book to reset its progress.</Text>
+          {query.isError && query.data && (
+            <Text style={styles.offline}>Showing your saved shelf. Reconnect to refresh it.</Text>
+          )}
         </View>
       }
+      renderSectionHeader={({ section }) => (
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{section.title}</Text>
+          <Text style={styles.sectionCount}>{section.data.length}</Text>
+        </View>
+      )}
+      renderItem={({ item }) => (
+        <BookCard book={item} language={language} onLongPress={() => resetProgress(item)} />
+      )}
+      SectionSeparatorComponent={() => <View style={styles.sectionGap} />}
+      ItemSeparatorComponent={() => <View style={styles.itemGap} />}
       ListEmptyComponent={
         <View style={styles.emptyInline}>
-          <Text style={styles.emptyTitle}>No books here yet</Text>
-          <Text style={styles.emptyText}>Try another active language in Settings.</Text>
+          <Text style={styles.emptyTitle}>{search ? 'No matching books' : 'No books here yet'}</Text>
+          <Text style={styles.emptyText}>
+            {search ? 'Try a title or author with different words.' : 'Pull down to refresh this shelf.'}
+          </Text>
         </View>
       }
-      renderItem={({ item }) => <BookCard book={item} language={language} />}
     />
   );
 }
 
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
-  list: { padding: 20, gap: 14, backgroundColor: colors.canvas, flexGrow: 1 },
-  hero: { paddingVertical: 12, gap: 8 },
+  list: { padding: 20, backgroundColor: colors.canvas, flexGrow: 1 },
+  header: { gap: 12, paddingBottom: 20 },
   eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '900', letterSpacing: 1.5 },
   heroTitle: { color: colors.ink, fontSize: 30, lineHeight: 35, fontWeight: '900', letterSpacing: -0.7 },
-  heroText: { color: colors.muted, fontSize: 15, lineHeight: 22 },
-  book: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    padding: 12,
-    minHeight: 138,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.line,
-    ...shadows.card,
-  },
-  cover: { width: 78, height: 112, borderRadius: 10, backgroundColor: colors.mint },
-  bookCopy: { flex: 1, gap: 5 },
-  badge: { alignSelf: 'flex-start', borderRadius: 8, backgroundColor: colors.mint, paddingHorizontal: 8, paddingVertical: 3 },
-  badgeText: { color: colors.primaryDark, fontSize: 11, fontWeight: '800' },
-  bookTitle: { color: colors.ink, fontSize: 18, lineHeight: 22, fontWeight: '800' },
-  author: { color: colors.muted, fontSize: 14 },
-  progressTrack: { height: 5, borderRadius: 3, marginTop: 5, backgroundColor: colors.line, overflow: 'hidden' },
-  progress: { height: 5, borderRadius: 3, backgroundColor: colors.gold },
+  languageChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  languageChip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.mint },
+  languageChipActive: { backgroundColor: colors.primary },
+  languageChipText: { color: colors.primaryDark, fontSize: 13, fontWeight: '800' },
+  languageChipTextActive: { color: colors.white },
+  search: { minHeight: 48, borderRadius: 14, paddingHorizontal: 14, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line },
+  searchInput: { flex: 1, color: colors.ink, fontSize: 15 },
+  hint: { color: colors.muted, fontSize: 11 },
+  offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '700', backgroundColor: colors.mint, borderRadius: 10, padding: 10 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 10 },
+  sectionTitle: { color: colors.ink, fontSize: 20, fontWeight: '900' },
+  sectionCount: { color: colors.primary, fontSize: 12, fontWeight: '800', backgroundColor: colors.mint, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8 },
+  itemGap: { height: 12 },
+  sectionGap: { height: 24 },
   empty: { flex: 1, padding: 32, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: colors.canvas },
   emptyInline: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyTitle: { color: colors.ink, fontWeight: '800', fontSize: 20 },

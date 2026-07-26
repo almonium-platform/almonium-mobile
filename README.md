@@ -1,13 +1,19 @@
 # Almonium Mobile
 
-Expo/React Native client for Almonium. The first vertical slice includes:
+Expo/React Native client for Almonium. The current mobile foundation includes:
 
 - Firebase email/password registration, verification, login, reset, and persistent sessions;
 - native Sign in with Apple on iOS;
 - Firebase ID-token bearer authentication against `almonium-be`;
 - protected Expo Router navigation;
-- language-aware bookshelves, book reading, favorites API support, and reading-progress sync;
-- profile, privacy, target-language activation, and CEFR settings.
+- resumable native onboarding from welcome through languages, CEFR, profile, and interests;
+- searchable, sectioned, multi-language bookshelves and full book details;
+- favorites, language variants, resettable progress, and parallel-reading support;
+- a reader with reliable resume, retryable progress sync, text sizing, and paper/night themes;
+- profile, privacy, interests, target-language, CEFR, account deletion, and plan summary;
+- status-aware API retries, profile-bootstrap recovery, and user-isolated query caches;
+- persisted shelf/detail caches with native online and app-focus awareness;
+- unit coverage for navigation, backend error contracts, language presentation, and progress queues.
 
 ## Local setup
 
@@ -22,8 +28,8 @@ npm start
 
 The defaults target the backend at:
 
-- iOS simulator/web: `http://localhost:9998`;
-- Android emulator: `http://10.0.2.2:9998`.
+- iOS simulator/web: `http://localhost:8080`;
+- Android emulator: `http://10.0.2.2:8080`.
 
 For Expo Go on a physical device, set `EXPO_PUBLIC_API_URL` in `.env.local` to
 the computer's LAN URL. Never point local development at a deployed database;
@@ -65,6 +71,7 @@ credentials.
 
 ```bash
 npm run check
+npm test
 npm run android
 npm run ios
 npm run web
@@ -73,3 +80,7 @@ npm run web
 Use a development build for native Apple auth and eventual Google native
 configuration. Expo Go remains useful for the email/password, library,
 settings, and reader flows.
+
+`eas.json` includes development, internal-preview, and production build
+profiles. Linking the repository to an Expo account is intentionally deferred
+until the owning account is available.

@@ -6,7 +6,9 @@ import { colors } from '@/src/theme';
 
 export default function TabsLayout() {
   const { firebaseUser, profile, loading } = useAuth();
-  if (!loading && (!firebaseUser || !profile)) return <Redirect href="/(auth)/sign-in" />;
+  if (!loading && !firebaseUser) return <Redirect href="/(auth)/sign-in" />;
+  if (!loading && !profile) return <Redirect href="/" />;
+  if (!loading && profile?.setupStep !== 'COMPLETED') return <Redirect href="/onboarding" />;
 
   return (
     <Tabs

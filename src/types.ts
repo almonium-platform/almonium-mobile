@@ -18,10 +18,23 @@ export interface UserInfo {
   fluentLangs: string[];
   learners: Learner[];
   premium: boolean;
-  setupStep: string;
+  setupStep: SetupStep;
+  subscription: {
+    name: string;
+    limits: Record<string, number>;
+    type: 'MONTHLY' | 'YEARLY' | 'LIFETIME';
+  };
+  interests: Interest[];
 }
 
-export interface Book {
+export type SetupStep = 'WELCOME' | 'PLAN' | 'LANGUAGES' | 'PROFILE' | 'INTERESTS' | 'COMPLETED';
+
+export interface Interest {
+  id: number;
+  name: string;
+}
+
+export interface BookSummary {
   id: number;
   title: string;
   author: string;
@@ -33,13 +46,29 @@ export interface Book {
   levelFrom: CefrLevel;
   levelTo: CefrLevel;
   progressPercentage: number | null;
+  hasParallelTranslation: boolean;
+  hasTranslation: boolean;
+  isTranslation: boolean;
+}
+
+export interface BookDetails extends BookSummary {
   description: string;
   favorite: boolean;
-  hasParallelTranslation: boolean;
+  languageVariants: { id: number; language: string }[];
+  orderLanguage?: string;
+  originalLanguage?: string;
+  originalId?: number;
+  translator?: string;
+}
+
+export interface BookMiniDetails {
+  progressPercentage: number;
+  language: string;
+  languageVariants: { id: number; language: string }[];
 }
 
 export interface Bookshelf {
-  continueReading: Book[];
-  available: Book[];
-  favorites: Book[];
+  continueReading: BookSummary[];
+  available: BookSummary[];
+  favorites: BookSummary[];
 }

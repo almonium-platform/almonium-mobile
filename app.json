@@ -11,10 +11,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.almonium.mobile",
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "buildNumber": "1"
     },
     "android": {
       "package": "com.almonium.mobile",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
