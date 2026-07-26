@@ -2,6 +2,12 @@
 
 Expo/React Native client for Almonium. The current mobile foundation includes:
 
+This is one of four coordinated repositories: `almonium-be` provides the API,
+`almonium-fe` is the browser client, and `almonium-infra` deploys the
+server-hosted FE/BE services. Mobile uses Firebase ID-token bearer
+authentication and native/Expo distribution; it does not use the browser's
+HttpOnly session cookie and is not currently deployed as an infra container.
+
 - Firebase email/password registration, verification, login, reset, and persistent sessions;
 - native Sign in with Apple on iOS;
 - Firebase ID-token bearer authentication against `almonium-be`;

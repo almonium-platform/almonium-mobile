@@ -9,9 +9,12 @@ This Expo SDK 54 React Native client is part of the Almonium workspace.
   documentation before changing auth or API behavior.
 - `../almonium-fe` is the existing Angular client and the reference for current
   product flows and DTOs. Coordinate contract changes across clients.
-- `../almonium-infra` owns deployed topology, environment values, and secrets.
-  Read its `AGENTS.md` before changing deployment configuration. Never copy
-  vault values, production credentials, or Firebase Admin keys here.
+- `../almonium-infra` owns the deployed server topology and the FE/BE container
+  deployment path. This mobile app is a native Expo client distributed through
+  Expo/EAS and app stores, not an infra-hosted container; coordinate any future
+  mobile release automation with infra without moving mobile secrets there. Read
+  its `AGENTS.md` before changing deployment configuration. Never copy vault
+  values, production credentials, or Firebase Admin keys here.
 
 Keep public Expo configuration in `EXPO_PUBLIC_*` variables and document new
 keys in `.env.example`. Public Firebase client identifiers are allowed;
