@@ -1,50 +1,75 @@
-# Welcome to your Expo app 👋
+# Almonium Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo/React Native client for Almonium. The first vertical slice includes:
 
-## Get started
+- Firebase email/password registration, verification, login, reset, and persistent sessions;
+- native Sign in with Apple on iOS;
+- Firebase ID-token bearer authentication against `almonium-be`;
+- protected Expo Router navigation;
+- language-aware bookshelves, book reading, favorites API support, and reading-progress sync;
+- profile, privacy, target-language activation, and CEFR settings.
 
-1. Install dependencies
+## Local setup
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Requirements: Node 20.19+ and the neighboring `../almonium-be` repository.
 
 ```bash
-npm run reset-project
+cp .env.example .env.local
+npm install
+npm run check
+npm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+The defaults target the backend at:
 
-## Learn more
+- iOS simulator/web: `http://localhost:9998`;
+- Android emulator: `http://10.0.2.2:9998`.
 
-To learn more about developing your project with Expo, look at the following resources:
+For Expo Go on a physical device, set `EXPO_PUBLIC_API_URL` in `.env.local` to
+the computer's LAN URL. Never point local development at a deployed database;
+run the backend using its documented `local` profile.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Firebase's client configuration is intentionally public and has safe tracked
+defaults matching the web app. Never add a Firebase Admin/service-account key
+to this repository.
 
-## Join the community
+## Native provider setup
 
-Join our community of developers creating universal apps.
+Apple sign-in uses the `com.almonium.mobile` bundle identifier and requires an
+iOS development build plus the existing Firebase Apple provider configuration.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Google sign-in is deliberately not shown until native OAuth clients exist.
+Create Android and iOS OAuth client IDs in the existing Firebase/Google Cloud
+project, then supply:
+
+```text
+EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
+```
+
+The Android client must be registered with the app package and signing
+certificate fingerprints. No provider secret belongs in the mobile app.
+
+## Authentication architecture
+
+The app keeps the Firebase user through React Native persistence and sends a
+fresh Firebase ID token in the `Authorization: Bearer` header. The backend
+verifies the token, maps its immutable Firebase UID to the product user, and
+applies revocation-aware recent-login checks to sensitive operations.
+
+Browser clients continue using the Secure, HttpOnly session cookie. Bearer
+requests do not use cookie CSRF tokens because they are not ambient browser
+credentials.
+
+## Useful commands
+
+```bash
+npm run check
+npm run android
+npm run ios
+npm run web
+```
+
+Use a development build for native Apple auth and eventual Google native
+configuration. Expo Go remains useful for the email/password, library,
+settings, and reader flows.

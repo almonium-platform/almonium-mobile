@@ -1,33 +1,35 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { Redirect, Tabs } from 'expo-router';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAuth } from '@/src/auth-context';
+import { colors } from '@/src/theme';
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function TabsLayout() {
+  const { firebaseUser, profile, loading } = useAuth();
+  if (!loading && (!firebaseUser || !profile)) return <Redirect href="/(auth)/sign-in" />;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
+        headerStyle: { backgroundColor: colors.canvas },
+        headerShadowVisible: false,
+        headerTitleStyle: { color: colors.ink, fontWeight: '800' },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.muted,
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.line },
       }}>
       <Tabs.Screen
-        name="index"
+        name="books"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Library',
+          tabBarIcon: ({ color, size }) => <Ionicons name="library" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="settings"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Settings',
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings" color={color} size={size} />,
         }}
       />
     </Tabs>

@@ -1,17 +1,20 @@
 {
   "expo": {
-    "name": "almonium-mobile",
+    "name": "Almonium",
     "slug": "almonium-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "almoniummobile",
+    "scheme": "almonium",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.almonium.mobile",
+      "usesAppleSignIn": true
     },
     "android": {
+      "package": "com.almonium.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -27,6 +30,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-apple-authentication",
       [
         "expo-splash-screen",
         {
