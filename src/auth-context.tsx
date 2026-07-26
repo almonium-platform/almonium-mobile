@@ -1,12 +1,15 @@
 import {
   createUserWithEmailAndPassword,
+  EmailAuthProvider,
   onAuthStateChanged,
   OAuthProvider,
+  reauthenticateWithCredential,
   sendEmailVerification,
   sendPasswordResetEmail,
   signInWithCredential,
   signInWithEmailAndPassword,
   signOut,
+  type AuthCredential,
   type User,
 } from 'firebase/auth';
 import * as AppleAuthentication from 'expo-apple-authentication';
@@ -37,6 +40,8 @@ interface AuthState {
   signInWithApple(): Promise<void>;
   register(email: string, password: string): Promise<void>;
   resetPassword(email: string): Promise<void>;
+  reauthenticateWithPassword(password: string): Promise<void>;
+  reauthenticateWithApple(): Promise<void>;
   logOut(): Promise<void>;
   refreshProfile(): Promise<void>;
   retryProfile(): Promise<void>;
@@ -44,6 +49,26 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 const profileCacheKey = (uid: string) => `almonium:profile:${uid}`;
+
+async function appleFirebaseCredential(): Promise<AuthCredential> {
+  const rawNonce = Crypto.randomUUID();
+  const nonce = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    rawNonce,
+  );
+  const appleCredential = await AppleAuthentication.signInAsync({
+    requestedScopes: [
+      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+      AppleAuthentication.AppleAuthenticationScope.EMAIL,
+    ],
+    nonce,
+  });
+  if (!appleCredential.identityToken) throw new Error('Apple did not return an identity token.');
+  return new OAuthProvider('apple.com').credential({
+    idToken: appleCredential.identityToken,
+    rawNonce,
+  });
+}
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
@@ -115,25 +140,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         await loadProfile(credential.user);
       },
       async signInWithApple() {
-        const rawNonce = Crypto.randomUUID();
-        const nonce = await Crypto.digestStringAsync(
-          Crypto.CryptoDigestAlgorithm.SHA256,
-          rawNonce,
-        );
-        const appleCredential = await AppleAuthentication.signInAsync({
-          requestedScopes: [
-            AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-            AppleAuthentication.AppleAuthenticationScope.EMAIL,
-          ],
-          nonce,
-        });
-        if (!appleCredential.identityToken) throw new Error('Apple did not return an identity token.');
-        const provider = new OAuthProvider('apple.com');
-        const firebaseCredential = provider.credential({
-          idToken: appleCredential.identityToken,
-          rawNonce,
-        });
-        const credential = await signInWithCredential(auth, firebaseCredential);
+        const credential = await signInWithCredential(auth, await appleFirebaseCredential());
         await loadProfile(credential.user);
       },
       async register(email, password) {
@@ -146,6 +153,21 @@ export function AuthProvider({ children }: PropsWithChildren) {
       },
       async resetPassword(email) {
         await sendPasswordResetEmail(auth, email.trim());
+      },
+      async reauthenticateWithPassword(password) {
+        const user = auth.currentUser;
+        if (!user?.email) throw new Error('This account does not have an email address.');
+        await reauthenticateWithCredential(
+          user,
+          EmailAuthProvider.credential(user.email, password),
+        );
+        await user.getIdToken(true);
+      },
+      async reauthenticateWithApple() {
+        const user = auth.currentUser;
+        if (!user) throw new Error('Sign in required.');
+        await reauthenticateWithCredential(user, await appleFirebaseCredential());
+        await user.getIdToken(true);
       },
       async logOut() {
         const uid = auth.currentUser?.uid;

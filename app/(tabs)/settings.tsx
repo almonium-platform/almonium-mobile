@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -92,7 +93,14 @@ function LanguageRow({
 }
 
 export default function SettingsScreen() {
-  const { profile, refreshProfile, logOut } = useAuth();
+  const {
+    firebaseUser,
+    profile,
+    refreshProfile,
+    logOut,
+    reauthenticateWithPassword,
+    reauthenticateWithApple,
+  } = useAuth();
   const queryClient = useQueryClient();
   const [username, setUsername] = useState(profile?.username || '');
   const [savingName, setSavingName] = useState(false);
@@ -105,6 +113,9 @@ export default function SettingsScreen() {
   const [newLanguage, setNewLanguage] = useState('');
   const [newLevel, setNewLevel] = useState<CefrLevel>('A1');
   const [addingLanguage, setAddingLanguage] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const usesPassword = firebaseUser?.providerData.some((provider) => provider.providerId === 'password');
+  const usesApple = firebaseUser?.providerData.some((provider) => provider.providerId === 'apple.com');
   const interestsQuery = useQuery({
     queryKey: ['interests'],
     queryFn: api.interests,
@@ -222,14 +233,34 @@ export default function SettingsScreen() {
                 style: 'destructive',
                 onPress: async () => {
                   try {
+                    if (usesPassword) {
+                      if (!currentPassword) {
+                        Alert.alert(
+                          'Password required',
+                          'Enter your current password in the Account section, then try again.',
+                        );
+                        return;
+                      }
+                      await reauthenticateWithPassword(currentPassword);
+                    } else if (usesApple) {
+                      await reauthenticateWithApple();
+                    }
                     await api.deleteAccount();
+                    const uid = firebaseUser?.uid;
+                    if (uid) {
+                      const reviewKeys = (await AsyncStorage.getAllKeys()).filter((key) =>
+                        key.startsWith(`almonium:review:${uid}:`),
+                      );
+                      if (reviewKeys.length) await AsyncStorage.multiRemove(reviewKeys);
+                    }
+                    setCurrentPassword('');
                     await logOut();
                     router.replace('/(auth)/sign-in');
                   } catch (error) {
                     Alert.alert(
                       'Could not delete account',
                       error instanceof Error
-                        ? `${error.message}\n\nIf your login is no longer recent, sign out and back in first.`
+                        ? `${error.message}\n\n${usesPassword ? 'Check your current password and try again.' : usesApple ? 'Complete the Apple confirmation and try again.' : 'Sign out and back in with your provider, then try again.'}`
                         : 'Please sign out, sign back in, and try again.',
                     );
                   }
@@ -408,6 +439,22 @@ export default function SettingsScreen() {
           <Text style={styles.settingLabel}>Plan</Text>
           <Text style={styles.stat}>{profile?.premium ? 'Premium' : 'Free'}</Text>
         </View>
+        {usesPassword && (
+          <View style={styles.passwordGroup}>
+            <Text style={styles.settingLabel}>Confirm sensitive changes</Text>
+            <Text style={styles.caption}>
+              Your current password is required when permanently deleting this account.
+            </Text>
+            <Field
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+              placeholder="Current password"
+              secureTextEntry
+              textContentType="password"
+              autoComplete="current-password"
+            />
+          </View>
+        )}
         <View style={styles.legalRow}>
           <Pressable onPress={() => Linking.openURL(`${config.webBaseUrl}/privacy-policy`)}>
             <Text style={styles.legalText}>Privacy policy</Text>
@@ -461,4 +508,5 @@ const styles = StyleSheet.create({
   pickerFrame: { borderWidth: 1, borderColor: colors.line, borderRadius: 14, overflow: 'hidden', backgroundColor: colors.white },
   legalRow: { flexDirection: 'row', justifyContent: 'center', gap: 20, paddingVertical: 4 },
   legalText: { color: colors.primary, fontSize: 13, fontWeight: '700' },
+  passwordGroup: { gap: 7, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 12 },
 });

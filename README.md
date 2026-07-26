@@ -11,9 +11,23 @@ Expo/React Native client for Almonium. The current mobile foundation includes:
 - favorites, language variants, resettable progress, and parallel-reading support;
 - a reader with reliable resume, retryable progress sync, text sizing, and paper/night themes;
 - profile, privacy, interests, target-language, CEFR, account deletion, and plan summary;
+- searchable multi-language flashcards with create, edit, tag, and delete flows;
+- device-local spaced-repetition sessions with Again/Hard/Good/Easy scheduling;
+- an in-app notification inbox with unread badges, read/unread actions, and deletion;
+- password or Apple reauthentication before destructive account deletion;
 - status-aware API retries, profile-bootstrap recovery, and user-isolated query caches;
 - persisted shelf/detail caches with native online and app-focus awareness;
 - unit coverage for navigation, backend error contracts, language presentation, and progress queues.
+
+Review timing is currently stored per Firebase user and language on the device.
+The backend card entity does not yet persist its exposed review metadata, so
+the mobile client does not claim cross-device scheduling. Card content itself
+is stored through the shared backend API.
+
+The inbox reads persisted backend notifications. Remote push registration is
+intentionally deferred: the backend currently accepts native FCM device tokens,
+not Expo Push Service tokens, and production push credentials are not available
+to this repository.
 
 ## Local setup
 

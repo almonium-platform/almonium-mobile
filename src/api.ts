@@ -4,8 +4,11 @@ import type {
   BookMiniDetails,
   BookSummary,
   Bookshelf,
+  AppNotification,
+  CardDraft,
   CefrLevel,
   Interest,
+  LearningCard,
   Learner,
   SetupStep,
   UserInfo,
@@ -148,5 +151,34 @@ export const api = {
     request<void>(`/books/${bookId}/language/${language}/favorite`, {
       method: favorite ? 'POST' : 'DELETE',
     }),
+  cards: (language: string) => request<LearningCard[]>(`/cards/lang/${language}`),
+  card: (cardId: string) => request<LearningCard>(`/cards/${cardId}`),
+  createCard: (draft: CardDraft) =>
+    request<void>('/cards', {
+      method: 'POST',
+      body: JSON.stringify(draft),
+    }),
+  updateCard: (
+    cardId: string,
+    language: string,
+    updates: Partial<Omit<CardDraft, 'language' | 'learnt'>> & {
+      deletedTranslationsIds?: string[];
+      deletedExamplesIds?: string[];
+    },
+  ) =>
+    request<void>('/cards', {
+      method: 'PUT',
+      body: JSON.stringify({ id: cardId, language, ...updates }),
+    }),
+  deleteCard: (cardId: string) => request<void>(`/cards/${cardId}`, { method: 'DELETE' }),
+  notifications: () => request<AppNotification[]>('/notifications'),
+  markAllNotificationsRead: () =>
+    request<void>('/notifications/read', { method: 'PATCH' }),
+  markNotificationRead: (id: string) =>
+    request<void>(`/notifications/${id}/read`, { method: 'PATCH' }),
+  markNotificationUnread: (id: string) =>
+    request<void>(`/notifications/${id}/unread`, { method: 'PATCH' }),
+  deleteNotification: (id: string) =>
+    request<void>(`/notifications/${id}`, { method: 'DELETE' }),
   deleteAccount: () => request<void>('/auth/me', { method: 'DELETE' }),
 };

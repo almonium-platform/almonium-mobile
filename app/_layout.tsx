@@ -30,6 +30,9 @@ export default function RootLayout() {
                 name="reader/[bookId]"
                 options={{ title: 'Reader', headerBackTitle: 'Library' }}
               />
+              <Stack.Screen name="card/new" options={{ title: 'New card' }} />
+              <Stack.Screen name="card/[cardId]" options={{ title: 'Card' }} />
+              <Stack.Screen name="review" options={{ headerShown: false }} />
             </Stack>
             <StatusBar style="dark" />
           </AuthProvider>

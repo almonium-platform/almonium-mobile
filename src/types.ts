@@ -72,3 +72,66 @@ export interface Bookshelf {
   available: BookSummary[];
   favorites: BookSummary[];
 }
+
+export interface CardTranslation {
+  id?: string;
+  translation: string;
+}
+
+export interface CardExample {
+  id?: string;
+  example: string;
+  translation?: string;
+}
+
+export interface LearningCard {
+  id: string;
+  publicId?: string;
+  userId?: string;
+  entry: string;
+  language: string;
+  translations: CardTranslation[];
+  notes?: string;
+  tags?: { text: string }[];
+  examples?: CardExample[];
+  createdAt?: string;
+  updatedAt?: string;
+  iteration?: number;
+  priority?: number;
+  activeLearning?: boolean;
+  irregularPlural?: boolean;
+  irregularSpelling?: boolean;
+  falseFriend?: boolean;
+}
+
+export interface CardDraft {
+  entry: string;
+  language: string;
+  translations: CardTranslation[];
+  notes?: string;
+  tags: { text: string }[];
+  examples?: CardExample[];
+  activeLearning: boolean;
+  irregularPlural: boolean;
+  falseFriend: boolean;
+  irregularSpelling: boolean;
+  learnt: boolean;
+  priority: number;
+}
+
+export type NotificationType =
+  | 'FRIENDSHIP_REQUESTED'
+  | 'FRIENDSHIP_ACCEPTED'
+  | 'TRANSLATION_ORDER_COMPLETED';
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  type: NotificationType;
+  message: string | null;
+  pictureUrl: string | null;
+  referenceId: string | null;
+  senderId: string | null;
+  createdAt: string;
+  readAt: string | null;
+}
