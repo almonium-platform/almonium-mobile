@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   EmailAuthProvider,
+  GoogleAuthProvider,
   onAuthStateChanged,
   OAuthProvider,
   reauthenticateWithCredential,
@@ -12,9 +13,14 @@ import {
   type AuthCredential,
   type User,
 } from 'firebase/auth';
+import {
+  GoogleSignin,
+  isCancelledResponse,
+} from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Crypto from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import {
   createContext,
   PropsWithChildren,
@@ -27,6 +33,7 @@ import {
 } from 'react';
 
 import { api } from '@/src/api';
+import { config } from '@/src/config';
 import { auth } from '@/src/firebase';
 import { queryClient } from '@/src/query-client';
 import type { UserInfo } from '@/src/types';
@@ -37,10 +44,12 @@ interface AuthState {
   profileError: string | null;
   loading: boolean;
   signIn(email: string, password: string): Promise<void>;
+  signInWithGoogle(): Promise<void>;
   signInWithApple(): Promise<void>;
   register(email: string, password: string): Promise<void>;
   resetPassword(email: string): Promise<void>;
   reauthenticateWithPassword(password: string): Promise<void>;
+  reauthenticateWithGoogle(): Promise<void>;
   reauthenticateWithApple(): Promise<void>;
   logOut(): Promise<void>;
   refreshProfile(): Promise<void>;
@@ -49,6 +58,31 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 const profileCacheKey = (uid: string) => `almonium:profile:${uid}`;
+
+class ProviderSignInCancelledError extends Error {
+  readonly code = 'ERR_REQUEST_CANCELED';
+}
+
+async function googleFirebaseCredential(): Promise<AuthCredential> {
+  const platformClientId =
+    Platform.OS === 'ios' ? config.google.iosClientId : config.google.androidClientId;
+  if (!config.google.webClientId || !platformClientId) {
+    throw new Error(`Google sign-in is not configured for ${Platform.OS}.`);
+  }
+
+  GoogleSignin.configure({
+    webClientId: config.google.webClientId,
+    iosClientId: config.google.iosClientId,
+  });
+  if (Platform.OS === 'android') {
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+  }
+
+  const response = await GoogleSignin.signIn();
+  if (isCancelledResponse(response)) throw new ProviderSignInCancelledError();
+  if (!response.data.idToken) throw new Error('Google did not return an identity token.');
+  return GoogleAuthProvider.credential(response.data.idToken);
+}
 
 async function appleFirebaseCredential(): Promise<AuthCredential> {
   const rawNonce = Crypto.randomUUID();
@@ -139,6 +173,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
         }
         await loadProfile(credential.user);
       },
+      async signInWithGoogle() {
+        const credential = await signInWithCredential(auth, await googleFirebaseCredential());
+        await loadProfile(credential.user);
+      },
       async signInWithApple() {
         const credential = await signInWithCredential(auth, await appleFirebaseCredential());
         await loadProfile(credential.user);
@@ -163,6 +201,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
         );
         await user.getIdToken(true);
       },
+      async reauthenticateWithGoogle() {
+        const user = auth.currentUser;
+        if (!user) throw new Error('Sign in required.');
+        await reauthenticateWithCredential(user, await googleFirebaseCredential());
+        await user.getIdToken(true);
+      },
       async reauthenticateWithApple() {
         const user = auth.currentUser;
         if (!user) throw new Error('Sign in required.');
@@ -170,8 +214,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
         await user.getIdToken(true);
       },
       async logOut() {
-        const uid = auth.currentUser?.uid;
+        const currentUser = auth.currentUser;
+        const uid = currentUser?.uid;
+        const usesGoogle = currentUser?.providerData.some(
+          (provider) => provider.providerId === 'google.com',
+        );
         await signOut(auth);
+        if (usesGoogle && Platform.OS !== 'web') {
+          await GoogleSignin.signOut().catch(() => undefined);
+        }
         queryClient.clear();
         if (uid) await AsyncStorage.removeItem(profileCacheKey(uid));
         setProfile(null);

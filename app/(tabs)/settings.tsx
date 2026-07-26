@@ -99,6 +99,7 @@ export default function SettingsScreen() {
     refreshProfile,
     logOut,
     reauthenticateWithPassword,
+    reauthenticateWithGoogle,
     reauthenticateWithApple,
   } = useAuth();
   const queryClient = useQueryClient();
@@ -115,6 +116,7 @@ export default function SettingsScreen() {
   const [addingLanguage, setAddingLanguage] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const usesPassword = firebaseUser?.providerData.some((provider) => provider.providerId === 'password');
+  const usesGoogle = firebaseUser?.providerData.some((provider) => provider.providerId === 'google.com');
   const usesApple = firebaseUser?.providerData.some((provider) => provider.providerId === 'apple.com');
   const interestsQuery = useQuery({
     queryKey: ['interests'],
@@ -242,6 +244,8 @@ export default function SettingsScreen() {
                         return;
                       }
                       await reauthenticateWithPassword(currentPassword);
+                    } else if (usesGoogle) {
+                      await reauthenticateWithGoogle();
                     } else if (usesApple) {
                       await reauthenticateWithApple();
                     }
@@ -260,7 +264,7 @@ export default function SettingsScreen() {
                     Alert.alert(
                       'Could not delete account',
                       error instanceof Error
-                        ? `${error.message}\n\n${usesPassword ? 'Check your current password and try again.' : usesApple ? 'Complete the Apple confirmation and try again.' : 'Sign out and back in with your provider, then try again.'}`
+                        ? `${error.message}\n\n${usesPassword ? 'Check your current password and try again.' : usesGoogle ? 'Complete the Google confirmation and try again.' : usesApple ? 'Complete the Apple confirmation and try again.' : 'Sign out and back in with your provider, then try again.'}`
                         : 'Please sign out, sign back in, and try again.',
                     );
                   }

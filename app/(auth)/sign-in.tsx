@@ -1,4 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -9,7 +10,7 @@ import { useAuth } from '@/src/auth-context';
 import { colors } from '@/src/theme';
 
 export default function SignInScreen() {
-  const { signIn, signInWithApple } = useAuth();
+  const { signIn, signInWithGoogle, signInWithApple } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,6 +53,25 @@ export default function SignInScreen() {
     }
   }
 
+  async function googleSignIn() {
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+      router.replace('/');
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        'code' in error &&
+        (error as Error & { code: string }).code === 'ERR_REQUEST_CANCELED'
+      ) {
+        return;
+      }
+      Alert.alert('Could not sign in with Google', error instanceof Error ? error.message : 'Try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <LinearGradient colors={['#eef5ec', colors.canvas, '#f7eedb']} style={styles.background}>
       <KeyboardAvoidingView
@@ -86,6 +106,15 @@ export default function SignInScreen() {
             onPress={submit}>
             Sign in
           </Button>
+          {Platform.OS !== 'web' && (
+            <GoogleSigninButton
+              size={GoogleSigninButton.Size.Wide}
+              color={GoogleSigninButton.Color.Light}
+              disabled={loading}
+              style={styles.googleButton}
+              onPress={googleSignIn}
+            />
+          )}
           {appleAvailable && (
             <AppleAuthentication.AppleAuthenticationButton
               buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
@@ -104,10 +133,6 @@ export default function SignInScreen() {
             </Link>
           </View>
         </Card>
-        <Text style={styles.providerNote}>
-          Google sign-in needs Android and iOS OAuth client IDs registered in the existing Firebase
-          project before it can be enabled on device.
-        </Text>
       </KeyboardAvoidingView>
     </LinearGradient>
   );
@@ -133,6 +158,6 @@ const styles = StyleSheet.create({
   subtitle: { color: colors.muted, fontSize: 17, lineHeight: 25, maxWidth: 330 },
   links: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 2 },
   link: { color: colors.primary, fontWeight: '700' },
-  providerNote: { color: colors.muted, fontSize: 12, lineHeight: 18, textAlign: 'center' },
+  googleButton: { height: 52, width: '100%' },
   appleButton: { height: 52, width: '100%' },
 });

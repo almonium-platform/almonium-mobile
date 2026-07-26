@@ -9,7 +9,7 @@ authentication and native/Expo distribution; it does not use the browser's
 HttpOnly session cookie and is not currently deployed as an infra container.
 
 - Firebase email/password registration, verification, login, reset, and persistent sessions;
-- native Sign in with Apple on iOS;
+- native Google sign-in on Android/iOS and Sign in with Apple on iOS;
 - Firebase ID-token bearer authentication against `almonium-be`;
 - protected Expo Router navigation;
 - resumable native onboarding from welcome through languages, CEFR, profile, and interests;
@@ -20,7 +20,7 @@ HttpOnly session cookie and is not currently deployed as an infra container.
 - searchable multi-language flashcards with create, edit, tag, and delete flows;
 - device-local spaced-repetition sessions with Again/Hard/Good/Easy scheduling;
 - an in-app notification inbox with unread badges, read/unread actions, and deletion;
-- password or Apple reauthentication before destructive account deletion;
+- password, Google, or Apple reauthentication before destructive account deletion;
 - status-aware API retries, profile-bootstrap recovery, and user-isolated query caches;
 - persisted shelf/detail caches with native online and app-focus awareness;
 - unit coverage for navigation, backend error contracts, language presentation, and progress queues.
@@ -64,17 +64,21 @@ to this repository.
 Apple sign-in uses the `com.almonium.mobile` bundle identifier and requires an
 iOS development build plus the existing Firebase Apple provider configuration.
 
-Google sign-in is deliberately not shown until native OAuth clients exist.
-Create Android and iOS OAuth client IDs in the existing Firebase/Google Cloud
-project, then supply:
+Google sign-in uses the native Google Sign-In SDK and therefore requires a
+development build rather than Expo Go. The Android and iOS OAuth clients must
+remain registered in the existing Firebase/Google Cloud project; Android build
+and Play signing-certificate SHA-1 fingerprints must be attached to the Android
+client. Supply the public client identifiers through:
 
 ```text
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
 EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID
 EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
 ```
 
-The Android client must be registered with the app package and signing
-certificate fingerprints. No provider secret belongs in the mobile app.
+The iOS client ID also determines the URL scheme configured in `app.json`.
+OAuth client IDs are public identifiers; no provider secret belongs in the
+mobile app.
 
 ## Authentication architecture
 
@@ -97,10 +101,9 @@ npm run ios
 npm run web
 ```
 
-Use a development build for native Apple auth and eventual Google native
-configuration. Expo Go remains useful for the email/password, library,
-settings, and reader flows.
+Use a development build for native Google and Apple auth. Expo Go remains
+useful for the email/password, library, settings, and reader flows.
 
 `eas.json` includes development, internal-preview, and production build
-profiles. Linking the repository to an Expo account is intentionally deferred
-until the owning account is available.
+profiles. The app config is linked to the `almonium-app` Expo account and its
+Almonium EAS project.
