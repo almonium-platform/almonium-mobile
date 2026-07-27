@@ -122,6 +122,7 @@ export default function SettingsScreen() {
   const [selectedInterests, setSelectedInterests] = useState<number[]>(
     profile?.interests.map((interest) => interest.id) || [],
   );
+  const [editingInterests, setEditingInterests] = useState(false);
   const selectedInterestsRef = useRef(selectedInterests);
   const savedInterestsRef = useRef(selectedInterests);
   const pendingInterestsRef = useRef<number[] | null>(null);
@@ -245,6 +246,15 @@ export default function SettingsScreen() {
     setSelectedInterests(interests);
     void persistInterests();
   }
+
+  const availableInterests = interestsQuery.data || [];
+  const selectedInterestItems = availableInterests.filter((interest) =>
+    selectedInterests.includes(interest.id),
+  );
+  const orderedInterests = [...availableInterests].sort(
+    (first, second) =>
+      Number(selectedInterests.includes(second.id)) - Number(selectedInterests.includes(first.id)),
+  );
 
   async function addLanguage() {
     if (!newLanguage) return;
@@ -429,20 +439,34 @@ export default function SettingsScreen() {
       </Card>
 
       <Card>
-        <View style={styles.sectionTitle}>
-          <Ionicons name="heart-outline" color={colors.primary} size={20} />
-          <Text style={styles.sectionTitleText}>Interests</Text>
+        <View style={styles.interestsHeader}>
+          <View style={styles.sectionTitle}>
+            <Ionicons name="heart-outline" color={colors.primary} size={20} />
+            <Text style={styles.sectionTitleText}>Interests</Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={editingInterests ? 'Close interests editor' : 'Edit interests'}
+            hitSlop={8}
+            onPress={() => setEditingInterests((editing) => !editing)}
+            style={styles.interestEditButton}>
+            <Ionicons
+              name={editingInterests ? 'close' : 'pencil-outline'}
+              size={20}
+              color={colors.primary}
+            />
+          </Pressable>
         </View>
-        <Text style={styles.caption}>These help Almonium shape future recommendations.</Text>
         <View style={styles.chips}>
-          {interestsQuery.data?.map((interest) => {
+          {(editingInterests ? orderedInterests : selectedInterestItems).map((interest) => {
             const selected = selectedInterests.includes(interest.id);
             return (
               <Pressable
                 key={interest.id}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: selected }}
+                accessibilityRole={editingInterests ? 'checkbox' : undefined}
+                accessibilityState={editingInterests ? { checked: selected } : undefined}
                 accessibilityLabel={`${interest.name} interest`}
+                disabled={!editingInterests}
                 onPress={() => toggleInterest(interest.id)}
                 style={[styles.chip, selected && styles.chipSelected]}>
                 <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
@@ -452,6 +476,12 @@ export default function SettingsScreen() {
             );
           })}
         </View>
+        {!editingInterests && !selectedInterestItems.length && (
+          <Text style={styles.caption}>No interests selected yet.</Text>
+        )}
+        {editingInterests && (
+          <Text style={styles.caption}>Tap interests to update your recommendations.</Text>
+        )}
       </Card>
 
       <Card>
@@ -607,6 +637,8 @@ const styles = StyleSheet.create({
   avatarText: { color: colors.white, fontWeight: '600', fontSize: 24 },
   caption: { color: colors.muted, fontSize: 14, lineHeight: 20 },
   sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  interestsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  interestEditButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   sectionTitleText: { color: colors.ink, fontWeight: '600', fontSize: 18 },
   settingRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 4 },
   settingCopy: { flex: 1, gap: 2 },
