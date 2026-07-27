@@ -13,13 +13,10 @@ import {
   type AuthCredential,
   type User,
 } from 'firebase/auth';
-import {
-  GoogleSignin,
-  isCancelledResponse,
-} from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Crypto from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import {
   createContext,
@@ -58,18 +55,25 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 const profileCacheKey = (uid: string) => `almonium:profile:${uid}`;
+export const isExpoGo = Constants.executionEnvironment === 'storeClient';
 
 class ProviderSignInCancelledError extends Error {
   readonly code = 'ERR_REQUEST_CANCELED';
 }
 
 async function googleFirebaseCredential(): Promise<AuthCredential> {
+  if (isExpoGo) {
+    throw new Error('Google sign-in is unavailable in Expo Go. Use email and password, or open a development build.');
+  }
   const platformClientId =
     Platform.OS === 'ios' ? config.google.iosClientId : config.google.androidClientId;
   if (!config.google.webClientId || !platformClientId) {
     throw new Error(`Google sign-in is not configured for ${Platform.OS}.`);
   }
 
+  const { GoogleSignin, isCancelledResponse } = await import(
+    '@react-native-google-signin/google-signin'
+  );
   GoogleSignin.configure({
     webClientId: config.google.webClientId,
     iosClientId: config.google.iosClientId,
@@ -219,10 +223,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
         const usesGoogle = currentUser?.providerData.some(
           (provider) => provider.providerId === 'google.com',
         );
-        await signOut(auth);
-        if (usesGoogle && Platform.OS !== 'web') {
+        if (usesGoogle && Platform.OS !== 'web' && !isExpoGo) {
+          const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
           await GoogleSignin.signOut().catch(() => undefined);
         }
+        await signOut(auth);
         queryClient.clear();
         if (uid) await AsyncStorage.removeItem(profileCacheKey(uid));
         setProfile(null);

@@ -1,12 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Card, Field, Title } from '@/components/ui';
-import { useAuth } from '@/src/auth-context';
+import { isExpoGo, useAuth } from '@/src/auth-context';
 import { colors } from '@/src/theme';
 
 export default function SignInScreen() {
@@ -106,14 +105,15 @@ export default function SignInScreen() {
             onPress={submit}>
             Sign in
           </Button>
-          {Platform.OS !== 'web' && (
-            <GoogleSigninButton
-              size={GoogleSigninButton.Size.Wide}
-              color={GoogleSigninButton.Color.Light}
-              disabled={loading}
-              style={styles.googleButton}
-              onPress={googleSignIn}
-            />
+          {Platform.OS !== 'web' && !isExpoGo && (
+            <Button variant="secondary" disabled={loading} onPress={googleSignIn}>
+              Continue with Google
+            </Button>
+          )}
+          {isExpoGo && (
+            <Text style={styles.expoGoHint}>
+              Google sign-in is available in the development build. Use email and password in Expo Go.
+            </Text>
           )}
           {appleAvailable && (
             <AppleAuthentication.AppleAuthenticationButton
@@ -158,6 +158,6 @@ const styles = StyleSheet.create({
   subtitle: { color: colors.muted, fontSize: 17, lineHeight: 25, maxWidth: 330 },
   links: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 2 },
   link: { color: colors.primary, fontWeight: '700' },
-  googleButton: { height: 52, width: '100%' },
+  expoGoHint: { color: colors.muted, fontSize: 13, lineHeight: 18, textAlign: 'center' },
   appleButton: { height: 52, width: '100%' },
 });
