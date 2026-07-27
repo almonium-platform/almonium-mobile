@@ -9,7 +9,7 @@ import { Button, Card } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
-import { colors } from '@/src/theme';
+import { colors, fonts } from '@/src/theme';
 
 export default function BookDetailsScreen() {
   const params = useLocalSearchParams<{ bookId: string; language?: string }>();
@@ -182,28 +182,28 @@ export default function BookDetailsScreen() {
 const styles = StyleSheet.create({
   center: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: colors.muted, fontSize: 16 },
-  errorTitle: { color: colors.ink, fontSize: 21, fontWeight: '800', textAlign: 'center' },
+  errorTitle: { color: colors.ink, fontSize: 21, fontWeight: '600', textAlign: 'center' },
   errorText: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center' },
   hero: { flexDirection: 'row', gap: 18, alignItems: 'flex-start' },
-  cover: { width: 126, height: 184, borderRadius: 15, backgroundColor: colors.mint },
+  cover: { width: 126, height: 184, borderRadius: 15, backgroundColor: colors.accentSoft },
   heroCopy: { flex: 1, gap: 9, paddingTop: 4 },
-  title: { color: colors.ink, fontSize: 25, lineHeight: 29, fontWeight: '900', letterSpacing: -0.4 },
-  author: { color: colors.muted, fontSize: 16 },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: 33, fontWeight: '600' },
+  author: { color: colors.muted, fontFamily: fonts.serif, fontSize: 18 },
   ratingRow: { flexDirection: 'row', gap: 10 },
-  rating: { color: colors.gold, fontWeight: '900' },
+  rating: { color: colors.reading, fontWeight: '600' },
   meta: { color: colors.muted, fontWeight: '600' },
   favorite: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingTop: 5 },
-  favoriteText: { color: colors.primary, fontSize: 13, fontWeight: '800' },
+  favoriteText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
   stats: { flexDirection: 'row', alignItems: 'center' },
   stat: { flex: 1, gap: 3, alignItems: 'center' },
   divider: { width: 1, height: 32, backgroundColor: colors.line },
-  statValue: { color: colors.ink, fontSize: 14, fontWeight: '900', textAlign: 'center' },
+  statValue: { color: colors.ink, fontSize: 14, fontWeight: '600', textAlign: 'center' },
   statLabel: { color: colors.muted, fontSize: 11 },
-  sectionTitle: { color: colors.ink, fontSize: 18, fontWeight: '900' },
+  sectionTitle: { color: colors.ink, fontSize: 18, fontWeight: '600' },
   variants: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   variant: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.canvas },
   variantActive: { backgroundColor: colors.primary },
-  variantText: { color: colors.ink, fontSize: 13, fontWeight: '700' },
+  variantText: { color: colors.ink, fontSize: 13, fontWeight: '600' },
   variantTextActive: { color: colors.white },
   parallelNote: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   parallelText: { flex: 1, color: colors.muted, fontSize: 13 },

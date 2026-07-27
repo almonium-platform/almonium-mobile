@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -20,7 +21,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { dueCards, type ReviewState } from '@/src/card-utils';
 import { languageName } from '@/src/languages';
-import { colors, shadows } from '@/src/theme';
+import { colors, fonts, gradients, shadows } from '@/src/theme';
 import type { LearningCard } from '@/src/types';
 
 const cardLanguageKey = 'almonium:card-language';
@@ -125,14 +126,20 @@ export default function CardsScreen() {
             <Pressable
               style={styles.reviewAction}
               onPress={() => router.push({ pathname: '/review', params: { language } })}>
-              <View style={styles.reviewCount}>
-                <Text style={styles.reviewCountText}>{due}</Text>
-              </View>
-              <View style={styles.actionCopy}>
-                <Text style={styles.actionTitle}>Review due cards</Text>
-                <Text style={styles.actionCaption}>Spaced practice on this device</Text>
-              </View>
-              <Ionicons name="arrow-forward" size={20} color={colors.white} />
+              <LinearGradient
+                colors={gradients.primary}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.reviewActionFill}>
+                <View style={styles.reviewCount}>
+                  <Text style={styles.reviewCountText}>{due}</Text>
+                </View>
+                <View style={styles.actionCopy}>
+                  <Text style={styles.actionTitle}>Review due cards</Text>
+                  <Text style={styles.actionCaption}>Spaced practice on this device</Text>
+                </View>
+                <Ionicons name="arrow-forward" size={20} color={colors.white} />
+              </LinearGradient>
             </Pressable>
             <Button
               variant="secondary"
@@ -198,34 +205,35 @@ export default function CardsScreen() {
 const styles = StyleSheet.create({
   list: { flexGrow: 1, padding: 20, paddingBottom: 32, backgroundColor: colors.canvas },
   header: { gap: 13, paddingBottom: 20 },
-  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '900', letterSpacing: 1.5 },
-  hero: { color: colors.ink, fontSize: 30, lineHeight: 35, fontWeight: '900', letterSpacing: -0.7 },
+  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
+  hero: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 36, fontWeight: '600' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.mint },
+  chip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.accentSoft },
   chipActive: { backgroundColor: colors.primary },
-  chipText: { color: colors.primaryDark, fontWeight: '800', fontSize: 13 },
+  chipText: { color: colors.primaryDark, fontWeight: '600', fontSize: 13 },
   chipTextActive: { color: colors.white },
   actions: { gap: 9 },
-  reviewAction: { minHeight: 70, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 15, borderRadius: 18, backgroundColor: colors.primary },
+  reviewAction: { minHeight: 70, borderRadius: 999, overflow: 'hidden' },
+  reviewActionFill: { minHeight: 70, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16 },
   reviewCount: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.18)' },
-  reviewCountText: { color: colors.white, fontSize: 19, fontWeight: '900' },
+  reviewCountText: { color: colors.white, fontSize: 19, fontWeight: '600' },
   actionCopy: { flex: 1, gap: 2 },
-  actionTitle: { color: colors.white, fontSize: 16, fontWeight: '800' },
-  actionCaption: { color: '#dceee5', fontSize: 12 },
-  search: { minHeight: 48, borderRadius: 14, paddingHorizontal: 14, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line },
+  actionTitle: { color: colors.white, fontSize: 16, fontWeight: '600' },
+  actionCaption: { color: '#f7e8f1', fontSize: 12 },
+  search: { minHeight: 50, borderRadius: 999, paddingHorizontal: 16, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, ...shadows.field },
   searchInput: { flex: 1, color: colors.ink, fontSize: 15 },
-  offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '700', backgroundColor: colors.mint, borderRadius: 10, padding: 10 },
-  card: { flexDirection: 'row', alignItems: 'center', gap: 13, borderRadius: 19, padding: 15, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, ...shadows.card },
-  cardIcon: { width: 45, height: 45, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.mint },
-  cardIconText: { color: colors.primaryDark, fontSize: 19, fontWeight: '900' },
+  offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, borderRadius: 10, padding: 10 },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 13, borderRadius: 20, padding: 15, backgroundColor: colors.surface, ...shadows.card },
+  cardIcon: { width: 45, height: 45, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accentSoft },
+  cardIconText: { color: colors.primaryDark, fontSize: 19, fontWeight: '600' },
   cardCopy: { flex: 1, gap: 3 },
-  entry: { color: colors.ink, fontSize: 18, fontWeight: '800' },
+  entry: { color: colors.ink, fontSize: 18, fontWeight: '600' },
   translation: { color: colors.muted, fontSize: 14, lineHeight: 19 },
-  tagLine: { color: colors.primary, fontSize: 11, fontWeight: '700', paddingTop: 2 },
+  tagLine: { color: colors.primary, fontSize: 11, fontWeight: '600', paddingTop: 2 },
   pressed: { opacity: 0.78 },
   loader: { marginTop: 50 },
   center: { flex: 1, padding: 32, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: colors.canvas },
   emptyInline: { alignItems: 'center', gap: 10, paddingVertical: 48, paddingHorizontal: 20 },
-  emptyTitle: { color: colors.ink, fontWeight: '800', fontSize: 20, textAlign: 'center' },
+  emptyTitle: { color: colors.ink, fontWeight: '600', fontSize: 20, textAlign: 'center' },
   emptyText: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center' },
 });

@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, shadows } from '@/src/theme';
+import { colors, fonts, shadows } from '@/src/theme';
 import type { BookSummary } from '@/src/types';
 
 export function BookCard({
@@ -73,29 +73,27 @@ const styles = StyleSheet.create({
     gap: 14,
     padding: 12,
     minHeight: 138,
-    borderRadius: 20,
+    borderRadius: 24,
     backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.line,
-    ...shadows.card,
+    ...shadows.media,
   },
   pressed: { opacity: 0.8 },
-  cover: { width: 78, height: 112, borderRadius: 10, backgroundColor: colors.mint },
+  cover: { width: 78, height: 112, borderRadius: 10, backgroundColor: colors.accentSoft },
   bookCopy: { flex: 1, gap: 5 },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   badge: {
     borderRadius: 8,
-    backgroundColor: colors.mint,
+    backgroundColor: colors.accentSoft,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  badgeText: { color: colors.primaryDark, fontSize: 11, fontWeight: '800' },
+  badgeText: { color: colors.primaryDark, fontSize: 11, fontWeight: '600' },
   parallel: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  parallelText: { color: colors.primary, fontSize: 10, fontWeight: '700' },
-  bookTitle: { color: colors.ink, fontSize: 18, lineHeight: 22, fontWeight: '800' },
+  parallelText: { color: colors.primary, fontSize: 10, fontWeight: '600' },
+  bookTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, lineHeight: 23, fontWeight: '600' },
   author: { color: colors.muted, fontSize: 14 },
   footer: { flexDirection: 'row', gap: 10 },
-  rating: { color: colors.gold, fontSize: 12, fontWeight: '800' },
+  rating: { color: colors.reading, fontSize: 12, fontWeight: '600' },
   year: { color: colors.muted, fontSize: 12 },
   progressTrack: {
     height: 5,
@@ -104,5 +102,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.line,
     overflow: 'hidden',
   },
-  progress: { height: 5, borderRadius: 3, backgroundColor: colors.gold },
+  progress: { height: 5, borderRadius: 3, backgroundColor: colors.reading },
 });

@@ -439,7 +439,7 @@ export default function SettingsScreen() {
 
       <Card>
         <View style={styles.sectionTitle}>
-          <Ionicons name="sparkles-outline" color={colors.gold} size={20} />
+          <Ionicons name="sparkles-outline" color={colors.reading} size={20} />
           <Text style={styles.sectionTitleText}>Account</Text>
         </View>
         <View style={styles.statRow}>
@@ -490,35 +490,35 @@ const styles = StyleSheet.create({
   headingCopy: { flex: 1, gap: 3 },
   avatar: { width: 58, height: 58, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary, overflow: 'hidden' },
   avatarImage: { width: '100%', height: '100%' },
-  avatarText: { color: colors.white, fontWeight: '900', fontSize: 24 },
+  avatarText: { color: colors.white, fontWeight: '600', fontSize: 24 },
   caption: { color: colors.muted, fontSize: 14, lineHeight: 20 },
   sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  sectionTitleText: { color: colors.ink, fontWeight: '800', fontSize: 18 },
+  sectionTitleText: { color: colors.ink, fontWeight: '600', fontSize: 18 },
   settingRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 4 },
   settingCopy: { flex: 1, gap: 2 },
-  settingLabel: { color: colors.ink, fontWeight: '700', fontSize: 15 },
+  settingLabel: { color: colors.ink, fontWeight: '600', fontSize: 15 },
   language: { borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 14, gap: 12 },
   languageHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   languageActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  languageName: { color: colors.ink, fontWeight: '900', fontSize: 16, letterSpacing: 0.8 },
+  languageName: { color: colors.ink, fontWeight: '600', fontSize: 16, letterSpacing: 0.8 },
   levels: { flexDirection: 'row', gap: 6 },
   level: { flex: 1, minHeight: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   levelActive: { backgroundColor: colors.primary },
-  levelText: { color: colors.muted, fontWeight: '700', fontSize: 12 },
+  levelText: { color: colors.muted, fontWeight: '600', fontSize: 12 },
   levelTextActive: { color: colors.white },
   saving: { opacity: 0.6 },
   statRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 },
-  stat: { color: colors.primary, fontWeight: '800' },
+  stat: { color: colors.primary, fontWeight: '600' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.line },
   chipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { color: colors.ink, fontSize: 13, fontWeight: '600' },
   chipTextSelected: { color: colors.white },
   deleteLink: { alignItems: 'center', paddingVertical: 8 },
-  deleteText: { color: colors.danger, fontSize: 13, fontWeight: '700' },
+  deleteText: { color: colors.danger, fontSize: 13, fontWeight: '600' },
   addLanguage: { gap: 10, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 14 },
-  pickerFrame: { borderWidth: 1, borderColor: colors.line, borderRadius: 14, overflow: 'hidden', backgroundColor: colors.white },
+  pickerFrame: { borderWidth: 1, borderColor: colors.line, borderRadius: 20, overflow: 'hidden', backgroundColor: colors.white },
   legalRow: { flexDirection: 'row', justifyContent: 'center', gap: 20, paddingVertical: 4 },
-  legalText: { color: colors.primary, fontSize: 13, fontWeight: '700' },
+  legalText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
   passwordGroup: { gap: 7, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 12 },
 });

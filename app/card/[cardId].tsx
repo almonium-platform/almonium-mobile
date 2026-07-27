@@ -9,7 +9,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { cardUpdate, createCardDraft } from '@/src/card-utils';
 import { languageName } from '@/src/languages';
-import { colors } from '@/src/theme';
+import { colors, fonts } from '@/src/theme';
 
 export default function CardEditorScreen() {
   const { cardId, language: languageParam } = useLocalSearchParams<{
@@ -146,12 +146,12 @@ export default function CardEditorScreen() {
 
 const styles = StyleSheet.create({
   heading: { gap: 5, paddingVertical: 3 },
-  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '900', letterSpacing: 1.4 },
-  title: { color: colors.ink, fontSize: 27, lineHeight: 33, fontWeight: '900', letterSpacing: -0.5 },
+  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.4 },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: 34, fontWeight: '600' },
   caption: { color: colors.muted, fontSize: 13, lineHeight: 19 },
   fieldGroup: { gap: 7 },
-  label: { color: colors.ink, fontWeight: '800', fontSize: 14 },
+  label: { color: colors.ink, fontWeight: '600', fontSize: 14 },
   multiline: { minHeight: 112, paddingTop: 14 },
   center: { justifyContent: 'center' },
-  errorTitle: { color: colors.ink, fontSize: 22, fontWeight: '800' },
+  errorTitle: { color: colors.ink, fontSize: 22, fontWeight: '600' },
 });

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { relativeTime } from '@/src/card-utils';
-import { colors, shadows } from '@/src/theme';
+import { colors, fonts, shadows } from '@/src/theme';
 import type { AppNotification, NotificationType } from '@/src/types';
 
 const iconForType: Record<NotificationType, keyof typeof Ionicons.glyphMap> = {
@@ -148,25 +148,25 @@ const styles = StyleSheet.create({
   header: { gap: 9, paddingBottom: 21 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   headerCopy: { flex: 1, gap: 3 },
-  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '900', letterSpacing: 1.5 },
-  hero: { color: colors.ink, fontSize: 30, fontWeight: '900', letterSpacing: -0.7 },
+  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
+  hero: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 36, fontWeight: '600' },
   caption: { color: colors.muted, fontSize: 14, lineHeight: 20 },
-  markAll: { paddingVertical: 8, paddingHorizontal: 11, borderRadius: 11, backgroundColor: colors.mint },
-  markAllText: { color: colors.primaryDark, fontWeight: '800', fontSize: 12 },
-  offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '700', backgroundColor: colors.mint, borderRadius: 10, padding: 10 },
-  notification: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 15, borderRadius: 19, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, ...shadows.card },
-  unread: { borderColor: '#b4d7c7', backgroundColor: '#fbfffc' },
+  markAll: { paddingVertical: 8, paddingHorizontal: 11, borderRadius: 11, backgroundColor: colors.accentSoft },
+  markAllText: { color: colors.primaryDark, fontWeight: '600', fontSize: 12 },
+  offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, borderRadius: 10, padding: 10 },
+  notification: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 15, borderRadius: 20, backgroundColor: colors.surface, ...shadows.card },
+  unread: { backgroundColor: '#fffafd' },
   icon: { width: 43, height: 43, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
-  iconUnread: { backgroundColor: colors.mint },
+  iconUnread: { backgroundColor: colors.accentSoft },
   copy: { flex: 1, gap: 5 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { flex: 1, color: colors.ink, fontSize: 15, fontWeight: '800' },
-  time: { color: colors.muted, fontSize: 11, fontWeight: '700' },
+  title: { flex: 1, color: colors.ink, fontSize: 15, fontWeight: '600' },
+  time: { color: colors.muted, fontSize: 11, fontWeight: '600' },
   message: { color: colors.muted, fontSize: 13, lineHeight: 19 },
-  action: { color: colors.primary, fontSize: 10, fontWeight: '700', paddingTop: 1 },
+  action: { color: colors.primary, fontSize: 10, fontWeight: '600', paddingTop: 1 },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.primary, marginTop: 7 },
   pressed: { opacity: 0.78 },
   empty: { flex: 1, minHeight: 420, alignItems: 'center', justifyContent: 'center', gap: 10 },
-  emptyTitle: { color: colors.ink, fontWeight: '800', fontSize: 20 },
+  emptyTitle: { color: colors.ink, fontWeight: '600', fontSize: 20 },
   emptyText: { color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: 'center', maxWidth: 300 },
 });

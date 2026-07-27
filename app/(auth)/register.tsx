@@ -63,5 +63,5 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   content: { flexGrow: 1, justifyContent: 'center' },
   subtitle: { fontSize: 17, lineHeight: 25, color: colors.muted },
-  link: { color: colors.primary, textAlign: 'center', fontWeight: '700' },
+  link: { color: colors.primary, textAlign: 'center', fontWeight: '600' },
 });

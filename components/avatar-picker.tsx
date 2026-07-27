@@ -125,13 +125,13 @@ export function AvatarPicker({ currentAvatarUrl, onChanged }: {
 
 const styles = StyleSheet.create({
   container: { gap: 9 },
-  uploadButton: { minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 13, backgroundColor: colors.mint },
-  uploadText: { color: colors.primaryDark, fontSize: 15, fontWeight: '800' },
+  uploadButton: { minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 999, borderWidth: 1, borderColor: colors.ink, backgroundColor: colors.white },
+  uploadText: { color: colors.primaryDark, fontSize: 15, fontWeight: '600' },
   hint: { color: colors.muted, fontSize: 13, lineHeight: 18 },
   avatarRow: { gap: 10, paddingVertical: 2 },
   avatarButton: { width: 58, height: 58, borderRadius: 18, overflow: 'hidden', borderWidth: 2, borderColor: 'transparent' },
   avatarButtonSelected: { borderColor: colors.primary },
   avatar: { width: '100%', height: '100%' },
   busyOverlay: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: '#00000066' },
-  busyText: { color: colors.white, fontSize: 24, fontWeight: '900' },
+  busyText: { color: colors.white, fontSize: 24, fontWeight: '600' },
 });

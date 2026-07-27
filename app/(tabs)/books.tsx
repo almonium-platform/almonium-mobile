@@ -20,7 +20,7 @@ import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
-import { colors } from '@/src/theme';
+import { colors, fonts, shadows } from '@/src/theme';
 import type { BookSummary } from '@/src/types';
 
 const shelfLanguageKey = 'almonium:shelf-language';
@@ -199,24 +199,24 @@ const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   list: { padding: 20, backgroundColor: colors.canvas, flexGrow: 1 },
   header: { gap: 12, paddingBottom: 20 },
-  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '900', letterSpacing: 1.5 },
-  heroTitle: { color: colors.ink, fontSize: 30, lineHeight: 35, fontWeight: '900', letterSpacing: -0.7 },
+  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
+  heroTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 36, fontWeight: '600' },
   languageChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  languageChip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.mint },
+  languageChip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.accentSoft },
   languageChipActive: { backgroundColor: colors.primary },
-  languageChipText: { color: colors.primaryDark, fontSize: 13, fontWeight: '800' },
+  languageChipText: { color: colors.primaryDark, fontSize: 13, fontWeight: '600' },
   languageChipTextActive: { color: colors.white },
-  search: { minHeight: 48, borderRadius: 14, paddingHorizontal: 14, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line },
+  search: { minHeight: 50, borderRadius: 999, paddingHorizontal: 16, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, ...shadows.field },
   searchInput: { flex: 1, color: colors.ink, fontSize: 15 },
   hint: { color: colors.muted, fontSize: 11 },
-  offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '700', backgroundColor: colors.mint, borderRadius: 10, padding: 10 },
+  offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, borderRadius: 10, padding: 10 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 10 },
-  sectionTitle: { color: colors.ink, fontSize: 20, fontWeight: '900' },
-  sectionCount: { color: colors.primary, fontSize: 12, fontWeight: '800', backgroundColor: colors.mint, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8 },
+  sectionTitle: { color: colors.ink, fontSize: 20, fontWeight: '600' },
+  sectionCount: { color: colors.primary, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8 },
   itemGap: { height: 12 },
   sectionGap: { height: 24 },
   empty: { flex: 1, padding: 32, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: colors.canvas },
   emptyInline: { alignItems: 'center', paddingVertical: 48, gap: 8 },
-  emptyTitle: { color: colors.ink, fontWeight: '800', fontSize: 20 },
+  emptyTitle: { color: colors.ink, fontWeight: '600', fontSize: 20 },
   emptyText: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center' },
 });

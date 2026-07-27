@@ -16,7 +16,7 @@ import {
   type ReviewState,
 } from '@/src/card-utils';
 import { languageName } from '@/src/languages';
-import { colors, shadows } from '@/src/theme';
+import { colors, fonts, shadows } from '@/src/theme';
 
 const reviewKey = (uid: string, language: string) => `almonium:review:${uid}:${language}`;
 
@@ -184,29 +184,29 @@ export default function ReviewScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.canvas },
   top: { minHeight: 64, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  progress: { color: colors.ink, fontWeight: '800', fontSize: 15 },
-  language: { color: colors.primary, fontWeight: '800', fontSize: 13, minWidth: 45, textAlign: 'right' },
+  progress: { color: colors.ink, fontWeight: '600', fontSize: 15 },
+  language: { color: colors.primary, fontWeight: '600', fontSize: 13, minWidth: 45, textAlign: 'right' },
   body: { flex: 1, justifyContent: 'center', padding: 20 },
-  flashcard: { minHeight: 380, padding: 28, borderRadius: 28, alignItems: 'center', justifyContent: 'center', gap: 22, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, ...shadows.card },
-  prompt: { color: colors.primary, fontSize: 11, fontWeight: '900', letterSpacing: 1.5 },
-  word: { color: colors.ink, fontSize: 38, lineHeight: 45, textAlign: 'center', fontWeight: '900', letterSpacing: -0.8 },
+  flashcard: { minHeight: 380, padding: 28, borderRadius: 30, alignItems: 'center', justifyContent: 'center', gap: 22, backgroundColor: colors.surface, ...shadows.card },
+  prompt: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
+  word: { color: colors.ink, fontFamily: fonts.serif, fontSize: 38, lineHeight: 46, textAlign: 'center', fontWeight: '600' },
   answer: { width: '100%', alignItems: 'center', gap: 8 },
   divider: { height: 1, width: '70%', backgroundColor: colors.line, marginBottom: 12 },
-  translation: { color: colors.primaryDark, fontSize: 23, lineHeight: 30, fontWeight: '700', textAlign: 'center' },
+  translation: { color: colors.primaryDark, fontSize: 23, lineHeight: 30, fontWeight: '600', textAlign: 'center' },
   notes: { color: colors.muted, fontSize: 14, lineHeight: 20, textAlign: 'center', marginTop: 8 },
   examples: { gap: 5, marginTop: 6 },
   example: { color: colors.ink, fontSize: 13, lineHeight: 19, fontStyle: 'italic', textAlign: 'center' },
   revealHint: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 18 },
-  revealText: { color: colors.primary, fontSize: 14, fontWeight: '700' },
+  revealText: { color: colors.primary, fontSize: 14, fontWeight: '600' },
   footer: { gap: 12, padding: 20, paddingTop: 4 },
   ratePrompt: { color: colors.muted, fontSize: 13, textAlign: 'center' },
   ratingRow: { flexDirection: 'row', gap: 7 },
   rating: { flex: 1, minHeight: 56, borderRadius: 13, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', gap: 1, backgroundColor: colors.surface },
-  ratingLabel: { fontSize: 13, fontWeight: '800' },
+  ratingLabel: { fontSize: 13, fontWeight: '600' },
   ratingHint: { color: colors.muted, fontSize: 10 },
   localNote: { color: colors.muted, textAlign: 'center', fontSize: 10 },
   center: { flex: 1, padding: 32, alignItems: 'center', justifyContent: 'center', gap: 13, backgroundColor: colors.canvas },
   completeIcon: { width: 72, height: 72, borderRadius: 26, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  completeTitle: { color: colors.ink, fontSize: 25, fontWeight: '900', textAlign: 'center' },
+  completeTitle: { color: colors.ink, fontSize: 25, fontWeight: '600', textAlign: 'center' },
   completeCopy: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center', maxWidth: 330 },
 });

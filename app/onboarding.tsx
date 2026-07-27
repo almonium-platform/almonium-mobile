@@ -6,8 +6,9 @@ import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Screen } from '@/components/screen';
 import { AvatarPicker } from '@/components/avatar-picker';
+import { BrandMark } from '@/components/brand-mark';
+import { Screen } from '@/components/screen';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
@@ -122,7 +123,10 @@ export default function OnboardingScreen() {
   return (
     <Screen>
       <View style={styles.topbar}>
-        <Text style={styles.logo}>ALMONIUM</Text>
+        <View style={styles.wordmark}>
+          <BrandMark size={36} />
+          <Text style={styles.logo}>ALMONIUM</Text>
+        </View>
         <Pressable onPress={signOut} hitSlop={12}>
           <Ionicons name="log-out-outline" size={22} color={colors.muted} />
         </Pressable>
@@ -280,28 +284,29 @@ export default function OnboardingScreen() {
 
 const styles = StyleSheet.create({
   topbar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  logo: { color: colors.primary, fontSize: 13, fontWeight: '900', letterSpacing: 2 },
+  wordmark: { flexDirection: 'row', alignItems: 'center', gap: 9 },
+  logo: { color: colors.primary, fontSize: 13, fontWeight: '600', letterSpacing: 2 },
   progressTrack: { height: 5, borderRadius: 3, overflow: 'hidden', backgroundColor: colors.line },
-  progress: { height: 5, borderRadius: 3, backgroundColor: colors.gold },
+  progress: { height: 5, borderRadius: 3, backgroundColor: colors.reading },
   intro: { gap: 10, paddingVertical: 10 },
-  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '900', letterSpacing: 1.5 },
+  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
   description: { color: colors.muted, fontSize: 16, lineHeight: 24 },
   feature: { flexDirection: 'row', gap: 13, alignItems: 'flex-start' },
   featureCopy: { flex: 1, gap: 3 },
-  featureTitle: { color: colors.ink, fontSize: 15, fontWeight: '700' },
+  featureTitle: { color: colors.ink, fontSize: 15, fontWeight: '600' },
   featureText: { color: colors.muted, fontSize: 14, lineHeight: 20 },
   checkRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   finePrint: { color: colors.muted, fontSize: 12, lineHeight: 18, textAlign: 'center' },
-  label: { color: colors.ink, fontSize: 14, fontWeight: '800' },
-  pickerFrame: { borderWidth: 1, borderColor: colors.line, borderRadius: 14, overflow: 'hidden', backgroundColor: colors.white },
+  label: { color: colors.ink, fontSize: 14, fontWeight: '600' },
+  pickerFrame: { borderWidth: 1, borderColor: colors.line, borderRadius: 20, overflow: 'hidden', backgroundColor: colors.white },
   levels: { flexDirection: 'row', gap: 6 },
   level: { flex: 1, minHeight: 42, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   levelActive: { backgroundColor: colors.primary },
-  levelText: { color: colors.muted, fontSize: 13, fontWeight: '800' },
+  levelText: { color: colors.muted, fontSize: 13, fontWeight: '600' },
   levelTextActive: { color: colors.white },
-  profileMark: { width: 72, height: 72, borderRadius: 24, alignSelf: 'center', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.mint, overflow: 'hidden' },
+  profileMark: { width: 72, height: 72, borderRadius: 24, alignSelf: 'center', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accentSoft, overflow: 'hidden' },
   profileImage: { width: '100%', height: '100%' },
-  profileMarkText: { color: colors.primaryDark, fontSize: 30, fontWeight: '900' },
+  profileMarkText: { color: colors.primaryDark, fontSize: 30, fontWeight: '600' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 9, backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.line },
   chipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },

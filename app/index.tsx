@@ -40,6 +40,6 @@ export default function Index() {
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   recovery: { flex: 1, justifyContent: 'center', gap: 14, padding: 28, backgroundColor: colors.canvas },
-  title: { color: colors.ink, fontSize: 24, lineHeight: 30, fontWeight: '900', textAlign: 'center' },
+  title: { color: colors.ink, fontSize: 24, lineHeight: 30, fontWeight: '600', textAlign: 'center' },
   message: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center' },
 });

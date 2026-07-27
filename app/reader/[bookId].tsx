@@ -41,8 +41,8 @@ const baseProgressScript = `
 `;
 
 function appearanceScript(fontSize: number, theme: ReaderTheme, progress: number) {
-  const background = theme === 'night' ? '#18211d' : '#fffdf8';
-  const foreground = theme === 'night' ? '#e5ebe7' : '#202824';
+  const background = theme === 'night' ? '#241f25' : colors.surface;
+  const foreground = theme === 'night' ? '#f1ecef' : colors.ink;
   return `
     (function () {
       let style = document.getElementById('almonium-reader-style');
@@ -63,7 +63,7 @@ function appearanceScript(fontSize: number, theme: ReaderTheme, progress: number
         }
         p { margin: 0 0 1.15em !important; }
         img { max-width: 100% !important; height: auto !important; }
-        a { color: #58a98d !important; }
+        a { color: ${colors.raspberry} !important; }
       \`;
       document.documentElement.style.background = '${background}';
       setTimeout(function () {
@@ -292,20 +292,20 @@ export default function ReaderScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  containerNight: { backgroundColor: '#18211d' },
+  containerNight: { backgroundColor: '#241f25' },
   webview: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32, backgroundColor: colors.canvas },
   status: { color: colors.muted, fontSize: 15, textAlign: 'center' },
-  errorTitle: { color: colors.ink, fontSize: 20, fontWeight: '800', textAlign: 'center' },
+  errorTitle: { color: colors.ink, fontSize: 20, fontWeight: '600', textAlign: 'center' },
   toolbar: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingBottom: 5, borderTopWidth: 1, borderTopColor: colors.line, backgroundColor: colors.surface },
-  toolbarNight: { backgroundColor: '#202c27', borderTopColor: '#34443d' },
+  toolbarNight: { backgroundColor: '#302a31', borderTopColor: '#4c414b' },
   progressCopy: { flex: 1, gap: 5 },
-  progressValue: { color: colors.ink, fontSize: 12, fontWeight: '900' },
+  progressValue: { color: colors.ink, fontSize: 12, fontWeight: '600' },
   track: { height: 4, borderRadius: 2, backgroundColor: colors.line, overflow: 'hidden' },
-  bar: { height: 4, borderRadius: 2, backgroundColor: colors.gold },
+  bar: { height: 4, borderRadius: 2, backgroundColor: colors.reading },
   toolButton: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
   toolButtonDisabled: { opacity: 0.3 },
-  smallA: { color: colors.ink, fontSize: 14, fontWeight: '800' },
-  largeA: { color: colors.ink, fontSize: 21, fontWeight: '800' },
+  smallA: { color: colors.ink, fontSize: 14, fontWeight: '600' },
+  largeA: { color: colors.ink, fontSize: 21, fontWeight: '600' },
   nightText: { color: colors.white },
 });
