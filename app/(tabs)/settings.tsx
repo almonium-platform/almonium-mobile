@@ -4,7 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Linking,
@@ -119,10 +119,13 @@ export default function SettingsScreen() {
   const [savingName, setSavingName] = useState(false);
   const [savingPrivacy, setSavingPrivacy] = useState(false);
   const [privacyHidden, setPrivacyHidden] = useState(profile?.hidden ?? false);
-  const [savingInterests, setSavingInterests] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<number[]>(
     profile?.interests.map((interest) => interest.id) || [],
   );
+  const selectedInterestsRef = useRef(selectedInterests);
+  const savedInterestsRef = useRef(selectedInterests);
+  const pendingInterestsRef = useRef<number[] | null>(null);
+  const savingInterestsRef = useRef(false);
   const [showAddLanguage, setShowAddLanguage] = useState(false);
   const [newLanguage, setNewLanguage] = useState('');
   const [newLevel, setNewLevel] = useState<CefrLevel>('A1');
@@ -149,10 +152,13 @@ export default function SettingsScreen() {
     setEditingUsername(false);
   }, [profile?.username]);
   useEffect(() => setPrivacyHidden(profile?.hidden ?? false), [profile?.hidden]);
-  useEffect(
-    () => setSelectedInterests(profile?.interests.map((interest) => interest.id) || []),
-    [profile?.interests],
-  );
+  useEffect(() => {
+    if (savingInterestsRef.current) return;
+    const interests = profile?.interests.map((interest) => interest.id) || [];
+    selectedInterestsRef.current = interests;
+    savedInterestsRef.current = interests;
+    setSelectedInterests(interests);
+  }, [profile?.interests]);
 
   async function changed() {
     await refreshProfile();
@@ -197,16 +203,47 @@ export default function SettingsScreen() {
     router.replace('/(auth)/sign-in');
   }
 
-  async function saveInterests() {
-    setSavingInterests(true);
+  async function persistInterests() {
+    if (savingInterestsRef.current) return;
+
+    savingInterestsRef.current = true;
     try {
-      await api.updateInterests(selectedInterests);
+      while (pendingInterestsRef.current) {
+        const interests = pendingInterestsRef.current;
+        pendingInterestsRef.current = null;
+
+        try {
+          await api.updateInterests(interests);
+          savedInterestsRef.current = interests;
+        } catch (error) {
+          if (!pendingInterestsRef.current) {
+            selectedInterestsRef.current = savedInterestsRef.current;
+            setSelectedInterests(savedInterestsRef.current);
+            Alert.alert(
+              'Could not update interests',
+              error instanceof Error ? error.message : 'Try again.',
+            );
+          }
+        }
+      }
+
       await changed();
-    } catch (error) {
-      Alert.alert('Could not save interests', error instanceof Error ? error.message : 'Try again.');
     } finally {
-      setSavingInterests(false);
+      savingInterestsRef.current = false;
+      if (pendingInterestsRef.current) void persistInterests();
     }
+  }
+
+  function toggleInterest(id: number) {
+    const current = selectedInterestsRef.current;
+    const interests = current.includes(id)
+      ? current.filter((interestId) => interestId !== id)
+      : [...current, id];
+
+    selectedInterestsRef.current = interests;
+    pendingInterestsRef.current = interests;
+    setSelectedInterests(interests);
+    void persistInterests();
   }
 
   async function addLanguage() {
@@ -403,14 +440,10 @@ export default function SettingsScreen() {
             return (
               <Pressable
                 key={interest.id}
-                disabled={savingInterests}
-                onPress={() =>
-                  setSelectedInterests((current) =>
-                    selected
-                      ? current.filter((id) => id !== interest.id)
-                      : [...current, interest.id],
-                  )
-                }
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: selected }}
+                accessibilityLabel={`${interest.name} interest`}
+                onPress={() => toggleInterest(interest.id)}
                 style={[styles.chip, selected && styles.chipSelected]}>
                 <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
                   {interest.name}
@@ -419,16 +452,6 @@ export default function SettingsScreen() {
             );
           })}
         </View>
-        <Button
-          variant="secondary"
-          loading={savingInterests}
-          disabled={
-            JSON.stringify([...selectedInterests].sort()) ===
-            JSON.stringify([...(profile?.interests.map((interest) => interest.id) || [])].sort())
-          }
-          onPress={saveInterests}>
-          Save interests
-        </Button>
       </Card>
 
       <Card>
