@@ -17,6 +17,7 @@ import {
 
 import { Screen } from '@/components/screen';
 import { AvatarPicker } from '@/components/avatar-picker';
+import { PaywallModal } from '@/components/paywall-modal';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
@@ -39,13 +40,19 @@ function LanguageRow({
   onDelete(): void;
 }) {
   const [saving, setSaving] = useState(false);
+  const [active, setActive] = useState(learner.active);
+
+  useEffect(() => setActive(learner.active), [learner.active]);
 
   async function update(updates: { active?: boolean; level?: CefrLevel }) {
+    const previousActive = active;
+    if (typeof updates.active === 'boolean') setActive(updates.active);
     setSaving(true);
     try {
       await api.updateLearner(learner.language, updates);
       await onChanged();
     } catch (error) {
+      if (typeof updates.active === 'boolean') setActive(previousActive);
       Alert.alert('Could not update language', error instanceof Error ? error.message : 'Try again.');
     } finally {
       setSaving(false);
@@ -67,9 +74,11 @@ function LanguageRow({
           )}
           <Switch
             disabled={saving}
-            value={learner.active}
+            value={active}
             onValueChange={(active) => update({ active })}
-            trackColor={{ false: colors.line, true: colors.primary }}
+            trackColor={{ false: colors.line, true: colors.accentBorder }}
+            thumbColor={active ? colors.primary : colors.muted}
+            ios_backgroundColor={colors.line}
           />
         </View>
       </View>
@@ -109,6 +118,7 @@ export default function SettingsScreen() {
   const [editingUsername, setEditingUsername] = useState(false);
   const [savingName, setSavingName] = useState(false);
   const [savingPrivacy, setSavingPrivacy] = useState(false);
+  const [privacyHidden, setPrivacyHidden] = useState(profile?.hidden ?? false);
   const [savingInterests, setSavingInterests] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<number[]>(
     profile?.interests.map((interest) => interest.id) || [],
@@ -118,6 +128,8 @@ export default function SettingsScreen() {
   const [newLevel, setNewLevel] = useState<CefrLevel>('A1');
   const [addingLanguage, setAddingLanguage] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
+  const [showDeletionAuth, setShowDeletionAuth] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const usesPassword = firebaseUser?.providerData.some((provider) => provider.providerId === 'password');
   const usesGoogle = firebaseUser?.providerData.some((provider) => provider.providerId === 'google.com');
   const usesApple = firebaseUser?.providerData.some((provider) => provider.providerId === 'apple.com');
@@ -136,6 +148,7 @@ export default function SettingsScreen() {
     setUsername(profile?.username || '');
     setEditingUsername(false);
   }, [profile?.username]);
+  useEffect(() => setPrivacyHidden(profile?.hidden ?? false), [profile?.hidden]);
   useEffect(
     () => setSelectedInterests(profile?.interests.map((interest) => interest.id) || []),
     [profile?.interests],
@@ -165,11 +178,14 @@ export default function SettingsScreen() {
   }
 
   async function togglePrivacy(hidden: boolean) {
+    const previousHidden = privacyHidden;
+    setPrivacyHidden(hidden);
     setSavingPrivacy(true);
     try {
       await api.updatePrivacy(hidden);
       await changed();
     } catch (error) {
+      setPrivacyHidden(previousHidden);
       Alert.alert('Could not update privacy', error instanceof Error ? error.message : 'Try again.');
     } finally {
       setSavingPrivacy(false);
@@ -231,6 +247,10 @@ export default function SettingsScreen() {
   }
 
   function confirmAccountDeletion() {
+    if (usesPassword && !showDeletionAuth) {
+      setShowDeletionAuth(true);
+      return;
+    }
     Alert.alert(
       'Delete your Almonium account?',
       'This permanently removes your profile, learning data, and Firebase login. It cannot be undone.',
@@ -251,7 +271,7 @@ export default function SettingsScreen() {
                       if (!currentPassword) {
                         Alert.alert(
                           'Password required',
-                          'Enter your current password in the Account section, then try again.',
+                          'Enter your current password, then try again.',
                         );
                         return;
                       }
@@ -362,9 +382,11 @@ export default function SettingsScreen() {
           </View>
           <Switch
             disabled={savingPrivacy}
-            value={profile?.hidden ?? false}
+            value={privacyHidden}
             onValueChange={togglePrivacy}
-            trackColor={{ false: colors.line, true: colors.primary }}
+            trackColor={{ false: colors.line, true: colors.accentBorder }}
+            thumbColor={privacyHidden ? colors.primary : colors.muted}
+            ios_backgroundColor={colors.line}
           />
         </View>
       </Card>
@@ -464,6 +486,18 @@ export default function SettingsScreen() {
               Cancel
             </Button>
           </View>
+        ) : !profile?.premium &&
+          (profile?.learners.length || 0) >=
+            (profile?.subscription.limits.MAX_TARGET_LANGS ?? 1) ? (
+          <View style={styles.paywalledAction}>
+            <Text style={styles.limitCopy}>
+              Free plan lets you pick only{' '}
+              {profile?.subscription.limits.MAX_TARGET_LANGS ?? 1} target language.
+            </Text>
+            <Button variant="premium" onPress={() => setShowPaywall(true)}>
+              + Add target language
+            </Button>
+          </View>
         ) : (
           <Button
             variant="secondary"
@@ -488,13 +522,20 @@ export default function SettingsScreen() {
         </View>
         <View style={styles.statRow}>
           <Text style={styles.settingLabel}>Plan</Text>
-          <Text style={styles.stat}>{profile?.premium ? 'Premium' : 'Free'}</Text>
+          <Text style={profile?.premium ? styles.premiumStat : styles.stat}>
+            {profile?.premium ? 'Premium +' : 'Free'}
+          </Text>
         </View>
-        {usesPassword && (
-          <View style={styles.passwordGroup}>
+        {!profile?.premium && (
+          <Button variant="premium" onPress={() => setShowPaywall(true)}>
+            + Upgrade to Premium
+          </Button>
+        )}
+        {usesPassword && showDeletionAuth && (
+          <View style={styles.dangerZone}>
             <Text style={styles.settingLabel}>Confirm sensitive changes</Text>
             <Text style={styles.caption}>
-              Your current password is required when permanently deleting this account.
+              Enter your current password to continue with permanent account deletion.
             </Text>
             <Field
               value={currentPassword}
@@ -504,6 +545,15 @@ export default function SettingsScreen() {
               textContentType="password"
               autoComplete="current-password"
             />
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                setCurrentPassword('');
+                setShowDeletionAuth(false);
+              }}
+              style={styles.cancelDeletion}>
+              <Text style={styles.cancelDeletionText}>Cancel deletion</Text>
+            </Pressable>
           </View>
         )}
         <View style={styles.legalRow}>
@@ -521,6 +571,7 @@ export default function SettingsScreen() {
           <Text style={styles.deleteText}>Delete account permanently</Text>
         </Pressable>
       </Card>
+      <PaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
     </Screen>
   );
 }
@@ -555,6 +606,7 @@ const styles = StyleSheet.create({
   saving: { opacity: 0.6 },
   statRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 },
   stat: { color: colors.primary, fontWeight: '600' },
+  premiumStat: { color: colors.primary, fontWeight: '700' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.line },
   chipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
@@ -566,5 +618,19 @@ const styles = StyleSheet.create({
   pickerFrame: { borderWidth: 1, borderColor: colors.line, borderRadius: 20, overflow: 'hidden', backgroundColor: colors.white },
   legalRow: { flexDirection: 'row', justifyContent: 'center', gap: 20, paddingVertical: 4 },
   legalText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
-  passwordGroup: { gap: 7, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 12 },
+  paywalledAction: { gap: 10 },
+  limitCopy: { color: colors.muted, fontSize: 14, lineHeight: 20 },
+  dangerZone: {
+    gap: 7,
+    borderRadius: 20,
+    padding: 14,
+    backgroundColor: colors.dangerSoft,
+  },
+  cancelDeletion: {
+    minHeight: 44,
+    alignSelf: 'flex-end',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  cancelDeletionText: { color: colors.primary, fontSize: 14, fontWeight: '600' },
 });

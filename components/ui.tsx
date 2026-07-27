@@ -35,11 +35,17 @@ export function Button({
 }: Omit<ComponentProps<typeof Pressable>, 'children'> & {
   children: ReactNode;
   loading?: boolean;
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: 'primary' | 'premium' | 'secondary' | 'danger';
 }) {
   const content = loading ? (
     <ActivityIndicator
-      color={variant === 'primary' ? colors.white : variant === 'danger' ? colors.danger : colors.ink}
+      color={
+        variant === 'primary' || variant === 'premium'
+          ? colors.white
+          : variant === 'danger'
+            ? colors.danger
+            : colors.ink
+      }
     />
   ) : (
     <Text
@@ -63,8 +69,12 @@ export function Button({
         pressed && styles.pressed,
         (props.disabled || loading) && styles.disabled,
       ]}>
-      {variant === 'primary' ? (
-        <LinearGradient colors={gradients.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.buttonFill}>
+      {variant === 'primary' || variant === 'premium' ? (
+        <LinearGradient
+          colors={variant === 'premium' ? gradients.premium : gradients.primary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.buttonFill}>
           {content}
         </LinearGradient>
       ) : (
