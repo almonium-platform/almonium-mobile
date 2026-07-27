@@ -106,6 +106,7 @@ export default function SettingsScreen() {
   } = useAuth();
   const queryClient = useQueryClient();
   const [username, setUsername] = useState(profile?.username || '');
+  const [editingUsername, setEditingUsername] = useState(false);
   const [savingName, setSavingName] = useState(false);
   const [savingPrivacy, setSavingPrivacy] = useState(false);
   const [savingInterests, setSavingInterests] = useState(false);
@@ -131,7 +132,10 @@ export default function SettingsScreen() {
     staleTime: Infinity,
   });
 
-  useEffect(() => setUsername(profile?.username || ''), [profile?.username]);
+  useEffect(() => {
+    setUsername(profile?.username || '');
+    setEditingUsername(false);
+  }, [profile?.username]);
   useEffect(
     () => setSelectedInterests(profile?.interests.map((interest) => interest.id) || []),
     [profile?.interests],
@@ -147,11 +151,17 @@ export default function SettingsScreen() {
     try {
       await api.updateUsername(username.trim());
       await changed();
+      setEditingUsername(false);
     } catch (error) {
       Alert.alert('Could not save username', error instanceof Error ? error.message : 'Try again.');
     } finally {
       setSavingName(false);
     }
+  }
+
+  function cancelUsernameEdit() {
+    setUsername(profile?.username || '');
+    setEditingUsername(false);
   }
 
   async function togglePrivacy(hidden: boolean) {
@@ -300,20 +310,50 @@ export default function SettingsScreen() {
           <Ionicons name="person-outline" color={colors.primary} size={20} />
           <Text style={styles.sectionTitleText}>Profile</Text>
         </View>
-        <Field
-          value={username}
-          onChangeText={setUsername}
-          placeholder="Username"
-          autoCapitalize="none"
-          maxLength={20}
-        />
-        <Button
-          variant="secondary"
-          loading={savingName}
-          disabled={username.trim().length < 3 || username.trim() === profile?.username}
-          onPress={saveUsername}>
-          Save username
-        </Button>
+        {editingUsername ? (
+          <View style={styles.usernameEditor}>
+            <View style={styles.usernameInputRow}>
+              <Field
+                value={username}
+                onChangeText={setUsername}
+                placeholder="Username"
+                autoCapitalize="none"
+                autoFocus
+                maxLength={20}
+                style={styles.usernameField}
+              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Cancel username edit"
+                disabled={savingName}
+                hitSlop={8}
+                onPress={cancelUsernameEdit}
+                style={styles.usernameIconButton}>
+                <Ionicons name="close" size={22} color={colors.ink} />
+              </Pressable>
+            </View>
+            {username.trim().length >= 3 && username.trim() !== profile?.username && (
+              <Button loading={savingName} onPress={saveUsername}>
+                Save username
+              </Button>
+            )}
+          </View>
+        ) : (
+          <View style={styles.usernameRow}>
+            <View style={styles.usernameCopy}>
+              <Text style={styles.settingLabel}>Username</Text>
+              <Text style={styles.caption}>@{profile?.username}</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Edit username"
+              hitSlop={8}
+              onPress={() => setEditingUsername(true)}
+              style={styles.usernameIconButton}>
+              <Ionicons name="pencil-outline" size={20} color={colors.primary} />
+            </Pressable>
+          </View>
+        )}
         <AvatarPicker currentAvatarUrl={profile?.avatarUrl ?? null} onChanged={changed} />
         <View style={styles.settingRow}>
           <View style={styles.settingCopy}>
@@ -496,6 +536,12 @@ const styles = StyleSheet.create({
   sectionTitleText: { color: colors.ink, fontWeight: '600', fontSize: 18 },
   settingRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 4 },
   settingCopy: { flex: 1, gap: 2 },
+  usernameRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  usernameCopy: { flex: 1, gap: 2 },
+  usernameEditor: { gap: 10 },
+  usernameInputRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  usernameField: { flex: 1 },
+  usernameIconButton: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   settingLabel: { color: colors.ink, fontWeight: '600', fontSize: 15 },
   language: { borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 14, gap: 12 },
   languageHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
