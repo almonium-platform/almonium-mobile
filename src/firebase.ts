@@ -6,6 +6,7 @@ import {
   initializeAuth,
   type Auth,
 } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
 
 import { config } from '@/src/config';
 
@@ -22,3 +23,4 @@ function createAuth(): Auth {
 }
 
 export const auth = createAuth();
+export const storage = getStorage(app);

@@ -1,11 +1,13 @@
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
+import { AvatarPicker } from '@/components/avatar-picker';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
@@ -220,8 +222,13 @@ export default function OnboardingScreen() {
       {step === 'PROFILE' && (
         <Card>
           <View style={styles.profileMark}>
-            <Text style={styles.profileMarkText}>{(username || 'A')[0].toUpperCase()}</Text>
+            {profile?.avatarUrl ? (
+              <Image source={profile.avatarUrl} style={styles.profileImage} contentFit="cover" />
+            ) : (
+              <Text style={styles.profileMarkText}>{(username || 'A')[0].toUpperCase()}</Text>
+            )}
           </View>
+          <AvatarPicker currentAvatarUrl={profile?.avatarUrl ?? null} onChanged={refreshProfile} />
           <Field
             value={username}
             onChangeText={setUsername}
@@ -292,7 +299,8 @@ const styles = StyleSheet.create({
   levelActive: { backgroundColor: colors.primary },
   levelText: { color: colors.muted, fontSize: 13, fontWeight: '800' },
   levelTextActive: { color: colors.white },
-  profileMark: { width: 72, height: 72, borderRadius: 24, alignSelf: 'center', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.mint },
+  profileMark: { width: 72, height: 72, borderRadius: 24, alignSelf: 'center', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.mint, overflow: 'hidden' },
+  profileImage: { width: '100%', height: '100%' },
   profileMarkText: { color: colors.primaryDark, fontSize: 30, fontWeight: '900' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 9, backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.line },

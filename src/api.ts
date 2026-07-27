@@ -5,6 +5,7 @@ import type {
   BookSummary,
   Bookshelf,
   AppNotification,
+  Avatar,
   CardDraft,
   CefrLevel,
   Interest,
@@ -111,6 +112,19 @@ export const api = {
     request<void>('/users/me/interests', {
       method: 'PATCH',
       body: JSON.stringify({ ids }),
+    }),
+  avatars: () => request<Avatar[]>('/profiles/me/avatars'),
+  addAvatar: (avatarUrl: string) =>
+    request<void>('/profiles/me/avatars', {
+      method: 'POST',
+      body: JSON.stringify({ avatarUrl }),
+    }),
+  chooseAvatar: (avatarId: string) =>
+    request<void>(`/profiles/me/avatars/${avatarId}`, { method: 'PATCH' }),
+  chooseDefaultAvatar: (avatarUrl: string) =>
+    request<void>('/profiles/me/avatars/default', {
+      method: 'PATCH',
+      body: JSON.stringify({ avatarUrl }),
     }),
   updateLearner: (language: string, updates: { active?: boolean; level?: CefrLevel }) =>
     request<void>(`/learners/${language}`, {

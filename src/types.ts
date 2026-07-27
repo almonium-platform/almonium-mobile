@@ -34,6 +34,11 @@ export interface Interest {
   name: string;
 }
 
+export interface Avatar {
+  id: string;
+  url: string;
+}
+
 export interface BookSummary {
   id: number;
   title: string;
