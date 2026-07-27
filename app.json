@@ -59,9 +59,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "3e1ab7f7-208f-4779-9c60-9e17ca3a2dfc"
+        "projectId": "db1f6412-0a43-442d-bdc6-b3de66f929c7"
       }
     },
-    "owner": "almonium-app"
+    "owner": "almonium"
   }
 }

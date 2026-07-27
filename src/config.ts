@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-const localApiHost = Platform.OS === 'android' ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
+const localApiHost = Platform.OS === 'android' ? 'http://10.0.2.2:9998' : 'http://localhost:9998';
 
 export const config = {
   apiBaseUrl: `${process.env.EXPO_PUBLIC_API_URL || localApiHost}/api/v1`,
