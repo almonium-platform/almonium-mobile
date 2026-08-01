@@ -10,10 +10,12 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
 import { colors, fonts } from '@/src/theme';
+import { isUuid } from '@/src/uuid';
 
 export default function BookDetailsScreen() {
   const params = useLocalSearchParams<{ bookId: string; language?: string }>();
-  const bookId = Number(params.bookId);
+  const bookId = params.bookId;
+  const validBookId = isUuid(bookId);
   const { firebaseUser, profile } = useAuth();
   const queryClient = useQueryClient();
   const language =
@@ -24,7 +26,7 @@ export default function BookDetailsScreen() {
   const query = useQuery({
     queryKey: ['book', firebaseUser?.uid, bookId, language],
     queryFn: () => api.book(bookId, language),
-    enabled: Number.isInteger(bookId) && bookId > 0 && Boolean(language),
+    enabled: validBookId && Boolean(language),
   });
 
   const favoriteMutation = useMutation({
@@ -40,7 +42,7 @@ export default function BookDetailsScreen() {
     },
   });
 
-  if (!Number.isInteger(bookId) || bookId <= 0 || !language) {
+  if (!validBookId || !language) {
     return (
       <Screen contentStyle={styles.center}>
         <Text style={styles.errorTitle}>This book link is invalid.</Text>

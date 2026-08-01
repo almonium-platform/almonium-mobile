@@ -10,7 +10,7 @@ export class ReadingProgressSync {
   private readonly storageKey: string;
 
   constructor(
-    private readonly bookId: number,
+    private readonly bookId: string,
     userId: string,
   ) {
     this.storageKey = `almonium:pending-progress:${userId}:${bookId}`;

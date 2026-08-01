@@ -40,7 +40,7 @@ export interface Avatar {
 }
 
 export interface BookSummary {
-  id: number;
+  id: string;
   title: string;
   author: string;
   publicationYear: number;
@@ -59,17 +59,17 @@ export interface BookSummary {
 export interface BookDetails extends BookSummary {
   description: string;
   favorite: boolean;
-  languageVariants: { id: number; language: string }[];
+  languageVariants: { id: string; language: string }[];
   orderLanguage?: string;
   originalLanguage?: string;
-  originalId?: number;
+  originalId?: string;
   translator?: string;
 }
 
 export interface BookMiniDetails {
   progressPercentage: number;
   language: string;
-  languageVariants: { id: number; language: string }[];
+  languageVariants: { id: string; language: string }[];
 }
 
 export interface Bookshelf {

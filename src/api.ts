@@ -142,26 +142,26 @@ export const api = {
     request<Bookshelf>(`/books/language/${language}?includeTranslations=true`),
   publicBooks: () =>
     publicRequest<BookSummary[]>('/public/books'),
-  book: (bookId: number, language: string) =>
+  book: (bookId: string, language: string) =>
     request<BookDetails>(`/books/${bookId}/language/${language}`),
-  bookInfo: (bookId: number) => request<BookMiniDetails>(`/books/${bookId}`),
-  bookText: async (bookId: number) => {
+  bookInfo: (bookId: string) => request<BookMiniDetails>(`/books/${bookId}`),
+  bookText: async (bookId: string) => {
     const response = await authorizedFetch(`/books/${bookId}/text`);
     if (!response.ok) throw new ApiError('Could not load this book', response.status);
     return response.text();
   },
-  parallelText: async (bookId: number, language: string) => {
+  parallelText: async (bookId: string, language: string) => {
     const response = await authorizedFetch(`/books/${bookId}/parallel/${language}`);
     if (!response.ok) throw new ApiError(await responseError(response), response.status);
     return response.text();
   },
-  saveProgress: (bookId: number, percentage: number) =>
+  saveProgress: (bookId: string, percentage: number) =>
     request<void>(`/books/${bookId}/progress?percentage=${Math.round(percentage)}`, {
       method: 'POST',
     }),
-  deleteProgress: (bookId: number) =>
+  deleteProgress: (bookId: string) =>
     request<void>(`/books/${bookId}/progress`, { method: 'DELETE' }),
-  setFavorite: (bookId: number, language: string, favorite: boolean) =>
+  setFavorite: (bookId: string, language: string, favorite: boolean) =>
     request<void>(`/books/${bookId}/language/${language}/favorite`, {
       method: favorite ? 'POST' : 'DELETE',
     }),

@@ -19,6 +19,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { ReadingProgressSync } from '@/src/reading-progress';
 import { colors } from '@/src/theme';
+import { isUuid } from '@/src/uuid';
 
 type ReaderTheme = 'paper' | 'night';
 const settingsKey = 'almonium:reader-settings';
@@ -82,16 +83,17 @@ function readerHtml(content: string) {
 
 export default function ReaderScreen() {
   const params = useLocalSearchParams<{ bookId: string; language?: string; title?: string }>();
-  const bookId = Number(params.bookId);
+  const bookId = params.bookId;
+  const validBookId = isUuid(bookId);
   const { firebaseUser, profile } = useAuth();
   const queryClient = useQueryClient();
   const webView = useRef<WebView>(null);
   const sync = useMemo(
     () =>
-      Number.isInteger(bookId) && firebaseUser
+      validBookId && firebaseUser
         ? new ReadingProgressSync(bookId, firebaseUser.uid)
         : null,
-    [bookId, firebaseUser],
+    [bookId, validBookId, firebaseUser],
   );
   const [progress, setProgress] = useState<number | null>(null);
   const progressRef = useRef(0);
@@ -103,13 +105,13 @@ export default function ReaderScreen() {
   const textQuery = useQuery({
     queryKey: ['book-text', firebaseUser?.uid, bookId],
     queryFn: () => api.bookText(bookId),
-    enabled: Number.isInteger(bookId) && bookId > 0 && Boolean(firebaseUser),
+    enabled: validBookId && Boolean(firebaseUser),
     staleTime: 10 * 60_000,
   });
   const infoQuery = useQuery({
     queryKey: ['book-info', firebaseUser?.uid, bookId],
     queryFn: () => api.bookInfo(bookId),
-    enabled: Number.isInteger(bookId) && bookId > 0 && Boolean(firebaseUser),
+    enabled: validBookId && Boolean(firebaseUser),
   });
   const parallelLanguage = infoQuery.data?.languageVariants.find(
     (variant) =>
@@ -183,7 +185,7 @@ export default function ReaderScreen() {
     saveTimer.current = setTimeout(() => void flush(), 1500);
   }
 
-  if (!Number.isInteger(bookId) || bookId <= 0) {
+  if (!validBookId) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorTitle}>This reader link is invalid.</Text>
