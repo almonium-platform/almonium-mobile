@@ -126,26 +126,29 @@ submission stops at TestFlight. A Google Play production rollout and App Store
 review submission are deliberate manual release decisions made only after the
 store listings, privacy material, testing, and review readiness are complete.
 
-### Staging and production delivery model
+### When to add staging
 
-Use three distinct lanes:
+For the current early-testing phase, use only two lanes:
 
-| Source | App variant | Backend | Distribution |
-| --- | --- | --- | --- |
-| local work | development | local backend | development build / Expo Go where supported |
-| `develop` | staging | `https://staging.api.almonium.com` | EAS internal distribution |
-| `main` | production | `https://api.almonium.com` | Google Play Internal Testing and TestFlight |
+| Source | App/API | Distribution |
+| --- | --- | --- |
+| local work | local backend | development build / Expo Go where supported |
+| `main` | production app and `https://api.almonium.com` | Google Play Internal Testing and TestFlight |
 
-The staging lane must use a separately installable app named **Almonium
-Staging**, with `com.almonium.mobile.staging` as both its Android application
-ID and iOS bundle identifier. Reusing the production identifiers would replace
-the production app on a phone and risks sending staging traffic to production.
+This lets trusted friends test the real production configuration without making
+the app public. Do not create a `develop` branch or staging variant merely for
+this purpose.
 
-The staging variant and the `develop`-branch workflow are not enabled yet.
-They require a dynamic Expo app configuration, separate Android/iOS OAuth
-clients for the staging identifiers, and a staging environment value in EAS.
-Create the `develop` branch only together with that change; otherwise a branch
-push will not create a staging phone build.
+Add staging later when changes need to be tested against
+`https://staging.api.almonium.com` without affecting the real product. That
+lane must be a separately installable **Almonium Staging** app, using
+`com.almonium.mobile.staging` as both its Android application ID and iOS bundle
+identifier. Reusing the production identifiers would replace the production
+app on a phone. It would need separate Android/iOS OAuth clients, but not
+automatically a separate Firebase project. A separate Firebase project is only
+needed when staging identities and Firebase data must be isolated from
+production; that choice also requires matching backend Firebase verification
+configuration.
 
 This uses the operating systems' normal test distribution paths. `expo export`
 only exports the JavaScript/web bundle; it cannot create an installable Android
