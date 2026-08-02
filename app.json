@@ -12,7 +12,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.almonium.mobile",
       "usesAppleSignIn": true,
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.almonium.mobile",
