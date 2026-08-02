@@ -117,8 +117,9 @@ submits the finished binaries automatically:
 - Android goes to the Google Play **Internal testing** track. Testers join the
   internal-test link once, then install and update Almonium through Google Play.
 - iOS goes to App Store Connect and becomes available through **TestFlight**
-  after Apple's processing. Add the phones as internal TestFlight testers and
-  enable automatic distribution for the tester group if desired.
+  after Apple's processing. Team members may use internal TestFlight testing;
+  friends outside the App Store Connect team use external TestFlight testing or
+  a public link. The first external build can require Apple's beta review.
 
 This is a production-candidate pipeline, not a public store release. The
 Android profile targets Google Play's internal testing track and the iOS
