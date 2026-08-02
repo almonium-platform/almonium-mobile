@@ -41,15 +41,14 @@ export interface Avatar {
 
 export interface BookSummary {
   id: string;
+  workSlug: string;
   title: string;
   author: string;
   publicationYear: number;
-  coverImageUrl: string;
+  coverUrl: string | null;
   wordCount: number;
-  rating: number;
   language: string;
-  levelFrom: CefrLevel;
-  levelTo: CefrLevel;
+  cefrLevel: CefrLevel;
   progressPercentage: number | null;
   hasParallelTranslation: boolean;
   hasTranslation: boolean;
@@ -57,7 +56,6 @@ export interface BookSummary {
 }
 
 export interface BookDetails extends BookSummary {
-  description: string;
   favorite: boolean;
   languageVariants: { id: string; language: string }[];
   orderLanguage?: string;

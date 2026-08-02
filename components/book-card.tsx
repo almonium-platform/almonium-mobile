@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { BookCover } from '@/components/book-cover';
 import { colors, fonts, shadows } from '@/src/theme';
 import type { BookSummary } from '@/src/types';
 
@@ -25,12 +25,18 @@ export function BookCard({
       }
       onLongPress={onLongPress}
       style={({ pressed }) => [styles.book, pressed && styles.pressed]}>
-      <Image source={book.coverImageUrl} style={styles.cover} contentFit="cover" transition={180} />
+      <BookCover
+        title={book.title}
+        author={book.author}
+        workSlug={book.workSlug}
+        coverUrl={book.coverUrl}
+        style={styles.cover}
+      />
       <View style={styles.bookCopy}>
         <View style={styles.meta}>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>
-              {book.levelFrom}–{book.levelTo}
+              {book.cefrLevel}
             </Text>
           </View>
           {book.hasParallelTranslation && (
@@ -47,7 +53,6 @@ export function BookCard({
           {book.author}
         </Text>
         <View style={styles.footer}>
-          <Text style={styles.rating}>★ {book.rating.toFixed(1)}</Text>
           <Text style={styles.year}>{book.publicationYear}</Text>
         </View>
         {book.progressPercentage !== null && book.progressPercentage > 0 && (
@@ -93,7 +98,6 @@ const styles = StyleSheet.create({
   bookTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, lineHeight: 23, fontWeight: '600' },
   author: { color: colors.muted, fontSize: 14 },
   footer: { flexDirection: 'row', gap: 10 },
-  rating: { color: colors.reading, fontSize: 12, fontWeight: '600' },
   year: { color: colors.muted, fontSize: 12 },
   progressTrack: {
     height: 5,

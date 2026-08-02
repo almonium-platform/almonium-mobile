@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { BookCover } from '@/components/book-cover';
 import { Screen } from '@/components/screen';
 import { Button, Card } from '@/components/ui';
 import { api } from '@/src/api';
@@ -79,14 +79,17 @@ export default function BookDetailsScreen() {
     <Screen>
       <Stack.Screen options={{ title: book.title }} />
       <View style={styles.hero}>
-        <Image source={book.coverImageUrl} style={styles.cover} contentFit="cover" transition={180} />
+        <BookCover
+          title={book.title}
+          author={book.author}
+          workSlug={book.workSlug}
+          coverUrl={book.coverUrl}
+          style={styles.cover}
+        />
         <View style={styles.heroCopy}>
           <Text style={styles.title}>{book.title}</Text>
           <Text style={styles.author}>{book.author}</Text>
-          <View style={styles.ratingRow}>
-            <Text style={styles.rating}>★ {book.rating.toFixed(1)}</Text>
-            <Text style={styles.meta}>{book.publicationYear}</Text>
-          </View>
+          <Text style={styles.meta}>{book.publicationYear}</Text>
           <Pressable
             disabled={favoriteMutation.isPending}
             onPress={() => favoriteMutation.mutate()}
@@ -117,7 +120,7 @@ export default function BookDetailsScreen() {
         <View style={styles.stats}>
           <View style={styles.stat}>
             <Text style={styles.statValue}>
-              {book.levelFrom}–{book.levelTo}
+              {book.cefrLevel}
             </Text>
             <Text style={styles.statLabel}>Level</Text>
           </View>
@@ -170,13 +173,12 @@ export default function BookDetailsScreen() {
         </Card>
       )}
 
-      <Card>
-        <Text style={styles.sectionTitle}>About this book</Text>
-        {book.translator && (
+      {book.translator && (
+        <Card>
+          <Text style={styles.sectionTitle}>Translation</Text>
           <Text style={styles.translator}>Translated by {book.translator}</Text>
-        )}
-        <Text style={styles.description}>{book.description}</Text>
-      </Card>
+        </Card>
+      )}
     </Screen>
   );
 }
@@ -191,8 +193,6 @@ const styles = StyleSheet.create({
   heroCopy: { flex: 1, gap: 9, paddingTop: 4 },
   title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: 33, fontWeight: '600' },
   author: { color: colors.muted, fontFamily: fonts.serif, fontSize: 18 },
-  ratingRow: { flexDirection: 'row', gap: 10 },
-  rating: { color: colors.reading, fontWeight: '600' },
   meta: { color: colors.muted, fontWeight: '600' },
   favorite: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingTop: 5 },
   favoriteText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
@@ -210,5 +210,4 @@ const styles = StyleSheet.create({
   parallelNote: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   parallelText: { flex: 1, color: colors.muted, fontSize: 13 },
   translator: { color: colors.primary, fontSize: 14, fontStyle: 'italic' },
-  description: { color: colors.ink, fontSize: 16, lineHeight: 25 },
 });
