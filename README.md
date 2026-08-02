@@ -120,6 +120,33 @@ submits the finished binaries automatically:
   after Apple's processing. Add the phones as internal TestFlight testers and
   enable automatic distribution for the tester group if desired.
 
+This is a production-candidate pipeline, not a public store release. The
+Android profile targets Google Play's internal testing track and the iOS
+submission stops at TestFlight. A Google Play production rollout and App Store
+review submission are deliberate manual release decisions made only after the
+store listings, privacy material, testing, and review readiness are complete.
+
+### Staging and production delivery model
+
+Use three distinct lanes:
+
+| Source | App variant | Backend | Distribution |
+| --- | --- | --- | --- |
+| local work | development | local backend | development build / Expo Go where supported |
+| `develop` | staging | `https://staging.api.almonium.com` | EAS internal distribution |
+| `main` | production | `https://api.almonium.com` | Google Play Internal Testing and TestFlight |
+
+The staging lane must use a separately installable app named **Almonium
+Staging**, with `com.almonium.mobile.staging` as both its Android application
+ID and iOS bundle identifier. Reusing the production identifiers would replace
+the production app on a phone and risks sending staging traffic to production.
+
+The staging variant and the `develop`-branch workflow are not enabled yet.
+They require a dynamic Expo app configuration, separate Android/iOS OAuth
+clients for the staging identifiers, and a staging environment value in EAS.
+Create the `develop` branch only together with that change; otherwise a branch
+push will not create a staging phone build.
+
 This uses the operating systems' normal test distribution paths. `expo export`
 only exports the JavaScript/web bundle; it cannot create an installable Android
 or iOS app. EAS internal-distribution builds remain useful for ad hoc testing,
@@ -128,7 +155,7 @@ when the device list changes.
 
 ### One-time release setup
 
-Before the workflow is enabled, complete these account-side steps. Keep all
+Before the production-candidate workflow is enabled, complete these account-side steps. Keep all
 credentials in EAS or GitHub; do not commit them to this repository.
 
 1. In the Almonium EAS project, add a project-scoped production environment
@@ -166,4 +193,5 @@ The Android submit profile already targets the internal track. EAS increments
 the Android version code and iOS build number remotely for every production
 build, so each push is acceptable to both stores. TestFlight delivery normally
 takes a short Apple processing period; it is not an App Store production
-release.
+release. Internal TestFlight testing does not require a public App Store
+release; inviting external TestFlight testers can require Apple's beta review.
