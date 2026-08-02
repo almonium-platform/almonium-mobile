@@ -107,3 +107,57 @@ useful for the email/password, library, settings, and reader flows.
 `eas.json` includes development, internal-preview, and production build
 profiles. The app config is linked to the `almonium-app` Expo account and its
 Almonium EAS project.
+
+## Phone releases from `main`
+
+Pushing to `main` triggers [`.github/workflows/internal-release.yml`](.github/workflows/internal-release.yml).
+It runs the checks, creates store-ready Android and iOS builds on EAS, and
+submits the finished binaries automatically:
+
+- Android goes to the Google Play **Internal testing** track. Testers join the
+  internal-test link once, then install and update Almonium through Google Play.
+- iOS goes to App Store Connect and becomes available through **TestFlight**
+  after Apple's processing. Add the phones as internal TestFlight testers and
+  enable automatic distribution for the tester group if desired.
+
+This uses the operating systems' normal test distribution paths. `expo export`
+only exports the JavaScript/web bundle; it cannot create an installable Android
+or iOS app. EAS internal-distribution builds remain useful for ad hoc testing,
+but iOS ad hoc builds require every device UDID to be registered and a rebuild
+when the device list changes.
+
+### One-time release setup
+
+Before the workflow is enabled, complete these account-side steps. Keep all
+credentials in EAS or GitHub; do not commit them to this repository.
+
+1. Create the `com.almonium.mobile` app in Google Play Console and App Store
+   Connect. Both require their respective paid developer accounts.
+2. In Google Play Console, upload the first Android App Bundle manually, then
+   create a Google Play service account with access to this app and upload its
+   JSON key under the Almonium EAS project's Android service credentials.
+3. In App Store Connect, create an App Store Connect API key, grant it access
+   to the app, and add the key to the Almonium EAS project's iOS submission
+   credentials. Get the app's numeric **Apple ID**, then add it to
+   `eas.json` as follows (the Apple ID is an identifier, not a secret):
+
+   ```json
+   {
+     "submit": {
+       "production": {
+         "ios": {
+           "ascAppId": "1234567890"
+         }
+       }
+     }
+   }
+   ```
+
+4. Create an Expo robot-user token with access to this EAS project and add it
+   to this GitHub repository as the `EXPO_TOKEN` Actions secret.
+
+The Android submit profile already targets the internal track. EAS increments
+the Android version code and iOS build number remotely for every production
+build, so each push is acceptable to both stores. TestFlight delivery normally
+takes a short Apple processing period; it is not an App Store production
+release.
