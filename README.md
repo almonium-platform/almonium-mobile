@@ -131,12 +131,18 @@ when the device list changes.
 Before the workflow is enabled, complete these account-side steps. Keep all
 credentials in EAS or GitHub; do not commit them to this repository.
 
-1. Create the `com.almonium.mobile` app in Google Play Console and App Store
+1. In the Almonium EAS project, add a project-scoped production environment
+   variable named `EXPO_PUBLIC_API_URL` with the value
+   `https://api.almonium.com` and **Plain text** visibility. Do not append
+   `/api/v1`: the mobile client adds that path itself. The other tracked public
+   Firebase values may use their defaults; do not add Firebase Admin keys or
+   provider secrets to EAS environment variables.
+2. Create the `com.almonium.mobile` app in Google Play Console and App Store
    Connect. Both require their respective paid developer accounts.
-2. In Google Play Console, upload the first Android App Bundle manually, then
+3. In Google Play Console, upload the first Android App Bundle manually, then
    create a Google Play service account with access to this app and upload its
    JSON key under the Almonium EAS project's Android service credentials.
-3. In App Store Connect, create an App Store Connect API key, grant it access
+4. In App Store Connect, create an App Store Connect API key, grant it access
    to the app, and add the key to the Almonium EAS project's iOS submission
    credentials. Get the app's numeric **Apple ID**, then add it to
    `eas.json` as follows (the Apple ID is an identifier, not a secret):
@@ -153,7 +159,7 @@ credentials in EAS or GitHub; do not commit them to this repository.
    }
    ```
 
-4. Create an Expo robot-user token with access to this EAS project and add it
+5. Create an Expo robot-user token with access to this EAS project and add it
    to this GitHub repository as the `EXPO_TOKEN` Actions secret.
 
 The Android submit profile already targets the internal track. EAS increments
