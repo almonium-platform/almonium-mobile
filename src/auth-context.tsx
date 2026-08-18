@@ -5,8 +5,6 @@ import {
   onAuthStateChanged,
   OAuthProvider,
   reauthenticateWithCredential,
-  sendEmailVerification,
-  sendPasswordResetEmail,
   signInWithCredential,
   signInWithEmailAndPassword,
   signOut,
@@ -171,7 +169,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       async signIn(email, password) {
         const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
         if (!credential.user.emailVerified) {
-          await sendEmailVerification(credential.user);
+          await api.requestEmailVerification();
           await signOut(auth);
           throw new Error('Verify your email first. We sent you a fresh verification link.');
         }
@@ -186,15 +184,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
         await loadProfile(credential.user);
       },
       async register(email, password) {
-        const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+        await createUserWithEmailAndPassword(auth, email.trim(), password);
         try {
-          await sendEmailVerification(credential.user);
+          await api.requestEmailVerification();
         } finally {
           await signOut(auth);
         }
       },
       async resetPassword(email) {
-        await sendPasswordResetEmail(auth, email.trim());
+        await api.requestPasswordReset(email.trim());
       },
       async reauthenticateWithPassword(password) {
         const user = auth.currentUser;

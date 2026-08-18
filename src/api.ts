@@ -79,7 +79,23 @@ async function publicRequest<T>(path: string): Promise<T> {
   return decodeJsonBody<T>(await response.text());
 }
 
+async function publicPost<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetchWithTimeout(`${config.apiBaseUrl}${path}`, {
+    method: 'POST',
+    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw new ApiError(await responseError(response), response.status);
+  return decodeJsonBody<T>(await response.text());
+}
+
 export const api = {
+  requestEmailVerification: async () => {
+    const user = auth.currentUser;
+    if (!user) throw new ApiError('Sign in required', 401);
+    return publicPost<void>('/public/auth/email-verification', {idToken: await user.getIdToken(true)});
+  },
+  requestPasswordReset: (email: string) => publicPost<{message: string}>('/public/auth/password-resets', {email}),
   me: () => request<UserInfo>('/users/me'),
   completeOnboardingStep: (step: SetupStep) =>
     request<void>(`/onboarding/step/${step}`, { method: 'PATCH' }),
