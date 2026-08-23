@@ -37,10 +37,13 @@ export function Button({
   loading?: boolean;
   variant?: 'primary' | 'premium' | 'secondary' | 'danger';
 }) {
+  const disabled = Boolean(props.disabled || loading);
   const content = loading ? (
     <ActivityIndicator
       color={
-        variant === 'primary' || variant === 'premium'
+        disabled
+          ? colors.disabledText
+          : variant === 'primary' || variant === 'premium'
           ? colors.white
           : variant === 'danger'
             ? colors.danger
@@ -53,6 +56,7 @@ export function Button({
         styles.buttonText,
         variant === 'secondary' && styles.buttonTextSecondary,
         variant === 'danger' && styles.buttonTextDanger,
+        disabled && styles.buttonTextDisabled,
       ]}>
       {children}
     </Text>
@@ -61,17 +65,19 @@ export function Button({
   return (
     <Pressable
       {...props}
-      disabled={props.disabled || loading}
+      disabled={disabled}
       style={({ pressed }) => [
         styles.button,
+        variant === 'primary' && styles.buttonPrimary,
         variant === 'secondary' && styles.buttonSecondary,
         variant === 'danger' && styles.buttonDanger,
-        pressed && styles.pressed,
-        (props.disabled || loading) && styles.disabled,
+        pressed && variant === 'primary' && styles.buttonPrimaryPressed,
+        pressed && variant !== 'primary' && styles.pressed,
+        disabled && styles.disabled,
       ]}>
-      {variant === 'primary' || variant === 'premium' ? (
+      {variant === 'premium' && !disabled ? (
         <LinearGradient
-          colors={variant === 'premium' ? gradients.premium : gradients.primary}
+          colors={gradients.premium}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.buttonFill}>
@@ -89,10 +95,9 @@ const styles = StyleSheet.create({
     fontFamily: fonts.serif,
     fontSize: 32,
     lineHeight: 39,
-    fontWeight: '600',
     color: colors.ink,
   },
-  body: { fontSize: 16, lineHeight: 23, color: colors.ink },
+  body: { fontFamily: fonts.sans, fontSize: 16, lineHeight: 23, color: colors.ink },
   muted: { color: colors.muted },
   card: {
     borderRadius: radii.card,
@@ -106,6 +111,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.control,
     paddingHorizontal: 18,
     fontSize: 16,
+    fontFamily: fonts.sans,
     color: colors.ink,
     backgroundColor: colors.white,
     ...shadows.field,
@@ -124,6 +130,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  buttonPrimary: { paddingHorizontal: 24, backgroundColor: colors.primary },
+  buttonPrimaryPressed: { backgroundColor: colors.primaryPressed },
   buttonSecondary: {
     paddingHorizontal: 20,
     borderWidth: 1,
@@ -136,9 +144,10 @@ const styles = StyleSheet.create({
     borderColor: colors.danger,
     backgroundColor: colors.white,
   },
-  buttonText: { color: colors.white, fontSize: 16, fontWeight: '600' },
+  buttonText: { color: colors.white, fontFamily: fonts.sansSemibold, fontSize: 16 },
   buttonTextSecondary: { color: colors.ink },
   buttonTextDanger: { color: colors.danger },
+  buttonTextDisabled: { color: colors.disabledText },
   pressed: { opacity: 0.75 },
-  disabled: { opacity: 0.6 },
+  disabled: { paddingHorizontal: 24, backgroundColor: colors.disabled, borderColor: colors.disabled },
 });

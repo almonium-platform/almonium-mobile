@@ -13,13 +13,17 @@ HttpOnly session cookie and is not currently deployed as an infra container.
 - Firebase ID-token bearer authentication against `almonium-be`;
 - protected Expo Router navigation;
 - resumable native onboarding from welcome through languages, CEFR, profile, and interests;
+- a language-aware Home hub with continue-reading, recent-card, and due-review shortcuts;
 - searchable, sectioned, multi-language bookshelves and full book details;
 - favorites, language variants, resettable progress, and parallel-reading support;
 - a reader with reliable resume, retryable progress sync, text sizing, and paper/night themes;
 - profile, privacy, interests, target-language, CEFR, account deletion, and plan summary;
 - searchable multi-language flashcards with create, edit, tag, and delete flows;
 - device-local spaced-repetition sessions with Again/Hard/Good/Easy scheduling;
-- an in-app notification inbox with unread badges, read/unread actions, and deletion;
+- a Play hub that reflects available decks without presenting unfinished games as playable;
+- reader search, friendship requests, friend/block management, and shareable public profiles;
+- an actionable notification inbox with unread badges, relationship actions, and deletion;
+- membership usage/status details and secure browser handoff to the backend billing portal;
 - password, Google, or Apple reauthentication before destructive account deletion;
 - status-aware API retries, profile-bootstrap recovery, and user-isolated query caches;
 - persisted shelf/detail caches with native online and app-focus awareness;
@@ -34,6 +38,11 @@ The inbox reads persisted backend notifications. Remote push registration is
 intentionally deferred: the backend currently accepts native FCM device tokens,
 not Expo Push Service tokens, and production push credentials are not available
 to this repository.
+
+The browser client's game routes are still placeholders, so mobile currently
+ships the Play discovery hub but labels the games as in development. New store
+purchases are also deferred; existing paid members can manage Paddle billing
+through the backend-created customer portal.
 
 ## Local setup
 

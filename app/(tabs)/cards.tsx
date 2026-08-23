@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -21,7 +20,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { dueCards, type ReviewState } from '@/src/card-utils';
 import { languageName } from '@/src/languages';
-import { colors, fonts, gradients, shadows } from '@/src/theme';
+import { colors, fonts, shadows } from '@/src/theme';
 import type { LearningCard } from '@/src/types';
 
 const cardLanguageKey = 'almonium:card-language';
@@ -126,11 +125,7 @@ export default function CardsScreen() {
             <Pressable
               style={styles.reviewAction}
               onPress={() => router.push({ pathname: '/review', params: { language } })}>
-              <LinearGradient
-                colors={gradients.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.reviewActionFill}>
+              <View style={styles.reviewActionFill}>
                 <View style={styles.reviewCount}>
                   <Text style={styles.reviewCountText}>{due}</Text>
                 </View>
@@ -139,7 +134,7 @@ export default function CardsScreen() {
                   <Text style={styles.actionCaption}>Spaced practice on this device</Text>
                 </View>
                 <Ionicons name="arrow-forward" size={20} color={colors.white} />
-              </LinearGradient>
+              </View>
             </Pressable>
             <Button
               variant="secondary"
@@ -214,12 +209,12 @@ const styles = StyleSheet.create({
   chipTextActive: { color: colors.white },
   actions: { gap: 9 },
   reviewAction: { minHeight: 70, borderRadius: 999, overflow: 'hidden' },
-  reviewActionFill: { minHeight: 70, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16 },
+  reviewActionFill: { minHeight: 70, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, backgroundColor: colors.primary },
   reviewCount: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.18)' },
   reviewCountText: { color: colors.white, fontSize: 19, fontWeight: '600' },
   actionCopy: { flex: 1, gap: 2 },
   actionTitle: { color: colors.white, fontSize: 16, fontWeight: '600' },
-  actionCaption: { color: '#f7e8f1', fontSize: 12 },
+  actionCaption: { color: colors.white, fontSize: 12, opacity: 0.84 },
   search: { minHeight: 50, borderRadius: 999, paddingHorizontal: 16, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, ...shadows.field },
   searchInput: { flex: 1, color: colors.ink, fontSize: 15 },
   offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, borderRadius: 10, padding: 10 },

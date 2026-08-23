@@ -120,7 +120,7 @@ export default function UserProfileScreen() {
 
 function Avatar({ profile }: { profile: UserProfile }) {
   if (profile.avatarUrl) return <Image source={profile.avatarUrl} style={styles.avatar} contentFit="cover" />;
-  return <View style={[styles.avatar, profile.premium && styles.avatarPremium]}><Text style={styles.avatarText}>{profile.username.match(/[\p{L}\p{N}]/u)?.[0]?.toUpperCase() ?? '·'}</Text></View>;
+  return <View style={[styles.avatar, profile.premium && styles.avatarPremium]}><Text style={[styles.avatarText, profile.premium && styles.avatarTextPremium]}>{profile.username.match(/[\p{L}\p{N}]/u)?.[0]?.toUpperCase() ?? '·'}</Text></View>;
 }
 
 function ProfileSection({ label, children }: { label: string; children: React.ReactNode }) {
@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
   avatar: { width: 92, height: 92, borderRadius: 46, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.disabled },
   avatarPremium: { backgroundColor: colors.raspberry },
   avatarText: { color: colors.ink, fontFamily: fonts.serif, fontSize: 35, fontWeight: '600' },
+  avatarTextPremium: { color: colors.white },
   identity: { alignItems: 'center', gap: 4 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: 34, fontWeight: '600', textAlign: 'center' },

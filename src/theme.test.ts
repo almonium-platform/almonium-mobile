@@ -10,15 +10,16 @@ vi.mock('react-native', () => ({
 
 describe('Almonium visual system', () => {
   it('keeps the core web brand palette aligned', () => {
-    expect(colors.canvas).toBe('#f9f6f5');
-    expect(colors.surface).toBe('#ffffff');
-    expect(colors.ink).toBe('#3d3d3d');
-    expect(colors.primary).toBe('#83397f');
-    expect(gradients.primary).toEqual(['#5a1a74', '#8f2356']);
+    expect(colors.canvas).toBe('#F9F6F5');
+    expect(colors.surface).toBe('#FFFFFF');
+    expect(colors.ink).toBe('#2C2530');
+    expect(colors.primary).toBe('#5A1A74');
+    expect(gradients.premium).toEqual(['#8F2356', '#5A1A74']);
+    expect(gradients).not.toHaveProperty('primary');
   });
 
   it('reserves green for success rather than the brand accent', () => {
-    expect(colors.success).toBe('#16ba7f');
+    expect(colors.success).toBe('#16BA7F');
     expect(colors.primary).not.toBe(colors.success);
   });
 

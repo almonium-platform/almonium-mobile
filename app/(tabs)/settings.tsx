@@ -598,7 +598,7 @@ export default function SettingsScreen() {
         </View>
         {!profile?.premium && (
           <Button variant="premium" onPress={() => setShowPaywall(true)}>
-            + Upgrade to Premium
+            See what Premium adds
           </Button>
         )}
         {usesPassword && showDeletionAuth && (

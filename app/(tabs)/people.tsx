@@ -147,7 +147,7 @@ function SearchResult({ user }: { user: PublicUserSummary }) {
 
 function Avatar({ user }: { user: PublicUserSummary }) {
   return user.avatarUrl ? <Image source={user.avatarUrl} style={styles.avatar} contentFit="cover" /> : (
-    <View style={[styles.avatar, user.premium && styles.avatarPremium]}><Text style={styles.avatarText}>{user.username.match(/[\p{L}\p{N}]/u)?.[0]?.toUpperCase() ?? '·'}</Text></View>
+    <View style={[styles.avatar, user.premium && styles.avatarPremium]}><Text style={[styles.avatarText, user.premium && styles.avatarTextPremium]}>{user.username.match(/[\p{L}\p{N}]/u)?.[0]?.toUpperCase() ?? '·'}</Text></View>
   );
 }
 
@@ -188,6 +188,7 @@ const styles = StyleSheet.create({
   avatar: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.disabled },
   avatarPremium: { backgroundColor: colors.raspberry },
   avatarText: { color: colors.ink, fontFamily: fonts.serif, fontSize: 18, fontWeight: '600' },
+  avatarTextPremium: { color: colors.white },
   personCopy: { flex: 1, gap: 3 },
   username: { color: colors.ink, fontSize: 14, fontWeight: '600' },
   relationship: { color: colors.muted, fontSize: 11 },
