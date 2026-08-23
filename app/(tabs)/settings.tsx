@@ -374,6 +374,28 @@ export default function SettingsScreen() {
 
       <Card>
         <View style={styles.sectionTitle}>
+          <Ionicons name="grid-outline" color={colors.primary} size={20} />
+          <Text style={styles.sectionTitleText}>More</Text>
+        </View>
+        <Pressable onPress={() => router.push('/(tabs)/inbox')} style={styles.destinationRow}>
+          <Ionicons name="notifications-outline" color={colors.primary} size={21} />
+          <View style={styles.settingCopy}><Text style={styles.settingLabel}>Inbox</Text><Text style={styles.caption}>Requests and book updates</Text></View>
+          <Ionicons name="chevron-forward" color={colors.muted} size={19} />
+        </Pressable>
+        <Pressable onPress={() => router.push('/(tabs)/people')} style={styles.destinationRow}>
+          <Ionicons name="people-outline" color={colors.primary} size={21} />
+          <View style={styles.settingCopy}><Text style={styles.settingLabel}>People</Text><Text style={styles.caption}>Friends, requests, and blocked readers</Text></View>
+          <Ionicons name="chevron-forward" color={colors.muted} size={19} />
+        </Pressable>
+        <Pressable onPress={() => router.push('/membership')} style={styles.destinationRow}>
+          <Ionicons name="star-outline" color={colors.primary} size={21} />
+          <View style={styles.settingCopy}><Text style={styles.settingLabel}>Membership</Text><Text style={styles.caption}>{profile?.subscription.name ?? 'Free'} · usage and billing</Text></View>
+          <Ionicons name="chevron-forward" color={colors.muted} size={19} />
+        </Pressable>
+      </Card>
+
+      <Card>
+        <View style={styles.sectionTitle}>
           <Ionicons name="person-outline" color={colors.primary} size={20} />
           <Text style={styles.sectionTitleText}>Profile</Text>
         </View>
@@ -544,8 +566,7 @@ export default function SettingsScreen() {
             (profile?.subscription.limits.MAX_TARGET_LANGS ?? 1) ? (
           <View style={styles.paywalledAction}>
             <Text style={styles.limitCopy}>
-              Free plan lets you pick only{' '}
-              {profile?.subscription.limits.MAX_TARGET_LANGS ?? 1} target language.
+              Free covers {profile?.subscription.limits.MAX_TARGET_LANGS ?? 1} target language.
             </Text>
             <Button variant="premium" onPress={() => setShowPaywall(true)}>
               + Add target language
@@ -568,10 +589,6 @@ export default function SettingsScreen() {
         <View style={styles.sectionTitle}>
           <Ionicons name="sparkles-outline" color={colors.reading} size={20} />
           <Text style={styles.sectionTitleText}>Account</Text>
-        </View>
-        <View style={styles.statRow}>
-          <Text style={styles.settingLabel}>Reading streak</Text>
-          <Text style={styles.stat}>{profile?.streak ?? 0} days</Text>
         </View>
         <View style={styles.statRow}>
           <Text style={styles.settingLabel}>Plan</Text>
@@ -641,6 +658,7 @@ const styles = StyleSheet.create({
   interestEditButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   sectionTitleText: { color: colors.ink, fontWeight: '600', fontSize: 18 },
   settingRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 4 },
+  destinationRow: { minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: 11, borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 8 },
   settingCopy: { flex: 1, gap: 2 },
   usernameRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   usernameCopy: { flex: 1, gap: 2 },

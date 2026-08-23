@@ -11,7 +11,11 @@ import type {
   Interest,
   LearningCard,
   Learner,
+  PublicUserSummary,
+  RelatedUserSummary,
+  RelationshipAction,
   SetupStep,
+  UserProfile,
   UserInfo,
 } from '@/src/types';
 import { config } from '@/src/config';
@@ -210,5 +214,31 @@ export const api = {
     request<void>(`/notifications/${id}/unread`, { method: 'PATCH' }),
   deleteNotification: (id: string) =>
     request<void>(`/notifications/${id}`, { method: 'DELETE' }),
+  friends: () => request<RelatedUserSummary[]>('/relationships'),
+  blockedUsers: () => request<RelatedUserSummary[]>('/relationships/blocked'),
+  sentFriendRequests: () =>
+    request<RelatedUserSummary[]>('/relationships/requests/sent'),
+  receivedFriendRequests: () =>
+    request<RelatedUserSummary[]>('/relationships/requests/received'),
+  searchUsers: (username: string) =>
+    request<PublicUserSummary[]>(
+      `/relationships/search/all?username=${encodeURIComponent(username)}`,
+    ),
+  userProfile: (id: string) => request<UserProfile>(`/profile/${id}`),
+  publicUserProfile: (id: string) => publicRequest<UserProfile>(`/public/profiles/${id}`),
+  requestFriendship: (recipientId: string) =>
+    request<UserProfile>('/relationships', {
+      method: 'POST',
+      body: JSON.stringify({ recipientId }),
+    }),
+  manageRelationship: (relationshipId: string, action: RelationshipAction) =>
+    request<UserProfile>(`/relationships/${relationshipId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ action }),
+    }),
+  blockUser: (id: string) =>
+    request<UserProfile>(`/relationships/block/${id}`, { method: 'POST' }),
+  customerPortal: () =>
+    request<{ sessionUrl: string }>('/subscriptions/portal', { method: 'POST' }),
   deleteAccount: () => request<void>('/auth/me', { method: 'DELETE' }),
 };

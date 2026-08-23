@@ -29,35 +29,53 @@ export default function TabsLayout() {
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.line },
       }}>
       <Tabs.Screen
+        name="home"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="books"
         options={{
-          title: 'Library',
-          tabBarIcon: ({ color, size }) => <Ionicons name="library" color={color} size={size} />,
+          title: 'Read',
+          tabBarIcon: ({ color, size }) => <Ionicons name="book" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="cards"
         options={{
-          title: 'Cards',
-          tabBarIcon: ({ color, size }) => <Ionicons name="albums" color={color} size={size} />,
+          title: 'Review',
+          tabBarIcon: ({ color, size }) => <Ionicons name="layers" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="play"
+        options={{
+          title: 'Play',
+          tabBarIcon: ({ color, size }) => <Ionicons name="shapes" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'More',
+          tabBarBadge: unread || undefined,
+          tabBarBadgeStyle: { backgroundColor: colors.danger, fontSize: 10 },
+          tabBarIcon: ({ color, size }) => <Ionicons name="menu" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="inbox"
         options={{
           title: 'Inbox',
+          href: null,
           tabBarBadge: unread || undefined,
           tabBarBadgeStyle: { backgroundColor: colors.danger, fontSize: 10 },
           tabBarIcon: ({ color, size }) => <Ionicons name="notifications" color={color} size={size} />,
         }}
       />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color, size }) => <Ionicons name="settings" color={color} size={size} />,
-        }}
-      />
+      <Tabs.Screen name="people" options={{ href: null, title: 'People' }} />
     </Tabs>
   );
 }

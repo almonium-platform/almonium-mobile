@@ -33,6 +33,8 @@ export default function RootLayout() {
               <Stack.Screen name="card/new" options={{ title: 'New card' }} />
               <Stack.Screen name="card/[cardId]" options={{ title: 'Card' }} />
               <Stack.Screen name="review" options={{ headerShown: false }} />
+              <Stack.Screen name="profile/[userId]" options={{ title: 'Reader profile' }} />
+              <Stack.Screen name="membership" options={{ title: 'Membership' }} />
             </Stack>
             <StatusBar style="dark" />
           </AuthProvider>

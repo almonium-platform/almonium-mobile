@@ -23,6 +23,9 @@ export interface UserInfo {
     name: string;
     limits: Record<string, number>;
     type: 'MONTHLY' | 'YEARLY' | 'LIFETIME';
+    autoRenewal: boolean;
+    startDate: string | null;
+    endDate: string | null;
   };
   interests: Interest[];
 }
@@ -137,4 +140,37 @@ export interface AppNotification {
   senderId: string | null;
   createdAt: string;
   readAt: string | null;
+}
+
+export type RelationshipStatus =
+  | 'FRIENDS'
+  | 'BLOCKED'
+  | 'PENDING_OUTGOING'
+  | 'PENDING_INCOMING'
+  | 'STRANGER';
+
+export type RelationshipAction = 'ACCEPT' | 'REJECT' | 'CANCEL' | 'UNFRIEND' | 'UNBLOCK';
+
+export interface PublicUserSummary {
+  id: string;
+  username: string;
+  avatarUrl: string | null;
+  premium: boolean;
+}
+
+export interface RelatedUserSummary extends PublicUserSummary {
+  relationshipId: string;
+  relationshipStatus: RelationshipStatus;
+}
+
+export interface UserProfile extends PublicUserSummary {
+  registeredAt: string;
+  hidden: boolean;
+  interests?: string[];
+  loginStreak?: number;
+  fluentLangs?: string[];
+  targetLangs?: { language: string; cefrLevel: CefrLevel }[];
+  relationshipId: string | null;
+  relationshipStatus: RelationshipStatus;
+  acceptsRequests: boolean | null;
 }

@@ -7,5 +7,5 @@ export function authenticatedDestination(
 ) {
   if (!hasFirebaseUser || !hasProfile) return '/(auth)/sign-in' as const;
   if (setupStep !== 'COMPLETED') return '/onboarding' as const;
-  return '/(tabs)/books' as const;
+  return '/(tabs)/home' as const;
 }

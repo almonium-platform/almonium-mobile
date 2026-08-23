@@ -11,7 +11,7 @@ describe('authenticatedDestination', () => {
     expect(authenticatedDestination(true, true, 'LANGUAGES')).toBe('/onboarding');
   });
 
-  it('opens the library only after onboarding', () => {
-    expect(authenticatedDestination(true, true, 'COMPLETED')).toBe('/(tabs)/books');
+  it('opens the learning home only after onboarding', () => {
+    expect(authenticatedDestination(true, true, 'COMPLETED')).toBe('/(tabs)/home');
   });
 });

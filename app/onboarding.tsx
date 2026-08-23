@@ -80,7 +80,7 @@ export default function OnboardingScreen() {
   );
 
   useEffect(() => {
-    if (step === 'COMPLETED') router.replace('/(tabs)/books');
+    if (step === 'COMPLETED') router.replace('/(tabs)/home');
   }, [step]);
 
   async function run(action: () => Promise<unknown>) {

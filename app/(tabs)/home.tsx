@@ -1,0 +1,260 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
+import { BookCover } from '@/components/book-cover';
+import { Button } from '@/components/ui';
+import { api } from '@/src/api';
+import { useAuth } from '@/src/auth-context';
+import { dueCards, type ReviewState } from '@/src/card-utils';
+import { languageName } from '@/src/languages';
+import { colors, fonts, shadows } from '@/src/theme';
+
+const reviewKey = (uid: string, language: string) => `almonium:review:${uid}:${language}`;
+
+export default function HomeScreen() {
+  const { firebaseUser, profile } = useAuth();
+  const activeLanguages = useMemo(
+    () => profile?.learners.filter((learner) => learner.active).map((learner) => learner.language) ?? [],
+    [profile?.learners],
+  );
+  const [language, setLanguage] = useState(activeLanguages[0] ?? '');
+  const [schedule, setSchedule] = useState<Record<string, ReviewState>>({});
+
+  useEffect(() => {
+    if ((!language || !activeLanguages.includes(language)) && activeLanguages[0]) {
+      setLanguage(activeLanguages[0]);
+    }
+  }, [activeLanguages, language]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!firebaseUser || !language) return;
+      void AsyncStorage.getItem(reviewKey(firebaseUser.uid, language)).then((value) => {
+        try {
+          setSchedule(value ? (JSON.parse(value) as Record<string, ReviewState>) : {});
+        } catch {
+          setSchedule({});
+        }
+      });
+    }, [firebaseUser, language]),
+  );
+
+  const shelf = useQuery({
+    queryKey: ['bookshelf', firebaseUser?.uid, language],
+    queryFn: () => api.bookshelf(language),
+    enabled: Boolean(firebaseUser && language),
+  });
+  const cards = useQuery({
+    queryKey: ['cards', firebaseUser?.uid, language],
+    queryFn: () => api.cards(language),
+    enabled: Boolean(firebaseUser && language),
+  });
+  const recentCards = useMemo(
+    () =>
+      [...(cards.data ?? [])]
+        .sort((first, second) => (second.createdAt ?? '').localeCompare(first.createdAt ?? ''))
+        .slice(0, 4),
+    [cards.data],
+  );
+  const due = dueCards(cards.data ?? [], schedule).length;
+  const continueBook = shelf.data?.continueReading[0];
+  const hasActivity = Boolean(continueBook || cards.data?.length);
+  const loading = shelf.isLoading || cards.isLoading;
+  const refreshing = shelf.isRefetching || cards.isRefetching;
+
+  async function refresh() {
+    await Promise.all([shelf.refetch(), cards.refetch()]);
+  }
+
+  if (!language) {
+    return (
+      <View style={styles.center}>
+        <Ionicons name="language-outline" size={44} color={colors.primary} />
+        <Text style={styles.emptyTitle}>Choose a learning language</Text>
+        <Text style={styles.emptyCopy}>Add or activate a target language in More to build your home.</Text>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.content}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}>
+      <View style={styles.topline}>
+        <Text style={styles.date}>
+          {new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())}
+        </Text>
+        {activeLanguages.length > 1 && (
+          <View style={styles.languages}>
+            {activeLanguages.map((code) => (
+              <Pressable
+                key={code}
+                accessibilityRole="button"
+                accessibilityState={{ selected: code === language }}
+                onPress={() => setLanguage(code)}
+                style={[styles.language, code === language && styles.languageActive]}>
+                <Text style={[styles.languageText, code === language && styles.languageTextActive]}>
+                  {code.toUpperCase()}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
+      </View>
+
+      {loading ? (
+        <View style={styles.loadingCard}><ActivityIndicator size="large" color={colors.primary} /></View>
+      ) : !hasActivity ? (
+        <View style={styles.emptyCard}>
+          <Ionicons name="book-outline" size={42} color={colors.primary} />
+          <Text style={styles.eyebrow}>NOTHING HERE YET</Text>
+          <Text style={styles.emptyTitle}>Start with one page</Text>
+          <Text style={styles.emptyCopy}>Open a book from the library. The words you keep will collect here.</Text>
+          <Button onPress={() => router.push('/(tabs)/books')}>Open the library</Button>
+        </View>
+      ) : (
+        <>
+          <View style={styles.continueCard}>
+            {continueBook ? (
+              <>
+                <BookCover
+                  title={continueBook.title}
+                  author={continueBook.author}
+                  workSlug={continueBook.workSlug}
+                  coverUrl={continueBook.coverUrl}
+                  style={styles.cover}
+                />
+                <View style={styles.continueCopy}>
+                  <Text style={styles.eyebrow}>CONTINUE READING</Text>
+                  <Text style={styles.bookTitle}>{continueBook.title}</Text>
+                  <Text style={styles.meta}>{continueBook.author} · {continueBook.cefrLevel}</Text>
+                  <View style={styles.progressTrack}>
+                    <View style={[styles.progress, { width: `${continueBook.progressPercentage ?? 0}%` }]} />
+                  </View>
+                  <Text style={styles.progressLabel}>{continueBook.progressPercentage ?? 0}% · your place is saved</Text>
+                  <Button onPress={() => router.push({ pathname: '/reader/[bookId]', params: { bookId: continueBook.id } })}>
+                    Continue
+                  </Button>
+                </View>
+              </>
+            ) : (
+              <View style={styles.continueCopy}>
+                <Text style={styles.eyebrow}>CONTINUE READING</Text>
+                <Text style={styles.bookTitle}>Choose your next page</Text>
+                <Text style={styles.meta}>Your saved words are waiting for somewhere to return.</Text>
+                <Button onPress={() => router.push('/(tabs)/books')}>Open the library</Button>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.panel}>
+            <View style={styles.panelHeading}>
+              <View>
+                <Text style={styles.eyebrow}>KEPT WHILE READING</Text>
+                <Text style={styles.panelTitle}>{cards.data?.length ?? 0} saved {(cards.data?.length ?? 0) === 1 ? 'word' : 'words'}</Text>
+              </View>
+              <Pressable onPress={() => router.push('/(tabs)/cards')} hitSlop={8}>
+                <Text style={styles.link}>All words</Text>
+              </Pressable>
+            </View>
+            {recentCards.map((card) => (
+              <Pressable
+                key={card.id}
+                onPress={() => router.push({ pathname: '/card/[cardId]', params: { cardId: card.id, language } })}
+                style={styles.wordRow}>
+                <View style={styles.wordCopy}>
+                  <Text style={styles.word}>{card.entry}</Text>
+                  <Text style={styles.translation} numberOfLines={1}>
+                    {card.translations[0]?.translation ?? 'Translation not added yet'}
+                  </Text>
+                </View>
+                {card.falseFriend && <Text style={styles.warning}>false friend</Text>}
+                <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+              </Pressable>
+            ))}
+          </View>
+
+          <View style={styles.reviewPanel}>
+            <View style={styles.reviewCount}><Text style={styles.reviewNumber}>{due}</Text></View>
+            <View style={styles.reviewCopy}>
+              <Text style={styles.eyebrow}>READY TO REVIEW</Text>
+              <Text style={styles.panelTitle}>{due === 1 ? 'One word is' : `${due} words are`} ready to come back</Text>
+              <Text style={styles.meta}>A short session in {languageName(language)}.</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Start review"
+              onPress={() => router.push({ pathname: '/review', params: { language } })}
+              style={styles.circleAction}>
+              <Ionicons name="arrow-forward" size={22} color={colors.white} />
+            </Pressable>
+          </View>
+
+          <View style={styles.planLine}>
+            <Text style={styles.meta}>You’re on {profile?.subscription?.name ?? (profile?.premium ? 'Premium' : 'Free')}.</Text>
+            <Pressable onPress={() => router.push('/membership')}><Text style={styles.link}>Membership</Text></Pressable>
+          </View>
+        </>
+      )}
+
+      {(shelf.isError || cards.isError) && (
+        <Text style={styles.error}>Some home details could not be refreshed. Available sections are shown.</Text>
+      )}
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.canvas },
+  content: { padding: 20, paddingBottom: 38, gap: 16 },
+  center: { flex: 1, padding: 32, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: colors.canvas },
+  topline: { minHeight: 36, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  date: { color: colors.muted, fontSize: 13 },
+  languages: { flexDirection: 'row', gap: 6 },
+  language: { minWidth: 40, minHeight: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.line },
+  languageActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  languageText: { color: colors.primary, fontSize: 11, fontWeight: '600' },
+  languageTextActive: { color: colors.white },
+  loadingCard: { minHeight: 220, borderRadius: 26, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, ...shadows.card },
+  emptyCard: { minHeight: 390, borderRadius: 28, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 28, backgroundColor: colors.surface, ...shadows.card },
+  emptyTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 28, lineHeight: 35, fontWeight: '600', textAlign: 'center' },
+  emptyCopy: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center' },
+  eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
+  continueCard: { flexDirection: 'row', gap: 18, padding: 18, borderRadius: 28, backgroundColor: colors.surface, ...shadows.card },
+  cover: { width: 104, height: 150, borderRadius: 10 },
+  continueCopy: { flex: 1, justifyContent: 'center', gap: 8 },
+  bookTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 25, lineHeight: 30, fontWeight: '600' },
+  meta: { color: colors.muted, fontSize: 13, lineHeight: 19 },
+  progressTrack: { height: 5, overflow: 'hidden', borderRadius: 3, backgroundColor: colors.line },
+  progress: { height: 5, borderRadius: 3, backgroundColor: colors.reading },
+  progressLabel: { color: colors.muted, fontSize: 11 },
+  panel: { padding: 20, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
+  panelHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12, paddingBottom: 8 },
+  panelTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 20, lineHeight: 26, fontWeight: '600', marginTop: 4 },
+  link: { color: colors.primary, fontSize: 13, fontWeight: '600' },
+  wordRow: { minHeight: 62, flexDirection: 'row', alignItems: 'center', gap: 9, borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 11 },
+  wordCopy: { flex: 1, gap: 3 },
+  word: { color: colors.primaryDark, fontFamily: fonts.serif, fontSize: 18, fontWeight: '600' },
+  translation: { color: colors.muted, fontSize: 13 },
+  warning: { color: colors.raspberry, fontSize: 10, fontWeight: '600', backgroundColor: colors.accentSoft, paddingHorizontal: 7, paddingVertical: 4, borderRadius: 8 },
+  reviewPanel: { flexDirection: 'row', alignItems: 'center', gap: 13, padding: 18, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
+  reviewCount: { width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accentSoft },
+  reviewNumber: { color: colors.primaryDark, fontFamily: fonts.serif, fontSize: 25, fontWeight: '600' },
+  reviewCopy: { flex: 1, gap: 2 },
+  circleAction: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary },
+  planLine: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingHorizontal: 5 },
+  error: { color: colors.danger, fontSize: 12, lineHeight: 18, textAlign: 'center' },
+});
