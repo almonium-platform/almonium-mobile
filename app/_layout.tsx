@@ -17,6 +17,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider } from '@/src/auth-context';
 import { persistOptions, queryClient } from '@/src/query-client';
+import { NoticeProvider } from '@/src/notice-context';
 import { colors } from '@/src/theme';
 
 void SplashScreen.preventAutoHideAsync();
@@ -60,7 +61,8 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
           <AuthProvider>
-            <Stack
+            <NoticeProvider>
+              <Stack
               screenOptions={{
                 headerStyle: { backgroundColor: colors.canvas },
                 headerShadowVisible: false,
@@ -83,8 +85,9 @@ export default function RootLayout() {
               <Stack.Screen name="review" options={{ headerShown: false }} />
               <Stack.Screen name="profile/[userId]" options={{ title: 'Reader profile' }} />
               <Stack.Screen name="membership" options={{ title: 'Membership' }} />
-            </Stack>
-            <StatusBar style="dark" />
+              </Stack>
+              <StatusBar style="dark" />
+            </NoticeProvider>
           </AuthProvider>
         </PersistQueryClientProvider>
       </SafeAreaProvider>

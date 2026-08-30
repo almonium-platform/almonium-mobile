@@ -2,15 +2,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { BrandMark } from '@/components/brand-mark';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { isExpoGo, useAuth } from '@/src/auth-context';
+import { useNotice } from '@/src/notice-context';
 import { colors, gradients } from '@/src/theme';
 
 export default function SignInScreen() {
   const { signIn, signInWithGoogle, signInWithApple } = useAuth();
+  const showNotice = useNotice();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,7 @@ export default function SignInScreen() {
       await signIn(email, password);
       router.replace('/');
     } catch (error) {
-      Alert.alert('Could not sign in', error instanceof Error ? error.message : 'Please try again.');
+      showNotice({ title: 'Could not sign in', message: error instanceof Error ? error.message : 'Please try again.', tone: 'error' });
     } finally {
       setLoading(false);
     }
@@ -47,7 +49,7 @@ export default function SignInScreen() {
       ) {
         return;
       }
-      Alert.alert('Could not sign in with Apple', error instanceof Error ? error.message : 'Try again.');
+      showNotice({ title: 'Could not sign in with Apple', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,7 @@ export default function SignInScreen() {
       ) {
         return;
       }
-      Alert.alert('Could not sign in with Google', error instanceof Error ? error.message : 'Try again.');
+      showNotice({ title: 'Could not sign in with Google', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
     } finally {
       setLoading(false);
     }

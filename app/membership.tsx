@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useQueries } from '@tanstack/react-query';
-import { Alert, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { useNotice } from '@/src/notice-context';
 import { colors, fonts, gradients, shadows } from '@/src/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { UserInfo } from '@/src/types';
@@ -20,6 +21,7 @@ const premiumFeatures = [
 
 export default function MembershipScreen() {
   const { firebaseUser, profile } = useAuth();
+  const showNotice = useNotice();
   const [openingPortal, setOpeningPortal] = useState(false);
   const cardQueries = useQueries({
     queries: (profile?.learners ?? []).map((learner) => ({
@@ -39,7 +41,7 @@ export default function MembershipScreen() {
       const { sessionUrl } = await api.customerPortal();
       await Linking.openURL(sessionUrl);
     } catch (error) {
-      Alert.alert('Could not open billing', error instanceof Error ? error.message : 'Try again.');
+      showNotice({ title: 'Could not open billing', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
     } finally {
       setOpeningPortal(false);
     }

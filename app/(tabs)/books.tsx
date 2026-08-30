@@ -20,6 +20,7 @@ import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
+import { useNotice } from '@/src/notice-context';
 import { downloadedBooks } from '@/src/offline-books';
 import { colors, fonts, shadows } from '@/src/theme';
 import type { BookSummary } from '@/src/types';
@@ -28,6 +29,7 @@ const shelfLanguageKey = 'almonium:shelf-language';
 
 export default function BooksScreen() {
   const { firebaseUser, profile } = useAuth();
+  const showNotice = useNotice();
   const activeLanguages = useMemo(
     () =>
       profile?.learners
@@ -92,7 +94,7 @@ export default function BooksScreen() {
             await api.deleteProgress(book.id);
             await query.refetch();
           } catch (error) {
-            Alert.alert('Could not reset progress', error instanceof Error ? error.message : 'Try again.');
+            showNotice({ title: 'Could not reset progress', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
           }
         },
       },

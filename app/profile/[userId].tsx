@@ -7,6 +7,7 @@ import { Button } from '@/components/ui';
 import { AvatarMark } from '@/components/avatar-mark';
 import { api } from '@/src/api';
 import { config } from '@/src/config';
+import { useNotice } from '@/src/notice-context';
 import { languageName } from '@/src/languages';
 import { colors, fonts, shadows } from '@/src/theme';
 import type { RelationshipAction, UserProfile } from '@/src/types';
@@ -14,6 +15,7 @@ import type { RelationshipAction, UserProfile } from '@/src/types';
 export default function UserProfileScreen() {
   const { userId = '' } = useLocalSearchParams<{ userId: string }>();
   const queryClient = useQueryClient();
+  const showNotice = useNotice();
   const profile = useQuery({ queryKey: ['profile', userId], queryFn: () => api.userProfile(userId), enabled: Boolean(userId) });
   const relationship = useMutation({
     mutationFn: ({ id, action }: { id: string; action: RelationshipAction }) => api.manageRelationship(id, action),
@@ -82,7 +84,7 @@ export default function UserProfileScreen() {
               try {
                 await Share.share({ message: `${config.webBaseUrl}/users/${encodeURIComponent(user.username)}` });
               } catch {
-                Alert.alert('Could not share profile', 'Try again.');
+                showNotice({ title: 'Could not share profile', message: 'Try again.', tone: 'error' });
               }
             }}
             style={styles.share}>
@@ -104,7 +106,7 @@ export default function UserProfileScreen() {
                   await api.blockUser(user.id);
                   await profile.refetch();
                 } catch (error) {
-                  Alert.alert('Could not block reader', error instanceof Error ? error.message : 'Try again.');
+                  showNotice({ title: 'Could not block reader', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
                 }
               },
             },

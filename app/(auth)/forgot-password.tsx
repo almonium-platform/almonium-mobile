@@ -1,14 +1,16 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 
 import { Screen } from '@/components/screen';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { useAuth } from '@/src/auth-context';
+import { useNotice } from '@/src/notice-context';
 import { colors } from '@/src/theme';
 
 export default function ForgotPasswordScreen() {
   const { resetPassword } = useAuth();
+  const showNotice = useNotice();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -16,9 +18,9 @@ export default function ForgotPasswordScreen() {
     setLoading(true);
     try {
       await resetPassword(email);
-      Alert.alert('Email sent', 'Use the link in your inbox to choose a new password.');
+      showNotice({ title: 'Email sent', message: 'Use the link in your inbox to choose a new password.', tone: 'success' });
     } catch (error) {
-      Alert.alert('Could not send email', error instanceof Error ? error.message : 'Try again.');
+      showNotice({ title: 'Could not send email', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
     } finally {
       setLoading(false);
     }

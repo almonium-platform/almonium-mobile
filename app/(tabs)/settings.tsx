@@ -22,6 +22,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { config } from '@/src/config';
 import { languageName, sortLanguages } from '@/src/languages';
+import { useNotice } from '@/src/notice-context';
 import { configureDailyReminder, getReminderSettings, reminderTimeLabel } from '@/src/reminders';
 import { colors } from '@/src/theme';
 import type { CefrLevel, Learner } from '@/src/types';
@@ -40,6 +41,7 @@ function LanguageRow({
   canDelete: boolean;
   onDelete(): void;
 }) {
+  const showNotice = useNotice();
   const [saving, setSaving] = useState(false);
   const [active, setActive] = useState(learner.active);
 
@@ -54,7 +56,7 @@ function LanguageRow({
       await onChanged();
     } catch (error) {
       if (typeof updates.active === 'boolean') setActive(previousActive);
-      Alert.alert('Could not update language', error instanceof Error ? error.message : 'Try again.');
+      showNotice({ title: 'Could not update language', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
     } finally {
       setSaving(false);
     }
@@ -114,6 +116,7 @@ export default function SettingsScreen() {
     reauthenticateWithGoogle,
     reauthenticateWithApple,
   } = useAuth();
+  const showNotice = useNotice();
   const queryClient = useQueryClient();
   const [username, setUsername] = useState(profile?.username || '');
   const [editingUsername, setEditingUsername] = useState(false);
@@ -184,7 +187,7 @@ export default function SettingsScreen() {
       await changed();
       setEditingUsername(false);
     } catch (error) {
-      Alert.alert('Could not save username', error instanceof Error ? error.message : 'Try again.');
+      showNotice({ title: 'Could not save username', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
     } finally {
       setSavingName(false);
     }
@@ -204,7 +207,7 @@ export default function SettingsScreen() {
       await changed();
     } catch (error) {
       setPrivacyHidden(previousHidden);
-      Alert.alert('Could not update privacy', error instanceof Error ? error.message : 'Try again.');
+      showNotice({ title: 'Could not update privacy', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
     } finally {
       setSavingPrivacy(false);
     }
@@ -251,10 +254,7 @@ export default function SettingsScreen() {
           if (!pendingInterestsRef.current) {
             selectedInterestsRef.current = savedInterestsRef.current;
             setSelectedInterests(savedInterestsRef.current);
-            Alert.alert(
-              'Could not update interests',
-              error instanceof Error ? error.message : 'Try again.',
-            );
+            showNotice({ title: 'Could not update interests', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
           }
         }
       }
@@ -296,7 +296,7 @@ export default function SettingsScreen() {
       setShowAddLanguage(false);
       await changed();
     } catch (error) {
-      Alert.alert('Could not add language', error instanceof Error ? error.message : 'Try again.');
+      showNotice({ title: 'Could not add language', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
     } finally {
       setAddingLanguage(false);
     }
@@ -316,7 +316,7 @@ export default function SettingsScreen() {
               await api.deleteLearner(learner.language);
               await changed();
             } catch (error) {
-              Alert.alert('Could not remove language', error instanceof Error ? error.message : 'Try again.');
+              showNotice({ title: 'Could not remove language', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
             }
           },
         },
@@ -347,10 +347,7 @@ export default function SettingsScreen() {
                   try {
                     if (usesPassword) {
                       if (!currentPassword) {
-                        Alert.alert(
-                          'Password required',
-                          'Enter your current password, then try again.',
-                        );
+                        showNotice({ title: 'Password required', message: 'Enter your current password, then try again.', tone: 'error' });
                         return;
                       }
                       await reauthenticateWithPassword(currentPassword);
@@ -364,12 +361,13 @@ export default function SettingsScreen() {
                     await logOut();
                     router.replace('/(auth)/sign-in');
                   } catch (error) {
-                    Alert.alert(
-                      'Could not delete account',
-                      error instanceof Error
-                        ? `${error.message}\n\n${usesPassword ? 'Check your current password and try again.' : usesGoogle ? 'Complete the Google confirmation and try again.' : usesApple ? 'Complete the Apple confirmation and try again.' : 'Sign out and back in with your provider, then try again.'}`
+                    showNotice({
+                      title: 'Could not delete account',
+                      message: error instanceof Error
+                        ? `${error.message} ${usesPassword ? 'Check your current password and try again.' : usesGoogle ? 'Complete the Google confirmation and try again.' : usesApple ? 'Complete the Apple confirmation and try again.' : 'Sign out and back in with your provider, then try again.'}`
                         : 'Please sign out, sign back in, and try again.',
-                    );
+                      tone: 'error',
+                    });
                   }
                 },
               },

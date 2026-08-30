@@ -1,14 +1,16 @@
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 
 import { Screen } from '@/components/screen';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { useAuth } from '@/src/auth-context';
+import { useNotice } from '@/src/notice-context';
 import { colors } from '@/src/theme';
 
 export default function RegisterScreen() {
   const { register } = useAuth();
+  const showNotice = useNotice();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,11 +19,10 @@ export default function RegisterScreen() {
     setLoading(true);
     try {
       await register(email, password);
-      Alert.alert('Check your inbox', 'Verify your email, then return here to sign in.', [
-        { text: 'OK', onPress: () => router.replace('/(auth)/sign-in') },
-      ]);
+      router.replace('/(auth)/sign-in');
+      showNotice({ title: 'Check your inbox', message: 'Verify your email, then return here to sign in.', tone: 'success' });
     } catch (error) {
-      Alert.alert('Could not create account', error instanceof Error ? error.message : 'Try again.');
+      showNotice({ title: 'Could not create account', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
     } finally {
       setLoading(false);
     }
