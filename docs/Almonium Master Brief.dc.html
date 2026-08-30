@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; color: #2C2530; font-family: 'IBM Plex Sans', sans-serif; }
+  a { color: #872657; text-decoration: none; }
+  a:hover { color: #5A1A74; }
+  doc-page:not(:defined) { visibility: hidden; }
+</style>
+<script src="./doc-page.js"></script>
+</helmet>
+
+<doc-page margin="0.8in">
+
+  <div slot="header" style="display:flex; align-items:baseline; gap:10px; padding-bottom:7px; border-bottom:1px solid #edebe8; font-size:9px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#a99aa8;">
+    <span style="color:#872657;">Almonium</span>
+    <span>Master brief</span>
+    <span style="margin-left:auto; text-transform:none; letter-spacing:0; font-weight:400;">Supersedes CONTEXT, BACKLOG, COMPETITIVE_EDGE, FREEMIUM, LANDING_PAGE</span>
+  </div>
+
+  <div slot="footer" style="padding-top:7px; border-top:1px solid #edebe8; font-size:9.5px; color:#a99aa8;">Last updated 2026-08-23 &middot; paste or link this file at the start of any Almonium conversation</div>
+
+  <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:26px;">
+    <div style="font-size:10px; letter-spacing:1.6px; text-transform:uppercase; font-weight:600; color:#872657;">Single source of context</div>
+    <h1 style="margin:0; font-family:'Literata',serif; font-size:33px; font-weight:600; line-height:1.12;">Almonium: the whole brief</h1>
+    <p style="margin:6px 0 0; font-size:12.5px; line-height:1.65; color:#5f5560;">Everything an agent, a collaborator, or a future you needs before touching the product: what it is, who it is for, what is decided, what is differentiated, how it makes money, what to build next, and the rules the interface obeys. Nothing here is aspiration &mdash; where the product does not yet do something, it says so.</p>
+  </div>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">1 &middot; What it is</h2>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;">A language-learning system covering the full acquisition lifecycle of a word, phrase, or chunk: encounter it, understand it in context, decide whether it is worth learning, save it with provenance, retrieve it through varied practice, diagnose exactly how the knowledge is failing, and rehearse it until it becomes usable language.</p>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;">Reading, Discover, review, stories, sharing, and games are surfaces around one personal knowledge and memory system. They are not separate products.</p>
+  <div style="background:#F9F6F5; border-radius:12px; padding:13px 16px; margin:0 0 18px; break-inside:avoid;">
+    <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#872657;">Working proposition</span>
+    <div style="font-family:'Literata',serif; font-size:19px; font-weight:600; margin-top:3px;">Read anything. Keep every word.</div>
+    <p style="margin:5px 0 0; font-size:11.5px; line-height:1.6; color:#5f5560;">It names both surfaces, implies the loop, and takes nothing Readlang already owns. Every competitor owns a verb &mdash; read, input, listen, drill, mine. The unclaimed verb is what happens to a word <em>after</em> you meet it. &ldquo;Multitool&rdquo; is the worst available position and is retired.</p>
+  </div>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">2 &middot; Who it is for, and who built it</h2>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;"><strong>User:</strong> self-directed intermediate-to-advanced learners who already consume real content and already collect vocabulary across several tools. Often multilingual. Not beginners, not casual gamified learners. They chose Almonium for not being gamified, and nothing may read as a beginner app.</p>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;"><strong>Wedge under consideration:</strong> Ukrainian and Russian speakers learning German. Large, motivated, deadline-driven &mdash; integration courses, B1 for residency, professional recognition &mdash; and completely underserved by tools built for English speakers. The founder has native access to those communities.</p>
+  <p style="margin:0 0 18px; font-size:12.5px; line-height:1.7;"><strong>Founder:</strong> solo, SWE, Kyiv. Took his own English to C2 self-taught, now learning German, speaks four languages. Started as a NaUKMA BSc project in 2022; the core thesis has been stable since. Founder-problem fit is genuine. Marketing and distribution are the weak side, and he knows it.</p>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">3 &middot; Current state</h2>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;">Real, substantial, and not yet closing its own loop.</p>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:0 0 12px; break-inside:avoid;">
+    <div style="background:#F9F6F5; border-radius:12px; padding:13px 15px;">
+      <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#872657;">Built</span>
+      <p style="margin:5px 0 0; font-size:11.5px; line-height:1.6;">Spring/Java backend, Angular web, React Native mobile in progress, self-hosted Postgres, Paddle Billing, Stream Chat, Firebase, custom auth, a Chrome extension, a Python book processor run manually, parallel reader, cards with device-local review, social graph, four game shells.</p>
+    </div>
+    <div style="background:#fff4f6; border-radius:12px; padding:13px 15px;">
+      <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#872657;">Missing</span>
+      <p style="margin:5px 0 0; font-size:11.5px; line-height:1.6;">The reader-to-card connection, backend-synced scheduling, a landing page, honest terms and pricing, and any users who are not friends.</p>
+    </div>
+  </div>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;"><strong>Infrastructure:</strong> Oracle pay-as-you-go, self-hosted DB, Backblaze B2 backups, Zepto Mail. Near-zero monthly cost.</p>
+  <div style="background:#2C2530; border-radius:12px; padding:14px 16px; margin:0 0 18px; break-inside:avoid;">
+    <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#c9a8c4;">Known failure mode</span>
+    <p style="margin:5px 0 0; font-size:11.5px; line-height:1.65; color:rgba(249,246,245,.85);">The founder builds whatever feature is interesting when he reaches it, and the digressions consistently land on invisible work with no audience &mdash; custom auth, avatar pickers, settings, chat &mdash; at exactly the moments when the next honest step was showing the product to a stranger. Four years of stable vision, zero external users. The constraint is not capability or capital. It is that progress has meant &ldquo;features exist&rdquo; rather than &ldquo;strangers came back.&rdquo;</p>
+  </div>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">4 &middot; What is genuinely differentiated</h2>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;">Ranked by defensibility.</p>
+  <ol style="margin:0 0 12px; padding-left:20px; font-size:12.5px; line-height:1.7;">
+    <li style="margin-bottom:5px;"><strong>Confusion-aware feedback.</strong> Answer A with the meaning of B, and Almonium names B and contrasts them. No competitor found doing this. Deterministic, cheap, shippable in a week. Highest edge per hour of work in the product.</li>
+    <li style="margin-bottom:5px;"><strong>Receptive vs productive intents.</strong> &ldquo;I understand it but cannot say it&rdquo; as a first-class state with its own exercises. Everyone else has one number. Deepest idea, hardest to put on a landing page.</li>
+    <li style="margin-bottom:5px;"><strong>Level-adapted real books.</strong> The same novel at B1, B2, C1. Beelinguapp grades short original content; nobody adapts real literature. $1&ndash;5 per book per level. The one an ordinary learner understands in a sentence.</li>
+    <li style="margin-bottom:5px;"><strong>Multi-fluent-language triangulation.</strong> Meaning shown across every language the learner speaks, because Ukrainian sometimes catches what English flattens. Novel, narrow audience, near-zero cost.</li>
+    <li style="margin-bottom:5px;"><strong>Paraphrase rotation.</strong> Reword the answer each review so the learner stops memorising the shape of the card.</li>
+    <li style="margin-bottom:5px;"><strong>Encounter history.</strong> Where a word was first met, how often, what it was confused with. Emotional differentiator, nearly free.</li>
+    <li><strong>Dessert story.</strong> A short generated passage at the end of a session containing the words just failed. Best session-ending hook available.</li>
+  </ol>
+  <div style="background:#fff4f6; border-radius:12px; padding:13px 16px; margin:0 0 12px; break-inside:avoid;">
+    <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#872657;">Not differentiated &mdash; do not claim otherwise</span>
+    <p style="margin:5px 0 0; font-size:11.5px; line-height:1.6;">Parallel reading (Beelinguapp has 4M+ downloads and it is their whole method), click-to-translate reading (Readlang, LingQ, Migaku), frequency ordering (Migaku, Clozemaster), deck sharing (Anki, Quizlet), browser extensions (Readlang, Language Reactor, Toucan), diglot-weave blending (Prismatext). Beelinguapp is parallel reading <em>as the destination</em>; Almonium is parallel reading <em>as the entrance to a memory system</em>. Say that, and never claim to have invented the format.</p>
+  </div>
+  <p style="margin:0 0 18px; font-size:12.5px; line-height:1.7;"><strong>What they do better:</strong> language coverage (Readlang claims 100+, Almonium has two it can do well), content volume, distribution (Steve Kaufmann's million subscribers is worth more than the whole backlog), time in market, and the fact that they have shipped. Distribution is the whole game.</p>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">5 &middot; The competitive set</h2>
+  <table style="width:100%; border-collapse:collapse; font-size:11.5px; line-height:1.55; margin:0 0 18px;">
+    <thead>
+      <tr>
+        <th style="text-align:left; padding:7px 9px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:#872657; width:110px;">Product</th>
+        <th style="text-align:left; padding:7px 9px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:#872657; width:72px;">Verb</th>
+        <th style="text-align:left; padding:7px 9px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:#872657;">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-weight:600;">Readlang</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">read</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Solo founder, unfunded since 2012, 700k+ registered, $6 and $15 tiers. <strong>No native apps.</strong> Proof a solo operator can sustain this niche &mdash; plausibly $170k&ndash;500k/yr, run by one person.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-weight:600;">LingQ</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">input</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">~3.5M members, ~$3.1M revenue, ~27 staff after 19 years. The ceiling of the category, not a unicorn.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-weight:600;">Beelinguapp</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">listen</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">4M+ downloads, parallel text plus narrated audiobooks. Explicitly anti-flashcard: no memory state, no SRS, short stories rather than novels.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-weight:600;">Migaku</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">mine</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Netflix/YouTube sentence mining, frequency lists, AI explanations.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-weight:600;">Clozemaster</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">drill</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">$8/mo, cloze in context, frequency-ordered. Small US LLC.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-weight:600;">Prismatext</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">blend</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Diglot weave: real novels with foreign words woven in progressively.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-weight:600;">Almonium</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8; color:#5A1A74; font-weight:600;">the word</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Models the word, not the card. Assumes four bridge languages, not one. Can level its content. Can ship native apps with push, which Readlang cannot. Looks like a book.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">6 &middot; Decisions made &mdash; do not relitigate</h2>
+  <table style="width:100%; border-collapse:collapse; font-size:11.5px; line-height:1.55; margin:0 0 12px;">
+    <thead>
+      <tr>
+        <th style="text-align:left; padding:7px 9px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:#872657; width:180px;">Question</th>
+        <th style="text-align:left; padding:7px 9px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:#872657;">Decision</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Angular &rarr; React rewrite</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>No.</strong> Extract a shared TS API client and domain types instead (~1 week). Revisit only if Angular becomes a measured velocity blocker.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Per-language DB tables</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>No.</strong> 2&ndash;5M lexeme rows is ordinary Postgres. Partition <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">review_events</code> by month only.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Prefill the whole lexicon</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>No.</strong> Write-through cache + 10k-lemma warm-up + book-driven enrichment.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Oxford / WordsAPI / Twinword</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>No.</strong> An LLM produces a richer structured entry for a fraction of a cent and you own it.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Frontier model at runtime</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>No.</strong> Nano/flash for cached generation, mid-tier for translation and adaptation, frontier only for designing prompts.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Launch at $5, raise later</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>No.</strong> Launch at target price with a generous free tier; grandfather founding members.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Chat as a marketed feature</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>No.</strong> Transport for shared learning items and study-buddy pairs. Never on the landing page.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">DeepL for book translation</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>No.</strong> ~5&ndash;30&times; more expensive per novel and worse at literary register.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">AI-generated book covers</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>No.</strong> Typographic covers. This audience is hostile to AI art and it undercuts the literary positioning.</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Games, PvP, streaks</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>Parked</strong> until the core loop retains anyone.</td></tr>
+    </tbody>
+  </table>
+  <div style="background:#F9F6F5; border-radius:12px; padding:13px 16px; margin:0 0 18px; break-inside:avoid;">
+    <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#872657;">Governing engineering principle</span>
+    <p style="margin:5px 0 0; font-size:11.5px; line-height:1.6;">Pay a model at write time, serve deterministically at read time. Cache every reusable artifact with its model and prompt version. Never call a model on a path a user waits for unless the result is new. Cache warming rides on content processing: every book ingested enqueues enrichment for its vocabulary, so the library builds the lexicon.</p>
+  </div>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">7 &middot; The domain model</h2>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">LearningItem</code> replaces <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">Card</code> as the domain object; a card becomes one presentation of an item.</p>
+  <div style="background:#F9F6F5; border-radius:12px; padding:14px 16px; margin:0 0 10px; font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.75; break-inside:avoid;">
+    LearningItem<br>
+    &nbsp;&nbsp;language, written form, normalized form, lemma<br>
+    &nbsp;&nbsp;type: word | phrase | chunk | template<br>
+    &nbsp;&nbsp;part of speech, selected sense<br>
+    &nbsp;&nbsp;learning intent: understand | produce | pronounce | disambiguate | chunk<br>
+    &nbsp;&nbsp;translations (multiple fluent languages)<br>
+    &nbsp;&nbsp;source contexts + encounter history<br>
+    &nbsp;&nbsp;frequency evidence with provenance<br>
+    &nbsp;&nbsp;confusion edges<br>
+    &nbsp;&nbsp;memory state (FSRS, server-side)
+  </div>
+  <p style="margin:0 0 18px; font-size:12.5px; line-height:1.7;">Supporting tables: <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">Sense</code> (one spelling, many senses, different CEFR levels), <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">Encounter</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">ReviewEvent</code> (append-only, month-partitioned; a power user generates ~70k rows a year), <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">ConfusionEdge</code> (confused_with, false_friend, sounds_like, near_synonym).</p>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">8 &middot; Languages and economics</h2>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;"><strong>Target:</strong> DE first, then EN, then FR/ES. <strong>Bridge/fluent:</strong> UA, RU, PL, EN. Capability tiers run Basic &rarr; Supported &rarr; Enhanced &rarr; Almonium-grade; only DE and EN reach Enhanced at launch. Feature availability renders per language from data, never a hardcoded list.</p>
+  <table style="width:100%; border-collapse:collapse; font-size:11.5px; line-height:1.55; margin:0 0 10px;">
+    <thead>
+      <tr>
+        <th style="text-align:left; padding:7px 9px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:#872657;">Workload</th>
+        <th style="text-align:left; padding:7px 9px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:#872657; width:130px;">Cost</th>
+        <th style="text-align:left; padding:7px 9px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:#872657; width:120px;">Shape</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">One structured lexical entry (~800 output tokens)</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-family:'IBM Plex Mono',monospace;">~$0.0003</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">One-time, global</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Warming 10k lemmas &times; 2 languages</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-family:'IBM Plex Mono',monospace;">~$5</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">One-time</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Translating a 100k-word novel into one language</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-family:'IBM Plex Mono',monospace;">~$0.50&ndash;5</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">One-time per pair</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">A 50-book &times; 4-language parallel library</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-family:'IBM Plex Mono',monospace;">~$100&ndash;600</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">One-time</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">One user's monthly runtime AI, cache warm</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-family:'IBM Plex Mono',monospace;">cents</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Recurring</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>Text-to-speech</strong></td><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-family:'IBM Plex Mono',monospace;">real money</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>Linear per user</strong></td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">One custom EPUB import</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8; font-family:'IBM Plex Mono',monospace;">~$1&ndash;5</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Per user, per book</td></tr>
+      <tr><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">Support and content QA</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;">your hours</td><td style="padding:7px 9px; border-bottom:1px solid #edebe8;"><strong>The real bottleneck</strong></td></tr>
+    </tbody>
+  </table>
+  <p style="margin:0 0 18px; font-size:12.5px; line-height:1.7;"><strong>Target: ~$3k/month.</strong> At $12&ndash;15/month that is roughly 250 subscribers, not 600. The content ambition is not token-constrained; it is constrained by QA time and by whether anyone reads the books.</p>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">9 &middot; Freemium</h2>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;"><strong>The rule that decides everything:</strong> free where cost is amortised, paid where cost scales per user. A processed book or a cached lexical entry costs the same for ten readers or ten thousand &mdash; free. TTS, custom import and per-use generation cost every time &mdash; metered and paid.</p>
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:11px; margin:0 0 12px; break-inside:avoid;">
+    <div style="background:#F9F6F5; border-radius:12px; padding:13px 15px;">
+      <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#872657;">Free</span>
+      <div style="font-family:'Literata',serif; font-size:15px; font-weight:600; margin:2px 0 5px;">A real reading tool</div>
+      <p style="margin:0; font-size:11px; line-height:1.55;">Unlimited reading, unlimited lookup, unlimited review sessions, confusion detection and paraphrase rotation included. 100 saved items, 1 target and 1 fluent language, one adapted chapter as preview, 3 dessert stories a week. No audio, no import, no sync. Receives shared packs, cannot create them.</p>
+    </div>
+    <div style="background:#F9F6F5; border-radius:12px; padding:13px 15px;">
+      <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#872657;">Premium &middot; $12/mo, $120/yr</span>
+      <div style="font-family:'Literata',serif; font-size:15px; font-weight:600; margin:2px 0 5px;">Everything, unlimited</div>
+      <p style="margin:0; font-size:11px; line-height:1.55;">Unlimited items and languages, all level-adapted editions, cross-device sync, unlimited stories under fair use, 10 hours of book audio, 3 custom imports a month, pack creation, encounter history and statistics.</p>
+    </div>
+    <div style="background:#F9F6F5; border-radius:12px; padding:13px 15px;">
+      <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#872657;">Founding &middot; $8/mo, $80/yr</span>
+      <div style="font-family:'Literata',serif; font-size:15px; font-weight:600; margin:2px 0 5px;">First fifty, locked</div>
+      <p style="margin:0; font-size:11px; line-height:1.55;">Same as Premium. Say the number publicly and count it down honestly. A distinct Paddle price granting the same entitlement; the app reserves one of fifty durable slots before checkout and confirms from the webhook. Keep those records permanently.</p>
+    </div>
+  </div>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>The 100-item cap is the load-bearing limit.</strong> Someone who has saved a hundred words from a book has already had the experience and built something they do not want to lose. Two or three serious sessions reach it &mdash; long enough to see value, short enough to matter. LingQ's most common free-tier complaint is that the cap bites before users understand the system; do not repeat that.</p>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>Never gate</strong> reading, lookup, or confusion feedback. Reading is the SEO engine, lookup is cached and free to serve, and confusion detection is what people tell their friends about. <strong>Always gate</strong> audio, custom import, and anything generating fresh tokens per user per use.</p>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>Finite, not annoying.</strong> Ads, delays, lockouts and nagging modals make people leave and say bad things. A hundred words reached, with nothing degraded, is a natural boundary. Every limit should read as the end of a generous allocation rather than a punishment.</p>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>No trial.</strong> A generous free tier already does the job, indefinitely. Trials add webhook complexity, abuse handling, and a day-fifteen churn spike that makes early retention unreadable. Revisit once a paid funnel works.</p>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>Regional pricing</strong> at 40&ndash;60% of list for UA, CEE, LATAM, SEA via Paddle overrides. Note Ukrainians living in Germany bill in the EU band, so the wedge splits across both.</p>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>Enforcement needs three things before launch:</strong> a limits table rather than scattered <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">if premium</code> checks; the per-user, per-feature, per-model cost ledger; and a real soft ceiling above any &ldquo;fair use&rdquo; number, handled as a conversation rather than a silent cutoff. Internal and QA accounts use an audited access grant, never a fake subscription. The pricing page must describe only limits the backend enforces.</p>
+  <p style="margin:0 0 18px; font-size:12.5px; line-height:1.7;"><strong>Never charge for</strong> skins, avatars or cosmetics; streak repairs (Readlang sells these &mdash; it is a small revenue line and a large statement about what a product values); or the removal of friction you introduced in order to sell its removal.</p>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600; break-before:page;">10 &middot; What to build next</h2>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;">Work top to bottom. Do not start a P1 while a P0 is open. Effort: S under a day, M two to five days, L one to three weeks.</p>
+  <div style="background:#fff4f6; border-radius:12px; padding:13px 16px; margin:0 0 10px; break-inside:avoid;">
+    <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#872657;">P0 &mdash; nothing matters until these are done</span>
+    <div style="font-size:11.5px; line-height:1.65; margin-top:5px;">
+      <div><strong>Landing page</strong> (M) &mdash; today the login screen is the landing page and it converts nobody.</div>
+      <div><strong>Public no-signup Discover demo</strong> (M) &mdash; a stranger pastes a German sentence and gets the full word sheet. The conversion mechanic.</div>
+      <div><strong>Product analytics, PostHog</strong> (S) &mdash; signup, first lookup, first save, first completed session, D1/D7/D30, book opened, progress %, share created/opened, subscribe, cancel, platform on every event.</div>
+      <div><strong>External-cost ledger</strong> (M) &mdash; impossible to retrofit, trivial now.</div>
+      <div><strong>Terms and privacy that are not placeholders</strong> (S) &mdash; payments, chat, analytics, personal data. Real liability.</div>
+      <div><strong>Align the pricing page with what the backend enforces</strong> (S) &mdash; it currently promises five things that do not exist.</div>
+      <div><strong>Purge leaked credentials from the book processor</strong> (S), and <strong>verify the B2 restore path</strong> (S) &mdash; backups never restored are not backups.</div>
+    </div>
+  </div>
+  <div style="background:#F9F6F5; border-radius:12px; padding:13px 16px; margin:0 0 10px; break-inside:avoid;">
+    <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#872657;">P1 &mdash; the core loop, end to end</span>
+    <p style="margin:5px 0 4px; font-size:11.5px; line-height:1.6;">encounter &rarr; understand &rarr; save &rarr; review &rarr; varied retrieval &rarr; diagnose &rarr; re-encounter</p>
+    <div style="font-size:11.5px; line-height:1.65;">
+      <div><strong>Domain:</strong> introduce <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">LearningItem</code> alongside <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">Card</code> (L); <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">Sense</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">Encounter</code>, partitioned <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">ReviewEvent</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">ConfusionEdge</code>; a paraphrase pool of 4&ndash;6 wordings per sense, generated once at creation.</div>
+      <div style="margin-top:4px;"><strong>Review:</strong> scheduling to the backend on FSRS (L) &mdash; kill device-local intervals, do not invent your own; rotate the prompt form every review; fuzzy and semantic answer acceptance; <strong>confusion-aware wrong-answer feedback</strong> (M, the single most distinctive shippable feature); progressive weighted hints; leech handling that never makes a user press &ldquo;remembered&rdquo; to escape a card; the dessert story.</div>
+      <div style="margin-top:4px;"><strong>Capture:</strong> one-tap save with sensible defaults; reader selection opens the same Discover sheet without losing position; optional intent selector; always capture the source sentence.</div>
+      <div style="margin-top:4px;"><strong>Discover pipeline:</strong> LLM-generated structured entry, write-through cached with model and prompt version (L); warm the top 8&ndash;10k DE and EN lemmas offline via batch (M, single-digit dollars); enqueue enrichment from book ingestion; a user correction flow, which is how the DB gets better than the model that seeded it; <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">wordfreq</code> for frequency, with provenance fields.</div>
+      <div style="margin-top:4px;"><strong>NLP:</strong> extract into a Python FastAPI service (L), killing the 500MB Stanford bundle in the JVM; phrase-template matcher built once by AI, matched deterministically at runtime.</div>
+    </div>
+  </div>
+  <div style="background:#F9F6F5; border-radius:12px; padding:13px 16px; margin:0 0 10px; break-inside:avoid;">
+    <span style="font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; color:#872657;">P2 &mdash; acquisition and content</span>
+    <div style="font-size:11.5px; line-height:1.65; margin-top:5px;">
+      <div><strong>Server-rendered public parallel-text pages</strong> (L) &mdash; an Angular SPA will not rank. One page per book, one per chapter, full text, no login wall. The only acquisition channel that scales without you. Plus sitemap, canonical URLs, schema.org Book markup, and auto-generated &ldquo;N most useful words in <em>Book</em>&rdquo; pages.</div>
+      <div style="margin-top:4px;"><strong>Shareable word packs</strong> with public preview; study-buddy pairing on the existing chat (density of two, not thousands).</div>
+      <div style="margin-top:4px;"><strong>Pipeline:</strong> Standard Ebooks as source where available, per-book YAML recipes, QA gates that fail loudly, canonical alignment groups (N editions not N&sup2;), embeddings + dynamic programming for sentence alignment with the LLM only on low-confidence spans, AI translation of PD originals into modern DE/UA labelled honestly.</div>
+      <div style="margin-top:4px;"><strong>Push notifications for due reviews</strong> &mdash; the biggest retention lever in SRS apps and the thing Readlang cannot do. Extension highlighting of learning items on any page. PPP price overrides. Fair-use limits in user-visible units. Credit-gated custom import, client-side EPUB parsing, private-only, with a takedown process.</div>
+    </div>
+  </div>
+  <p style="margin:0 0 18px; font-size:11.5px; line-height:1.65; color:#5f5560;"><strong>Lab &mdash; only with a stated metric:</strong> in-page word substitution (great demo, weak pedagogy: it drills L1 syntax), rare-word poker, graffiti handwriting, homophone exploration, PvP anything, any additional dictionary API, Elasticsearch or Kafka.</p>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">11 &middot; The design constitution, condensed</h2>
+  <p style="margin:0 0 10px; font-size:12.5px; line-height:1.7;">Full rules live in the design constitution document. These are the laws everything else derives from; if a rule and a law conflict, the law wins.</p>
+  <ol style="margin:0 0 12px; padding-left:20px; font-size:12.5px; line-height:1.7;">
+    <li>No brand hue exists that is not on the emblem's ramp. Status colours are the only exception.</li>
+    <li>Gradient means premium and nothing else. Every other action is solid.</li>
+    <li>Calm by default, warm at the edges. Surfaces holding content are quiet; personality lives only where there is nothing to read.</li>
+    <li>Two type families, self-hosted. Literata reads, IBM Plex Sans operates. No system stacks, no third family.</li>
+    <li>Every panel is a card. Same radius, same shadow, white on cream.</li>
+  </ol>
+  <div style="display:flex; margin:0 0 8px; border-radius:9px; overflow:hidden; break-inside:avoid;">
+    <div style="flex:1; background:#A1264C; padding:16px 6px 8px; font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:#fff;">#A1264C</div>
+    <div style="flex:1; background:#8F2356; padding:16px 6px 8px; font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:#fff;">#8F2356</div>
+    <div style="flex:1; background:#7D2060; padding:16px 6px 8px; font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:#fff;">#7D2060</div>
+    <div style="flex:1; background:#6C1D6A; padding:16px 6px 8px; font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:#fff;">#6C1D6A</div>
+    <div style="flex:1; background:#5A1A74; padding:16px 6px 8px; font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:#fff;">#5A1A74</div>
+    <div style="flex:1; background:#48177D; padding:16px 6px 8px; font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:#fff;">#48177D</div>
+    <div style="flex:1; background:#3A1462; padding:16px 6px 8px; font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:#fff;">#3A1462</div>
+    <div style="flex:1; background:#2C2530; padding:16px 6px 8px; font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:#fff;">#2C2530</div>
+  </div>
+  <p style="margin:0 0 8px; font-size:11.5px; line-height:1.65; color:#5f5560;">Steps one to six are the literal fills of the emblem; the last two are app-only extensions at the dark end. Roles: <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">#5A1A74</code> primary action and links, <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">#872657</code> eyebrows and inline emphasis, <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">#2C2530</code> all headings and dark surfaces, <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">#33292E</code> reader body only, <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">#F9F6F5</code> ground, <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">#fff</code> card. Status stays deliberately off-ramp: <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">#16BA7F</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">#fa4666</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:10.5px;">#ea6644</code>. Prohibited: pure black, any cyan, gradient text, brand-coloured third-party logos, and raspberry for plan limits &mdash; a paywall boundary is not an error.</p>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>Page header pattern, everywhere:</strong> eyebrow (11px, 550, 1.5px tracking, uppercase, <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">#872657</code>) &rarr; large serif headline &rarr; one-line subhead &rarr; one action. Do not invent alternatives.</p>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>Buttons:</strong> one primary per view, fully rounded, 600 weight. Primary solid <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">#5A1A74</code>; secondary outlines toward ink, never toward plum; premium is the only gradient, defined by two inset hairlines reading as struck metal. Disable for danger, never for incompleteness &mdash; an incomplete form keeps a live button that marks the offending field, because a disabled button cannot explain what is missing.</p>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>Register:</strong> calm on content surfaces (reader, library, cards, review, settings, landing hero), warm on contentless ones (empty states, errors, 404, offline, auth, onboarding, earned celebration). Almo the octopus and any particles live only in the second. Celebration is rationed to three events: first upgrade, book finished, session complete. Voice is second person, plain, unhurried; no exclamation marks, no emoji, no &ldquo;awesome&rdquo;, no streak threats. Progress is a record, never a threat: weeks are the unit, the user sets the target, &ldquo;no target&rdquo; is a first-class choice, and no number can be lost.</p>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>Surfaces:</strong> the card is the atom &mdash; white on cream, 24&ndash;28px on panels, 12&ndash;18px nested, no inner shadows. Flex or grid with gap for every sibling group. Blades are a gauge for countable units only; reading position is always a linear bar. Never two progress indicators on one screen.</p>
+  <p style="margin:0 0 18px; font-size:12.5px; line-height:1.7;"><strong>Accessibility:</strong> 4.5:1 on body text, 3:1 on large text and boundaries; status never by colour alone; 44px touch targets; visible focus rings; all ambient motion behind <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">prefers-reduced-motion</code>. Status must never look like action, and an action must never be labelled with a state.</p>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">12 &middot; Landing page rules</h2>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;">Server-rendered or statically generated. Five seconds to comprehension: one sentence, one moving image, one button. Show the real product &mdash; screen recordings beat illustrations, and every section gets one visual of the actual thing. One idea per section; one call to action repeated four times down the page. Specificity beats adjectives: &ldquo;forty-two books in six languages, aligned paragraph by paragraph&rdquo; beats &ldquo;an extensive library&rdquo;, and never write seamless, powerful, or revolutionary. Lead with what is rare and true, not with what took longest to build. Do not hide the price. Answer each objection where it arises. Medium length, eight or nine sections &mdash; the failure mode is filler, not length. Never claim to have invented parallel reading.</p>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>Order:</strong> hero &rarr; live paste demo &rarr; the bookshelf &rarr; understand any word &rarr; confusion-aware review (the wow section, most space) &rarr; the dessert story &rarr; send words to a friend &rarr; honest difference list &rarr; founder story &rarr; pricing &rarr; final call to action. The founder story replaces testimonials, because it is the only thing on the page a competitor cannot copy.</p>
+  <p style="margin:0 0 8px; font-size:12.5px; line-height:1.7;"><strong>Leave off:</strong> chat, games, the tech stack, streaks and heatmaps, a competing newsletter signup, &ldquo;trusted by&rdquo; logos you do not have, and any adjective doing the work a screenshot should do.</p>
+  <p style="margin:0 0 18px; font-size:12.5px; line-height:1.7;"><strong>Build order:</strong> hero plus final CTA today, even with nothing below it; then the bookshelf with real links to public reader pages; then the word sheet and the confusion section; then founder and pricing; then the live paste demo, which is engineering work rather than page work.</p>
+
+  <h2 style="margin:0 0 8px; font-family:'Literata',serif; font-size:20px; font-weight:600;">13 &middot; Open questions</h2>
+  <div style="background:#2C2530; border-radius:12px; padding:15px 17px; break-inside:avoid;">
+    <div style="font-size:11.5px; line-height:1.7; color:rgba(249,246,245,.85);">
+      <div>Does anyone outside the founder's circle complete the loop three times a week?</div>
+      <div>Do the public parallel-text pages rank and convert?</div>
+      <div>Is the UA&rarr;DE wedge real, or is the founder over-indexing on his own case?</div>
+      <div>Will level-adapted editions read well enough to be a selling point?</div>
+      <div>What actually creates willingness to pay: books, intelligence, or sync?</div>
+      <div style="margin-top:7px; color:rgba(249,246,245,.6);">Design-side: which layer owns tokens (Tailwind, Less, or Taiga UI); whether Discover, Review and Chat survive review unchanged; whether the retired effect classes still exist in the repo; and the unresolved ITC Benguiat wordmark licence.</div>
+    </div>
+  </div>
+
+</doc-page>
+</x-dc>
+</body>
+</html>

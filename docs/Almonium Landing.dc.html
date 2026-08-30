@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: #F9F6F5; color: #2C2530; font-family: 'IBM Plex Sans', sans-serif; }
+  a { color: #872657; text-decoration: none; }
+  a:hover { color: #5A1A74; }
+</style>
+</helmet>
+
+<div style="width:100%;">
+
+<div style="background:#F9F6F5; border-bottom:3px solid #6C7FA8;">
+  <div style="max-width:1120px; margin:0 auto; height:70px; padding:0 32px; display:flex; align-items:center; gap:26px;">
+    <div style="display:flex; align-items:center; gap:13px;">
+      <img src="./assets/logo.svg" alt="" style="width:31px; height:31px; display:block;">
+      <img src="./assets/wordmark.svg" alt="Almonium" style="height:22px; width:auto; display:block;">
+    </div>
+    <div style="margin-left:auto; display:flex; align-items:center; gap:22px;">
+      <a href="#books" style="font-size:14px; font-weight:500; color:#5f5560;">Books</a>
+      <a href="#pricing" style="font-size:14px; font-weight:500; color:#5f5560;">Pricing</a>
+      <a href="#founder" style="font-size:14px; font-weight:500; color:#5f5560;">Who built it</a>
+      <span style="border:1.5px solid #2C2530; color:#2C2530; font-size:14px; font-weight:600; padding:9px 20px; border-radius:9999px;">Sign in</span>
+    </div>
+  </div>
+</div>
+
+<div style="max-width:1120px; margin:0 auto; padding:72px 32px 96px; display:flex; flex-direction:column; gap:34px;">
+  <div style="max-width:24ch;">
+    <h1 style="margin:0; font-family:'Literata',serif; font-size:66px; font-weight:600; line-height:1.05; letter-spacing:-.5px;">Read anything.<br>Keep every word.</h1>
+  </div>
+  <p style="margin:0; font-size:19px; line-height:1.6; color:#5f5560; max-width:62ch; text-wrap:pretty;">Almonium turns the books you read into the vocabulary you actually use. Read in your target language with the translation beside it, tap any word to understand it, and let Almonium remember it until you can use it yourself.</p>
+  <div style="display:flex; align-items:center; gap:22px; flex-wrap:wrap;">
+    <span style="background:#5A1A74; color:#fff; font-size:16px; font-weight:600; padding:16px 34px; border-radius:9999px; box-shadow:0 6px 16px rgba(72,23,125,.24);">Start reading, no account needed</span>
+    <span style="font-size:14px; line-height:1.5; color:#5f5560;">Free forever for reading.<br>Nine books, four language pairs.</span>
+  </div>
+
+  <div style="margin-top:16px; border-radius:22px; overflow:hidden; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+    <div style="height:420px; background-image:repeating-linear-gradient(135deg,#f2ecef 0 11px,#e9e1e7 11px 22px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:#8b8290;">Hero recording</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; color:#a99aa8; text-align:center; max-width:44ch;">~8s loop of the parallel reader scrolling,<br>paragraphs staying aligned, a phrase lighting up<br>in matching colours on both sides.<br>No cursor, no chrome.</span>
+    </div>
+  </div>
+</div>
+
+<div style="background:#fff; border-top:1px solid #edebe8; border-bottom:1px solid #edebe8;">
+  <div style="max-width:1120px; margin:0 auto; padding:56px 32px; display:flex; gap:56px; align-items:center; flex-wrap:wrap;">
+    <div style="flex:1; min-width:320px; display:flex; flex-direction:column; gap:9px;">
+      <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Try it now</span>
+      <div style="font-family:'Literata',serif; font-size:32px; font-weight:600; line-height:1.15;">Paste a German sentence.</div>
+      <span style="font-size:14.5px; color:#5f5560;">No sign-up, no email.</span>
+    </div>
+    <div style="flex:1.2; min-width:380px; display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; gap:12px; align-items:center;">
+        <div style="flex:1; border:1px solid #d8cfd6; border-radius:9999px; padding:16px 22px; background:#F9F6F5; font-family:'Literata',serif; font-size:15.5px; color:#2C2530;">Er hatte das Zimmer nicht verlassen wollen.</div>
+        <span style="background:#5A1A74; color:#fff; font-size:15px; font-weight:600; padding:15px 28px; border-radius:9999px; white-space:nowrap;">Look up</span>
+      </div>
+      <span style="font-size:12.5px; color:#a99aa8;">The full word sheet opens here on the page. Saving is the only thing that needs an account.</span>
+    </div>
+  </div>
+</div>
+
+<div id="books" style="max-width:1120px; margin:0 auto; padding:88px 32px; display:flex; flex-direction:column; gap:26px;">
+  <div style="display:flex; flex-direction:column; gap:9px; max-width:62ch;">
+    <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">The shelf</span>
+    <div style="font-family:'Literata',serif; font-size:38px; font-weight:600; line-height:1.15;">Books, side by side</div>
+    <p style="margin:0; font-size:16px; line-height:1.65; color:#5f5560; text-wrap:pretty;">Every book is aligned paragraph by paragraph, so the translation never drifts out of step. Read the whole thing free, in your browser, without an account.</p>
+  </div>
+  <div style="display:flex; gap:20px; align-items:flex-end; flex-wrap:wrap;">
+    <div style="width:132px; height:196px; border-radius:8px; background:#2C2530; padding:20px 16px; display:flex; flex-direction:column; justify-content:space-between;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:1.4px; text-transform:uppercase; color:#c9a8c4;">Kafka</span>
+      <span style="font-family:'Literata',serif; font-size:21px; font-weight:600; line-height:1.15; color:#F9F6F5;">Die Verwand&shy;lung</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:rgba(249,246,245,.6);">DE / UA</span>
+    </div>
+    <div style="width:132px; height:196px; border-radius:8px; background:#5A1A74; padding:20px 16px; display:flex; flex-direction:column; justify-content:space-between;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:1.4px; text-transform:uppercase; color:#dcc2e6;">Shelley</span>
+      <span style="font-family:'Literata',serif; font-size:21px; font-weight:600; line-height:1.15; color:#F9F6F5;">Franken&shy;stein</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:rgba(249,246,245,.6);">EN / UA</span>
+    </div>
+    <div style="width:132px; height:196px; border-radius:8px; background:#8F2356; padding:20px 16px; display:flex; flex-direction:column; justify-content:space-between;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:1.4px; text-transform:uppercase; color:#f0c4d6;">Doyle</span>
+      <span style="font-family:'Literata',serif; font-size:21px; font-weight:600; line-height:1.15; color:#F9F6F5;">Sherlock Holmes</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:rgba(249,246,245,.6);">EN / DE</span>
+    </div>
+    <div style="width:132px; height:196px; border-radius:8px; background:#6C1D6A; padding:20px 16px; display:flex; flex-direction:column; justify-content:space-between;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:1.4px; text-transform:uppercase; color:#e2c0e0;">Fontane</span>
+      <span style="font-family:'Literata',serif; font-size:21px; font-weight:600; line-height:1.15; color:#F9F6F5;">Effi Briest</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:rgba(249,246,245,.6);">DE / EN</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; padding-bottom:8px; max-width:26ch;">
+      <span style="font-size:14px; line-height:1.55; color:#5f5560;">Each cover opens the full public reader. Nothing is behind a wall.</span>
+      <span style="border:1.5px solid #2C2530; color:#2C2530; font-size:14.5px; font-weight:600; padding:11px 24px; border-radius:9999px; align-self:flex-start;">Browse all books</span>
+    </div>
+  </div>
+</div>
+
+<div style="background:#fff; border-top:1px solid #edebe8;">
+  <div style="max-width:1120px; margin:0 auto; padding:88px 32px; display:flex; gap:56px; align-items:center; flex-wrap:wrap;">
+    <div style="flex:1; min-width:340px; display:flex; flex-direction:column; gap:9px;">
+      <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Discover</span>
+      <div style="font-family:'Literata',serif; font-size:38px; font-weight:600; line-height:1.15;">Tap a word. Understand it properly.</div>
+      <p style="margin:6px 0 0; font-size:16px; line-height:1.65; color:#5f5560; text-wrap:pretty;">Not a dictionary dump. Almonium shows the sense that fits this sentence, how common the word is, how it sounds, and which words it usually travels with.</p>
+      <p style="margin:10px 0 0; font-size:16px; line-height:1.65; color:#5f5560; text-wrap:pretty;">Speak more than one language? See the meaning in all of them. Sometimes Ukrainian catches a nuance that English flattens.</p>
+    </div>
+    <div style="flex:1; min-width:380px; border-radius:20px; overflow:hidden; background:#F9F6F5; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+      <div style="height:340px; background-image:repeating-linear-gradient(135deg,#f2ecef 0 11px,#e9e1e7 11px 22px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:#8b8290;">Word sheet recording</span>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; color:#a99aa8; text-align:center; max-width:38ch;">Selecting a word inside the reader,<br>the sheet rising over the text without<br>losing your place. Default state,<br>then the expansion.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="background:#2C2530;">
+  <div style="max-width:1120px; margin:0 auto; padding:96px 32px; display:flex; flex-direction:column; gap:34px;">
+    <div style="display:flex; flex-direction:column; gap:11px; max-width:70ch;">
+      <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#c9a8c4;">Review</span>
+      <div style="font-family:'Literata',serif; font-size:44px; font-weight:600; line-height:1.13; color:#F9F6F5;">Most apps say &ldquo;wrong.&rdquo; Almonium says which word you were thinking of.</div>
+      <p style="margin:8px 0 0; font-size:17px; line-height:1.65; color:rgba(249,246,245,.78); max-width:64ch; text-wrap:pretty;">If you answer with the meaning of a different word you are learning, Almonium recognises it, shows you both, and schedules the two together until you stop mixing them up.</p>
+      <p style="margin:0; font-size:17px; line-height:1.65; color:rgba(249,246,245,.78); max-width:64ch; text-wrap:pretty;">It also rewords the answer every time, so you learn the word instead of memorising the shape of the card.</p>
+    </div>
+    <div style="display:flex; gap:24px; align-items:stretch; flex-wrap:wrap;">
+      <div style="flex:1.3; min-width:400px; border-radius:20px; overflow:hidden;">
+        <div style="height:100%; min-height:300px; background-image:repeating-linear-gradient(135deg,#3a3340 0 11px,#332c39 11px 22px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:40px;">
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:#8b8290;">Confusion recording</span>
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; color:#7d7386; text-align:center; max-width:40ch;">A review card, a wrong answer typed in,<br>the feedback appearing beneath it.<br>Spend an afternoon on this one.</span>
+        </div>
+      </div>
+      <div style="flex:1; min-width:340px; background:#F9F6F5; border-radius:20px; padding:30px 32px; display:flex; flex-direction:column; gap:16px;">
+        <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">What it looks like</span>
+        <div style="font-family:'Literata',serif; font-size:23px; font-weight:600;">verlassen</div>
+        <div style="border:1px solid #d8cfd6; border-radius:12px; padding:13px 16px; font-size:15px; color:#5f5560;">to hand over</div>
+        <div style="background:#fff; border-radius:14px; padding:18px 20px; display:flex; flex-direction:column; gap:8px;">
+          <p style="margin:0; font-size:15px; line-height:1.65;"><strong style="color:#5A1A74;">verlassen</strong> means to leave. You were thinking of <strong style="color:#5A1A74;">&uuml;berlassen</strong>, to hand over.</p>
+          <div style="height:1px; background:#edebe8;"></div>
+          <div style="display:flex; gap:20px; font-size:13.5px; line-height:1.5; color:#5f5560;">
+            <div style="flex:1;"><span style="font-family:'Literata',serif; font-size:15px; font-weight:600; color:#2C2530;">verlassen</span><br>to leave a place</div>
+            <div style="flex:1;"><span style="font-family:'Literata',serif; font-size:15px; font-weight:600; color:#2C2530;">&uuml;berlassen</span><br>to leave something to someone</div>
+          </div>
+        </div>
+        <span style="font-size:13px; color:#a99aa8;">Both are now scheduled together.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="max-width:1120px; margin:0 auto; padding:88px 32px; display:flex; gap:56px; align-items:center; flex-wrap:wrap;">
+  <div style="flex:1; min-width:380px; border-radius:20px; overflow:hidden; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <div style="height:300px; background-image:repeating-linear-gradient(135deg,#f2ecef 0 11px,#e9e1e7 11px 22px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:#8b8290;">End-of-session screen</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; color:#a99aa8; text-align:center; max-width:36ch;">A short generated passage with the<br>words you missed highlighted inside it.</span>
+    </div>
+  </div>
+  <div style="flex:1; min-width:340px; display:flex; flex-direction:column; gap:9px;">
+    <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">The dessert</span>
+    <div style="font-family:'Literata',serif; font-size:38px; font-weight:600; line-height:1.15;">Finish with a story built from what you missed</div>
+    <p style="margin:6px 0 0; font-size:16px; line-height:1.65; color:#5f5560; text-wrap:pretty;">Every review session ends with a short piece of writing that quietly uses the words you just got wrong, in new sentences, at your level.</p>
+  </div>
+</div>
+
+<div style="background:#fff; border-top:1px solid #edebe8; border-bottom:1px solid #edebe8;">
+  <div style="max-width:1120px; margin:0 auto; padding:88px 32px; display:flex; gap:56px; align-items:center; flex-wrap:wrap;">
+    <div style="flex:1; min-width:340px; display:flex; flex-direction:column; gap:9px;">
+      <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Packs</span>
+      <div style="font-family:'Literata',serif; font-size:38px; font-weight:600; line-height:1.15;">Words are better shared</div>
+      <p style="margin:6px 0 0; font-size:16px; line-height:1.65; color:#5f5560; text-wrap:pretty;">Send a word, a phrase, or a whole list from a chapter you just read. Your friend can open it, read the context you saved, and keep the ones they want. They do not need an account to look.</p>
+    </div>
+    <div style="flex:0 0 300px; border-radius:20px; overflow:hidden; background:#F9F6F5;">
+      <div style="height:300px; background-image:repeating-linear-gradient(135deg,#f2ecef 0 11px,#e9e1e7 11px 22px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:#8b8290;">Shared pack</span>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; color:#a99aa8; text-align:center; max-width:28ch;">Opening on a phone,<br>previewing without an account.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="max-width:1120px; margin:0 auto; padding:88px 32px; display:flex; flex-direction:column; gap:26px;">
+  <div style="display:flex; flex-direction:column; gap:9px; max-width:60ch;">
+    <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">The difference</span>
+    <div style="font-family:'Literata',serif; font-size:38px; font-weight:600; line-height:1.15;">What Almonium does that other tools do not</div>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px;">
+    <div style="background:#fff; border-radius:20px; padding:24px 26px; font-size:15.5px; line-height:1.6; box-shadow:0 1px 3px rgba(0,0,0,.1);">Shows a word's meaning in every language you already speak, not just one</div>
+    <div style="background:#fff; border-radius:20px; padding:24px 26px; font-size:15.5px; line-height:1.6; box-shadow:0 1px 3px rgba(0,0,0,.1);">Knows the difference between understanding a word and being able to use it</div>
+    <div style="background:#fff; border-radius:20px; padding:24px 26px; font-size:15.5px; line-height:1.6; box-shadow:0 1px 3px rgba(0,0,0,.1);">Notices which words you confuse with each other</div>
+    <div style="background:#fff; border-radius:20px; padding:24px 26px; font-size:15.5px; line-height:1.6; box-shadow:0 1px 3px rgba(0,0,0,.1);">Gives you the same book at the level you can actually read</div>
+    <div style="background:#fff; border-radius:20px; padding:24px 26px; font-size:15.5px; line-height:1.6; box-shadow:0 1px 3px rgba(0,0,0,.1);">Keeps the whole history of a word: where you met it, how often, what tripped you up</div>
+  </div>
+</div>
+
+<div id="founder" style="background:#fff; border-top:1px solid #edebe8;">
+  <div style="max-width:1120px; margin:0 auto; padding:88px 32px; display:flex; gap:48px; align-items:flex-start; flex-wrap:wrap;">
+    <div style="flex:0 0 260px; border-radius:20px; overflow:hidden; background:#F9F6F5;">
+      <div style="height:300px; background-image:repeating-linear-gradient(135deg,#f2ecef 0 11px,#e9e1e7 11px 22px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:#8b8290;">Photo</span>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#a99aa8;">A real one.</span>
+      </div>
+    </div>
+    <div style="flex:1; min-width:380px; display:flex; flex-direction:column; gap:16px;">
+      <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Who built this</span>
+      <p style="margin:0; font-family:'Literata',serif; font-size:19px; line-height:1.65; color:#33292E; max-width:60ch; text-wrap:pretty;">I took my English to C2 on my own, using about a dozen disconnected tools. Then I started German and hit the same wall. A dictionary that does not know what I am reading, flashcards that do not know what I understood, a reader that forgets everything the moment I close it.</p>
+      <p style="margin:0; font-family:'Literata',serif; font-size:19px; line-height:1.65; color:#33292E; max-width:60ch;">Almonium is the tool I wanted. I use it every day.</p>
+      <p style="margin:0; font-size:15px; color:#5f5560;">&mdash; Yevhenii, Kyiv</p>
+    </div>
+  </div>
+</div>
+
+<div id="pricing" style="max-width:1120px; margin:0 auto; padding:88px 32px; display:flex; flex-direction:column; gap:26px;">
+  <div style="display:flex; flex-direction:column; gap:9px; max-width:60ch;">
+    <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Pricing</span>
+    <div style="font-family:'Literata',serif; font-size:38px; font-weight:600; line-height:1.15;">Reading is free, and stays free</div>
+    <p style="margin:0; font-size:16px; line-height:1.65; color:#5f5560;">Paying covers the parts that cost something every time you use them.</p>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px; align-items:start;">
+    <div style="background:#fff; border-radius:24px; padding:30px 32px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+      <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Free</span>
+      <div style="font-family:'Literata',serif; font-size:34px; font-weight:600;">&euro;0</div>
+      <p style="margin:0; font-size:14.5px; line-height:1.65; color:#5f5560;">Read every book, look up any word, keep 100 words. One language, unlimited review, confusion feedback included.</p>
+      <span style="align-self:flex-start; border:1.5px solid #2C2530; color:#2C2530; font-size:14.5px; font-weight:600; padding:11px 24px; border-radius:9999px; margin-top:4px;">Start reading</span>
+    </div>
+    <div style="background:#fff; border-radius:24px; padding:30px 32px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+      <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Premium</span>
+      <div style="font-family:'Literata',serif; font-size:34px; font-weight:600;">$12<span style="font-size:17px; font-weight:500; color:#a99aa8;"> / month</span></div>
+      <p style="margin:0; font-size:14.5px; line-height:1.65; color:#5f5560;">Everything unlimited, synced across devices, every level-adapted edition, ten hours of audio, three of your own books a month.</p>
+      <span style="align-self:flex-start; background:linear-gradient(135deg,#8F2356,#5A1A74); color:#fff; font-size:14.5px; font-weight:600; padding:12px 26px; border-radius:9999px; margin-top:4px; box-shadow:inset 0 1px 0 rgba(255,240,250,.28), 0 2px 6px rgba(72,23,125,.3);">Go Premium</span>
+    </div>
+    <div style="background:#2C2530; border-radius:24px; padding:30px 32px; display:flex; flex-direction:column; gap:14px;">
+      <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#c9a8c4;">Founding member</span>
+      <div style="font-family:'Literata',serif; font-size:34px; font-weight:600; color:#F9F6F5;">$8<span style="font-size:17px; font-weight:500; color:rgba(249,246,245,.55);"> / month</span></div>
+      <p style="margin:0; font-size:14.5px; line-height:1.65; color:rgba(249,246,245,.78);">Everything in Premium, at a price that never rises while you stay subscribed. Fifty places, and 38 are left.</p>
+      <span style="align-self:flex-start; background:linear-gradient(135deg,#8F2356,#5A1A74); color:#fff; font-size:14.5px; font-weight:600; padding:12px 26px; border-radius:9999px; margin-top:4px; box-shadow:inset 0 1px 0 rgba(255,240,250,.28), 0 2px 6px rgba(72,23,125,.3);">Take a place</span>
+    </div>
+  </div>
+  <p style="margin:0; font-size:14px; line-height:1.6; color:#a99aa8; max-width:70ch;">Prices in Ukraine, Central Europe, Latin America and South-East Asia are set lower to match local purchasing power. Cancel from your account page at any time.</p>
+</div>
+
+<div style="background:#F9F6F5; border-top:1px solid #edebe8;">
+  <div style="max-width:1120px; margin:0 auto; padding:96px 32px 104px; display:flex; flex-direction:column; align-items:center; gap:26px; text-align:center;">
+    <div style="font-family:'Literata',serif; font-size:46px; font-weight:600; line-height:1.15; max-width:20ch;">Start with one page of a book.</div>
+    <span style="background:#5A1A74; color:#fff; font-size:16px; font-weight:600; padding:16px 34px; border-radius:9999px; box-shadow:0 6px 16px rgba(72,23,125,.24);">Start reading, no account needed</span>
+  </div>
+</div>
+
+<div style="background:#2C2530;">
+  <div style="max-width:1120px; margin:0 auto; padding:40px 32px; display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:11px;">
+      <img src="./assets/logo.svg" alt="" style="width:25px; height:25px; display:block;">
+      <img src="./assets/wordmark-cream.svg" alt="Almonium" style="height:18px; width:auto; display:block;">
+    </div>
+    <span style="font-size:13.5px; color:#a99aa8;">Read anything. Keep every word.</span>
+    <div style="margin-left:auto; display:flex; gap:22px; font-size:13.5px;">
+      <a href="#books" style="color:#c9c0cc;">Books</a>
+      <a href="#pricing" style="color:#c9c0cc;">Pricing</a>
+      <a href="#founder" style="color:#c9c0cc;">Terms</a>
+      <a href="#founder" style="color:#c9c0cc;">Privacy</a>
+    </div>
+  </div>
+</div>
+
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#efe9e6">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<rect width="200" height="200" fill="#efe9e6"/>
+<circle cx="100" cy="100" r="70" fill="#5A1A74"/>
+<text x="100" y="118" font-family="serif" font-size="70" fill="#F9F6F5" text-anchor="middle">A</text>
+</svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: #efe9e6; color: #2C2530; }
+  a { color: #872657; text-decoration: none; }
+  a:hover { color: #5A1A74; }
+</style>
+</helmet>
+
+<div style="padding:44px 32px 100px; font-family:'IBM Plex Sans',sans-serif;">
+<div style="max-width:920px; margin:0 auto; display:flex; flex-direction:column; gap:22px;">
+
+  <div style="display:flex; flex-direction:column; gap:8px;">
+    <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:600; color:#872657;">Almonium · action list</div>
+    <h1 style="margin:0; font-family:'Literata',serif; font-size:34px; font-weight:600; line-height:1.15;">Everything to do, no argument attached</h1>
+    <p style="margin:0; font-size:14px; line-height:1.6; color:#5f5560;">Rationale for any line is in <a href="Almonium Constitution.dc.html">the constitution</a>. <span style="color:#fa4666; font-weight:500;">P0</span> breaks a rule or ships a bug · <span style="color:#ea6644; font-weight:500;">P1</span> visible quality · <span style="color:#5f5560; font-weight:500;">P2</span> new work.</p>
+  </div>
+
+  <div style="background:#fff4f6; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:11px;">
+    <div style="display:flex; align-items:center; gap:9px;"><span style="font-size:10.5px; letter-spacing:1.2px; font-weight:600; color:#fff; background:#fa4666; padding:3px 8px; border-radius:6px;">P0</span><span style="font-family:'Literata',serif; font-size:19px; font-weight:600;">Do first</span></div>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div>Replace <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#00d1ff → #8a2be2</code> in <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">email-templates/_fragments/styles.html</code> <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">.premium-btn</code>. Last cyan in the product.</div>
+      <div>Set <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">--premium-gradient: linear-gradient(135deg, #8F2356, #5A1A74)</code>.</div>
+      <div>Change primary action buttons to solid <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#5A1A74</code>; remove gradient from every non-premium control.</div>
+      <div>Self-host Literata + IBM Plex Sans (+ Plex Mono). Delete <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">--font-family: Cambria, Cochin, Georgia, Times</code>.</div>
+      <div>Remove all 9 per-component <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">font-family</code> declarations, including <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">fantasy</code> in <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">play.component.less</code> and the 6 Arial/Helvetica.</div>
+      <div>Make the reader use the type variables — drop its local <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">Georgia</code>/<code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">Palatino</code> override.</div>
+      <div>Delete the Premium pill in Settings; keep Manage plan as the only control to the portal.</div>
+      <div>Replace "Unhide" button with a labelled visibility switch.</div>
+      <div>Disable Delete Account until the typed username matches.</div>
+      <div>Fix email footer contrast: tagline <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#a99aa8</code>, unsubscribe <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#c9c0cc</code>.</div>
+      <div>Buy a desktop licence for the wordmark typeface after confirming the identification; keep the receipt.</div>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:20px; font-weight:600;">Colour</h2>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Add ramp steps <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#3A1462</code> and <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#2C2530</code> as variables. No emblem change.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Replace all pure black and all <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#3d3d3d</code> body text with <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#2C2530</code>.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Reader body text to <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#33292E</code>, never black.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Regenerate <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#ffeefb</code> and <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#f4d7e4</code> as mixes of <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#A1264C</code> with cream — currently too blue.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Recolour the black <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">∞</code> circle and the <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#1c1c1c</code> "Unlock private imports" pill to <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#48177D</code>.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Recolour the blue tooltip to ink background with cream text; fix its tail overlapping the card below.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Linked-account logos (Google, Apple, mail) to monochrome plum.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Blue <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">i</code> icon and the yellow-green level pill on "I'm Learning" to plum.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Email shell background <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#120222</code> → <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#2C2530</code>.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Keep status colours off-ramp — do not "harmonise" <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#16BA7F</code> or <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#fa4666</code>.</div>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:20px; font-weight:600;">Type</h2>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Decide which layer owns tokens — Tailwind, Less or Taiga — before consolidating.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Remove the unused Libre Baskerville <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">@fontsource</code> imports, or repoint book covers to Literata.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Formalise the eyebrow: 11px / 550 / 1.5px tracking / uppercase / <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#872657</code> / 8px above heading. Apply to every section header.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Email body to Georgia at <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">line-height:1.55</code>; remove Arial from button labels.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Add a reader font override with three options, Literata default.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Use Plex Mono for IPA, language codes and lemma forms.</div>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:20px; font-weight:600;">Buttons &amp; states</h2>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Build the pressed state: <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#3A1462</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">translateY(1px)</code>, inset shadow.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Primary hover: <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#48177D</code> + <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">translateY(-1px)</code> + <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">0 6px 16px rgba(72,23,125,.28)</code>, 160ms.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Disabled: set colours directly (<code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#e8e2e6</code> / <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#8b8290</code>), <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">opacity:1</code>, keep <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">cursor:not-allowed</code>.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Stop disabling buttons for incomplete forms — use outline→solid, and validate on click.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Retire <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">.full-gradient-btn</code> and all <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">background-clip:text</code> gradient text.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Promote the dark button to secondary solid: rest <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#2C2530</code>, hover fills ink. Keep it moving toward ink, not plum.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Avatar hover scale 1.09 → 1.04.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Add the unmet-condition line beneath any blocked action.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Label icon-only controls (copy link, QR, share).</div>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:20px; font-weight:600;">Premium</h2>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Star badge: gradient + two inset hairlines, no neon shadow. Hover 200deg + <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">translateY(-1px)</code>, 400ms.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Restore the shine sweep on the plan card: single 900ms hover pass, <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">rgba(255,252,248,.22)</code>, blur 6px. No infinite loop.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Restore upgrade confetti, fired off the checkout redirect route only.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Reword plan limits as caps, in grey with a plum link. Remove "only".</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Suppress the founder count until claimed &gt; 0, or phrase as a cap.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#fa4666;">P0</span> &nbsp;Remove the paywall step from onboarding; move the ask to the contextual wall.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Show the free tier as a real column on the paywall, not a "no thanks" link.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Add renewal date to the Plan card.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Check whether <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">.shining-effect</code> / <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">.custom-transition</code> still exist before rebuilding.</div>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:20px; font-weight:600;">Logo, emblem, motion</h2>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Welcome title and Get Started: solid <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#5A1A74</code>, and stop inheriting <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">--default-avatar-gradient</code>.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Invert loader timing: 3–4 blades by 250ms, bloom over the rest, hold.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Correct the fold direction — unfold on discover/load, fold on save.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Make the navbar logo navigate home and play the unfold during the transition.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Login lockup: emblem down to the wordmark's optical height, gap ≈ one cap-height.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Watermark emblem ≤6% opacity, cropped off an edge.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Cross-fade the rotating login greeting; fix container height so no reflow.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Ship a flat <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#7D2060</code> logo variant for favicon, email, print, monochrome.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Test the 10-blade mark at 16px favicon; draw a 5-blade variant only if it smudges.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Widen the print canvas for <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">logo-on-white-circle.svg</code> — <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">r="50%"</code> shaves the disc at left and right. Preserve its existing 91%/94% berth.</div>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:20px; font-weight:600;">Illustration &amp; mascot</h2>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div><span style="font-size:10px; font-weight:600; color:#fa4666;">P0</span> &nbsp;Withdraw the cartoon avatar set, the coral airbrushed Almo and the hard-hat render.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Commission one canonical Almo, engraved, plum ink, transparent PNG at 2×, 6–8 fixed poses.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Commission five engraved animal avatars in the same hand — owl, fox, stag, whale, hare. No octopus.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Remove custom photo upload; keep initials-on-gradient as default.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Name Almo in passing in empty-state copy. No nameplate, no "meet Almo".</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Add the greeting pose as onboarding's final screen, arms fanned to echo the emblem.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Verify the four mode icons still differ at 20px, especially inline vs overlay.</div>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:20px; font-weight:600;">Onboarding</h2>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Reorder: Welcome → Language → Level → Interests → Profile → Almo.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Language: target first in cards; detect native from locale as one correctable line.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Render per-language features from <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">languageFeatures</code>, not a hardcoded list. Remove the two-column legend and the blue info box.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Remove the last emoji (checkmark, dash) from the language screen.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Level: behavioural sentences lead, CEFR code demoted to a mono tag.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Profile: remove Skip, pre-fill both fields, say so in the subhead, show the real initials avatar.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Back must work on every step, including from any paywall.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Persist state per step so a drop-off resumes in place.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Build the "I'm not sure" placement test: 8 sentences ascending, assign at two consecutive misses, skippable, default B1.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Use the same behavioural descriptions in the Settings level dropdown.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Interests: soft floor of three via outline→solid, no hard block.</div>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:20px; font-weight:600;">Settings &amp; profile</h2>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Merge the Profile and Username cards into one.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Add stats to the profile card: words, books, level, weeks met.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Group the navbar toggles into Sections and Tools, with a line explaining what they control.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Wire the navbar language badge to the rail hue (currently yellow-outlined).</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Show interests inline on the profile card with an Add affordance.</div>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:20px; font-weight:600;">Email</h2>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div><span style="font-size:10px; font-weight:600; color:#fa4666;">P0</span> &nbsp;Replace the text-rendered wordmark with a 2× PNG of <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">title-purple.svg</code>, name in <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">alt</code>.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Unify <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">.button</code> to solid <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#5A1A74</code>; drop the 45deg dark→light gradient.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Body colour off <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#000000</code>; <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">line-height</code> 1.2 → 1.55.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Cut the subscription email from 118 words to ~65; move price, renewal date and cancellation into a panel.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Remove emoji and exclamation marks from the friendship emails.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Drop filler closing lines that restate the button.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Point CTAs at the specific object, not a list ("View @name's profile").</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;De-bold the greeting so the news line leads.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Consolidate the two header images into one wordmark.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Add a timestamp to notification emails.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;State the do-nothing outcome in every request email.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Convert to tables + inline styles; add VML for round buttons; add plain-text parts; test Gmail iOS and Outlook dark mode.</div>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:20px; font-weight:600;">Surfaces &amp; reader</h2>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Remove the hero panel's inner shadow.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Gate the particle field on <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">prefers-reduced-motion</code>, and keep it off content surfaces.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Give private imports the same footprint as library books — dashed edge and "Yours" mark, not a small icon.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#ea6644;">P1</span> &nbsp;Drop the "PREMIUM" chip inside the <em>Unlock private imports</em> button. A pill inside a pill, at 10px, in a second red-plum, is three materials in one control. The gradient already means premium: fill the button <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">linear-gradient(135deg,#8F2356,#5A1A74)</code> with the inset top hairline, keep the label alone in cream, and replace the leading <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">+</code> with the padlock — this gates a feature, so it takes the lock mark, not a word.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Language edge rail: 3px rule under the navbar sharing the badge hue; user-overridable from ~8 muted hues.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Blade gauge for review sessions and placement. Linear bar stays for book position.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Spine shelf view, thickness bounded 34–66px, hover lifts to a cover panel.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Word card as a dictionary plate — numbered senses, IPA in mono, source sentence as quotation.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Weekly harness: user-set target, weeks as the unit, "No target" allowed. No streak.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Marginalia in the reader — true margin with hairline leaders on desktop, push-up sheet on mobile.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Book-completion certificate, engraved, capped at 12 rarest words plus the total.</div>
+    </div>
+  </div>
+
+  <div style="background:#F9F6F5; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:12px;">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:20px; font-weight:600;">Merch &amp; open questions</h2>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:14px; line-height:1.55;">
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Mug: the unfold filmstrip, five stages left to right, monochrome plum until the final full-ramp bloom. No wordmark, no slogan.</div>
+      <div><span style="font-size:10px; font-weight:600; color:#5f5560;">P2</span> &nbsp;Print setup 2550×1050px at 300dpi, 0.25in clear of all edges, vector only. Proof the ramp — dye-sublimation pushes <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#48177D</code> toward blue.</div>
+      <div style="padding-top:6px; border-top:1px solid #e3dcdf;">Review Discover, Review and Chat — never analysed.</div>
+      <div>Decide the token layer before any consolidation lands.</div>
+      <div>Confirm the wordmark typeface identification before buying a licence.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+</x-dc>
+</body>
+</html>

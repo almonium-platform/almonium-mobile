@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  body { margin: 0; background: #F9F6F5; color: #3d3d3d; }
+  a { color: #872657; text-decoration: underline; }
+  a:hover { color: #A999A8; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#F9F6F5; padding:56px 24px 96px; font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;">
+<div style="max-width:900px; margin:0 auto; display:flex; flex-direction:column; gap:28px;">
+
+  <div style="display:flex; flex-direction:column; gap:14px; padding-bottom:8px;">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <img src="assets/logo.svg" alt="Almonium" style="height:50px; width:50px; background:#fff; border-radius:50%; padding:7px; box-sizing:border-box; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);" />
+      <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#958ba5; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight:600;">Almonium · visual system extraction</div>
+    </div>
+    <h1 style="margin:0; font-size:44px; font-weight:700; line-height:1.15; color:#3d3d3d; text-wrap:pretty;">The implicit design system behind the current interface</h1>
+    <p style="margin:0; font-size:18px; line-height:1.6; color:#555; max-width:70ch; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">Reconstructed from ten interface screenshots (login, onboarding step 3, avatar modal, Profile / Account / Learning settings, Play, Read index, Book detail, Compare Plans) and cross-checked against the shipped stylesheets in <code>almonium-fe</code>. No screen is proposed here; nothing is modernised. Where the screenshots and the code disagree, both readings are recorded.</p>
+  </div>
+
+  <sc-if value="{{ showLegend }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:16px 20px; background:#fff; border-radius:20px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+    <span style="font-size:13px; font-weight:600; color:#3d3d3d; margin-right:4px;">Evidence levels:</span>
+    <span style="display:inline-flex; align-items:center; padding:3px 9px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span>
+    <span style="font-size:12px; color:#7e7e7e;">directly visible, or literal in the stylesheet</span>
+    <span style="display:inline-flex; align-items:center; padding:3px 9px; border-radius:15px; background:#f8f3e7; color:#f0ad4e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Inferred</span>
+    <span style="font-size:12px; color:#7e7e7e;">a rule read off repetition across ≥2 screens</span>
+    <span style="display:inline-flex; align-items:center; padding:3px 9px; border-radius:15px; background:#f0f0f0; color:#7e7e7e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Unknown</span>
+    <span style="font-size:12px; color:#7e7e7e;">not determinable from static screens</span>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ showAnalysis }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex; flex-direction:column; gap:24px;">
+
+  <!-- 1 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">1</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Visual character and product personality</h2>
+    </div>
+    <p style="margin:0; font-size:16px; line-height:1.65; color:#3d3d3d; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">The product reads as a <strong>warm, bookish, slightly whimsical study companion</strong> — not a gamified streak machine and not an enterprise dashboard. Four traits carry that character:</p>
+    <ul style="margin:0; padding-left:22px; display:flex; flex-direction:column; gap:10px; font-size:15px; line-height:1.6; color:#3d3d3d; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <li><strong>Paper-warm, never white.</strong> Every page sits on the same off-white cream; white is reserved for raised cards. Visible on all ten screenshots. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span> <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px; background:#f1f1f1; color:#872657; padding:2px 6px; border-radius:5px;">--main-bg-color: #F9F6F5</code></li>
+      <li><strong>Literary serif voice.</strong> The wordmark, the top navigation and the game titles are set in a serif/display face while UI controls are sans — the product signals "reading" rather than "app". <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span> <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px; background:#f1f1f1; color:#872657; padding:2px 6px; border-radius:5px;">--font-family: Cambria…serif</code></li>
+      <li><strong>Very round geometry.</strong> Pills, capsules and 20–35px card radii everywhere; there is effectively no square corner in the product except the tiny CEFR/level chip. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Playful, illustrated mascots.</strong> Cartoon animal avatars, a hand-drawn vintage-engraving illustration set for games, drifting translucent card particles behind auth/onboarding. Personality is delivered by <em>illustration</em>, not by UI decoration. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Plum/aubergine as the single brand hue,</strong> with raspberry as its action shade. Nothing in the product uses a corporate blue except third-party auth and informational accents. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f8f3e7; color:#f0ad4e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Inferred</span></li>
+    </ul>
+    <p style="margin:0; font-size:15px; line-height:1.6; color:#555; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">Copy tone matches: second person, short, warm, occasionally teasing ("Why so mysterious? Share your interests with us!", "Almo will challenge your knowledge…", "Who will outsmart the other to claim victory?"). Feature names are single verbs — Discover, Review, Read, Play.</p>
+  </section>
+
+  <!-- 2 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">2</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Page structure and navigation</h2>
+    </div>
+    <p style="margin:0; font-size:16px; line-height:1.65; color:#3d3d3d; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">Three distinct shells, each with a fixed anatomy. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></p>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:14px; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <div style="background:#F9F6F5; border-radius:20px; padding:18px 20px; display:flex; flex-direction:column; gap:8px;">
+        <div style="font-size:13px; font-weight:700; color:#612b5e; letter-spacing:.4px;">A · APP SHELL</div>
+        <p style="margin:0; font-size:14px; line-height:1.55; color:#3d3d3d;">Sticky top bar, ~69px tall, cream (not white), ending in a 1px hairline that is <em>inset</em> from both edges rather than full-bleed. Left: circular white logo badge. Then serif nav links. Center: the target-language badge. Right, in fixed order: timer, chat, notifications, avatar.</p>
+        <div style="font-size:12px; color:#7e7e7e;">Play, Read, Book detail screenshots</div>
+      </div>
+      <div style="background:#F9F6F5; border-radius:20px; padding:18px 20px; display:flex; flex-direction:column; gap:8px;">
+        <div style="font-size:13px; font-weight:700; color:#612b5e; letter-spacing:.4px;">B · CENTRED HEADLESS</div>
+        <p style="margin:0; font-size:14px; line-height:1.55; color:#3d3d3d;">No navbar. One card floated dead-centre in the viewport over an animated particle field of pale pink/lilac rounded rectangles. Used for login and for onboarding steps (there with a pill stepper above the card).</p>
+        <div style="font-size:12px; color:#7e7e7e;">Login, Onboarding step 3</div>
+      </div>
+      <div style="background:#F9F6F5; border-radius:20px; padding:18px 20px; display:flex; flex-direction:column; gap:8px;">
+        <div style="font-size:13px; font-weight:700; color:#612b5e; letter-spacing:.4px;">C · MODAL / OVERLAY</div>
+        <p style="margin:0; font-size:14px; line-height:1.55; color:#3d3d3d;">Near-opaque dark scrim (#2b2b2b-ish, high opacity — the page beneath is visible but heavily dimmed), a cream or light-grey sheet, a centred bold title, and a grey circular ✕ in the top-right corner.</p>
+        <div style="font-size:12px; color:#7e7e7e;">Change Avatar, Compare Plans</div>
+      </div>
+    </div>
+
+    <ul style="margin:0; padding-left:22px; display:flex; flex-direction:column; gap:9px; font-size:15px; line-height:1.6; color:#3d3d3d; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <li><strong>Two navigation levels only.</strong> Global sections live in the navbar; within a section, sub-areas are centred underlined tabs (Settings: Profile · Account · Learning · App). There is no sidebar anywhere. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Active nav item</strong> = plum text (#520f6a) + 1px underline of the same colour. Inactive = body grey. Hover = violet. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Language switching is a persistent global control,</strong> not a setting: a small squared badge showing the two-letter code, opening a vertical stack of same-shaped badges directly beneath it. Each language gets its own generated colour (border + text), so the badge is also a status indicator. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Popovers, not pages,</strong> for avatar menu / notifications / timer: white, radius 25px, a soft 0 4px 8px shadow, and a light pink 1px border. They are fixed at <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px; background:#f1f1f1; color:#872657; padding:2px 6px; border-radius:5px;">top: 6em</code> and anchored to the right edge. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Progress is shown as a numbered pill stepper</strong> on a white capsule: filled plum circle + coloured label for the current step, grey circle + grey label for the rest; earlier steps stay dark, indicating they are re-enterable. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f8f3e7; color:#f0ad4e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Inferred</span></li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">3</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Layout, containers, grid, alignment, spacing rhythm</h2>
+    </div>
+    <ul style="margin:0; padding-left:22px; display:flex; flex-direction:column; gap:10px; font-size:15px; line-height:1.6; color:#3d3d3d; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <li><strong>One base container per page:</strong> full width, min-height = viewport − header, ~1.2rem padding, cream background, contents centred. Section pages override it to top-align and stack with a 2em gap. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Settings uses a masonry column layout, not a grid:</strong> a 820px-max, 2-column CSS <em>column</em> flow with 1rem gutters and 400px blocks that avoid breaking. This is why the Profile screenshot has cards of unequal heights stacking left and a taller Interests card on the right with a ragged bottom edge. Below 820px it collapses to one column. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Catalogue pages use auto-fit grids of fixed-size cards,</strong> centred on small screens and left-aligned from 600px up: games <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px; background:#f1f1f1; color:#872657; padding:2px 6px; border-radius:5px;">minmax(300px, max-content)</code> with 280×400px cards; books <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px; background:#f1f1f1; color:#872657; padding:2px 6px; border-radius:5px;">minmax(14rem, max-content)</code> with 14rem×22rem cards. Card <em>margin</em> (10–20px) does most of the visual spacing; grid gap is only 6px. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Detail pages are two-column and top-aligned:</strong> a fixed ~250px left rail (cover + one full-width primary action) and a fluid right column of stacked facts, gap 2rem; it stacks vertically under 768px. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Spacing rhythm is rem-based and coarse:</strong> 0.2 / 0.5 / 1 / 1.5 / 2rem, with 1rem as the default gap inside a card and 2rem between major blocks. Onboarding cards use padding 1.5rem and gap 2rem; settings blocks padding 1.3em and gap 1em. There is no 4/8px token scale — spacing is authored per component. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f8f3e7; color:#f0ad4e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Inferred</span></li>
+      <li><strong>Alignment convention:</strong> content left-aligned inside cards; card titles flush left at the top; the row's action (edit pencil, chevron, toggle) pushed to the far right with <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px; background:#f1f1f1; color:#872657; padding:2px 6px; border-radius:5px;">margin-left:auto</code>. Modals and auth cards centre everything. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f8f3e7; color:#f0ad4e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Inferred</span></li>
+      <li><strong>Onboarding cards are content-sized,</strong> min 20rem / max 30rem wide (40rem when the step shows plans) — they never stretch to fill. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li>The exact page max-width for Read / Play / Book is <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f0f0f0; color:#7e7e7e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Unknown</span> — those grids are full-bleed with only container padding, so on very wide monitors the behaviour cannot be judged from a 1920px screenshot.</li>
+    </ul>
+  </section>
+
+  <!-- 4 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:18px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">4</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Typography hierarchy and type scale</h2>
+    </div>
+    <p style="margin:0; font-size:16px; line-height:1.65; color:#3d3d3d; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">Three families coexist, each with a job: a <strong>serif</strong> for brand/reading surfaces, a <strong>UI sans</strong> (inherited from the component library) for controls and body, and <strong>Arial</strong> explicitly for the code-like language and level badges. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></p>
+
+    <div style="display:grid; grid-template-columns: 1.1fr 0.7fr 0.7fr 1.6fr; gap:0; border:1px solid #edebe8; border-radius:16px; overflow:hidden; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-size:13.5px;">
+      <div style="padding:10px 14px; background:#F9F6F5; font-weight:700; color:#612b5e;">Role</div>
+      <div style="padding:10px 14px; background:#F9F6F5; font-weight:700; color:#612b5e;">Size</div>
+      <div style="padding:10px 14px; background:#F9F6F5; font-weight:700; color:#612b5e;">Weight</div>
+      <div style="padding:10px 14px; background:#F9F6F5; font-weight:700; color:#612b5e;">Where</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Modal / plan display</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">~48px (clamp to 2rem)</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">700</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">"Change Avatar", "FREE", "PREMIUM", price</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Page / entity title</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">2rem / 32px</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">550</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Book title, "Compare Plans"</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Nav link</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">1.8em (~29px)</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">400 serif</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Discover / Review / Read / Play</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Card / step header</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">1.5rem / 24px</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">600</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">"Choose Your Languages", game titles</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Sub-entity</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">1.4rem / 22px</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">400</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Book author (muted #555)</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Popover title</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">1.3rem</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">550</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">"Notifications"</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Field label / body-L</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">1.1rem / 18px</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">550</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">"I'm fluent in", "Level", danger text</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Body / control</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">16px</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">400–500</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Default button label, book description, filters</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Settings card title</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">16px (13px mobile)</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">bold</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">"Profile", "Username", "Plan", "I Know"</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Small action</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">14–15px</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">550</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Outline button, unlink, card meta</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Caption / meta</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">0.7–0.85rem</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">400–550</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Rating, year, notification time (#999)</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Micro status</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">10px, uppercase</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">650</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">"VERIFIED", "LAST UPDATED"</div>
+
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">Inline chip text</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">0.55–0.7rem, uppercase, +1px tracking</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">550</div>
+      <div style="padding:10px 14px; border-top:1px solid #edebe8;">"B2 – C1" inside a language chip</div>
+    </div>
+
+    <ul style="margin:0; padding-left:22px; display:flex; flex-direction:column; gap:9px; font-size:15px; line-height:1.6; color:#3d3d3d; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <li><strong>550 is the house semibold.</strong> It appears far more often than 600 or 700 — an unusual but consistent signature. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Line-height</strong> is 1.5 for UI text and 1.6 for long-form reading (book description); titles run 1.2–1.3. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Title case</strong> for headings and buttons ("Choose Your Languages", "Continue Reading", "Delete Account"); sentence case for helper text. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f8f3e7; color:#f0ad4e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Inferred</span></li>
+      <li><strong>Uncertainty:</strong> the settings card titles are declared as the serif <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px; background:#f1f1f1; color:#872657; padding:2px 6px; border-radius:5px;">var(--font-family)</code> yet read as a bold sans in the screenshots; and the game card titles are set to the browser keyword <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px; background:#f1f1f1; color:#872657; padding:2px 6px; border-radius:5px;">font-family: fantasy</code>, which renders differently per OS. The intended face in both places is <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f0f0f0; color:#7e7e7e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Unknown</span>.</li>
+    </ul>
+  </section>
+
+  <!-- 5 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:18px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">5</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Colour roles</h2>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:8px; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:#F9F6F5; border:1px solid #edebe8;"></div>
+        <div style="font-size:14px; font-weight:600;">Page ground</div>
+        <div style="font-size:13.5px; color:#555;">#F9F6F5 — every page, the navbar, the settings tab strip, and the avatar modal sheet. Never used for a raised element.</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:#ffffff; border:1px solid #edebe8;"></div>
+        <div style="font-size:14px; font-weight:600;">Raised surface</div>
+        <div style="font-size:13.5px; color:#555;">#FFFFFF — cards, popovers, the pill stepper, the filter "pad", plan cards, logo badge. White = "this floats".</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:#3d3d3d;"></div>
+        <div style="font-size:14px; font-weight:600;">Primary text / neutral action</div>
+        <div style="font-size:13.5px; color:#555;">#3d3d3d — all body copy, and the border+label of the outline ("black &amp; white") button, which inverts to a #3d3d3d fill on hover.</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:linear-gradient(to right,#5A1A74,#8F2356);"></div>
+        <div style="font-size:14px; font-weight:600;">Primary commit</div>
+        <div style="font-size:13.5px; color:#555;">Plum→raspberry horizontal gradient on a full-width pill. Exactly one per view: "Continue", "Continue Reading", "Save".</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:#83397f;"></div>
+        <div style="font-size:14px; font-weight:600;">Brand accent / focus</div>
+        <div style="font-size:13.5px; color:#555;">#83397f (with #520f6a for the active nav link, #612b5e, #872657 for links). Fills the current step circle, checkbox ticks, toggle track, avatar-edit fob.</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:#958ba5;"></div>
+        <div style="font-size:14px; font-weight:600;">Hover / de-emphasis</div>
+        <div style="font-size:13.5px; color:#555;">Pale purple #958ba5 and lavender #A999A8 are the hover states <em>for accent things</em>; violet #9A49D2 is the hover for nav/icons.</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:linear-gradient(135deg,#00d1ff,#8a2be2);"></div>
+        <div style="font-size:14px; font-weight:600;">Premium</div>
+        <div style="font-size:13.5px; color:#555;">Cyan→violet gradient, used only for paid status: gradient text, gradient-outline "PREMIUM" button, the star badge, the Upgrade CTA, avatar ring. It is deliberately <em>outside</em> the warm palette so it reads as special.</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:#ffe3e9; border:1px solid #fa4666;"></div>
+        <div style="font-size:14px; font-weight:600;">Danger</div>
+        <div style="font-size:13.5px; color:#555;">#ffe3e9 zone background + #fa4666 text/border. Destructive actions live in a dedicated pink "Danger Zone" block at the bottom of the column, never inline.</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:#E7F8F2; border:1px solid #16BA7F;"></div>
+        <div style="font-size:14px; font-weight:600;">Success</div>
+        <div style="font-size:13.5px; color:#555;">#16BA7F on #E7F8F2, only as a small rounded status box ("✓ VERIFIED").</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:#f8f3e7; border:1px solid #f0ad4e;"></div>
+        <div style="font-size:14px; font-weight:600;">Pending / warning</div>
+        <div style="font-size:13.5px; color:#555;">#f0ad4e on #f8f3e7 for awaiting states; #ea6644 for "unverified, act now" (the verify button and its hover fill).</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:#ff7f00;"></div>
+        <div style="font-size:14px; font-weight:600;">Data highlight</div>
+        <div style="font-size:13.5px; color:#555;">Orange #ff7f00 is reserved for reading metadata: the CEFR range badge on a cover and the reading-progress ring.</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:#e6e5e5;"></div>
+        <div style="font-size:14px; font-weight:600;">Disabled</div>
+        <div style="font-size:13.5px; color:#555;">#e6e5e5 fill + #7e7e7e text, no border ("Current Plan"). Text-appearance controls instead drop to 0.5–0.6 opacity.</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:#edebe8;"></div>
+        <div style="font-size:14px; font-weight:600;">Hairline</div>
+        <div style="font-size:13.5px; color:#555;">#edebe8 for dividers and inactive borders; #eaeaea inside popovers. Borders are always 1px and always warm-grey — never black.</div>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px 1.1fr 1.9fr; gap:12px; align-items:center; padding:10px 12px; background:#F9F6F5; border-radius:14px;">
+        <div style="height:30px; border-radius:8px; background:linear-gradient(90deg,#f4b8c8,#a8e0d0,#c8dda0,#b9b3e8);"></div>
+        <div style="font-size:14px; font-weight:600;">Generated identity colours</div>
+        <div style="font-size:13.5px; color:#555;">Interests, languages and CEFR chips get a pastel hue derived from their own label, so the palette is data-driven and unbounded. Always pastel + dark text.</div>
+      </div>
+    </div>
+    <p style="margin:0; font-size:15px; line-height:1.6; color:#555; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">Rule of thumb visible across all screens: <strong>colour encodes meaning, not decoration.</strong> A screen has one cream ground, one white surface tier, one gradient CTA, and then colour only where the data itself is categorical (language, interest, level) or the state is exceptional (danger, success, pending, premium). <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f8f3e7; color:#f0ad4e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Inferred</span></p>
+  </section>
+
+  <!-- 6 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">6</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Border, radius, shadow, elevation, surface</h2>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <div style="background:#F9F6F5; border-radius:18px; padding:16px 18px;">
+        <div style="font-size:13px; font-weight:700; color:#612b5e; margin-bottom:6px;">RADIUS LADDER</div>
+        <p style="margin:0; font-size:13.5px; line-height:1.55; color:#3d3d3d;">4px inline level chip · 8px discount badge · 15–18px status box, filter pad, small pill · 20px settings block · 25px provider tile, popover, plan card · 25–35px generic card · 50em / 9999px all buttons, chips and toggles.</p>
+      </div>
+      <div style="background:#F9F6F5; border-radius:18px; padding:16px 18px;">
+        <div style="font-size:13px; font-weight:700; color:#612b5e; margin-bottom:6px;">TWO SHADOWS ONLY</div>
+        <p style="margin:0; font-size:13.5px; line-height:1.55; color:#3d3d3d;">Ambient: <code style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px;">0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px</code> for cards, badges, the logo, the avatar. Media: <code style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px;">0 2px 5px 1px rgba(0,0,0,.15)</code> for game and book cards. Popovers get a third, deeper <code style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px;">0 4px 8px rgba(0,0,0,.15)</code>.</p>
+      </div>
+      <div style="background:#F9F6F5; border-radius:18px; padding:16px 18px;">
+        <div style="font-size:13px; font-weight:700; color:#612b5e; margin-bottom:6px;">ELEVATION = SHADOW, NOT BORDER</div>
+        <p style="margin:0; font-size:13.5px; line-height:1.55; color:#3d3d3d;">Raised things have a shadow and no border. Bordered things (provider tiles, outline buttons, chips) are flat and interactive. The only element with both is the language badge and the popover.</p>
+      </div>
+      <div style="background:#F9F6F5; border-radius:18px; padding:16px 18px;">
+        <div style="font-size:13px; font-weight:700; color:#612b5e; margin-bottom:6px;">FROSTED OVERLAYS</div>
+        <p style="margin:0; font-size:13.5px; line-height:1.55; color:#3d3d3d;">Text over artwork sits on <code style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px;">rgba(255,255,255,.5)</code> + <code style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px;">backdrop-filter: blur(6px)</code> — book titles, the progress ring. Never a solid bar.</p>
+      </div>
+      <div style="background:#F9F6F5; border-radius:18px; padding:16px 18px;">
+        <div style="font-size:13px; font-weight:700; color:#612b5e; margin-bottom:6px;">DASHED = EDITABLE / EMPTY</div>
+        <p style="margin:0; font-size:13.5px; line-height:1.55; color:#3d3d3d;">A 1px dashed border marks "add / edit / drop here": the Interests Edit chip, the "+ Order" chip, the file drop-zone. Solid borders are committed values.</p>
+      </div>
+      <div style="background:#F9F6F5; border-radius:18px; padding:16px 18px;">
+        <div style="font-size:13px; font-weight:700; color:#612b5e; margin-bottom:6px;">SETTINGS EXCEPTION</div>
+        <p style="margin:0; font-size:13.5px; line-height:1.55; color:#3d3d3d;">Settings blocks deliberately kill the card shadow (<code style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px;">box-shadow: unset</code>) and use radius 20px — the section reads as flat panels on cream rather than floating cards.</p>
+      </div>
+    </div>
+    <p style="margin:0; font-size:14px; color:#7e7e7e; font-family: system-ui, sans-serif;">All of the above: <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span> in both screenshots and stylesheets.</p>
+  </section>
+
+  <!-- 7 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:18px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">7</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Component patterns</h2>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:16px; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h3 style="margin:0; font-size:17px; font-weight:700; color:#612b5e;">Buttons — four appearances, no more</h3>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px;">
+          <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px;">gradient</div><p style="margin:0; font-size:13px; line-height:1.5; color:#555;">Full-width pill, plum→raspberry, white bold 16px, padding 1.1rem 1.5rem, radius 9999px. Hover = opacity .75. The single commit action.</p></div>
+          <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px;">bw (outline)</div><p style="margin:0; font-size:13px; line-height:1.5; color:#555;">1px #3d3d3d, transparent, 14px/550, padding .5em 1em, pill. Hover inverts to dark fill + white text. Secondary actions: Manage, Link, Save.</p></div>
+          <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px;">underline</div><p style="margin:0; font-size:13px; line-height:1.5; color:#555;">Underlined black label, no chrome; hover swaps the underline for a #f0f0f0 pill. Tertiary/toggling actions: Hide, Unlink.</p></div>
+          <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px;">text</div><p style="margin:0; font-size:13px; line-height:1.5; color:#555;">Coloured label only ("Mark all as read"), 16px/550, drops to opacity .5 when busy or disabled.</p></div>
+        </div>
+        <p style="margin:0; font-size:13.5px; color:#7e7e7e;">Danger is a fifth, page-specific variant: white fill, 1px #fa4666, radius 35px, padding 15px 30px, bold 15px, icon + label, hover fills raspberry. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></p>
+      </div>
+
+      <div style="height:1px; background:#edebe8;"></div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h3 style="margin:0; font-size:17px; font-weight:700; color:#612b5e;">Icon buttons</h3>
+        <p style="margin:0; font-size:14px; line-height:1.6; color:#3d3d3d;">A 40×40px circle, 1px #3d3d3d border, white fill, a 24px <strong>Lucide icon at stroke-width 1</strong> inside; hover inverts to a dark fill. Used for every "edit this row" affordance (Profile, Username, Email, Password, I Know) and for "+ add". Bare Lucide icons (no circle) are used for share/QR/link, bookmark and downgrade. Loading swaps the glyph for a centred spinner in place. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></p>
+        <p style="margin:0; font-size:13.5px; color:#7e7e7e;">The icon set is mixed: Lucide (stroke, 1px) in the shell and settings rows, but Font Awesome solid glyphs in the settings tabs and the numbered stepper avatars. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></p>
+      </div>
+
+      <div style="height:1px; background:#edebe8;"></div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h3 style="margin:0; font-size:17px; font-weight:700; color:#612b5e;">Inputs</h3>
+        <p style="margin:0; font-size:14px; line-height:1.6; color:#3d3d3d;">Pill-shaped fields (radius 2rem/3rem) with a white fill and a very soft shadow instead of a visible border; label sits <em>above</em> the field in 1.1rem/550 ("I'm fluent in"). Multi-value fields hold removable chips inline plus a trailing ✕ (clear all) and ▾ (open list). Search is a pill with a leading magnifier and placeholder-only labelling. Selects are compact pills with a chevron, sized to content (6–9rem). Focus/accent colour inside forms is overridden to a deeper plum (#5A1A74); error state is #ac1c1c for both border and message. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></p>
+      </div>
+
+      <div style="height:1px; background:#edebe8;"></div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h3 style="margin:0; font-size:17px; font-weight:700; color:#612b5e;">Cards — three distinct kinds</h3>
+        <ul style="margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:14px; line-height:1.6; color:#3d3d3d;">
+          <li><strong>Settings/content panel:</strong> white, radius 20px, no shadow, padding 1.3em, gap 1em, bold 16px title flush top-left, one row of content, action right-aligned.</li>
+          <li><strong>Media card:</strong> fixed size, radius 1.1–1.5rem, image bleeds to all four edges, metadata in a frosted strip pinned to the bottom, status badges absolutely positioned in the corners (level top-right, progress/parallel top-left), hover scale 1.01.</li>
+          <li><strong>Illustrated game card:</strong> 280×400, radius 25px, a per-game pastel background colour tinting both the illustration area (70%) and a slightly translucent caption area (30%), centred display title + left-aligned 15px description in #666.</li>
+        </ul>
+        <p style="margin:0; font-size:13.5px; color:#7e7e7e;">Note: the game card's description area is a fixed 30% and the copy is clipped rather than truncated in the Play screenshot ("How far can you climb?" and "victory?" are cut off) — an observed defect, not a rule. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></p>
+      </div>
+
+      <div style="height:1px; background:#edebe8;"></div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h3 style="margin:0; font-size:17px; font-weight:700; color:#612b5e;">Tabs and segmented controls</h3>
+        <p style="margin:0; font-size:14px; line-height:1.6; color:#3d3d3d;">Two different mechanisms, used consistently for two different jobs. <strong>Route tabs</strong> (Settings) are centred, icon + label, transparent, with a plum underline under the active item and a full-width hairline beneath the strip. <strong>Filter tabs</strong> (Play: All / Solo / PvP) are a white "pad" with radius 18px holding pills; the active pill takes a pale pink fill (#ffeefb) with raspberry bold text (#8F2356). <strong>Segmented switches</strong> (Monthly / Yearly) are a bordered radius-10px group where the active half is white-raised and the inactive half is transparent, with a pink discount badge riding the inactive label. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></p>
+      </div>
+
+      <div style="height:1px; background:#edebe8;"></div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h3 style="margin:0; font-size:17px; font-weight:700; color:#612b5e;">Chips and badges</h3>
+        <ul style="margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:14px; line-height:1.6; color:#3d3d3d;">
+          <li><strong>Data chip</strong> (interest, language, level): pill, auto-generated pastel fill, dark text, no border, 0.5em gaps in a wrapping row. A chip may nest a micro "inner-text" box (1px solid, radius 4px, 0.55rem uppercase) for a level range.</li>
+          <li><strong>Action chip</strong>: same pill but transparent with a 1px dashed #3d3d3d border and a small leading icon — Edit, Add, + Order.</li>
+          <li><strong>Squared badge</strong> (<code style="font-family:ui-monospace,Menlo,monospace; font-size:12px;">.badge-btn</code>): radius 25%, Arial, +1px tracking, 1px coloured border, shadow, cream fill — the navbar language code and the CEFR level. Hover scale 1.02.</li>
+          <li><strong>Status box</strong>: radius 15px, tinted background, tiny circular glyph + 10px/650 uppercase label (VERIFIED, pending).</li>
+          <li><strong>Corner badge</strong>: solid orange pill, white bold 14px, radius 20px, absolutely positioned on artwork (level range on covers).</li>
+          <li><strong>Notification dot</strong>: tiny red dot pinned 2px/2px inside the top-right of the host icon or avatar.</li>
+          <li><strong>Premium star</strong>: 2.5rem gradient circle with a glow shadow, pulsing on hover.</li>
+        </ul>
+      </div>
+
+      <div style="height:1px; background:#edebe8;"></div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h3 style="margin:0; font-size:17px; font-weight:700; color:#612b5e;">Menus</h3>
+        <p style="margin:0; font-size:14px; line-height:1.6; color:#3d3d3d;">White popover, radius 25px, pink hairline border, 0.5rem vertical padding, 20rem-wide rows. Row = 24px Lucide icon + label, radius-md, hover #f3f4f6. Groups are separated by a 1px #eaeaea rule; the profile menu leads with an avatar + username/email identity block. Right-click context menus on notifications use the same row grammar, with destructive items in raspberry. Menu bodies scroll at max-height 60vh with a custom 8px scrollbar. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></p>
+      </div>
+
+      <div style="height:1px; background:#edebe8;"></div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <h3 style="margin:0; font-size:17px; font-weight:700; color:#612b5e;">Modals</h3>
+        <p style="margin:0; font-size:14px; line-height:1.6; color:#3d3d3d;">Radius 2rem sheet, min-width min(50rem, 60vw) for wide ones, background cream (Change Avatar) or light grey #f1f1f1 (Compare Plans) so that white content cards read as raised inside it. Header: centred, bold, <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px;">clamp(1rem, 7vw, 2rem)</code>, 1rem padding, 2rem margin below. Close = grey circular ✕ top-right. Bodies split into a narrow left "current value" column and a wider right "choose" column separated by a 1px vertical divider with 1rem breathing room; below 780px the split becomes vertical and the divider becomes horizontal. Confirmations are a separate title + message + confirm-text modal, sometimes with a countdown before the destructive button arms. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">8</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Information-density conventions</h2>
+    </div>
+    <ul style="margin:0; padding-left:22px; display:flex; flex-direction:column; gap:9px; font-size:15px; line-height:1.6; color:#3d3d3d; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <li><strong>One concern per card.</strong> Settings never groups two unrelated fields; "Email and Password" is one card because they are one concern, and Level/Active sit in one card because both belong to the selected language. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Loose overall, dense at the atom.</strong> Generous card padding and whitespace, but the atoms themselves are tight: 10px uppercase micro-labels, 0.7rem ratings, chips packed at 0.5em. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f8f3e7; color:#f0ad4e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Inferred</span></li>
+      <li><strong>Facts are compressed onto one line with · separators</strong> rather than a definition list: "English B2–C1 · 255 pages · First published in 1872 · Translated by Anthony Matonak". <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Overflow is summarised, not scrolled:</strong> "+1 more" next to a language chip; a filter row rather than a table of options. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Explanations are deferred to tooltips and (i) buttons,</strong> keeping the surface short; only genuinely constraining rules are printed inline ("Free plan lets you pick only 1 target language."). <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f8f3e7; color:#f0ad4e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Inferred</span></li>
+      <li><strong>Catalogues are cover-first:</strong> ~86% of a book card is artwork; text is minimal and overlaid. Density scales by adding cards, never by shrinking a card. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+    </ul>
+  </section>
+
+  <!-- 9 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">9</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Repeated interaction patterns</h2>
+    </div>
+    <ul style="margin:0; padding-left:22px; display:flex; flex-direction:column; gap:9px; font-size:15px; line-height:1.6; color:#3d3d3d; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <li><strong>Read-then-edit rows.</strong> A value is displayed, and a circular pencil on the far right switches that row into edit mode in place. Saving is a "bw" Save button inside the same card. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span> (Username, I Know, Interests)</li>
+      <li><strong>Inline optimistic actions with local spinners.</strong> Any icon or button can carry its own loading state — the glyph is replaced by a spinner and the label is made transparent, so layout never shifts. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Hover-swapped labels.</strong> The same control changes its word on hover to reveal the inverse action (Hidden → Unhide). <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Micro-scale on hover</strong> — 1.01–1.09 depending on element size (cards 1.01, badges 1.02, menu icons 1.05, avatars 1.09) with a 0.2s ease. Nothing lifts or changes shadow. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Dismiss by clicking outside.</strong> Every popover and dropdown closes on outside click; dropdowns also support arrow-key navigation with a focused-item style. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Destructive actions are always two-step</strong> and always physically separated into a pink Danger Zone; a confirmation modal (sometimes countdown-gated) follows. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></li>
+      <li><strong>Paywall as an interception.</strong> Locked capability is not hidden; it is shown with the constraint stated, and the Upgrade CTA opens the Compare Plans modal. Premium features are marked with ✨/gradient rather than a lock. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f8f3e7; color:#f0ad4e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Inferred</span></li>
+      <li><strong>Filters are a single horizontal row</strong> of heterogeneous controls (search, radio, select, sort direction) that collapses to a column under 768px; results react immediately, with no Apply button. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f8f3e7; color:#f0ad4e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Inferred</span></li>
+      <li>Whether card hovers reveal extra affordances (the book caption strip has an opacity/transform transition defined) is <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f0f0f0; color:#7e7e7e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Unknown</span> from static frames.</li>
+    </ul>
+  </section>
+
+  <!-- 10 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">10</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">State language</h2>
+    </div>
+    <div style="display:grid; grid-template-columns: 0.8fr 2.2fr; gap:0; border:1px solid #edebe8; border-radius:16px; overflow:hidden; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-size:14px;">
+      <div style="padding:11px 14px; background:#F9F6F5; font-weight:700; color:#612b5e;">State</div>
+      <div style="padding:11px 14px; background:#F9F6F5; font-weight:700; color:#612b5e;">How it appears</div>
+
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; font-weight:600;">Primary</div>
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; color:#3d3d3d;">One gradient pill, full width of its container, bottom of the card or under the cover. Never two per view.</div>
+
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; font-weight:600;">Secondary</div>
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; color:#3d3d3d;">Outline pill or circular icon button; sized to content, right-aligned.</div>
+
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; font-weight:600;">Selected</div>
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; color:#3d3d3d;">Three dialects: plum underline (route tabs), pale-pink fill + raspberry bold text (filter pills), white raised half (segmented). For chips, selection = having the coloured fill at all; for the language badge, a coloured border + larger type.</div>
+
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; font-weight:600;">Disabled</div>
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; color:#3d3d3d;">#e6e5e5 fill, #7e7e7e text, matching border, <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px;">cursor:not-allowed</code> ("Current Plan"). Gradient buttons instead stay coloured at opacity .75; text buttons at .5; disabled icons at .5 with hover suppressed. Future steps in the stepper use grey circle + grey label.</div>
+
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; font-weight:600;">Empty</div>
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; color:#3d3d3d;">A dashed "+ Add" chip plus one warm sentence of copy — "Why so mysterious? Share your interests with us!" Menus use a plain centred line ("You have no notifications."); catalogues use a 1.2rem padded message. No illustrations in empty states.</div>
+
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; font-weight:600;">Loading</div>
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; color:#3d3d3d;">Two tiers. In-control: absolutely centred spinner with the content hidden in place. Page-level: <strong>skeletons that mirror the real layout</strong> — radius-12px blocks at 60% / 40% / 15% widths for title / author / rating, then 16px description lines with a shorter last line.</div>
+
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; font-weight:600;">Error</div>
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; color:#3d3d3d;">Field-level only in the evidence: #ac1c1c border and message under a pill input. Destructive/irreversible framing uses the raspberry danger palette. A global toast/banner pattern is <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f0f0f0; color:#7e7e7e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Unknown</span> — none of the ten screenshots shows one.</div>
+
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; font-weight:600;">Pending</div>
+      <div style="padding:11px 14px; border-top:1px solid #edebe8; color:#3d3d3d;">Amber: #f8f3e7 box with #f0ad4e glyph and label, or a circular amber-outlined icon that fills amber on hover.</div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">11</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Reusable components (inventory)</h2>
+    </div>
+    <p style="margin:0; font-size:15px; line-height:1.6; color:#555; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">Elements that recur across ≥2 screenshots and therefore behave as components. <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#E7F8F2; color:#16BA7F; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Observed</span></p>
+    <div style="display:flex; flex-wrap:wrap; gap:9px; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <span style="padding:7px 14px; border-radius:9999px; background:#f4d7e4; color:#3d3d3d; font-size:13.5px;">App navbar (+ mobile popover)</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#d9d3ea; color:#3d3d3d; font-size:13.5px;">Target-language badge + dropdown</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#cfe4e8; color:#3d3d3d; font-size:13.5px;">Avatar (size, premium ring, edit fob)</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#dfe8c8; color:#3d3d3d; font-size:13.5px;">Notification popover + item</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#f6e0c8; color:#3d3d3d; font-size:13.5px;">Settings tabs</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#f4d7e4; color:#3d3d3d; font-size:13.5px;">Section block / card</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#d9d3ea; color:#3d3d3d; font-size:13.5px;">Button (4 appearances, loading, hint)</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#cfe4e8; color:#3d3d3d; font-size:13.5px;">Action icon (circular, self-loading)</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#dfe8c8; color:#3d3d3d; font-size:13.5px;">Edit button</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#f6e0c8; color:#3d3d3d; font-size:13.5px;">Info (i) button + tooltip</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#f4d7e4; color:#3d3d3d; font-size:13.5px;">CEFR badge</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#d9d3ea; color:#3d3d3d; font-size:13.5px;">Language chip / selector</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#cfe4e8; color:#3d3d3d; font-size:13.5px;">Interest chip grid</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#dfe8c8; color:#3d3d3d; font-size:13.5px;">Danger zone</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#f6e0c8; color:#3d3d3d; font-size:13.5px;">Status box (verified / pending)</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#f4d7e4; color:#3d3d3d; font-size:13.5px;">Confirm modal (± countdown)</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#d9d3ea; color:#3d3d3d; font-size:13.5px;">Paywall / Compare Plans</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#cfe4e8; color:#3d3d3d; font-size:13.5px;">Premium badge + gradient text</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#dfe8c8; color:#3d3d3d; font-size:13.5px;">Interactive CTA button</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#f6e0c8; color:#3d3d3d; font-size:13.5px;">File upload drop-zone</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#f4d7e4; color:#3d3d3d; font-size:13.5px;">Media card + corner badges</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#d9d3ea; color:#3d3d3d; font-size:13.5px;">Filter row / filter pad</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#cfe4e8; color:#3d3d3d; font-size:13.5px;">Star rating</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#dfe8c8; color:#3d3d3d; font-size:13.5px;">Step header (numbered)</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#f6e0c8; color:#3d3d3d; font-size:13.5px;">Pill stepper</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#f4d7e4; color:#3d3d3d; font-size:13.5px;">Particle background</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#d9d3ea; color:#3d3d3d; font-size:13.5px;">Social auth buttons</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#cfe4e8; color:#3d3d3d; font-size:13.5px;">Share link / QR</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#dfe8c8; color:#3d3d3d; font-size:13.5px;">Skeleton set</span>
+      <span style="padding:7px 14px; border-radius:9999px; background:#f6e0c8; color:#3d3d3d; font-size:13.5px;">Divider (1px, 1rem margins)</span>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#ea6644; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">12</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Inconsistencies and uncertain interpretations</h2>
+    </div>
+    <ul style="margin:0; padding-left:22px; display:flex; flex-direction:column; gap:10px; font-size:15px; line-height:1.6; color:#3d3d3d; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <li><strong>Three "selected" idioms</strong> (underline, pink pill, white segment) live within two clicks of each other. Deliberate per-context, but not a single rule.</li>
+      <li><strong>Radius is not tokenised.</strong> 18, 20, 25, 28, 35px and 1.1rem/1.5rem/2rem/3rem all appear for card-like surfaces. Any new screen must pick by matching its nearest neighbour, not by a scale.</li>
+      <li><strong>Two accent plums.</strong> #83397f is the global accent, but the Account tab overrides it to #5A1A74 locally, and the active nav link is #520f6a. Which is canonical is <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f0f0f0; color:#7e7e7e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Unknown</span>.</li>
+      <li><strong>Two gradients for one meaning.</strong> The CTA gradient is defined once as <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px;">#5A1A74→#8F2356</code> (left→right) but the onboarding Continue button in the screenshot reads darker on the left and brighter magenta on the right at a slight angle — the exact angle/stops per instance vary.</li>
+      <li><strong>Danger red vs error red.</strong> #fa4666 (danger zone) and #ac1c1c (form errors) coexist; the distinction is destructive-action vs validation, but it is never stated.</li>
+      <li><strong>Font mixing.</strong> Serif (brand), the library sans (UI), Arial (badges), and <code style="font-family:ui-monospace,Menlo,monospace; font-size:12px;">fantasy</code> (game titles) — four families, one of them OS-dependent. The screenshots show game titles in a slab serif that will not reproduce on every machine.</li>
+      <li><strong>Icon-set mixing.</strong> Lucide stroke icons and Font Awesome solid glyphs appear in the same viewport (settings tabs vs settings rows), so stroke weight and optical size are inconsistent.</li>
+      <li><strong>Clipped copy</strong> on game cards (fixed 30% caption) and on book captions where the frosted strip overlaps the rating.</li>
+      <li><strong>The Interests card breaks the "no border, no shadow" settings rule</strong> by being visually taller than its siblings in a masonry column, producing an intentional-looking but accidental asymmetry.</li>
+      <li><strong>Hover-only affordances</strong> (share icons, "Hide", card scale) cannot be judged for touch parity from these screenshots — <span style="display:inline-block; padding:2px 8px; border-radius:15px; background:#f0f0f0; color:#7e7e7e; font-size:10px; font-weight:650; letter-spacing:.8px; text-transform:uppercase;">Unknown</span>.</li>
+      <li><strong>Not determinable at all:</strong> dark mode, focus-ring styling for keyboard users, transition durations beyond the 0.2–0.3s seen in CSS, mobile navbar layout, the Discover / Review / chat surfaces (no screenshot supplied), and real type sizes for the library-owned components (they inherit the component library's own scale).</li>
+    </ul>
+  </section>
+
+  </div>
+  </sc-if>
+
+  <!-- 13 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:18px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">13</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Brand foundations — hue ramp, jurisdiction, type</h2>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <h3 style="margin:0; font-size:17px; font-weight:700; color:#612b5e;">The logo defines the palette</h3>
+      <p style="margin:0; font-size:14px; line-height:1.6; color:#3d3d3d; font-family: system-ui, sans-serif;">The emblem's ten blades ramp from raspberry to violet. Every brand hue in the product is already a sample from it — which is why <code style="font-family:ui-monospace,monospace; background:#F9F6F5; padding:1px 5px; border-radius:5px;">#872657</code> and <code style="font-family:ui-monospace,monospace; background:#F9F6F5; padding:1px 5px; border-radius:5px;">#612b5e</code> feel native and the old cyan did not.</p>
+      <div style="display:flex; border-radius:12px; overflow:hidden; height:44px; font-family: ui-monospace, monospace; font-size:10px; color:#fff;">
+        <div style="flex:1; background:#A1264C; display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px;">A1264C</div>
+        <div style="flex:1; background:#8F2356; display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px;">8F2356</div>
+        <div style="flex:1; background:#7D2060; display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px;">7D2060</div>
+        <div style="flex:1; background:#6C1D6A; display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px;">6C1D6A</div>
+        <div style="flex:1; background:#5A1A74; display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px;">5A1A74</div>
+        <div style="flex:1; background:#48177D; display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px;">48177D</div>
+      </div>
+      <p style="margin:0; font-size:13.5px; color:#7e7e7e; font-family: system-ui, sans-serif;"><strong>Rule:</strong> no brand hue may exist that is not on this ramp. Status colours (sage, amber, rose, info blue) are the only exceptions and are already fixed.</p>
+    </div>
+
+    <div style="height:1px; background:#edebe8;"></div>
+
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <h3 style="margin:0; font-size:17px; font-weight:700; color:#612b5e;">Calm by default, warm at the edges</h3>
+      <p style="margin:0; font-size:14px; line-height:1.6; color:#3d3d3d; font-family: system-ui, sans-serif;">Two registers coexist — bookish-intelligentsia and young-startup-playful. They are compatible only with a jurisdiction rule.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-family: system-ui, sans-serif;">
+        <div style="background:#F9F6F5; border-radius:16px; padding:14px;">
+          <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; color:#612b5e; margin-bottom:6px;">Calm — content surfaces</div>
+          <p style="margin:0; font-size:13px; line-height:1.55; color:#3d3d3d;">Reader, cards, review, library, settings, chat. Serif, cream, plum. No illustration, no emoji, no motion beyond state feedback.</p>
+        </div>
+        <div style="background:#F9F6F5; border-radius:16px; padding:14px;">
+          <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; color:#872657; margin-bottom:6px;">Warm — contentless surfaces</div>
+          <p style="margin:0; font-size:13px; line-height:1.55; color:#3d3d3d;">Empty states, errors, 404, offline, loading, onboarding, earned celebration. Mascot lives here and only here.</p>
+        </div>
+      </div>
+      <p style="margin:0; font-size:13.5px; color:#7e7e7e; font-family: system-ui, sans-serif;">The abstract emblem carries the intelligentsia signal; Almo carries the warmth. They never share a screen.</p>
+    </div>
+
+    <div style="height:1px; background:#edebe8;"></div>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <h3 style="margin:0; font-size:17px; font-weight:700; color:#612b5e;">Type — two families, self-hosted, no system stacks</h3>
+      <p style="margin:0; font-size:14px; line-height:1.6; color:#3d3d3d; font-family: system-ui, sans-serif;">Verified in the repo: <code style="font-family:ui-monospace,monospace; background:#F9F6F5; padding:1px 5px; border-radius:5px;">--font-family: Cambria, Cochin, Georgia, Times…</code> is a fallback stack, not a choice — Cambria on Windows, Cochin on Mac, Times on Linux. Nine competing declarations exist across components, including <code style="font-family:ui-monospace,monospace; background:#F9F6F5; padding:1px 5px; border-radius:5px;">font-family: fantasy</code> in play, and the reader hardcodes Georgia/Palatino and ignores the variable entirely. Libre Baskerville is already installed via <code style="font-family:ui-monospace,monospace; background:#F9F6F5; padding:1px 5px; border-radius:5px;">@fontsource</code> but reaches only book covers.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-family: system-ui, sans-serif;">
+        <div style="background:#F9F6F5; border-radius:16px; padding:16px;">
+          <div style="font-size:22px; font-weight:700; color:#3d3d3d; margin-bottom:4px;">Literata</div>
+          <p style="margin:0 0 8px; font-size:13px; line-height:1.55; color:#3d3d3d;">Wordmark, page titles, section headings, book titles, all reading content, the word on a card.</p>
+          <p style="margin:0; font-size:12.5px; line-height:1.5; color:#7e7e7e;">Built for long-form screen reading. Variable weight. Full Cyrillic — non-negotiable given the UA/RU wedge.</p>
+        </div>
+        <div style="background:#F9F6F5; border-radius:16px; padding:16px;">
+          <div style="font-size:22px; font-weight:700; color:#3d3d3d; margin-bottom:4px;">IBM Plex Sans</div>
+          <p style="margin:0 0 8px; font-size:13px; line-height:1.55; color:#3d3d3d;">Nav, buttons, chips, badges, metadata, form labels, counts, tooltips, eyebrow labels.</p>
+          <p style="margin:0; font-size:12.5px; line-height:1.5; color:#7e7e7e;">Cyrillic + Latin Extended for PL/DE diacritics. Mono sibling available for IPA and lemma forms. Not Inter.</p>
+        </div>
+      </div>
+      <p style="margin:0; font-size:13.5px; color:#7e7e7e; font-family: system-ui, sans-serif;">Alternative serif if a cooler tone is wanted: Source Serif 4. Pick one, not both. Reader may let users override the reading face — offer three options, not a menu — but the default is Literata.</p>
+    </div>
+  </section>
+
+  <!-- 14 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">14</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Premium as a material, not a colour</h2>
+    </div>
+    <p style="margin:0; font-size:15px; line-height:1.6; color:#3d3d3d; font-family: system-ui, sans-serif;">The cyan/violet neon was correctly removed — those hues are off-ramp and read as crypto/gaming to an audience that chose Almonium for not being gamified. But the <em>behaviour</em> was removed alongside the colour, which is why premium now reads as flat plum. Premium should feel like a different material: material is communicated by how a surface responds to light and touch, not by how loud it is.</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; font-family: system-ui, sans-serif;">
+      <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px; color:#612b5e;">Gradient</div><p style="margin:0; font-size:13px; line-height:1.55; color:#3d3d3d;">Sample from the emblem rather than from nearby: <code style="font-family:ui-monospace,monospace; font-size:11.5px;">linear-gradient(135deg,#8F2356,#5A1A74)</code>. Richer than the current #612b5e→#83397f and provably on-brand.</p></div>
+      <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px; color:#612b5e;">Shine sweep — restore</div><p style="margin:0; font-size:13px; line-height:1.55; color:#3d3d3d;">Keep <code style="font-family:ui-monospace,monospace; font-size:11.5px;">skewX(20deg)</code>, blur 6px. Highlight <code style="font-family:ui-monospace,monospace; font-size:11.5px;">rgba(255,252,248,.22)</code> not white .4. <strong>900ms single pass on hover</strong> — drop the 5s infinite loop, which is what made it feel cheap.</p></div>
+      <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px; color:#612b5e;">Star badge — restore hover, not glow</div><p style="margin:0; font-size:13px; line-height:1.55; color:#3d3d3d;">No neon shadow. On hover: <code style="font-family:ui-monospace,monospace; font-size:11.5px;">translateY(-1px)</code> + rotate gradient 135deg→200deg over 400ms. Catches light like metal without emitting any.</p></div>
+      <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px; color:#612b5e;">Confetti — keep</div><p style="margin:0; font-size:13px; line-height:1.55; color:#3d3d3d;">On successful upgrade only. Celebration is rationed, not banned — rationing it to exactly one event makes it land. Fire once; never on revisit.</p></div>
+    </div>
+    <div style="background:#F9F6F5; border-radius:16px; padding:14px; font-family: system-ui, sans-serif;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:6px; color:#612b5e;">CTA hover — currently too timid</div>
+      <pre style="margin:0; font-family:ui-monospace,monospace; font-size:12px; line-height:1.6; color:#3d3d3d; white-space:pre-wrap;">transform: translateY(-1px);
+box-shadow: 0 6px 16px rgba(72,23,125,.28), 0 2px 4px rgba(72,23,125,.16);
+transition: transform 160ms ease, box-shadow 160ms ease;</pre>
+    </div>
+    <div style="background:#fff4f6; border-radius:16px; padding:14px 16px; font-family: system-ui, sans-serif;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:6px; color:#872657;">Reserve the gradient for premium — the structural fix</div>
+      <p style="margin:0; font-size:13.5px; line-height:1.6; color:#3d3d3d;">Premium went off-palette because gradient had already been spent on every action button, leaving nothing for the paid tier to differ by. Take it back: <strong>primary commit becomes solid <code style="font-family:ui-monospace,monospace; font-size:11.5px;">#5A1A74</code></strong> (still the one action per view — solid is if anything more decisive), and <strong>gradient becomes exclusively premium</strong> — upgrade CTA, plan card, star, avatar ring, nothing else. Premium then reads as different without leaving the ramp, and an entire signalling channel is recovered for the cost of one variable. It also dissolves the purple-gradient-AI-startup association, which came from frequency rather than hue.</p>
+    </div>
+    <div style="background:#F9F6F5; border-radius:16px; padding:14px 16px; font-family: system-ui, sans-serif;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:6px; color:#612b5e;">Correction — the settings premium pill is a real button</div>
+      <p style="margin:0; font-size:13.5px; line-height:1.6; color:#3d3d3d;">It opens the same customer portal as Manage, so the earlier status-styled-as-action reading was wrong. The remaining problem is smaller: it is a <em>filled gradient</em> pill, which in this system means "the one commit action on this view," for a secondary, non-committing destination — and it duplicates Manage. Ship one control, not two: <code style="font-family:ui-monospace,monospace; font-size:11.5px;">Premium</code> as plain plum 550 status text, Manage as the only button. Not bold; status is a fact.</p>
+    </div>
+  </section>
+
+  <!-- 15 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#83397f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">15</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Mascot canon — Almo</h2>
+    </div>
+    <p style="margin:0; font-size:15px; line-height:1.6; color:#3d3d3d; font-family: system-ui, sans-serif;">The octopus is the right animal: nine brains and distributed cognition, eight arms for parallel texts, ink for writing, camouflage for adapting register. An owl maps to nothing and is Duolingo-adjacent. Keep the creature; fix the execution — currently three different octopuses across three screens, one of them coral (roughly plum's complement, so it reads as a foreign object), in a stock AI-render pose that violates the project's own "no AI art" decision.</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; font-family: system-ui, sans-serif;">
+      <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px; color:#612b5e;">Style</div><p style="margin:0; font-size:13px; line-height:1.55;">19th-c. engraved plate. Hatching, no airbrush, no gloss, no rim light. Merges with the vintage engravings already in the games.</p></div>
+      <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px; color:#612b5e;">Ink</div><p style="margin:0; font-size:13px; line-height:1.55;">Single colour, deep plum #612B5E, transparent background. Never coral, never full-colour, never two mascot hues in one product.</p></div>
+      <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px; color:#612b5e;">Set</div><p style="margin:0; font-size:13px; line-height:1.55;">Six to eight fixed poses, drawn once. Rest, reading, offering a card, searching, asleep, delight, waiting, greeting.</p></div>
+      <div style="background:#F9F6F5; border-radius:16px; padding:14px;"><div style="font-size:13px; font-weight:700; margin-bottom:6px; color:#612b5e;">Placement</div><p style="margin:0; font-size:13px; line-height:1.55;">Empty states, errors, loading, onboarding. <strong>Never the landing hero</strong> — a cute mascot above the fold reads as a beginner app to this audience.</p></div>
+    </div>
+    <p style="margin:0; font-size:13.5px; color:#7e7e7e; font-family: system-ui, sans-serif; line-height:1.6;"><strong>Consistency method:</strong> GPT-Image-1 exposes no seed, so prompt text alone never reproduces a character. Generate all six poses in <em>one</em> character-sheet render (identical by construction), crop them apart, then chain new poses by uploading the approved figure as reference — always referencing the original, never the latest output, or drift accumulates. For a permanent asset, have the final set vector-redrawn by an illustrator: resolution-independent, recolourable from one variable, and provably not an AI render. The greeting pose should fan its arms behind it, echoing the emblem's bloom.</p>
+  </section>
+
+  <!-- 16 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#16BA7F; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">16</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Action list — do and don't</h2>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; font-family: system-ui, sans-serif;">
+      <div style="display:flex; flex-direction:column; gap:9px;">
+        <div style="font-size:12px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; color:#16BA7F;">Do</div>
+        <ul style="margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px; font-size:13.5px; line-height:1.55; color:#3d3d3d;">
+          <li>Self-host Literata + IBM Plex Sans; delete all nine competing <code style="font-family:ui-monospace,monospace; font-size:11.5px;">font-family</code> declarations and drive everything from two variables.</li>
+          <li>Make the reader use the type variables instead of hardcoded Georgia/Palatino.</li>
+          <li>Draw a 5-blade reduced logo variant with ~1.6× blade width for anything ≤32px (favicon, tab bar).</li>
+          <li>Ship a flat <code style="font-family:ui-monospace,monospace; font-size:11.5px;">#7D2060</code> logo fallback for print, dark backgrounds and monochrome contexts.</li>
+          <li>Invert the loader timing: reach 3–4 blades within 250ms, spend the rest blooming, then hold.</li>
+          <li>Use the fold animation for save/collect and the unfold for load/discover — one motion, two meanings.</li>
+          <li>Re-sample <code style="font-family:ui-monospace,monospace; font-size:11.5px;">--premium-gradient</code> to <code style="font-family:ui-monospace,monospace; font-size:11.5px;">#8F2356→#5A1A74</code>.</li>
+          <li>Restore the shine sweep as a single 900ms hover pass, and the badge hover as lift + gradient rotation.</li>
+          <li>Keep the upgrade confetti; fire once, never on revisit.</li>
+          <li>Give status pills a treatment that cannot be mistaken for a button.</li>
+          <li>Lock one canonical Almo, plum ink, engraved, transparent PNG at 2× display size.</li>
+          <li>Formalise the <strong>eyebrow</strong> (kicker) — 11px, 550, ~1.5px tracking, uppercase, #872657, 8px above its heading — and use it for every section header. Eyebrow + large serif headline + one-line subhead + one dark action is the strongest template in the product.</li>
+          <li>Promote the dark button to <strong>secondary solid</strong>: rest #3d3d3d, hover #5A1A74, 160ms. It fills the gap between outline and primary.</li>
+          <li>Fold and unfold in the right direction: <strong>unfold = one becoming many</strong> (discover, load, expand a word into senses); <strong>fold = many becoming one</strong> (save, collect, commit to memory).</li>
+          <li>Clicking the navbar logo navigates home <em>and</em> plays the unfold during the route transition — loader and easter egg in one motion.</li>
+          <li>Cross-fade the rotating login greeting and fix its container height so "Marhaba" → "Здравствуйте" causes no reflow.</li>
+          <li>Regenerate the off-ramp pinks (#ffeefb, #f4d7e4) as mixes of #A1264C with cream. Keep #fa4666 and #16BA7F off-ramp deliberately — alarm and success should not harmonise.</li>
+          <li>Gate the particle field on <code style="font-family:ui-monospace,monospace; font-size:11.5px;">prefers-reduced-motion</code>.</li>
+          <li>Fire the upgrade confetti client-side off the checkout redirect, not from stored state. No schema change.</li>
+        </ul>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:9px;">
+        <div style="font-size:12px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; color:#fa4666;">Don't</div>
+        <ul style="margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px; font-size:13.5px; line-height:1.55; color:#3d3d3d;">
+          <li>Don't switch the main product to brown — Books diverges only in accent, and the shared cream substrate is already the system. Brown may support (rules, dividers, metadata) but never take the CTA.</li>
+          <li>Don't introduce any hue that isn't on the emblem ramp. Cyan is gone; keep it gone.</li>
+          <li>Don't leave black in the palette — the <code style="font-family:ui-monospace,monospace; font-size:11.5px;">∞</code> circle and the #1c1c1c "Unlock private imports" pill are drift. Use #48177D.</li>
+          <li>Don't ship <code style="font-family:ui-monospace,monospace; font-size:11.5px;">font-family: fantasy</code> in play.component.</li>
+          <li>Don't put Almo in the landing hero, the reader, or any surface holding real content.</li>
+          <li>Don't run infinite ambient animation on pricing — it reads as a slot machine.</li>
+          <li>Don't chain mascot generations from the newest output; always reference the original.</li>
+          <li>Don't put emoji back into empty states — the mascot carries the warmth.</li>
+          <li>Don't let the mascot and the emblem appear on the same screen.</li>
+          <li>Don't add a fourth type family for any reason.</li>
+          <li>Don't put a gradient on anything that isn't premium — that includes the onboarding "Get Started" button, which currently spends the token for decoration.</li>
+          <li>Don't redraw the wordmark. It is a drawn asset, not UI type; the Literata/Plex decision does not reach it. Convert it to outlines and leave it.</li>
+          <li>Don't run the particle field behind the reader, the library, or any surface holding content — auth, onboarding and the upgrade-success moment only.</li>
+          <li>Don't keep the hero panel's inner shadow. Inner shadow reads as recessed and contradicts a panel that is clearly raised; it is also the only one in the product.</li>
+          <li>Don't scale avatars 1.09 on hover — that is a visible pop. 1.04 matches the rest of the ladder.</li>
+          <li>Don't add an exclamation mark to the login greeting. It is the emoji's replacement and carries the same over-eagerness.</li>
+          <li>Don't ship two controls to one destination (Premium pill and Manage both open the portal).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 -->
+  <section style="background:#fff; border-radius:28px; box-shadow:0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1); padding:32px 36px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="width:28px; height:28px; border-radius:50%; background:#ea6644; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: system-ui, sans-serif;">17</span>
+      <h2 style="margin:0; font-size:26px; font-weight:700; color:#3d3d3d;">Assumptions about the code — verified and open</h2>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px; font-family: system-ui, sans-serif; font-size:13.5px; line-height:1.6; color:#3d3d3d;">
+      <div style="display:flex; gap:10px; align-items:flex-start; background:#E7F8F2; border-radius:14px; padding:12px 14px;"><span style="flex:0 0 auto; font-size:11px; font-weight:700; color:#16BA7F; letter-spacing:1px; padding-top:2px;">CONFIRMED</span><p style="margin:0;"><code style="font-family:ui-monospace,monospace; font-size:11.5px;">--font-family</code> in <code style="font-family:ui-monospace,monospace; font-size:11.5px;">variables.less</code> is the Cambria/Cochin/Georgia/Times fallback stack. Nine separate <code style="font-family:ui-monospace,monospace; font-size:11.5px;">font-family</code> declarations across components, six of them Arial/Helvetica, one <code style="font-family:ui-monospace,monospace; font-size:11.5px;">fantasy</code>.</p></div>
+      <div style="display:flex; gap:10px; align-items:flex-start; background:#E7F8F2; border-radius:14px; padding:12px 14px;"><span style="flex:0 0 auto; font-size:11px; font-weight:700; color:#16BA7F; letter-spacing:1px; padding-top:2px;">CONFIRMED</span><p style="margin:0;">Libre Baskerville is already a dependency (<code style="font-family:ui-monospace,monospace; font-size:11.5px;">@fontsource</code>, three weights imported in <code style="font-family:ui-monospace,monospace; font-size:11.5px;">styles.scss</code>) but is referenced in exactly one component — book covers. The type infrastructure exists and is unused.</p></div>
+      <div style="display:flex; gap:10px; align-items:flex-start; background:#E7F8F2; border-radius:14px; padding:12px 14px;"><span style="flex:0 0 auto; font-size:11px; font-weight:700; color:#16BA7F; letter-spacing:1px; padding-top:2px;">CONFIRMED</span><p style="margin:0;">The reader defines its own <code style="font-family:ui-monospace,monospace; font-size:11.5px;">--font-family: 'Georgia', serif</code> plus a Palatino block, bypassing the global variable. This is why the reading surface renders as Times on Linux.</p></div>
+      <div style="display:flex; gap:10px; align-items:flex-start; background:#E7F8F2; border-radius:14px; padding:12px 14px;"><span style="flex:0 0 auto; font-size:11px; font-weight:700; color:#16BA7F; letter-spacing:1px; padding-top:2px;">CONFIRMED</span><p style="margin:0;">No cyan remains: <code style="font-family:ui-monospace,monospace; font-size:11.5px;">#00d1ff</code> and <code style="font-family:ui-monospace,monospace; font-size:11.5px;">#8a2be2</code> appear nowhere in the codebase. <code style="font-family:ui-monospace,monospace; font-size:11.5px;">--premium-gradient</code> is <code style="font-family:ui-monospace,monospace; font-size:11.5px;">#612b5e→#83397f</code>.</p></div>
+      <div style="display:flex; gap:10px; align-items:flex-start; background:#E7F8F2; border-radius:14px; padding:12px 14px;"><span style="flex:0 0 auto; font-size:11px; font-weight:700; color:#16BA7F; letter-spacing:1px; padding-top:2px;">CORRECTED</span><p style="margin:0;">The founder count is <strong>not</strong> hardcoded copy — <code style="font-family:ui-monospace,monospace; font-size:11.5px;">paywall.component.ts</code> fetches <code style="font-family:ui-monospace,monospace; font-size:11.5px;">/founding-members</code> and binds real capacity and claimed values. Earlier advice to remove it was wrong. The remaining concern is presentational only: "50 of 50 places left" reads as "nobody bought this" while claimed is 0. Suppress the sentence until claimed &gt; 0, or phrase it as a cap.</p></div>
+      <div style="display:flex; gap:10px; align-items:flex-start; background:#E7F8F2; border-radius:14px; padding:12px 14px;"><span style="flex:0 0 auto; font-size:11px; font-weight:700; color:#16BA7F; letter-spacing:1px; padding-top:2px;">CORRECTED</span><p style="margin:0;">The settings premium pill is <strong>not</strong> a status styled as a button — it is a real button opening the customer portal, the same destination as Manage. The screenshot-only reading was wrong. What remains is that it is a filled gradient (reserved tier) on a secondary action, duplicating Manage.</p></div>
+      <div style="display:flex; gap:10px; align-items:flex-start; background:#fff4e8; border-radius:14px; padding:12px 14px;"><span style="flex:0 0 auto; font-size:11px; font-weight:700; color:#ea6644; letter-spacing:1px; padding-top:2px;">OPEN</span><p style="margin:0;">Whether the removed <code style="font-family:ui-monospace,monospace; font-size:11.5px;">.shining-effect</code>, <code style="font-family:ui-monospace,monospace; font-size:11.5px;">.custom-transition</code> and confetti classes still exist anywhere or were deleted outright — this determines whether restoring them is an edit or a rewrite.</p></div>
+      <div style="display:flex; gap:10px; align-items:flex-start; background:#fff4e8; border-radius:14px; padding:12px 14px;"><span style="flex:0 0 auto; font-size:11px; font-weight:700; color:#ea6644; letter-spacing:1px; padding-top:2px;">OPEN</span><p style="margin:0;">Tailwind is present (<code style="font-family:ui-monospace,monospace; font-size:11.5px;">tailwind.config.js</code>) alongside Less and Taiga UI. Which layer owns typography and spacing tokens is undetermined, and the font consolidation should land in whichever one is authoritative.</p></div>
+      <div style="display:flex; gap:10px; align-items:flex-start; background:#fff4e8; border-radius:14px; padding:12px 14px;"><span style="flex:0 0 auto; font-size:11px; font-weight:700; color:#ea6644; letter-spacing:1px; padding-top:2px;">OPEN</span><p style="margin:0;">Discover, Review and Chat were never supplied as screenshots and are unanalysed. Any rule here may need amendment once they are seen.</p></div>
+    </div>
+  </section>
+
+  <!-- Constitution -->
+  <section style="background:linear-gradient(135deg,#3b1436,#5A1A74 55%,#8F2356); border-radius:28px; padding:38px 40px; display:flex; flex-direction:column; gap:20px; color:#fff;">
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#f4d7e4; font-family: system-ui, sans-serif; font-weight:600;">Constitution</div>
+      <h2 style="margin:0; font-size:32px; font-weight:700; line-height:1.2;">Rules every future Almonium screen follows</h2>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">1</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Cream ground, white float.</strong> Every page starts on #F9F6F5. White is only for raised surfaces. Never put a white page background behind content.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">2</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>One primary action per view,</strong> and it is a <em>solid</em> plum pill — #5A1A74, radius 9999px, white bold 16px, padding 1.1rem 1.5rem, full width of its column. Below it: dark secondary solid, outline, underline, text. <strong>Gradient is not available to it</strong> — gradient means premium and only premium.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">3</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Round everything.</strong> Interactive elements are pills; containers are 20–35px; nothing below 15px except the 4px inline level chip and 8px micro-badges. No square corners.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">4</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Two families only: Literata for brand and reading, IBM Plex Sans for every control.</strong> Never set a form label or button in the serif; never set the wordmark, a heading or body text in the sans. No system font stacks, no third family.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">5</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>550 for emphasis, 700 only for display.</strong> Body 16px/1.5, long-form 1.6, micro-labels 10px uppercase 650 with tracking.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">6</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>One concern per card,</strong> bold 16px title flush top-left, content in a single row or wrapping chip row, the row's action pushed to the far right as a 40px circular outlined icon.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">7</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Spacing in rem steps of 0.5:</strong> 0.5 / 1 / 1.5 / 2rem. 1rem gap inside a card, 1.3em card padding, 2rem between blocks. Use flex/grid gap, never margins between siblings.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">8</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Elevation is shadow, hierarchy is not border.</strong> Two shadows only: ambient for cards, the slightly deeper media shadow for artwork. Hover changes scale (1.01–1.09), never shadow.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">9</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Categorical data is a pastel chip whose colour comes from its own label</strong> — languages, interests, levels. Do not hand-pick chip colours, and do not invent new semantic hues.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">10</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Dashed border = "add / edit / drop here".</strong> Solid = a committed value. Keep that contract.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">11</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Edit in place.</strong> Show the value, offer a pencil, swap the row into a field, save within the same card. No separate edit pages.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">12</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Every control owns its own loading state</strong> — spinner in place, label hidden, zero layout shift. Page-level waits use skeletons shaped like the real content, radius 12px.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">13</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Destructive actions are quarantined</strong> in a #ffe3e9 Danger Zone at the end of the column, with a raspberry outline button and a confirmation step. Never inline, never a primary.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">14</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Premium owns the gradient outright.</strong> No other element in the product may carry one. Plum gradient sampled from the emblem, plus one restrained response to touch — a single hover sweep, a lift, a rotating gradient. No glow, no loop, no off-ramp hue. Locked features stay visible with the limit stated in one plain sentence; upgrade is an invitation, not a lock icon.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">15</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Personality comes from illustration and copy, not from UI ornament.</strong> Mascots, engraved artwork, particles and a warm second-person voice — while the chrome stays quiet, round and cream.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">16</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>No brand hue exists that is not on the emblem's ramp</strong> (#A1264C → #48177D). Status colours are the only exceptions and are already fixed. No black, no cyan, no invented accent.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">17</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Calm by default, warm at the edges.</strong> Surfaces holding real content are quiet — no mascot, no emoji, no ornament. The playful register is permitted only where there is nothing to read: empty, error, loading, onboarding, earned celebration.</p></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,.08); border-radius:16px; padding:14px 16px;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#fff; color:#5A1A74; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">18</span><p style="margin:0; font-size:15px; line-height:1.55;"><strong>Status never looks like action.</strong> A filled pill does something when clicked. Anything that merely reports a state is text, small-caps or a hairline outline — never a filled pill.</p></div>
+    </div>
+  </section>
+
+  <p style="margin:0; font-size:13px; line-height:1.6; color:#7e7e7e; font-family: system-ui, sans-serif; text-align:center;">Extraction only — no new screens, no recolouring, no simplification. Discover, Review and chat were not supplied and are absent from this analysis.</p>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;full&quot;,&quot;constitution-only&quot;],&quot;default&quot;:&quot;full&quot;,&quot;tsType&quot;:&quot;'full' | 'constitution-only'&quot;,&quot;section&quot;:&quot;Document&quot;},&quot;showLegend&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Document&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showLegend: this.props.showLegend ?? true,
+      showAnalysis: (this.props.view ?? 'full') === 'full',
+    };
+  }
+}
+</script>
+</body>
+</html>

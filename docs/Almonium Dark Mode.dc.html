@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: #0E0C12; color: #F1EAEF; }
+  a { color: #CBA3E0; text-decoration: none; }
+  a:hover { color: #E0C4EE; }
+</style>
+</helmet>
+
+<div style="padding:44px 32px 100px; font-family:'IBM Plex Sans',sans-serif; background:#14111A;">
+<div style="max-width:900px; margin:0 auto; display:flex; flex-direction:column; gap:26px;">
+
+  <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:28px; padding:40px 44px; display:flex; flex-direction:column; gap:12px;">
+    <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Almonium · dark mode rulebook · v1</div>
+    <h1 style="margin:0; font-family:'Literata',serif; font-size:38px; font-weight:600; line-height:1.15; color:#F1EAEF;">Dark is a second system, not a filter</h1>
+    <p style="margin:0; font-size:15px; line-height:1.65; color:#BEB2C2; max-width:70ch;">Companion to the design constitution. The constitution's laws all hold in dark; what changes is which value plays which role. The current dark build fails because only the page ground was darkened — cards, inputs and text colours kept their light-mode values, so half the interface is white and the other half is unreadable.</p>
+    <p style="margin:6px 0 0; font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.7; color:#8D8298;">Scope: almonium-fe. Dark is a token flip on <span style="color:#CBA3E0;">[data-theme="dark"]</span> at the root — never a per-component override, never a CSS filter.</p>
+  </div>
+
+  <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:24px; padding:26px 30px; display:flex; flex-direction:column; gap:10px;">
+    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">The five dark laws</div>
+    <p style="margin:0; font-size:14px; line-height:1.6; color:#BEB2C2;">Derived from the constitution. Where a light-mode value is quoted below, dark's job is to keep its <em>role</em>, not its hex.</p>
+    <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
+      <div style="display:flex; gap:13px; align-items:flex-start; background:#272130; border-radius:14px; padding:14px 16px;"><span style="flex:0 0 24px; height:24px; border-radius:50%; background:#B07BD0; color:#14111A; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">1</span><p style="margin:0; font-size:14.5px; line-height:1.55; color:#F1EAEF;"><strong>Nothing inverts literally.</strong> White cards do not become black cards and ink text does not become white text. Each token is re-derived for its new ground.</p></div>
+      <div style="display:flex; gap:13px; align-items:flex-start; background:#272130; border-radius:14px; padding:14px 16px;"><span style="flex:0 0 24px; height:24px; border-radius:50%; background:#B07BD0; color:#14111A; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">2</span><p style="margin:0; font-size:14.5px; line-height:1.55; color:#F1EAEF;"><strong>Elevation is lightness, not shadow.</strong> A raised surface is a lighter surface plus a hairline. Shadow is invisible on dark and must not be relied on to separate a card from its ground.</p></div>
+      <div style="display:flex; gap:13px; align-items:flex-start; background:#272130; border-radius:14px; padding:14px 16px;"><span style="flex:0 0 24px; height:24px; border-radius:50%; background:#B07BD0; color:#14111A; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">3</span><p style="margin:0; font-size:14.5px; line-height:1.55; color:#F1EAEF;"><strong>The brand moves up the ramp, it does not change hue.</strong> Three tints extend the ramp's light end. Plum stays plum; it just stops being the darkest thing on screen and becomes the lightest.</p></div>
+      <div style="display:flex; gap:13px; align-items:flex-start; background:#272130; border-radius:14px; padding:14px 16px;"><span style="flex:0 0 24px; height:24px; border-radius:50%; background:#B07BD0; color:#14111A; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">4</span><p style="margin:0; font-size:14.5px; line-height:1.55; color:#F1EAEF;"><strong>No pure black and no pure white.</strong> Grounds carry the ink's warmth; text tops out at a warm off-white. Full-contrast pairs vibrate on OLED and make long reading sessions worse, which is the one thing dark mode exists to fix.</p></div>
+      <div style="display:flex; gap:13px; align-items:flex-start; background:#272130; border-radius:14px; padding:14px 16px;"><span style="flex:0 0 24px; height:24px; border-radius:50%; background:#B07BD0; color:#14111A; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">5</span><p style="margin:0; font-size:14.5px; line-height:1.55; color:#F1EAEF;"><strong>Saturation comes down as lightness comes up.</strong> Every fill that was a mid-tone hue in light — language rails, interest pills, status — is re-mixed at lower chroma. A saturated fill on a dark ground glares.</p></div>
+    </div>
+  </div>
+
+  <sc-if value="{{ showFailures }}" hint-placeholder-val="{{ true }}">
+  <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:16px;">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600; color:#F1EAEF;">0 · What is broken today</h2>
+    <p style="margin:0; font-size:14px; line-height:1.6; color:#BEB2C2;">Six failures, all from the same cause: the theme changed the ground and nothing else. Each is a fix, not a redesign.</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <div style="background:#272130; border-radius:14px; padding:14px 16px;"><div style="font-size:12.5px; font-weight:600; color:#FF8FA3; margin-bottom:5px;">White cards on a dark page</div><p style="margin:0; font-size:13px; line-height:1.55; color:#BEB2C2;">Profile, plan, App settings and every onboarding modal still render <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#fff</code>. They are the brightest object on screen and burn. Card surface is a token; it must move with the theme.</p></div>
+      <div style="background:#272130; border-radius:14px; padding:14px 16px;"><div style="font-size:12.5px; font-weight:600; color:#FF8FA3; margin-bottom:5px;">Headings invisible</div><p style="margin:0; font-size:13px; line-height:1.55; color:#BEB2C2;">"Read", "Continue reading", "My books", "Appearance", "Navbar" are drawn in plum or ink on a near-black ground — 1.4:1. Page titles take the primary text token, never a brand hex.</p></div>
+      <div style="background:#272130; border-radius:14px; padding:14px 16px;"><div style="font-size:12.5px; font-weight:600; color:#FF8FA3; margin-bottom:5px;">Light-mode form controls</div><p style="margin:0; font-size:13px; line-height:1.55; color:#BEB2C2;">The search bar, the two selects and the empty filter pills on Read are still white/cream. Native <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">select</code> needs an explicit dark scheme or the OS paints it light.</p></div>
+      <div style="background:#272130; border-radius:14px; padding:14px 16px;"><div style="font-size:12.5px; font-weight:600; color:#FF8FA3; margin-bottom:5px;">Disabled reads as missing</div><p style="margin:0; font-size:13px; line-height:1.55; color:#BEB2C2;">"Manage plan", "Clear offline books", "Refresh" and the language-row labels sit near the ground and vanish. Disabled on dark lifts the label to <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#6E637A</code> minimum and keeps its fill.</p></div>
+      <div style="background:#272130; border-radius:14px; padding:14px 16px;"><div style="font-size:12.5px; font-weight:600; color:#FF8FA3; margin-bottom:5px;">Pills and toggles keep light fills</div><p style="margin:0; font-size:13px; line-height:1.55; color:#BEB2C2;">Interest pills stay pastel-on-white; toggle tracks stay pale grey, so off looks brighter than on. Both sets get a dark-ground variant at the same hue.</p></div>
+      <div style="background:#272130; border-radius:14px; padding:14px 16px;"><div style="font-size:12.5px; font-weight:600; color:#FF8FA3; margin-bottom:5px;">No boundary anywhere</div><p style="margin:0; font-size:13px; line-height:1.55; color:#BEB2C2;">Where a surface did darken, it darkened to nearly the ground value and the shadow does nothing. Cards need the surface step <em>and</em> the hairline; the constitution's "no inner shadows" rule stands.</p></div>
+    </div>
+  </div>
+  </sc-if>
+
+  <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:18px;">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600; color:#F1EAEF;">1 · Surfaces</h2>
+    <p style="margin:0; font-size:14px; line-height:1.6; color:#BEB2C2;">Four steps, each a warm plum-grey carrying the ink's hue. Anything deeper than the ground is prohibited: the reader must never sit in a well.</p>
+    <div style="display:flex; border-radius:12px; overflow:hidden; border:1px solid #332C3C;">
+      <div style="flex:1; background:#14111A; padding:22px 12px 14px; display:flex; flex-direction:column; gap:4px; min-height:104px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#F1EAEF;">#14111A</span><span style="font-size:9.5px; letter-spacing:.8px; color:#BEB2C2; text-transform:uppercase;">Ground · 0</span></div>
+      <div style="flex:1; background:#1E1A26; padding:22px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#F1EAEF;">#1E1A26</span><span style="font-size:9.5px; letter-spacing:.8px; color:#BEB2C2; text-transform:uppercase;">Card · 1</span></div>
+      <div style="flex:1; background:#272130; padding:22px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#F1EAEF;">#272130</span><span style="font-size:9.5px; letter-spacing:.8px; color:#BEB2C2; text-transform:uppercase;">Nested · 2</span></div>
+      <div style="flex:1; background:#2E2736; padding:22px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#F1EAEF;">#2E2736</span><span style="font-size:9.5px; letter-spacing:.8px; color:#BEB2C2; text-transform:uppercase;">Overlay · 3</span></div>
+      <div style="flex:1; background:#332C3C; padding:22px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#F1EAEF;">#332C3C</span><span style="font-size:9.5px; letter-spacing:.8px; color:#BEB2C2; text-transform:uppercase;">Hairline</span></div>
+      <div style="flex:1; background:#453D51; padding:22px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#F1EAEF;">#453D51</span><span style="font-size:9.5px; letter-spacing:.8px; color:#BEB2C2; text-transform:uppercase;">Control border</span></div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6; color:#F1EAEF;">
+      <div><strong>Mapping.</strong> Light <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#F9F6F5</code> ground → <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#14111A</code>. Light <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#fff</code> card → <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#1E1A26</code>. Light <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#F9F6F5</code> nested block inside a card → <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#272130</code>. Nesting goes <em>up</em>, one step per level, three levels maximum.</div>
+      <div><strong>Every card carries <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">1px solid #332C3C</code></strong> in place of its light-mode shadow. Radius, padding and the "every panel is a card" law are unchanged.</div>
+      <div><strong>Popovers, dropdowns and modals</strong> sit at step 3 with the same hairline plus <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">0 16px 40px rgba(0,0,0,.55)</code> — the one place shadow still earns its keep, as a halo separating the overlay from a scrim, not as a lift.</div>
+      <div><strong>Scrim</strong> <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">rgba(10,8,14,.72)</code>, no blur. Onboarding's particle field stays visible through it at reduced opacity.</div>
+      <div><strong>The dark ink surface from light mode has no counterpart.</strong> Where light mode used <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#2C2530</code> as a contrast panel (email shell, constitution header, footers), dark uses the card step and a hairline instead. Two dark panels on a dark ground are one panel.</div>
+    </div>
+  </div>
+
+  <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:18px;">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600; color:#F1EAEF;">2 · Ink &amp; brand tints</h2>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Text — four levels, warm, never #fff</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:9px; font-size:13px; line-height:1.5;">
+        <div style="background:#272130; border-radius:12px; padding:11px 13px; color:#F1EAEF;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#F1EAEF;">#F1EAEF</code> — headings, UI text <span style="color:#8D8298;">(was #2C2530)</span></div>
+        <div style="background:#272130; border-radius:12px; padding:11px 13px; color:#BEB2C2;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#BEB2C2</code> — subheads, secondary prose <span style="color:#8D8298;">(was #5f5560)</span></div>
+        <div style="background:#272130; border-radius:12px; padding:11px 13px; color:#8D8298;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#8D8298</code> — metadata, placeholder <span style="color:#6E637A;">(was #a99aa8)</span></div>
+        <div style="background:#272130; border-radius:12px; padding:11px 13px; color:#E4DAE2;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#E4DAE2</code> — reader body only <span style="color:#8D8298;">(was #33292E)</span></div>
+      </div>
+      <p style="margin:0; font-size:13.5px; line-height:1.6; color:#BEB2C2;">Reader body drops to 400 weight at 17–19px as in light mode, but the ground is <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#1E1A26</code>, not the page ground — the page still holds a page.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">The tint end — three new ramp steps, no new hues</div>
+      <p style="margin:0; font-size:14px; line-height:1.6; color:#BEB2C2;">Law 1 of the constitution permits extending the ramp's ends. Dark extends the light end, exactly as steps 7–8 extended the dark end for light mode. These are app-only and never appear in the mark.</p>
+      <div style="display:flex; border-radius:12px; overflow:hidden;">
+        <div style="flex:1; background:#E0C4EE; padding:22px 12px 14px; display:flex; flex-direction:column; gap:4px; min-height:100px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#2C2530;">#E0C4EE</span><span style="font-size:9.5px; letter-spacing:.8px; color:#4A3A55; text-transform:uppercase;">Hover / focus</span></div>
+        <div style="flex:1; background:#CBA3E0; padding:22px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#2C2530;">#CBA3E0</span><span style="font-size:9.5px; letter-spacing:.8px; color:#4A3A55; text-transform:uppercase;">Link / selected</span></div>
+        <div style="flex:1; background:#B07BD0; padding:22px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#14111A;">#B07BD0</span><span style="font-size:9.5px; letter-spacing:.8px; color:#2C2530; text-transform:uppercase;">Primary fill</span></div>
+        <div style="flex:1; background:#9059BC; padding:22px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#F1EAEF;">#9059BC</span><span style="font-size:9.5px; letter-spacing:.8px; color:rgba(241,234,239,.8); text-transform:uppercase;">Pressed / gauge</span></div>
+        <div style="flex:1; background:#D98BA8; padding:22px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#2C2530;">#D98BA8</span><span style="font-size:9.5px; letter-spacing:.8px; color:#4A3A55; text-transform:uppercase;">Eyebrow (was #872657)</span></div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6; color:#F1EAEF; margin-top:2px;">
+        <div><strong>The primary button inverts its relationship to the page.</strong> In light mode it is the darkest object and its label is cream. In dark mode it is the lightest object and its label is <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#14111A</code>. Filling it with <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#5A1A74</code> on a dark ground makes the one committing action the least visible thing on screen.</div>
+        <div><strong>Saved words, links, active nav, blade-gauge fill</strong> take <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#CBA3E0</code>. Marginalia takes <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#C297D6</code> at 80%.</div>
+        <div><strong>Nothing below <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#9059BC</code> may carry text or meaning on a dark ground.</strong> Steps 1–8 of the original ramp survive only as fills behind cream text — the premium gradient, the emblem, the language rail.</div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Status — re-mixed, still off-ramp</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:12px;">
+        <span style="background:#3DD69B; color:#0E2B20; padding:7px 13px; border-radius:9px;">#3DD69B success</span>
+        <span style="background:#FF8FA3; color:#33101A; padding:7px 13px; border-radius:9px;">#FF8FA3 error</span>
+        <span style="background:#F0A184; color:#331708; padding:7px 13px; border-radius:9px;">#F0A184 warning</span>
+        <span style="background:#12332A; color:#5FE0AF; padding:7px 13px; border-radius:9px;">#12332A success ground</span>
+      </div>
+      <p style="margin:0; font-size:13.5px; line-height:1.6; color:#BEB2C2;">Status text on a dark card uses the tint; status fills behind dark text use the same tint. The light-mode hexes are never drawn on dark — <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#fa4666</code> on <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#14111A</code> is 3.1:1 and fails body text.</p>
+    </div>
+    <div style="background:#2A1A22; border-radius:14px; padding:14px 16px;">
+      <div style="font-size:12.5px; font-weight:600; color:#FF8FA3; margin-bottom:6px;">Prohibited</div>
+      <p style="margin:0; font-size:13.5px; line-height:1.6; color:#E8DCE3;">Pure black grounds and pure white text. <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">filter: invert()</code> or any global blend hack. Neutral greys with no hue — a cold grey card next to a plum-grey card reads as a bug. New hues invented for dark; extend the tint end instead. Light-mode brand hexes used as text. Elevation by shadow alone.</p>
+    </div>
+  </div>
+
+  <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:16px;">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600; color:#F1EAEF;">3 · Controls</h2>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; background:#272130; border-radius:14px; padding:18px;">
+      <button style="font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; color:#14111A; background:#B07BD0; border:none; border-radius:9999px; padding:11px 22px; cursor:pointer;" style-hover="background:#E0C4EE; transform:translateY(-1px);">Primary</button>
+      <button style="font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; color:#F1EAEF; background:transparent; border:1px solid #6B6178; border-radius:9999px; padding:11px 22px; cursor:pointer;" style-hover="background:rgba(241,234,239,.08); border-color:#8D8298;">Secondary</button>
+      <button style="font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; color:#CBA3E0; background:transparent; border:1px solid #453D51; border-radius:9999px; padding:11px 22px; cursor:pointer;" style-hover="background:rgba(203,163,224,.10);">Tertiary</button>
+      <button style="font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; color:#FDF4F8; background:linear-gradient(135deg,#B24A76,#7B3FA4); border:none; border-radius:9999px; padding:11px 22px; cursor:pointer; box-shadow:inset 0 1px 0 rgba(255,240,250,.38), inset 0 -1px 0 rgba(20,6,30,.45);">Premium</button>
+      <button style="font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; color:#6E637A; background:#2A2433; border:none; border-radius:9999px; padding:11px 22px; cursor:not-allowed;">Disabled</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:13.5px; line-height:1.6; color:#F1EAEF;">
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>Primary</strong> — <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#B07BD0</code> fill, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#14111A</code> label · hover <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#E0C4EE</code> + <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">translateY(-1px)</code> · pressed <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#9059BC</code>. Hover <em>lightens</em> in dark, where light mode darkened. Drop the coloured drop-shadow; it does nothing on dark.</div>
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>Secondary</strong> — outline <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#6B6178</code> with primary-text label, filling to a 8% white state layer. It moves toward light, the mirror of light mode's move toward ink.</div>
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>Disabled</strong> — <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">background:#2A2433; color:#6E637A</code>. Still one step above the card so the control's footprint survives; a disabled control that disappears is worse in dark than in light.</div>
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>Inputs</strong> — fill <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#272130</code>, border <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#453D51</code>, text <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#F1EAEF</code>, placeholder <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#8D8298</code>, focus ring <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">2px #CBA3E0</code>. Set <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">color-scheme: dark</code> on the root or native selects, checkboxes, scrollbars and autofill stay light.</div>
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>Toggles</strong> — off track <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#453D51</code> with a <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#8D8298</code> knob; on track <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#9059BC</code> with a <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#F1EAEF</code> knob. On must always be brighter than off, which the current build inverts.</div>
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>State layers</strong> — hover is white at 6%, pressed white at 10%, selected <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">rgba(203,163,224,.14)</code> with a <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#CBA3E0</code> label. Light mode's black-at-4% layers are invisible here.</div>
+    </div>
+  </div>
+
+  <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:14px;">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600; color:#F1EAEF;">4 · Brand assets, imagery, colour sets</h2>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6; color:#F1EAEF;">
+      <div><strong>Wordmark.</strong> <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">wordmark-cream.svg</code> replaces the plum wordmark everywhere in dark. Never recolour the plum file with a filter; ship the cream asset.</div>
+      <div><strong>Emblem — size decides the variant, in both themes.</strong> The ten-tone ramp emblem needs ~64px to resolve; below that the tonal steps average into a purple smudge and the blade gaps close. The rule: <strong>ramp emblem at 64px and up, flat emblem below.</strong> Nav, favicons, avatars and list rows are always flat.</div>
+      <div style="display:flex; gap:18px; align-items:center; background:#272130; border-radius:14px; padding:16px 18px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:10px; background:#1A1620; border:1px solid #332C3C; border-radius:10px; padding:10px 14px;"><img src="./assets/logo-flat-tint.svg" alt="" style="width:26px; height:26px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8D8298;">dark nav · #CBA3E0</span></div>
+        <div style="display:flex; align-items:center; gap:10px; background:#F9F6F5; border:1px solid #edebe8; border-radius:10px; padding:10px 14px;"><img src="./assets/logo-flat-plum.svg" alt="" style="width:26px; height:26px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#7a7280;">light nav · #7D2060</span></div>
+        <div style="display:flex; align-items:center; gap:10px; background:#1A1620; border:1px solid #332C3C; border-radius:10px; padding:10px 14px;"><img src="./logo-flat.svg" alt="" style="width:26px; height:26px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#FF8FA3;">#7D2060 on dark · 2.3:1</span></div>
+      </div>
+      <div><strong>Flat fill is a token, not a constant.</strong> Light uses <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#7D2060</code>; dark uses <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#CBA3E0</code>. The plum flat mark on a dark ground is 2.3:1 and reads as a dark stain — the same failure as the plum headings. Ship the two files, don't filter.</div>
+      <div><strong>No disc behind a small emblem.</strong> The white-disc seal is a large-format lockup; at nav size the disc becomes a bright dot with a smudge in it and it is the brightest object in a dark navbar. Place the flat mark directly on the bar.</div>
+      <div><strong>Almo.</strong> Plum ink <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#612B5E</code> disappears on dark. Dark mode uses a second engraving pass in <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#C79BD8</code> — same drawing, re-inked, exported as a paired asset. Hatched line art must never be inverted programmatically; the hatching goes muddy.</div>
+      <div><strong>Book covers and imagery</strong> are content and keep their own values. A cream paper cover is <em>correct</em> on a dark shelf. Do not dim, do not tint; give each cover a <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">1px rgba(0,0,0,.35)</code> inner edge so white covers do not bleed into the ground.</div>
+      <div><strong>Language hues</strong> (the edge rail and code badges) drop to ~55% saturation and rise in lightness: the rail stays 3px, the badge text takes the hue's tint rather than the hue itself.</div>
+      <div><strong>Interest pills</strong> keep their eight hues at 18% opacity over the card, with the label in the hue's tint. The pastel-on-white fills from light mode are not reused.</div>
+      <div><strong>Particle field</strong> — particles drop to <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">rgba(232,220,228,.18)</code>. The current dark auth screen is close to right; it is the only screen that is.</div>
+    </div>
+  </div>
+
+  <sc-if value="{{ showSpecimens }}" hint-placeholder-val="{{ true }}">
+  <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:20px;">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600; color:#F1EAEF;">5 · Specimens</h2>
+    <p style="margin:0; font-size:14px; line-height:1.6; color:#BEB2C2;">The four worst screens, redrawn against the tokens above.</p>
+
+    <div style="display:flex; flex-direction:column; gap:9px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Navbar &amp; language switcher</div>
+      <div style="background:#14111A; border-radius:16px; padding:0 0 26px; overflow:hidden; border:1px solid #332C3C;">
+        <div style="display:flex; align-items:center; gap:22px; padding:14px 20px; background:#1A1620; border-bottom:1px solid #332C3C;">
+          <span style="width:30px; height:30px; border-radius:9px; background:#272130; border:1px solid #453D51; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#CBA3E0;">EN</span>
+          <img src="./assets/logo-flat-tint.svg" alt="Almonium" style="width:26px; height:26px;">
+          <div style="display:flex; gap:20px; font-size:15px; font-weight:500;">
+            <span style="color:#CBA3E0; border-bottom:2px solid #CBA3E0; padding-bottom:3px;">Discover</span>
+            <span style="color:#BEB2C2;">Review</span>
+            <span style="color:#BEB2C2;">Read</span>
+            <span style="color:#BEB2C2;">Play</span>
+          </div>
+        </div>
+        <div style="height:3px; background:#7D5C93;"></div>
+        <div style="margin:18px 20px 0; width:270px; background:#2E2736; border:1px solid #3E3648; border-radius:16px; padding:10px 0; box-shadow:0 16px 40px rgba(0,0,0,.55);">
+          <div style="display:flex; align-items:center; gap:10px; padding:6px 14px 10px;">
+            <span style="width:28px; height:20px; border-radius:6px; border:1px solid #453D51; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#CBA3E0;">EN</span>
+            <span style="font-size:13px; color:#8D8298;">now studying</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; padding:8px 14px; background:rgba(203,163,224,.14);">
+            <span style="width:28px; height:20px; border-radius:6px; border:1px solid #CBA3E0; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#CBA3E0;">AZ</span>
+            <span style="font-size:14px; color:#F1EAEF; flex:1;">Azerbaijani</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8D8298;">C2 · Ctrl+1</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; padding:8px 14px;">
+            <span style="width:28px; height:20px; border-radius:6px; border:1px solid #453D51; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#BEB2C2;">DE</span>
+            <span style="font-size:14px; color:#F1EAEF; flex:1;">German</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8D8298;">A2 · Ctrl+2</span>
+          </div>
+          <div style="height:1px; background:#3E3648; margin:8px 0;"></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:4px 14px 8px;">
+            <span style="width:28px; height:20px; border-radius:6px; border:1px dashed #6B6178; display:flex; align-items:center; justify-content:center; font-size:11px; color:#8D8298;">+</span>
+            <span style="font-size:14px; color:#F1EAEF;">Add a language</span>
+          </div>
+        </div>
+      </div>
+      <p style="margin:0; font-size:13px; line-height:1.55; color:#8D8298;">Overlay at step 3 with a hairline and a halo; selection is a tint state layer, not a cream fill; the language rail keeps its hue at reduced saturation.</p>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:9px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Read — header, filters, shelf</div>
+      <div style="background:#14111A; border:1px solid #332C3C; border-radius:16px; padding:22px 20px; display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px;">
+          <div>
+            <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Your books</div>
+            <div style="font-family:'Literata',serif; font-size:32px; font-weight:600; color:#F1EAEF; line-height:1.2; margin-top:4px;">Read</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:12px; color:#8D8298; border:1px solid #453D51; border-radius:9999px; padding:6px 12px;">3 of 3 imports left</span>
+            <button style="font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; font-weight:600; color:#14111A; background:#B07BD0; border:none; border-radius:9999px; padding:9px 18px; cursor:pointer;">Import a book</button>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; background:#1E1A26; border:1px solid #332C3C; border-radius:14px; padding:9px 12px;">
+          <span style="flex:1; font-size:14px; color:#8D8298;">Search books</span>
+          <span style="font-size:13px; color:#F1EAEF; background:#272130; border:1px solid #453D51; border-radius:9px; padding:6px 12px;">Any level</span>
+          <span style="font-size:13px; color:#F1EAEF; background:#272130; border:1px solid #453D51; border-radius:9px; padding:6px 12px;">Best rated first</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="font-family:'Literata',serif; font-size:19px; font-weight:600; color:#F1EAEF;">Continue reading</div>
+          <div style="display:flex; align-items:center; gap:14px; background:#1E1A26; border:1px solid #332C3C; border-radius:14px; padding:12px; width:360px;">
+            <div style="width:44px; height:62px; border-radius:4px; background:#EDE3D2; box-shadow:inset 0 0 0 1px rgba(0,0,0,.35); display:flex; align-items:flex-end; padding:5px; font-family:'Literata',serif; font-size:9px; color:#3A2E22; line-height:1.1;">Pride and Prejudice</div>
+            <div style="display:flex; flex-direction:column; gap:3px;">
+              <span style="font-family:'Literata',serif; font-size:15px; font-weight:600; color:#F1EAEF;">Pride and Prejudice</span>
+              <span style="font-size:12.5px; color:#8D8298;">Jane Austen · 38%</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="font-family:'Literata',serif; font-size:19px; font-weight:600; color:#F1EAEF;">My books</div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; background:#1E1A26; border:1px solid #332C3C; border-radius:14px; padding:20px 18px;">
+            <span style="font-size:14px; color:#BEB2C2;">No private books yet.</span>
+            <button style="font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; font-weight:600; color:#F1EAEF; background:transparent; border:1px solid #6B6178; border-radius:9999px; padding:9px 18px; cursor:pointer;">Import your first book</button>
+          </div>
+        </div>
+      </div>
+      <p style="margin:0; font-size:13px; line-height:1.55; color:#8D8298;">Section headings take the primary text token; the cream cover is left alone and edged instead of dimmed.</p>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:9px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Settings — profile &amp; plan</div>
+      <div style="background:#14111A; border:1px solid #332C3C; border-radius:16px; padding:22px 20px; display:flex; gap:16px; align-items:flex-start;">
+        <div style="flex:1.6; background:#1E1A26; border:1px solid #332C3C; border-radius:20px; padding:22px 24px; display:flex; flex-direction:column; gap:14px;">
+          <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Profile</div>
+          <div style="display:flex; gap:16px; align-items:center;">
+            <div style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,#B24A76,#7B3FA4); display:flex; align-items:center; justify-content:center; font-family:'Literata',serif; font-size:28px; color:#FDF4F8; box-shadow:inset 0 1px 0 rgba(255,240,250,.38), inset 0 -1px 0 rgba(20,6,30,.45);">W</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <span style="font-family:'Literata',serif; font-size:21px; font-weight:600; color:#F1EAEF;">@wowsie</span>
+              <div style="display:flex; gap:8px;">
+                <span style="font-size:12.5px; color:#F1EAEF; background:rgba(241,234,239,.07); border:1px solid #6B6178; border-radius:9999px; padding:5px 13px;">Edit</span>
+                <span style="font-size:12.5px; color:#F1EAEF; background:rgba(241,234,239,.07); border:1px solid #6B6178; border-radius:9999px; padding:5px 13px;">Copy link</span>
+                <span style="font-size:12.5px; color:#F1EAEF; background:rgba(241,234,239,.07); border:1px solid #6B6178; border-radius:9999px; padding:5px 13px;">QR</span>
+              </div>
+            </div>
+          </div>
+          <div style="height:1px; background:#332C3C;"></div>
+          <div style="display:flex; gap:34px;">
+            <div><div style="font-family:'Literata',serif; font-size:23px; font-weight:600; color:#F1EAEF;">8</div><div style="font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:#8D8298;">Languages</div></div>
+            <div><div style="font-family:'Literata',serif; font-size:23px; font-weight:600; color:#F1EAEF;">C2</div><div style="font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:#8D8298;">Azerbaijani</div></div>
+            <div><div style="font-family:'Literata',serif; font-size:23px; font-weight:600; color:#F1EAEF;">1</div><div style="font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:#8D8298;">Fluent</div></div>
+          </div>
+          <div style="height:1px; background:#332C3C;"></div>
+          <div style="display:flex; gap:7px; flex-wrap:wrap;">
+            <span style="font-size:12.5px; color:#E7A8C0; background:rgba(217,139,168,.18); border-radius:9999px; padding:6px 13px;">Fashion &amp; Style</span>
+            <span style="font-size:12.5px; color:#8FD9B6; background:rgba(61,214,155,.16); border-radius:9999px; padding:6px 13px;">Environment</span>
+            <span style="font-size:12.5px; color:#C9B48A; background:rgba(201,180,138,.16); border-radius:9999px; padding:6px 13px;">Science &amp; Tech</span>
+            <span style="font-size:12.5px; color:#A5B6E0; background:rgba(165,182,224,.16); border-radius:9999px; padding:6px 13px;">Linguistics</span>
+            <span style="font-size:12.5px; color:#CBA3E0; background:rgba(203,163,224,.16); border-radius:9999px; padding:6px 13px;">Philosophy</span>
+          </div>
+          <div style="height:1px; background:#332C3C;"></div>
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div><div style="font-size:14px; font-weight:600; color:#F1EAEF;">Profile is visible</div><div style="font-size:12.5px; color:#8D8298;">Others can find you and send connection requests.</div></div>
+            <div style="width:46px; height:26px; border-radius:9999px; background:#9059BC; position:relative;"><span style="position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:50%; background:#F1EAEF;"></span></div>
+          </div>
+        </div>
+        <div style="flex:1; background:#1E1A26; border:1px solid #332C3C; border-radius:20px; padding:22px 24px; display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Plan</div>
+          <div style="display:flex; align-items:center; gap:9px;"><span style="font-family:'Literata',serif; font-size:21px; font-weight:600; color:#CBA3E0;">Premium</span><span style="width:15px; height:15px; border-radius:50%; background:linear-gradient(135deg,#B24A76,#7B3FA4); box-shadow:inset 0 1px 0 rgba(255,240,250,.38), inset 0 -1px 0 rgba(20,6,30,.45);"></span></div>
+          <div style="font-size:13px; color:#BEB2C2;">Lifetime membership</div>
+          <div style="margin-top:6px; font-size:13.5px; font-weight:600; color:#6E637A; background:#2A2433; border-radius:9999px; padding:10px; text-align:center;">Manage plan</div>
+        </div>
+      </div>
+      <p style="margin:0; font-size:13px; line-height:1.55; color:#8D8298;">Edit / Copy link / QR are secondary actions, not disabled ones: label stays at full primary brightness, the border dims, and a 7% wash gives them a footprint. Grey labels on near-black fall under 4.5:1 and read as unavailable. Premium keeps its bevelled gradient — lifted two ramp steps so it still reads as struck metal against a dark card. Disabled keeps a visible footprint.</p>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:9px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Onboarding — modal over the particle field</div>
+      <div style="background:#14111A; border:1px solid #332C3C; border-radius:16px; padding:26px 20px; display:flex; justify-content:center; position:relative; overflow:hidden;">
+        <div style="position:absolute; inset:0; opacity:.5; background-image:radial-gradient(rgba(232,220,228,.18) 1.5px, transparent 1.6px); background-size:38px 30px;"></div>
+        <div style="position:relative; width:400px; background:#2E2736; border:1px solid #3E3648; border-radius:22px; padding:26px 28px; display:flex; flex-direction:column; gap:14px; box-shadow:0 16px 40px rgba(0,0,0,.55);">
+          <div style="font-family:'Literata',serif; font-size:24px; font-weight:600; color:#F1EAEF;">How much Polish can you read?</div>
+          <p style="margin:0; font-size:13.5px; line-height:1.55; color:#BEB2C2;">Pick whichever sounds most like you. You can change it whenever you like.</p>
+          <div style="display:flex; flex-direction:column; gap:7px;">
+            <div style="display:flex; gap:12px; align-items:flex-start; background:#272130; border:1px solid #3E3648; border-radius:12px; padding:11px 14px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#8D8298;">A2</span><span style="font-size:13.5px; color:#F1EAEF;">I can follow short, direct sentences about familiar things.</span></div>
+            <div style="display:flex; gap:12px; align-items:flex-start; background:rgba(203,163,224,.14); border:1px solid #CBA3E0; border-radius:12px; padding:11px 14px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#CBA3E0;">B1</span><span style="font-size:13.5px; color:#F1EAEF;">I can get through a simple story if I look words up often.</span></div>
+            <div style="display:flex; gap:12px; align-items:flex-start; background:#272130; border:1px solid #3E3648; border-radius:12px; padding:11px 14px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#8D8298;">B2</span><span style="font-size:13.5px; color:#F1EAEF;">I can follow a novel with a dictionary nearby.</span></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px; margin-top:4px;">
+            <button style="flex:1; font-family:'IBM Plex Sans',sans-serif; font-size:14.5px; font-weight:600; color:#14111A; background:#B07BD0; border:none; border-radius:9999px; padding:12px; cursor:pointer;">Continue</button>
+            <span style="font-size:13.5px; color:#BEB2C2;">Back</span>
+          </div>
+        </div>
+      </div>
+      <p style="margin:0; font-size:13px; line-height:1.55; color:#8D8298;">The modal is a surface, not a light source: step 3, hairline, halo. Selection is the tint layer; the commit action is the brightest element on the screen.</p>
+    </div>
+  </div>
+  </sc-if>
+
+  <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:18px;">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600; color:#F1EAEF;">6 · Login</h2>
+    <p style="margin:0; font-size:14px; line-height:1.6; color:#BEB2C2;">The auth screen is the one place dark is nearly right today, and the one place where a wrong provider treatment does the most damage — it is the first surface a new user sees.</p>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:250px; background:#2A1A22; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12.5px; font-weight:600; color:#FF8FA3; margin-bottom:6px;">Not brand-filled discs</div>
+        <p style="margin:0; font-size:13px; line-height:1.55; color:#E8DCE3;">Three saturated circles become the brightest, loudest objects on a near-black screen, and the white Apple disc glares hardest of all. They out-shout the wordmark and the greeting.</p>
+      </div>
+      <div style="flex:1; min-width:250px; background:#2A1A22; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12.5px; font-weight:600; color:#FF8FA3; margin-bottom:6px;">Not fully monochrome</div>
+        <p style="margin:0; font-size:13px; line-height:1.55; color:#E8DCE3;">Three identical grey chips with faint glyphs read as one control group, not three choices, and lose the colour recognition that makes a provider button instant. Apple's guidelines also require its mark be full black or full white.</p>
+      </div>
+      <div style="flex:1; min-width:250px; background:#12332A; border-radius:14px; padding:14px 16px;">
+        <div style="font-size:12.5px; font-weight:600; color:#5FE0AF; margin-bottom:6px;">Brand mark on a neutral chip</div>
+        <p style="margin:0; font-size:13px; line-height:1.55; color:#DCEDE5;">The chip is a surface (step 2 + hairline) so it obeys the elevation rule; the mark inside keeps its own colours, so it stays recognisable without lighting up the page. Provider logos are content, like book covers.</p>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:9px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Specimen</div>
+      <div style="background:#14111A; border:1px solid #332C3C; border-radius:16px; padding:34px 20px; display:flex; justify-content:center; position:relative; overflow:hidden;">
+        <div style="position:absolute; inset:0; opacity:.55; background-image:radial-gradient(rgba(203,163,224,.13) 1.6px, transparent 1.7px); background-size:44px 34px;"></div>
+        <div style="position:relative; width:360px; background:#1E1A26; border:1px solid #332C3C; border-radius:22px; padding:30px 32px 26px; display:flex; flex-direction:column; align-items:center; gap:6px; box-shadow:0 16px 40px rgba(0,0,0,.55);">
+          <img src="./assets/logo-flat-tint.svg" alt="" style="width:34px; height:34px; margin-bottom:6px;">
+          <img src="./assets/wordmark-cream.svg" alt="Almonium" style="height:40px; width:auto; display:block;">
+          <div style="font-family:'Literata',serif; font-size:16px; font-weight:500; color:#BEB2C2;">Merhaba</div>
+          <div style="display:flex; gap:10px; margin-top:18px; width:100%;">
+            <div style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; background:#272130; border:1px solid #453D51; border-radius:12px; padding:12px 0; font-size:13.5px; font-weight:600; color:#F1EAEF;">
+              <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M45 24c0-1.6-.1-2.7-.4-4H24v7.5h12c-.2 2-1.5 5-4.4 7l6.7 5.2C42.2 36 45 30.6 45 24z"></path><path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.3l-6.9-5.4c-1.9 1.3-4.4 2.2-7.6 2.2-5.8 0-10.7-3.8-12.5-9.1l-7.1 5.5C8 41.4 15.4 46 24 46z"></path><path fill="#FBBC05" d="M11.5 28.4c-.5-1.4-.8-2.9-.8-4.4s.3-3 .7-4.4l-7.1-5.5C2.8 17 2 20.4 2 24s.8 7 2.3 9.9l7.2-5.5z"></path><path fill="#EA4335" d="M24 10.4c4.1 0 6.9 1.8 8.5 3.3l6.2-6C34.9 4.2 29.9 2 24 2 15.4 2 8 6.6 4.3 14.1l7.1 5.5c1.8-5.3 6.8-9.2 12.6-9.2z"></path></svg>
+              Google
+            </div>
+            <div style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; background:#272130; border:1px solid #453D51; border-radius:12px; padding:12px 0; font-size:13.5px; font-weight:600; color:#F1EAEF;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#F1EAEF" aria-hidden="true"><path d="M16.4 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.8-3.5.8-.7 0-1.9-.8-3.1-.8-1.6 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.9-2.3.9-1.3 1.3-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.7zM14.2 5.9c.6-.8 1-1.9.9-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3z"></path></svg>
+              Apple
+            </div>
+            <div style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; background:#272130; border:1px solid #453D51; border-radius:12px; padding:12px 0; font-size:13.5px; font-weight:600; color:#F1EAEF;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#CBA3E0" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"></rect><path d="m3 6.5 9 6 9-6"></path></svg>
+              Email
+            </div>
+          </div>
+          <div style="margin-top:14px; font-size:11.5px; line-height:1.5; color:#8D8298; text-align:center;">By continuing you agree to the <a href="#0">Terms</a> and <a href="#0">Privacy Policy</a>.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:13.5px; line-height:1.6; color:#F1EAEF;">
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>The card is a surface, not a void.</strong> <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#1E1A26</code> with the <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#332C3C</code> hairline and the overlay halo. The current card is darker than the page it sits on, which inverts the elevation rule — the one object that should feel lifted is the one sunk furthest.</div>
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>Label the buttons.</strong> Bare discs make the user decode three glyphs; on the widest screen there is room for a word next to each mark. If the layout must stay compact, keep circular chips at the same fill and border and add a visible label underneath — never nothing.</div>
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>Chip spec</strong> — fill <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#272130</code>, border <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#453D51</code>, radius 12, min height 44, hover white-at-6%, focus ring <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">2px #CBA3E0</code>. Identical geometry for all three — differences between providers live in the mark alone.</div>
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>Emblem above the wordmark, not behind it.</strong> Today it straddles the card's top-right corner and is clipped by it, at a size where the ramp is already unreadable. Flat tint mark, 32–36px, centred over the wordmark.</div>
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>Particles take the tint at low alpha</strong> — <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">rgba(203,163,224,.13)</code> and a soft shape. Hard grey rectangles read as broken image tiles rather than atmosphere, and they should never approach the card's own value.</div>
+      <div style="background:#272130; border-radius:12px; padding:11px 14px;"><strong>The greeting is the localisation cue</strong> and stays in Literata at secondary text; the wordmark stays primary. Terms and privacy links take <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#CBA3E0</code> at 11.5px — they are absent from the current screen.</div>
+    </div>
+  </div>
+
+  <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:14px;">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600; color:#F1EAEF;">7 · Implementation &amp; checks</h2>
+    <div style="background:#272130; border-radius:14px; padding:16px 18px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; line-height:1.9; color:#D5C9D8;">:root { color-scheme: light; --ground:#F9F6F5; --surface:#fff; --nested:#F9F6F5; --overlay:#fff;<br>&nbsp;&nbsp;--hairline:#edebe8; --border:#d8cfd6; --text:#2C2530; --text-2:#5f5560; --text-3:#a99aa8;<br>&nbsp;&nbsp;--brand:#5A1A74; --brand-hover:#48177D; --on-brand:#fff; --accent:#872657; }<br><br>[data-theme="dark"] { color-scheme: dark; --ground:#14111A; --surface:#1E1A26; --nested:#272130; --overlay:#2E2736;<br>&nbsp;&nbsp;--hairline:#332C3C; --border:#453D51; --text:#F1EAEF; --text-2:#BEB2C2; --text-3:#8D8298;<br>&nbsp;&nbsp;--brand:#B07BD0; --brand-hover:#E0C4EE; --on-brand:#14111A; --accent:#D98BA8; }</div>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6; color:#F1EAEF;">
+      <div><strong>One flip, one place.</strong> If a component needs a <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">[data-theme="dark"] .thing</code> rule, the thing is hardcoding a hex. Fix the component, not the theme.</div>
+      <div><strong>Theme setting is Light / Dark / System</strong>, resolved before first paint from a tiny inline script — a light flash on a dark theme is the most-reported dark-mode bug there is.</div>
+      <div><strong>Ship checks:</strong> no <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#fff</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#CBA3E0;">#000</code> or literal ramp hex outside the token file · every screen at 4.5:1 body / 3:1 UI · every native control and scrollbar dark · email dark-mode inversion tested in Gmail iOS and Outlook · screenshots of both themes side by side before merge.</div>
+      <div><strong>Order of repair,</strong> highest damage first: card surface token → text tokens → form controls and selects → toggles and pills → disabled states → Almo and wordmark assets.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showFailures&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sections&quot;},&quot;showSpecimens&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sections&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showFailures: this.props.showFailures ?? true,
+      showSpecimens: this.props.showSpecimens ?? true,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#2C2530">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<circle cx="100" cy="100" r="70" fill="#5A1A74"/>
+<text x="100" y="118" font-family="serif" font-size="70" fill="#F9F6F5" text-anchor="middle">A</text>
+</svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: #efe9e6; color: #2C2530; }
+  a { color: #872657; text-decoration: none; }
+  a:hover { color: #5A1A74; }
+</style>
+</helmet>
+
+<div style="padding:44px 32px 100px; font-family:'IBM Plex Sans',sans-serif;">
+<div style="max-width:900px; margin:0 auto; display:flex; flex-direction:column; gap:26px;">
+
+  <div style="background:#2C2530; border-radius:28px; padding:40px 44px; display:flex; flex-direction:column; gap:12px;">
+    <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:600; color:#c9a8c4;">Almonium · design constitution · v2</div>
+    <h1 style="margin:0; font-family:'Literata',serif; font-size:38px; font-weight:600; line-height:1.15; color:#F9F6F5;">The rulebook</h1>
+    <p style="margin:0; font-size:15px; line-height:1.65; color:rgba(249,246,245,.78); max-width:70ch;">Feed this file to any AI agent as initial context before it touches Almonium. It supersedes the previous design-system analysis, which specified cyan for premium, a system-font stack for type, and gradient on every action button — all three are now prohibited.</p>
+    <p style="margin:6px 0 0; font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.7; color:rgba(249,246,245,.55);">Scope: almonium-fe (Angular · Less · Tailwind · Taiga UI), email-templates (Thymeleaf), brand assets.<br>Not in scope: Almonium Books, an internal admin tool, which may diverge freely.</p>
+  </div>
+
+  <div style="background:#fff; border-radius:24px; padding:26px 30px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">The five laws</div>
+    <p style="margin:0; font-size:14px; line-height:1.6; color:#5f5560;">Everything below is derived from these. If a rule and a law conflict, the law wins.</p>
+    <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
+      <div style="display:flex; gap:13px; align-items:flex-start; background:#F9F6F5; border-radius:14px; padding:14px 16px;"><span style="flex:0 0 24px; height:24px; border-radius:50%; background:#5A1A74; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">1</span><p style="margin:0; font-size:14.5px; line-height:1.55;"><strong>No brand hue exists that is not on the emblem's ramp.</strong> Status colours are the only exception.</p></div>
+      <div style="display:flex; gap:13px; align-items:flex-start; background:#F9F6F5; border-radius:14px; padding:14px 16px;"><span style="flex:0 0 24px; height:24px; border-radius:50%; background:#5A1A74; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">2</span><p style="margin:0; font-size:14.5px; line-height:1.55;"><strong>Gradient means premium and nothing else.</strong> Every other action is solid.</p></div>
+      <div style="display:flex; gap:13px; align-items:flex-start; background:#F9F6F5; border-radius:14px; padding:14px 16px;"><span style="flex:0 0 24px; height:24px; border-radius:50%; background:#5A1A74; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">3</span><p style="margin:0; font-size:14.5px; line-height:1.55;"><strong>Calm by default, warm at the edges.</strong> Surfaces holding content are quiet; personality lives only where there is nothing to read.</p></div>
+      <div style="display:flex; gap:13px; align-items:flex-start; background:#F9F6F5; border-radius:14px; padding:14px 16px;"><span style="flex:0 0 24px; height:24px; border-radius:50%; background:#5A1A74; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">4</span><p style="margin:0; font-size:14.5px; line-height:1.55;"><strong>Two type families, self-hosted.</strong> Literata reads, IBM Plex Sans operates. No system stacks, no third family.</p></div>
+      <div style="display:flex; gap:13px; align-items:flex-start; background:#F9F6F5; border-radius:14px; padding:14px 16px;"><span style="flex:0 0 24px; height:24px; border-radius:50%; background:#5A1A74; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">5</span><p style="margin:0; font-size:14.5px; line-height:1.55;"><strong>Every panel is a card.</strong> Same radius, same shadow, white on cream — the reader, a book, a word and a setting are instances of one object.</p></div>
+    </div>
+  </div>
+
+  <!-- 1 COLOUR -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:16px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">1 · Colour</h2>
+
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">The ramp</div>
+      <p style="margin:0; font-size:14px; line-height:1.6;">Steps 1–6 are the literal fills of <code style="font-family:'IBM Plex Mono',monospace; font-size:12px; background:#F9F6F5; padding:1px 5px; border-radius:5px;">logo.svg</code> (ten blades, six distinct values). Steps 7–8 are app-only extensions at the dark end and never appear in the mark.</p>
+      <div style="display:flex; border-radius:12px; overflow:hidden; min-width:640px;">
+        <div style="flex:1; background:#A1264C; padding:20px 12px 14px; display:flex; flex-direction:column; gap:4px; min-height:104px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#fff;">#A1264C</span><span style="font-size:9.5px; letter-spacing:.8px; color:rgba(255,255,255,.88); text-transform:uppercase; white-space:nowrap;">Raspberry</span></div>
+        <div style="flex:1; background:#8F2356; padding:20px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#fff;">#8F2356</span><span style="font-size:9.5px; letter-spacing:.8px; color:rgba(255,255,255,.88); text-transform:uppercase; white-space:nowrap;">Premium</span></div>
+        <div style="flex:1; background:#7D2060; padding:20px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#fff;">#7D2060</span><span style="font-size:9.5px; letter-spacing:.8px; color:rgba(255,255,255,.88); text-transform:uppercase; white-space:nowrap;">Flat logo</span></div>
+        <div style="flex:1; background:#6C1D6A; padding:20px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#fff;">#6C1D6A</span><span style="font-size:9.5px; letter-spacing:.8px; color:rgba(255,255,255,.88); text-transform:uppercase; white-space:nowrap;">Margin</span></div>
+        <div style="flex:1; background:#5A1A74; padding:20px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#fff;">#5A1A74</span><span style="font-size:9.5px; letter-spacing:.8px; color:rgba(255,255,255,.88); text-transform:uppercase; white-space:nowrap;">Primary</span></div>
+        <div style="flex:1; background:#48177D; padding:20px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#fff;">#48177D</span><span style="font-size:9.5px; letter-spacing:.8px; color:rgba(255,255,255,.88); text-transform:uppercase; white-space:nowrap;">Hover</span></div>
+        <div style="flex:1; background:#3A1462; padding:20px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end; border-top:4px solid #16BA7F;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#fff;">#3A1462</span><span style="font-size:9.5px; letter-spacing:.8px; color:rgba(255,255,255,.88); text-transform:uppercase; white-space:nowrap;">Pressed</span></div>
+        <div style="flex:1; background:#2C2530; padding:20px 12px 14px; display:flex; flex-direction:column; gap:4px; justify-content:flex-end; border-top:4px solid #16BA7F;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#fff;">#2C2530</span><span style="font-size:9.5px; letter-spacing:.8px; color:rgba(255,255,255,.88); text-transform:uppercase; white-space:nowrap;">Ink</span></div>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Roles — one hex, one job</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:9px; font-size:13px; line-height:1.5;">
+        <div style="background:#F9F6F5; border-radius:12px; padding:11px 13px;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#5A1A74;">#5A1A74</code> — primary action, links, selected state, blade gauge fill</div>
+        <div style="background:#F9F6F5; border-radius:12px; padding:11px 13px;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#872657;">#872657</code> — eyebrow labels, inline emphasis in prose</div>
+        <div style="background:#F9F6F5; border-radius:12px; padding:11px 13px;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#2C2530;">#2C2530</code> — all headings, all UI text, dark surfaces, secondary button</div>
+        <div style="background:#F9F6F5; border-radius:12px; padding:11px 13px;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#33292E</code> — reader body text only</div>
+        <div style="background:#F9F6F5; border-radius:12px; padding:11px 13px;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#5f5560</code> — subheads, secondary prose</div>
+        <div style="background:#F9F6F5; border-radius:12px; padding:11px 13px;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#a99aa8</code> — metadata, disabled labels, placeholder</div>
+        <div style="background:#F9F6F5; border-radius:12px; padding:11px 13px;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#F9F6F5</code> — page ground · <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#fff</code> — card</div>
+        <div style="background:#F9F6F5; border-radius:12px; padding:11px 13px;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#edebe8</code> — hairline rule · <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#d8cfd6</code> — control border</div>
+        <div style="background:#F9F6F5; border-radius:12px; padding:11px 13px;"><code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#e8e2e6</code> / <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#8b8290</code> — disabled fill / label</div>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Status — deliberately off-ramp</div>
+      <p style="margin:0; font-size:14px; line-height:1.6;">Alarm and success must interrupt. A status colour that harmonises with the brand fails at its only job. These four are a principled exception to law 1 and are not to be "brought on-brand".</p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:12px;">
+        <span style="background:#16BA7F; color:#fff; padding:7px 13px; border-radius:9px;">#16BA7F success</span>
+        <span style="background:#fa4666; color:#fff; padding:7px 13px; border-radius:9px;">#fa4666 error</span>
+        <span style="background:#ea6644; color:#fff; padding:7px 13px; border-radius:9px;">#ea6644 warning</span>
+        <span style="background:#E7F8F2; color:#0d7a53; padding:7px 13px; border-radius:9px;">#E7F8F2 success ground</span>
+      </div>
+    </div>
+
+    <div style="background:#fff4f6; border-radius:14px; padding:14px 16px;">
+      <div style="font-size:12.5px; font-weight:600; color:#872657; margin-bottom:6px;">Prohibited</div>
+      <p style="margin:0; font-size:13.5px; line-height:1.6;">Pure black anywhere. <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#00d1ff</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#8a2be2</code>, or any cyan. <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#120222</code> (blue-violet). Brand-coloured third-party logos. Any new hue invented to solve a local problem — extend the ramp's ends instead. Raspberry for plan limits: a paywall boundary is not an error.</p>
+    </div>
+  </div>
+
+  <!-- 2 TYPE -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:16px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">2 · Type</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div style="background:#F9F6F5; border-radius:16px; padding:18px 20px;">
+        <div style="font-family:'Literata',serif; font-size:26px; font-weight:600;">Literata</div>
+        <p style="margin:6px 0 0; font-size:13.5px; line-height:1.55;">Wordmark aside: page titles, section headings, book titles, all reading content, the word on a card, large numerals in stats.</p>
+        <p style="margin:6px 0 0; font-size:12.5px; line-height:1.5; color:#5f5560;">Variable weight, full Cyrillic — required by the UA/RU wedge. Reader default; user may override from three options, not a font menu.</p>
+      </div>
+      <div style="background:#F9F6F5; border-radius:16px; padding:18px 20px;">
+        <div style="font-size:26px; font-weight:600;">IBM Plex Sans</div>
+        <p style="margin:6px 0 0; font-size:13.5px; line-height:1.55;">Nav, buttons, chips, badges, form labels, tooltips, counts, eyebrows, all UI prose.</p>
+        <p style="margin:6px 0 0; font-size:12.5px; line-height:1.5; color:#5f5560;">Cyrillic + Latin Extended for PL/DE diacritics. <strong>IBM Plex Mono</strong> is permitted for IPA, language codes, lemma forms and numeric data only.</p>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">The eyebrow — standard section header</div>
+      <p style="margin:0; font-size:14px; line-height:1.6;">11px · 550 · 1.5px tracking · uppercase · <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">#872657</code> · 8px above its heading. The pattern <strong>eyebrow → large serif headline → one-line subhead → one action</strong> is the default page header everywhere; do not invent alternatives.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6;">
+      <div><strong>Wordmark is exempt.</strong> <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">title-purple.svg</code> (ITC Benguiat, fill <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#300b4f</code>) is a drawn asset, not type. Never re-set it in Literata, never use Benguiat for UI.</div>
+      <div><strong>Email is exempt.</strong> Georgia body, Arial nowhere. Literata will not load in mail clients.</div>
+      <div><strong>Minimums.</strong> Body 15px, UI labels 12px, reader 17–19px. Nothing below 11px, and 11px only for eyebrows and metadata.</div>
+    </div>
+    <div style="background:#fff4f6; border-radius:14px; padding:14px 16px;">
+      <div style="font-size:12.5px; font-weight:600; color:#872657; margin-bottom:6px;">Prohibited</div>
+      <p style="margin:0; font-size:13.5px; line-height:1.6;">Any system font stack (<code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">Cambria, Cochin, Georgia, Times</code> and friends). Arial, Helvetica, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">fantasy</code>. Per-component <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">font-family</code> declarations — two variables, no exceptions. A serif for a form label; a sans for body prose. A fourth family.</p>
+    </div>
+  </div>
+
+  <!-- 3 BUTTONS -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:16px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">3 · Buttons &amp; states</h2>
+    <p style="margin:0; font-size:14px; line-height:1.6;">One primary action per view. Radius <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">9999px</code>, label 600 weight, transition <code style="font-family:'IBM Plex Mono',monospace; font-size:12px;">160ms ease</code> on transform and box-shadow.</p>
+    <div style="display:flex; flex-direction:column; gap:7px; font-size:13.5px; line-height:1.6;">
+      <div style="background:#F9F6F5; border-radius:12px; padding:11px 14px;"><strong>Primary</strong> — solid <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#5A1A74</code> · hover <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#48177D</code> + <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">translateY(-1px)</code> + <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">0 6px 16px rgba(72,23,125,.28)</code> · pressed <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#3A1462</code> + <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">translateY(1px)</code> + inset shadow</div>
+      <div style="background:#F9F6F5; border-radius:12px; padding:11px 14px;"><strong>Secondary</strong> — outline <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#2C2530</code>, fills to solid ink on hover. Moves toward ink, never toward plum.</div>
+      <div style="background:#F9F6F5; border-radius:12px; padding:11px 14px;"><strong>Tertiary</strong> — plum text, hairline border <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#d8cfd6</code>, or plain text link.</div>
+      <div style="background:#F9F6F5; border-radius:12px; padding:11px 14px;"><strong>Premium</strong> — <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">linear-gradient(135deg,#8F2356,#5A1A74)</code> + <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">inset 0 1px 0 rgba(255,240,250,.28)</code>. The only gradient in the product.</div>
+      <div style="background:#F9F6F5; border-radius:12px; padding:11px 14px;"><strong>Not-yet-satisfiable</strong> — outline plum, fills solid the instant the form validates. Full-strength label.</div>
+      <div style="background:#F9F6F5; border-radius:12px; padding:11px 14px;"><strong>Disabled</strong> — <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">background:#e8e2e6; color:#8b8290; box-shadow:none; cursor:not-allowed; opacity:1</code></div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Disable for danger, never for incompleteness</div>
+      <p style="margin:0; font-size:14px; line-height:1.6;">An incomplete form keeps a live button; clicking it marks the offending fields and moves focus to the first. A disabled button cannot explain what is missing, so users who get stuck get stuck silently. <strong>Destructive and irreversible actions are the exception</strong> — Delete Account stays grey and dead until the typed confirmation matches.</p>
+      <p style="margin:0; font-size:13.5px; line-height:1.6; color:#5f5560;">Never set <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">opacity</code> on a composited button — the shadow and border fade with it and the edge dissolves. Fade label and fill as separate tokens if fading at all. 38% of a gradient is still the most saturated thing on screen.</p>
+      <p style="margin:0; font-size:13.5px; line-height:1.6; color:#5f5560;">Hover uses a state layer (on-colour at ~8%) or a ramp-step darken. Never dim on hover.</p>
+    </div>
+    <div style="background:#fff4f6; border-radius:14px; padding:14px 16px;">
+      <div style="font-size:12.5px; font-weight:600; color:#872657; margin-bottom:6px;">Prohibited</div>
+      <p style="margin:0; font-size:13.5px; line-height:1.6;">Scale on hover. Glow, sweep, ripple or icon-slide on any non-premium control. Gradient text (<code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">background-clip:text</code>) anywhere — retire <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">.full-gradient-btn</code>. Two controls leading to one destination. A filled pill for a non-committing action.</p>
+    </div>
+  </div>
+
+  <!-- 4 PREMIUM -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">4 · Premium</h2>
+    <p style="margin:0; font-size:14px; line-height:1.6;">Premium is a <em>material</em>, not a colour. It differs by how it responds to light, not by being louder. It never leaves the ramp.</p>
+    <div style="background:#F9F6F5; border-radius:14px; padding:16px 18px;">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; line-height:1.8;">--premium-gradient: linear-gradient(135deg, #8F2356, #5A1A74);<br><br>/* star / badge */<br>box-shadow: inset 0 1px 0 rgba(255,240,250,.45),<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inset 0 -1px 0 rgba(20,6,30,.30),<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 2px 6px rgba(72,23,125,.30);<br>/* hover: gradient 200deg, translateY(-1px), 400ms */</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6;">
+      <div>The two inset hairlines are the whole effect: pale top edge, dark bottom edge, reading as struck metal catching room light. Bevel improves at small size; glow never does.</div>
+      <div><strong>Shine sweep</strong> — permitted on the plan card only. Single 900ms pass on hover, highlight <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">rgba(255,252,248,.22)</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">skewX(20deg)</code>, blur 6px. No infinite loop — ambient animation on pricing reads as a slot machine.</div>
+      <div><strong>Confetti</strong> — on successful upgrade only, fired client-side off the checkout redirect route. Never on revisit. No schema change needed.</div>
+      <div><strong>Premium as status</strong> — plum 550 text plus the bevelled star. Not bold, not a filled pill, not a button.</div>
+      <div><strong>Plan limits</strong> — grey body text with a plum link. State the cap, not the restriction: "Free covers one language at a time", never "Free plan lets you pick only 1".</div>
+      <div><strong>Paywall placement</strong> — contextual, at the wall: second language, private import, first book finished. Never in onboarding.</div>
+    </div>
+  </div>
+
+  <!-- 5 REGISTER -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">5 · Register &amp; jurisdiction</h2>
+    <p style="margin:0; font-size:14px; line-height:1.6;">Two registers coexist — bookish-intelligentsia and warm-playful. They are compatible only under a jurisdiction rule, and they never share a screen.</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div style="background:#F9F6F5; border-radius:16px; padding:16px 18px;">
+        <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#5A1A74; margin-bottom:6px;">Calm — content surfaces</div>
+        <p style="margin:0; font-size:13.5px; line-height:1.55;">Reader, library, cards, review, settings, chat, landing hero. Serif, cream, plum. No mascot, no emoji, no illustration, no ambient motion. Motion only as state feedback.</p>
+      </div>
+      <div style="background:#F9F6F5; border-radius:16px; padding:16px 18px;">
+        <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657; margin-bottom:6px;">Warm — contentless surfaces</div>
+        <p style="margin:0; font-size:13.5px; line-height:1.55;">Empty states, errors, 404, offline, loading, auth, onboarding, earned celebration. Mascot and particles live here and only here.</p>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6;">
+      <div><strong>Audience.</strong> Self-directed B2–C1 readers who chose Almonium for not being gamified. Nothing may read as a beginner app: no streak threats, no mascot above the fold, no exclamation marks, no emoji, no "awesome".</div>
+      <div><strong>Voice.</strong> Second person, plain, unhurried. State facts and let the reader draw the conclusion. No "exclusive", "top-tier", "excited to have you on board".</div>
+      <div><strong>Celebration is rationed to three events</strong> — first upgrade, book finished, review session complete. A fourth use makes all four ordinary.</div>
+      <div><strong>Progress is a record, never a threat.</strong> Weeks are the unit, the user sets their own target, "No target" is a first-class choice, and no number can be lost.</div>
+    </div>
+  </div>
+
+  <!-- 6 LOGO -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">6 · Emblem, wordmark, motion</h2>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6;">
+      <div><strong>Assets.</strong> <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">logo.svg</code> (ten blades, ramp steps 1–6) · <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">logo-on-white-circle.svg</code> (seal; art occupies 91% of disc width, 94% of height — preserve that berth, do not add to it) · <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">title-purple.svg</code> (wordmark).</div>
+      <div><strong>Flat fallback</strong> <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#7D2060</code> for 16px favicons, email, print, embroidery, monochrome contexts, and any plum ground.</div>
+      <div><strong>Semantics of the fold.</strong> <em>Unfold</em> = one becoming many: loading, discovering, expanding a word into senses. <em>Fold</em> = many becoming one: saving, collecting, committing to memory. Never mixed.</div>
+      <div><strong>Loader timing.</strong> Reach 3–4 blades within 250ms, bloom over the remainder, hold. Never spend the majority of the cycle on a single rotating blade.</div>
+      <div><strong>Navbar logo</strong> navigates home <em>and</em> plays the unfold during the route transition. A logo that only animates is a dead control.</div>
+      <div><strong>Blade gauge.</strong> Static emblem, blades filling discretely, 180ms bloom per blade. For countable units only — review sessions, onboarding, placement, chapter cards. Never for reading position in a book: use a linear bar, since 10% granularity is too coarse and prose is continuous.</div>
+      <div><strong>Never</strong> two progress indicators on one screen. If a labelled step plank is present, no blades.</div>
+      <div><strong>Wordmark</strong> is solid, never gradient, never re-set in a UI face. Lockup: emblem at the wordmark's optical height, gap ≈ one cap-height of "A".</div>
+      <div><strong>Watermark emblem</strong> ≤6% opacity, cropped off an edge. Centred watermarks read as placeholders.</div>
+    </div>
+    <div style="background:#F9F6F5; border-radius:14px; padding:14px 16px; font-size:13px; line-height:1.6;"><strong>Open licensing item.</strong> The wordmark is ITC Benguiat (Monotype), commercial. Confirm the identification, then buy a desktop licence retroactively and keep the receipt. Typeface designs are not copyrightable in the US but font software is, so the exposure is contractual. A Canva origin does not cover trademark use.</div>
+  </div>
+
+  <!-- 7 MASCOT -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">7 · Almo &amp; illustration</h2>
+    <p style="margin:0; font-size:14px; line-height:1.6;">One octopus, one style, one ink. Nine brains, eight arms for parallel texts, ink for writing, camouflage for register — the animal maps to the product. It stays.</p>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6;">
+      <div><strong>Style.</strong> 19th-century engraved plate. Hatching, no airbrush, no gloss, no rim light. Single plum ink <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#612B5E</code> on transparent, rendered at 2× display size.</div>
+      <div><strong>Fixed set</strong> of 6–8 poses: rest, reading, offering a card, searching, asleep, delight, waiting, greeting. The greeting fans its arms behind it, echoing the emblem's bloom.</div>
+      <div><strong>Placement.</strong> Empty states, errors, 404, offline, loading, onboarding's final screen. Never the landing hero, never the reader, never any surface holding content.</div>
+      <div><strong>Naming by exposure.</strong> Name him in passing in copy ("Almo hasn't found anything here yet"). Never a nameplate, never a "meet Almo" moment.</div>
+      <div><strong>Avatars.</strong> One disc, one fill, and the fill is the tier: free accounts flat <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#d8cfd6</code> with an ink mark, members the premium gradient with a cream mark. No ring, no star, no dot, nothing else encoded. Same avatar for every viewer including yourself. The mark is <em>one</em> letter &mdash; the first alphanumeric character of the username, uppercased &mdash; because there is no first or last name to take initials from. Optional set: five engraved animals in the same hand and ink — owl, fox, stag, whale, hare. <strong>No octopus avatar</strong>; that silhouette is Almo's alone. Retire custom photo uploads: moderation, storage, GDPR deletion and cropping cost more than a barely-social profile returns.</div>
+      <div><strong>One illustration style in the product.</strong> The cartoon avatar set, the coral airbrushed octopus and the AI hard-hat render are all withdrawn. Commission once; AI may sketch, a human finishes.</div>
+    </div>
+    <div style="background:#F9F6F5; border-radius:14px; padding:14px 16px; font-size:13px; line-height:1.6;"><strong>Consistency method.</strong> No seed parameter exists in GPT-Image-1, so text prompts never reproduce a character. Generate all poses in <em>one</em> character-sheet render and crop them apart; for additions, upload the approved original as reference — never chain from the newest output, or drift accumulates. Vector-redraw the final set.</div>
+  </div>
+
+  <!-- 8 SURFACES -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">8 · Surfaces &amp; layout</h2>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6;">
+      <div><strong>The card is the atom.</strong> White on cream, radius 24–28px on panels, 12–18px on nested blocks, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1)</code>. Every panel is a card because every object in the product is one.</div>
+      <div><strong>No inner shadows.</strong> Inner shadow reads as recessed and contradicts a raised panel. To increase presence, deepen the outer shadow.</div>
+      <div><strong>Flex/grid with <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">gap</code></strong> for every sibling group. Never margin-spaced inline siblings.</div>
+      <div><strong>Language edge rail</strong> — a 3px rule under the navbar in the active language's hue, with the code badge sharing that hue. The only place a language colour may be large. User-overridable from a fixed set of ~8 muted hues.</div>
+      <div><strong>Interest pills</strong> may be multicolour — user-owned content, one tab, drawn from a fixed 8-hue set at consistent saturation and lightness. This palette never leaks into learning data or product chrome.</div>
+      <div><strong>Particle field</strong> — auth, onboarding, upgrade success only. Gated on <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">prefers-reduced-motion</code>. Never behind text.</div>
+      <div><strong>Spines</strong> — thickness bounded 34–66px across the whole page-count range. Private imports get identical footprint to library books, distinguished by a dashed edge and a "Yours" mark, never by being shrunk.</div>
+      <div><strong>Reader.</strong> Body <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#33292E</code> at 17–19px; saved word <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#5A1A74</code>; marginalia <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#6C1D6A</code> at 80%; chapter headings <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#2C2530</code>. Marginalia sits in a true margin on desktop with hairline leaders; on mobile it becomes a sheet that pushes text up. <strong>Never occlude the sentence being read.</strong></div>
+    </div>
+  </div>
+
+  <!-- 9 EMAIL -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">9 · Email</h2>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6;">
+      <div>Ink <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#2C2530</code> shell, cream <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#F9F6F5</code> content card, Georgia body at <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">line-height:1.55</code>, body colour <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#33292E</code>.</div>
+      <div><strong>Buttons solid</strong> <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#5A1A74</code>. Outlook strips gradients, so only the subscription email carries one, with <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">bgcolor="#5A1A74"</code> beneath as fallback.</div>
+      <div><strong>Wordmark as 2× PNG</strong> with the name in <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">alt</code>. SVG does not render in most mail clients.</div>
+      <div><strong>Footer contrast on ink:</strong> tagline <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#a99aa8</code>, unsubscribe <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#c9c0cc</code>. Unsubscribe must be conspicuous — CAN-SPAM and GDPR.</div>
+      <div>Tables and inline styles, not divs. Round corners need VML in Outlook or accept squares. Every send needs a plain-text part. Test Gmail iOS and Outlook for dark-mode inversion.</div>
+      <div><strong>Copy.</strong> A transactional email owes the fact, the action, and what happens if you do nothing. Receipts owe price, renewal date, and where to cancel. No filler line to fill a card; no restating what the button says.</div>
+    </div>
+  </div>
+
+  <!-- 10 ONBOARDING -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">10 · Onboarding</h2>
+    <p style="margin:0; font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.7; color:#5f5560;">1 Welcome → 2 Language → 3 Level → 4 Interests → 5 Profile → 6 Almo's greeting</p>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6;">
+      <div>One question per screen. Back works everywhere. State persists per step, so a drop-off resumes in place.</div>
+      <div><strong>No paywall step.</strong> Removed entirely; the ask moves to the contextual wall.</div>
+      <div><strong>Language.</strong> Target first, in cards, large — it is the decision the user came to make. Native language is detected from locale and demoted to one correctable line. Feature availability renders per card from <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">languageFeatures</code>, not a hardcoded list; today only EN and DE carry extras.</div>
+      <div><strong>Level.</strong> Behavioural sentences lead, the CEFR code is a quiet monospace tag. "I'm not sure" is a dashed sibling option, not a link, routing to eight sentences of ascending difficulty; level assigned at the first two consecutive misses, skippable, defaulting to B1. Settings must use the same descriptions.</div>
+      <div><strong>Interests.</strong> 6–8 chosen from ~30. Soft floor via the outline→solid button, no hard block.</div>
+      <div><strong>Profile.</strong> Both fields ship pre-filled and the subhead says so, which makes Continue the skip. No second Skip button — two controls to one outcome is worse than one. Show the real initials avatar rather than an empty upload well.</div>
+      <div><strong>Final screen</strong> is Almo greeting, not a form. Converts "setup finished" into "let's begin", and is where the mascot earns his introduction.</div>
+    </div>
+  </div>
+
+  <!-- 11 A11Y -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">11 · Accessibility &amp; honesty</h2>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6;">
+      <div>4.5:1 on all body text, 3:1 on large text and UI boundaries. Check every cream-on-ink and grey-on-cream pair, including footers.</div>
+      <div>Status is never conveyed by colour alone — pair with text, icon or position.</div>
+      <div>Hit targets ≥44px on touch. Visible focus ring on every interactive element.</div>
+      <div>All ambient motion respects <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">prefers-reduced-motion</code>.</div>
+      <div><strong>Status must never look like action</strong>, and an action must never be labelled with a state. A button reading "Unhide" cannot tell the user which state they are in — use a labelled switch.</div>
+      <div>Icon-only controls get labels wherever the action is not universally understood (share, QR, copy link).</div>
+    </div>
+  </div>
+
+  <!-- 12 DARK -->
+  <div style="background:#fff; border-radius:24px; padding:28px 32px; display:flex; flex-direction:column; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <h2 style="margin:0; font-family:'Literata',serif; font-size:25px; font-weight:600;">12 · Dark mode</h2>
+    <p style="margin:0; font-size:14px; line-height:1.6;">Every law above holds in dark; what changes is which value plays which role. Full token set, component specs and specimens live in the <strong>dark mode rulebook</strong>, which this section does not restate. The four rules that bind light-mode work:</p>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.6;">
+      <div><strong>Author against tokens, never hexes.</strong> A component that writes <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#fff</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#F9F6F5</code> or a ramp step directly cannot be themed and will be rejected. The theme is one flip on <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">[data-theme="dark"]</code>.</div>
+      <div><strong>Nothing inverts literally.</strong> White cards do not become black cards; elevation on dark is lightness plus a hairline, not shadow.</div>
+      <div><strong>The ramp extends at its light end</strong> — <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#E0C4EE</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#CBA3E0</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#B07BD0</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#9059BC</code>, plus rose <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#D98BA8</code> for eyebrows. No new hues. Law 1 stands.</div>
+      <div><strong>Brand assets need dark counterparts</strong>, not filters: cream wordmark, re-inked Almo. The emblem is unchanged.</div>
+    </div>
+  </div>
+
+  <div style="background:#2C2530; border-radius:24px; padding:26px 30px;">
+    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#c9a8c4; margin-bottom:8px;">Known open questions</div>
+    <div style="display:flex; flex-direction:column; gap:5px; font-size:13.5px; line-height:1.6; color:rgba(249,246,245,.82);">
+      <div>Which layer owns tokens — Tailwind config, Less variables, or Taiga UI — is undecided. The type and colour consolidation must land in whichever is authoritative.</div>
+      <div>Discover, Review and Chat have never been reviewed. Rules here may need amendment once seen.</div>
+      <div>Whether the removed <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">.shining-effect</code>, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">.custom-transition</code> and confetti classes still exist in the repo determines whether restoring them is an edit or a rewrite.</div>
+      <div>Wordmark licensing is unresolved.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+</x-dc>
+</body>
+</html>

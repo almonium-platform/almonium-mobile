@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: #efe9e6; color: #2C2530; font-family: 'IBM Plex Sans', sans-serif; }
+  a { color: #872657; text-decoration: none; }
+  a:hover { color: #5A1A74; }
+</style>
+</helmet>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<path id="bl1" d="M5505 10729 c-16 -5 -40 -11 -53 -14 -40 -7 -114 -56 -164 -108 -61 -64 -120 -178 -174 -340 l-44 -130 185 -571 c102 -314 189 -578 194 -586 14 -25 669 -2050 687 -2125 12 -47 18 -112 18 -200 1 -109 -3 -142 -22 -205 -47 -149 -154 -282 -298 -369 l-67 -39 84 -26 c135 -41 185 -48 298 -44 96 3 113 6 173 36 87 42 170 133 222 239 21 43 61 146 88 228 346 1058 1001 3086 1014 3140 11 50 15 102 12 180 -3 96 -8 118 -33 170 -43 90 -130 171 -246 227 -104 51 -1484 504 -1621 532 -84 17 -205 20 -253 5z"></path>
+<path id="bl2" d="M8285 9740 c-106 -23 -197 -70 -361 -187 l-95 -68 -109 -335 c-60 -184 -289 -891 -509 -1570 -221 -679 -413 -1266 -427 -1305 -61 -162 -158 -307 -256 -383 -129 -98 -250 -135 -426 -130 -61 2 -112 1 -112 -1 0 -15 114 -151 174 -208 101 -96 181 -135 290 -141 103 -5 184 14 288 71 102 55 2812 2024 2887 2098 70 68 113 128 143 200 17 43 22 73 22 149 -1 110 -26 188 -96 300 -82 132 -935 1295 -991 1352 -62 63 -137 115 -205 141 -51 20 -162 29 -217 17z"></path>
+<path id="bl3" d="M9630 7312 c-72 -60 -2677 -1948 -2739 -1985 -140 -85 -273 -127 -406 -127 -162 0 -289 51 -437 173 l-48 39 0 -109 c1 -302 113 -476 352 -544 l83 -24 1790 0 1790 0 83 24 c143 41 238 117 294 236 59 128 59 123 56 1073 l-3 867 -27 78 c-34 95 -62 140 -121 194 -104 96 -199 123 -447 129 l-185 5 -35 -29z"></path>
+<path id="bl4" d="M5742 5047 c-204 -295 -199 -504 17 -717 67 -67 378 -297 1433 -1063 742 -538 1377 -996 1413 -1019 146 -91 306 -121 429 -78 160 55 195 94 719 815 248 341 470 650 493 688 101 164 121 333 55 471 -43 88 -142 193 -282 296 l-108 80 -1683 0 c-1073 0 -1716 4 -1773 10 -346 39 -558 210 -634 512 -10 37 -20 70 -23 73 -3 3 -28 -28 -56 -68z"></path>
+<path id="bl5" d="M5380 4981 c-347 -112 -481 -314 -415 -626 14 -66 466 -1474 484 -1505 4 -8 137 -413 295 -900 158 -487 303 -916 320 -955 111 -237 289 -334 536 -292 94 16 1469 455 1608 513 140 59 243 147 295 253 28 57 32 77 35 167 5 118 -9 193 -66 363 l-37 109 -1345 977 c-740 538 -1375 1002 -1412 1031 -115 92 -219 231 -265 354 -37 97 -43 246 -13 360 12 47 33 104 47 128 13 24 23 45 21 47 -2 2 -41 -9 -88 -24z"></path>
+<path id="bl6" d="M4633 5165 c-68 -21 -127 -61 -185 -125 -67 -73 -117 -173 -173 -345 -275 -835 -1008 -3106 -1021 -3160 -11 -51 -15 -101 -12 -180 4 -95 8 -118 33 -170 43 -90 130 -171 246 -227 104 -51 1484 -504 1621 -532 89 -18 196 -21 252 -5 21 6 47 12 58 14 37 7 112 58 160 108 61 64 120 178 174 340 l44 130 -185 571 c-102 314 -189 578 -193 586 -14 25 -670 2050 -688 2125 -12 47 -18 113 -18 200 -1 109 3 142 22 205 47 149 154 282 298 368 l66 40 -64 21 c-156 51 -339 67 -435 36z"></path>
+<path id="bl7" d="M4290 5724 c-30 -8 -90 -34 -132 -57 -102 -55 -2812 -2024 -2887 -2098 -70 -68 -113 -128 -143 -200 -17 -43 -22 -73 -22 -149 1 -110 26 -188 96 -300 82 -132 935 -1295 991 -1352 111 -113 216 -163 342 -163 132 1 231 43 430 184 l104 74 45 136 c25 75 255 782 511 1571 256 789 477 1467 491 1505 61 162 158 307 256 383 129 98 250 135 426 130 61 -2 112 -1 112 1 0 2 -23 34 -50 71 -74 100 -186 202 -265 241 -60 29 -79 34 -159 36 -59 2 -110 -3 -146 -13z"></path>
+<path id="bl8" d="M895 6410 c-190 -26 -319 -111 -386 -255 -60 -128 -60 -122 -57 -1073 l3 -867 27 -78 c34 -95 62 -140 121 -194 103 -95 199 -123 444 -130 l182 -5 38 29 c112 88 2688 1953 2742 1986 140 85 273 127 406 127 162 0 289 -51 438 -173 l47 -39 0 109 c-1 301 -110 471 -350 545 l-75 23 -1760 1 c-968 1 -1787 -2 -1820 -6z"></path>
+<path id="bl9" d="M1854 8976 c-151 -56 -189 -100 -707 -811 -248 -341 -470 -650 -493 -688 -101 -164 -121 -333 -55 -471 43 -88 142 -193 282 -296 l108 -80 1683 0 c1073 0 1716 -4 1773 -10 344 -39 558 -210 633 -508 10 -39 21 -74 24 -77 3 -3 28 28 56 68 204 295 199 504 -17 717 -67 67 -378 297 -1433 1063 -741 537 -1377 996 -1413 1018 -151 95 -313 123 -441 75z"></path>
+<path id="bl10" d="M4280 10445 c-78 -15 -1478 -465 -1588 -511 -140 -59 -243 -147 -295 -253 -28 -57 -32 -77 -35 -167 -5 -118 9 -193 66 -363 l37 -109 1345 -977 c740 -537 1375 -1002 1412 -1031 115 -92 219 -231 265 -354 37 -97 43 -246 13 -360 -12 -47 -33 -104 -47 -128 -13 -24 -23 -45 -21 -47 6 -7 175 53 238 84 232 116 320 305 265 566 -14 66 -466 1474 -484 1505 -4 8 -137 413 -295 900 -158 487 -303 917 -320 955 -79 169 -193 267 -340 294 -75 14 -121 13 -216 -4z"></path>
+</defs></svg>
+
+<div style="padding:44px 40px 120px; display:flex; flex-direction:column; gap:46px;">
+
+<section style="display:flex; flex-direction:column; gap:30px;">
+
+  <div style="max-width:1000px; display:flex; flex-direction:column; gap:11px;">
+    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Almonium &middot; /discover</div>
+    <h1 style="margin:0; font-family:'Literata',serif; font-size:40px; font-weight:600; line-height:1.15;">Discover is the front door, the dictionary, and the only page a stranger sees first</h1>
+    <p style="margin:0; font-size:15px; line-height:1.65; color:#5f5560; max-width:84ch; text-wrap:pretty;">One surface does three jobs: it is the public no-signup demo the brief calls the conversion mechanic, it is the word sheet the reader opens mid-paragraph, and it is where a word gets kept. Everything downstream &mdash; intent, confusion edges, encounter history &mdash; is decided here, at the moment of saving. The sheet is the same object for all three audiences; what changes is how much of it is filled in.</p>
+    <p style="margin:0; font-size:14px; line-height:1.65; color:#5f5560; max-width:84ch; text-wrap:pretty;">Two additions to what exists today: <strong>roots</strong>, because German confusion is morphological &mdash; the reason <em>Ausgabe</em> and <em>Aufgabe</em> cross is visible in their parts &mdash; and <strong>frequency with its provenance</strong>, replacing a bare score out of a hundred. Both are cached, deterministic, and free to serve.</p>
+  </div>
+
+  <div id="1a" style="display:flex; flex-direction:column; gap:10px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1a</span>
+      <span style="font-size:13px; color:#5f5560;">/discover &mdash; the field at rest, mid-typing, with the diacritic helper</span>
+    </div>
+
+    <div style="width:1360px; background:#F9F6F5; border-radius:20px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1);" data-screen-label="Discover index">
+
+      <div style="background:#fff; border-bottom:3px solid #6C7FA8;">
+        <div style="height:64px; padding:0 28px; display:flex; align-items:center; gap:28px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img src="./assets/logo.svg" alt="" style="width:28px; height:28px; display:block;">
+            <img src="./assets/wordmark.svg" alt="Almonium" style="height:20px; width:auto; display:block;">
+          </div>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="font-size:13.5px; font-weight:500; color:#5f5560; padding:7px 13px;">Home</span>
+            <span style="font-size:13.5px; font-weight:500; color:#5f5560; padding:7px 13px;">Read</span>
+            <span style="font-size:13.5px; font-weight:600; color:#5A1A74; background:#f4eef6; padding:7px 13px; border-radius:9999px;">Discover</span>
+            <span style="font-size:13.5px; font-weight:500; color:#5f5560; padding:7px 13px;">Review</span>
+          </div>
+          <div style="margin-left:auto; display:flex; align-items:center; gap:14px;">
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.5px; color:#6C7FA8; border:1px solid #cdd4e2; padding:4px 9px; border-radius:7px;">DE</span>
+            <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#8F2356,#5A1A74); display:flex; align-items:center; justify-content:center; font-family:'Literata',serif; font-size:15px; font-weight:600; color:#F9F6F5;">K</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:40px 28px 44px; display:flex; justify-content:center;">
+        <div style="width:900px; display:flex; flex-direction:column; gap:18px;">
+
+          <div style="display:flex; flex-direction:column; gap:9px;">
+            <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Discover</div>
+            <h2 style="margin:0; font-family:'Literata',serif; font-size:32px; font-weight:600; line-height:1.15;">Look up a word, or paste the sentence it was in</h2>
+            <p style="margin:0; font-size:14.5px; line-height:1.6; color:#5f5560; max-width:66ch; text-wrap:pretty;">The sentence is worth pasting. A word arrives with a sense already chosen when Almonium can see the sentence it came from, and that sentence is kept with the word.</p>
+          </div>
+
+          <div style="background:#fff; border-radius:26px; padding:26px 30px 22px; display:flex; flex-direction:column; gap:0; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+            <div style="display:flex; align-items:center; gap:14px; padding-bottom:14px; border-bottom:1.5px solid #5A1A74;">
+              <span style="font-family:'Literata',serif; font-size:34px; font-weight:500; color:#2C2530;">Ausg</span>
+              <span style="width:2px; height:36px; background:#5A1A74; margin-left:-10px;"></span>
+              <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+                <span style="position:relative; display:flex; flex-direction:column; align-items:center;">
+                  <span style="position:absolute; bottom:38px; background:#2C2530; color:#F9F6F5; font-family:'Literata',serif; font-size:19px; padding:8px 14px; border-radius:12px; box-shadow:0 6px 18px rgba(44,37,48,.28);">&ouml;</span>
+                  <span style="font-family:'Literata',serif; font-size:17px; color:#5f5560; border:1px solid #d8cfd6; border-radius:9px; width:38px; height:38px; display:flex; align-items:center; justify-content:center;">o</span>
+                </span>
+                <span style="font-family:'Literata',serif; font-size:17px; color:#5f5560; border:1px solid #d8cfd6; border-radius:9px; width:38px; height:38px; display:flex; align-items:center; justify-content:center;">&auml;</span>
+                <span style="font-family:'Literata',serif; font-size:17px; color:#5f5560; border:1px solid #d8cfd6; border-radius:9px; width:38px; height:38px; display:flex; align-items:center; justify-content:center;">&uuml;</span>
+                <span style="font-family:'Literata',serif; font-size:17px; color:#5f5560; border:1px solid #d8cfd6; border-radius:9px; width:38px; height:38px; display:flex; align-items:center; justify-content:center;">&szlig;</span>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; padding-top:6px;">
+              <div style="display:flex; align-items:center; gap:16px; padding:11px 6px; background:#f4eef6; border-radius:12px;">
+                <span style="font-family:'Literata',serif; font-size:20px; font-weight:600; color:#5A1A74; flex:0 0 260px; padding-left:10px;">die Ausgabe</span>
+                <span style="font-size:13.5px; color:#5f5560; flex:1;">edition, issue &middot; expense</span>
+                <div style="display:flex; align-items:flex-end; gap:2px; height:16px;">
+                  <span style="width:4px; height:5px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:8px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:11px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:14px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:16px; background:#e8e2e6; border-radius:1px;"></span>
+                </div>
+                <span style="font-size:12px; color:#a99aa8; width:104px; text-align:right; padding-right:10px;">common in print</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:16px; padding:11px 6px;">
+                <span style="font-family:'Literata',serif; font-size:20px; color:#2C2530; flex:0 0 260px; padding-left:10px;">ausgeben</span>
+                <span style="font-size:13.5px; color:#5f5560; flex:1;">to spend; to hand out</span>
+                <div style="display:flex; align-items:flex-end; gap:2px; height:16px;">
+                  <span style="width:4px; height:5px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:8px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:11px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:14px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:16px; background:#e8e2e6; border-radius:1px;"></span>
+                </div>
+                <span style="font-size:12px; color:#a99aa8; width:104px; text-align:right; padding-right:10px;">common in print</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:16px; padding:11px 6px;">
+                <span style="font-family:'Literata',serif; font-size:20px; color:#2C2530; flex:0 0 260px; padding-left:10px;">der Ausgang</span>
+                <span style="font-size:13.5px; color:#5f5560; flex:1;">exit; outcome</span>
+                <div style="display:flex; align-items:flex-end; gap:2px; height:16px;">
+                  <span style="width:4px; height:5px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:8px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:11px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:14px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:16px; background:#5A1A74; border-radius:1px;"></span>
+                </div>
+                <span style="font-size:12px; color:#a99aa8; width:104px; text-align:right; padding-right:10px;">everyday</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:16px; padding:11px 6px;">
+                <span style="font-family:'Literata',serif; font-size:20px; color:#2C2530; flex:0 0 260px; padding-left:10px;">ausgiebig</span>
+                <span style="font-size:13.5px; color:#5f5560; flex:1;">extensive, thorough</span>
+                <div style="display:flex; align-items:flex-end; gap:2px; height:16px;">
+                  <span style="width:4px; height:5px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:8px; background:#5A1A74; border-radius:1px;"></span>
+                  <span style="width:4px; height:11px; background:#e8e2e6; border-radius:1px;"></span>
+                  <span style="width:4px; height:14px; background:#e8e2e6; border-radius:1px;"></span>
+                  <span style="width:4px; height:16px; background:#e8e2e6; border-radius:1px;"></span>
+                </div>
+                <span style="font-size:12px; color:#a99aa8; width:104px; text-align:right; padding-right:10px;">bookish</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px; padding:13px 16px; margin-top:6px; border-top:1px solid #edebe8;">
+                <span style="font-size:13.5px; color:#5f5560;">Or press enter to look up <em style="font-style:normal; font-family:'Literata',serif; font-weight:600;">Ausg</em> as written.</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">&crarr; enter &middot; &uarr;&darr; to choose</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:16px; align-items:stretch;">
+            <div style="flex:1; background:#fff; border-radius:22px; padding:20px 24px; display:flex; flex-direction:column; gap:11px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+              <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">From the chapter you are in</span>
+              <p style="margin:0; font-size:13.5px; line-height:1.55; color:#5f5560;">Words in Die Verwandlung, chapter four, that are above your level and not yet yours.</p>
+              <div style="display:flex; flex-wrap:wrap; gap:7px;">
+                <span style="font-family:'Literata',serif; font-size:16px; background:#F9F6F5; padding:6px 13px; border-radius:9999px;">der Unrat</span>
+                <span style="font-family:'Literata',serif; font-size:16px; background:#F9F6F5; padding:6px 13px; border-radius:9999px;">sich hinauswagen</span>
+                <span style="font-family:'Literata',serif; font-size:16px; background:#F9F6F5; padding:6px 13px; border-radius:9999px;">bei&shy;l&auml;ufig</span>
+                <span style="font-family:'Literata',serif; font-size:16px; background:#F9F6F5; padding:6px 13px; border-radius:9999px;">der Verdru&szlig;</span>
+              </div>
+            </div>
+            <div style="flex:0 0 330px; background:#fff; border-radius:22px; padding:20px 24px; display:flex; flex-direction:column; gap:11px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+              <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Looked up, not kept</span>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'Literata',serif; font-size:16px;">die Zudringlichkeit</span><span style="font-size:12px; color:#a99aa8; margin-left:auto;">twice</span></div>
+                <div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'Literata',serif; font-size:16px;">der Anschlag</span><span style="font-size:12px; color:#a99aa8; margin-left:auto;">twice</span></div>
+                <div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'Literata',serif; font-size:16px;">vorl&auml;ufig</span><span style="font-size:12px; color:#a99aa8; margin-left:auto;">three times</span></div>
+              </div>
+              <p style="margin:0; font-size:12.5px; line-height:1.55; color:#a99aa8;">Looking a word up twice is the strongest signal you have that it is worth keeping.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="1b" style="display:flex; flex-direction:column; gap:10px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1b</span>
+      <span style="font-size:13px; color:#5f5560;">The word sheet, signed in as a member &mdash; the whole object</span>
+    </div>
+
+    <div style="width:1360px; background:#F9F6F5; border-radius:20px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1);" data-screen-label="Word sheet member">
+
+      <div style="background:#fff; border-bottom:3px solid #6C7FA8;">
+        <div style="height:64px; padding:0 28px; display:flex; align-items:center; gap:28px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img src="./assets/logo.svg" alt="" style="width:28px; height:28px; display:block;">
+            <img src="./assets/wordmark.svg" alt="Almonium" style="height:20px; width:auto; display:block;">
+          </div>
+          <div style="flex:1; max-width:420px; display:flex; align-items:center; gap:9px; border:1px solid #d8cfd6; border-radius:9999px; padding:8px 15px;">
+            <span style="font-family:'Literata',serif; font-size:14.5px; color:#2C2530;">die Ausgabe</span>
+            <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">esc</span>
+          </div>
+          <div style="margin-left:auto; display:flex; align-items:center; gap:14px;">
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.5px; color:#6C7FA8; border:1px solid #cdd4e2; padding:4px 9px; border-radius:7px;">DE</span>
+            <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#8F2356,#5A1A74); display:flex; align-items:center; justify-content:center; font-family:'Literata',serif; font-size:15px; font-weight:600; color:#F9F6F5;">K</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:28px; display:flex; gap:18px; align-items:flex-start;">
+
+        <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:16px;">
+
+          <div style="background:#fff; border-radius:28px; padding:30px 34px 26px; display:flex; flex-direction:column; gap:18px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+            <div style="display:flex; align-items:flex-end; gap:18px;">
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">German &middot; noun, feminine</span>
+                <div style="display:flex; align-items:baseline; gap:14px;">
+                  <span style="font-family:'Literata',serif; font-size:52px; font-weight:600; line-height:1;">die Ausgabe</span>
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:15px; color:#5f5560;">[ˈaʊsˌɡaːbə]</span>
+                </div>
+                <span style="font-size:13.5px; color:#5f5560;">plural <em style="font-style:normal; font-family:'Literata',serif;">die Ausgaben</em> &middot; genitive <em style="font-style:normal; font-family:'Literata',serif;">der Ausgabe</em></span>
+              </div>
+              <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+                <span style="display:flex; align-items:center; gap:8px; border:1px solid #d8cfd6; border-radius:9999px; padding:9px 17px; font-size:13.5px; font-weight:600; color:#5A1A74;">Listen</span>
+                <span style="display:flex; align-items:center; gap:8px; border:1px solid #d8cfd6; border-radius:9999px; padding:9px 17px; font-size:13.5px; font-weight:600; color:#5A1A74;">Slowly</span>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:20px; background:#F9F6F5; border-radius:16px; padding:16px 20px;">
+              <div style="display:flex; flex-direction:column; gap:7px; flex:0 0 300px;">
+                <div style="display:flex; align-items:flex-end; gap:4px; height:34px;">
+                  <span style="flex:1; height:8px; background:#e8e2e6; border-radius:2px;"></span>
+                  <span style="flex:1; height:13px; background:#e8e2e6; border-radius:2px;"></span>
+                  <span style="flex:1; height:18px; background:#cbb6d8; border-radius:2px;"></span>
+                  <span style="flex:1; height:24px; background:#5A1A74; border-radius:2px;"></span>
+                  <span style="flex:1; height:29px; background:#e8e2e6; border-radius:2px;"></span>
+                  <span style="flex:1; height:34px; background:#e8e2e6; border-radius:2px;"></span>
+                  <span style="flex:1; height:34px; background:#e8e2e6; border-radius:2px;"></span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.6px; text-transform:uppercase; color:#a99aa8;">
+                  <span>rare</span><span>everyday</span>
+                </div>
+              </div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
+                <span style="font-family:'Literata',serif; font-size:18px; font-weight:600;">Common in print, uncommon in speech</span>
+                <sc-if value="{{ showNumbers }}" hint-placeholder-val="{{ true }}">
+                  <span style="font-size:13.5px; line-height:1.55; color:#5f5560;">About 25 uses per million words &mdash; roughly the 3,100th most common German word. It sits three bands higher in books and newspapers than in subtitles.</span>
+                </sc-if>
+                <sc-if value="{{ showProvenance }}" hint-placeholder-val="{{ true }}">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">wordfreq 3.1 &middot; de &middot; books, news, subtitles, wikipedia &middot; lemma, not form</span>
+                </sc-if>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column;">
+
+              <div style="display:flex; gap:20px; padding:20px 0; border-top:1px solid #edebe8;">
+                <div style="flex:0 0 32px; font-family:'Literata',serif; font-size:22px; font-weight:600; color:#a99aa8;">1</div>
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:9px;">
+                  <div style="display:flex; align-items:baseline; gap:12px;">
+                    <span style="font-family:'Literata',serif; font-size:22px; font-weight:600;">An edition or issue</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#5A1A74; background:#f4eef6; padding:3px 7px; border-radius:5px;">B1</span>
+                    <span style="font-size:12.5px; color:#a99aa8;">the most common sense in books</span>
+                  </div>
+                  <p style="margin:0; font-size:14.5px; line-height:1.6; color:#5f5560; max-width:70ch; text-wrap:pretty;">One printing of a newspaper, a magazine or a book &mdash; the copies that come off the press together.</p>
+                  <div style="display:flex; gap:26px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">UA</span><span style="font-family:'Literata',serif; font-size:16px;">видання</span></div>
+                    <div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">EN</span><span style="font-family:'Literata',serif; font-size:16px;">edition, issue</span></div>
+                    <div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">PL</span><span style="font-family:'Literata',serif; font-size:16px;">wydanie</span></div>
+                  </div>
+                  <p style="margin:2px 0 0; font-family:'Literata',serif; font-size:16px; line-height:1.6; color:#33292E;">&bdquo;Die zweite <strong style="font-weight:600; color:#5A1A74;">Ausgabe</strong> der Zeitung erschien erst am Abend.&ldquo;</p>
+                  <span style="font-size:11.5px; color:#a99aa8;">Fontane, Effi Briest &middot; chapter 11 &middot; in the library</span>
+                </div>
+                <div style="flex:0 0 auto;"><span style="border:1px solid #d8cfd6; color:#5A1A74; font-size:13px; font-weight:600; padding:8px 16px; border-radius:9999px; white-space:nowrap;">Keep this sense</span></div>
+              </div>
+
+              <div style="display:flex; gap:20px; padding:20px 0; border-top:1px solid #edebe8;">
+                <div style="flex:0 0 32px; font-family:'Literata',serif; font-size:22px; font-weight:600; color:#a99aa8;">2</div>
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:9px;">
+                  <div style="display:flex; align-items:baseline; gap:12px;">
+                    <span style="font-family:'Literata',serif; font-size:22px; font-weight:600;">An amount spent</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#5A1A74; background:#f4eef6; padding:3px 7px; border-radius:5px;">B2</span>
+                    <span style="font-size:12.5px; color:#a99aa8;">usually plural</span>
+                  </div>
+                  <p style="margin:0; font-size:14.5px; line-height:1.6; color:#5f5560; max-width:70ch; text-wrap:pretty;">An expense or outlay. In the plural, <em>Ausgaben</em> is what a household or a budget spends, against <em>Einnahmen</em>, what it takes in.</p>
+                  <div style="display:flex; gap:26px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">UA</span><span style="font-family:'Literata',serif; font-size:16px;">витрати</span></div>
+                    <div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">EN</span><span style="font-family:'Literata',serif; font-size:16px;">expense, expenditure</span></div>
+                    <div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">PL</span><span style="font-family:'Literata',serif; font-size:16px;">wydatek</span></div>
+                  </div>
+                  <div style="display:flex; align-items:flex-start; gap:9px; background:#F9F6F5; border-radius:12px; padding:11px 14px; max-width:70ch;">
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:#872657; white-space:nowrap; padding-top:2px;">Across your languages</span>
+                    <span style="font-size:13.5px; line-height:1.55; color:#5f5560;">Polish splits the two senses the way German does &mdash; <em>wydanie</em> and <em>wydatek</em>, both from <em>wydać</em>, to give out. Ukrainian does not, and English does not.</span>
+                  </div>
+                </div>
+                <div style="flex:0 0 auto;"><span style="border:1px solid #d8cfd6; color:#5A1A74; font-size:13px; font-weight:600; padding:8px 16px; border-radius:9999px; white-space:nowrap;">Keep this sense</span></div>
+              </div>
+
+              <div style="display:flex; gap:20px; padding:20px 0 4px; border-top:1px solid #edebe8;">
+                <div style="flex:0 0 32px; font-family:'Literata',serif; font-size:22px; font-weight:600; color:#a99aa8;">3</div>
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px;">
+                  <div style="display:flex; align-items:baseline; gap:12px;">
+                    <span style="font-family:'Literata',serif; font-size:22px; font-weight:600;">A handing out, or the counter it happens at</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#5A1A74; background:#f4eef6; padding:3px 7px; border-radius:5px;">C1</span>
+                  </div>
+                  <p style="margin:0; font-size:14.5px; line-height:1.6; color:#5f5560; max-width:70ch; text-wrap:pretty;">The issuing of something, and by extension the window where it is issued: <em>Essensausgabe</em>, <em>Gep&auml;ckausgabe</em>. A fourth sense, output in computing, is listed under technical use.</p>
+                  <span style="font-size:12.5px; color:#872657; margin-top:2px;">Show the technical sense and four compounds</span>
+                </div>
+                <div style="flex:0 0 auto;"><span style="border:1px solid #d8cfd6; color:#5A1A74; font-size:13px; font-weight:600; padding:8px 16px; border-radius:9999px; white-space:nowrap;">Keep this sense</span></div>
+              </div>
+
+            </div>
+          </div>
+
+          <div style="background:#fff; border-radius:28px; padding:26px 34px 28px; display:flex; flex-direction:column; gap:16px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+            <div style="display:flex; align-items:baseline; gap:12px;">
+              <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Roots</span>
+              <span style="font-size:12.5px; color:#a99aa8;">Why this word means what it means, and which words it will be confused with</span>
+            </div>
+
+            <div style="display:flex; align-items:stretch; gap:10px;">
+              <div style="flex:0 0 auto; background:#F9F6F5; border-radius:16px; padding:14px 20px; display:flex; flex-direction:column; gap:3px;">
+                <span style="font-family:'Literata',serif; font-size:26px; font-weight:600; color:#5A1A74;">aus-</span>
+                <span style="font-size:13px; color:#5f5560;">out, outward</span>
+              </div>
+              <div style="flex:0 0 auto; display:flex; align-items:center; font-size:20px; color:#a99aa8;">+</div>
+              <div style="flex:0 0 auto; background:#F9F6F5; border-radius:16px; padding:14px 20px; display:flex; flex-direction:column; gap:3px;">
+                <span style="font-family:'Literata',serif; font-size:26px; font-weight:600; color:#5A1A74;">-gabe</span>
+                <span style="font-size:13px; color:#5f5560;">a giving, from <em style="font-style:normal;">geben</em></span>
+              </div>
+              <div style="flex:1; display:flex; align-items:center; padding-left:12px;">
+                <p style="margin:0; font-size:14.5px; line-height:1.6; color:#5f5560; text-wrap:pretty;">A giving-out. The paper is given out, the money is given out, the food is given out at the counter. Every sense on this page is the same picture.</p>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:9px;">
+              <span style="font-size:13.5px; color:#5f5560;">Nine German words are built from <em style="font-style:normal; font-family:'Literata',serif; font-weight:600;">geben</em> the same way. The prefix carries the whole difference.</span>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; flex-direction:column; gap:2px; background:#f4eef6; border:1px solid #e2d3ea; border-radius:13px; padding:10px 14px;"><span style="font-family:'Literata',serif; font-size:16px; font-weight:600; color:#5A1A74;">die Ausgabe</span><span style="font-size:12px; color:#5f5560;">given out &middot; this word</span></div>
+                <div style="display:flex; flex-direction:column; gap:2px; background:#fff4f6; border:1px solid #f2d9e1; border-radius:13px; padding:10px 14px;"><span style="font-family:'Literata',serif; font-size:16px; font-weight:600;">die Aufgabe</span><span style="font-size:12px; color:#872657;">given onto you &middot; crossed twice</span></div>
+                <div style="display:flex; flex-direction:column; gap:2px; background:#F9F6F5; border:1px solid #edebe8; border-radius:13px; padding:10px 14px;"><span style="font-family:'Literata',serif; font-size:16px; font-weight:600;">die Angabe</span><span style="font-size:12px; color:#5f5560;">a statement &middot; yours</span></div>
+                <div style="display:flex; flex-direction:column; gap:2px; background:#F9F6F5; border:1px solid #edebe8; border-radius:13px; padding:10px 14px;"><span style="font-family:'Literata',serif; font-size:16px; font-weight:600;">die Abgabe</span><span style="font-size:12px; color:#5f5560;">a handing over, a levy</span></div>
+                <div style="display:flex; flex-direction:column; gap:2px; background:#F9F6F5; border:1px solid #edebe8; border-radius:13px; padding:10px 14px;"><span style="font-family:'Literata',serif; font-size:16px; font-weight:600;">die &Uuml;bergabe</span><span style="font-size:12px; color:#5f5560;">a handover</span></div>
+                <div style="display:flex; flex-direction:column; gap:2px; background:#F9F6F5; border:1px solid #edebe8; border-radius:13px; padding:10px 14px;"><span style="font-family:'Literata',serif; font-size:16px; font-weight:600;">die Hingabe</span><span style="font-size:12px; color:#5f5560;">devotion &middot; given toward</span></div>
+                <div style="display:flex; align-items:center; padding:0 6px;"><span style="font-size:12.5px; color:#872657;">Three more</span></div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:flex-start; gap:12px; border-top:1px solid #edebe8; padding-top:14px;">
+              <span style="width:7px; height:7px; border-radius:50%; background:#ea6644; margin-top:7px;"></span>
+              <p style="margin:0; font-size:14px; line-height:1.6; color:#5f5560; max-width:84ch; text-wrap:pretty;"><strong style="color:#2C2530;">You have written <em style="font-style:normal; font-family:'Literata',serif;">Aufgabe</em> for this word twice</strong>, both times in that direction. They come back side by side in review until you clear both. The distinction to hold is the prefix, not the noun.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="flex:0 0 372px; display:flex; flex-direction:column; gap:16px;">
+
+          <div style="background:#fff; border-radius:26px; padding:24px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+            <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Keep it</span>
+            <div style="display:flex; flex-direction:column; gap:7px;">
+              <span style="font-size:13.5px; color:#5f5560;">What do you want from this word?</span>
+              <div style="display:flex; flex-wrap:wrap; gap:7px;">
+                <span style="font-size:13px; font-weight:600; color:#fff; background:#5A1A74; padding:8px 15px; border-radius:9999px;">Understand it</span>
+                <span style="font-size:13px; font-weight:500; color:#2C2530; border:1px solid #d8cfd6; padding:8px 15px; border-radius:9999px;">Say it too</span>
+                <span style="font-size:13px; font-weight:500; color:#2C2530; border:1px solid #d8cfd6; padding:8px 15px; border-radius:9999px;">Tell it from Aufgabe</span>
+              </div>
+              <span style="font-size:12.5px; line-height:1.5; color:#a99aa8;">Sense 1 is selected. Changing your mind later costs one tap on the word.</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="background:#5A1A74; color:#fff; font-size:14.5px; font-weight:600; padding:12px 26px; border-radius:9999px; box-shadow:0 6px 16px rgba(72,23,125,.24);">Keep the word</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">S</span>
+            </div>
+            <p style="margin:0; font-size:12.5px; line-height:1.55; color:#a99aa8;">Saved with the sentence you came from, so review can ask you about it in context.</p>
+          </div>
+
+          <div style="background:#fff; border-radius:26px; padding:24px 26px; display:flex; flex-direction:column; gap:13px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+            <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Where you have met it</span>
+            <div style="display:flex; flex-direction:column; gap:0;">
+              <div style="display:flex; gap:13px; padding-bottom:13px;">
+                <div style="flex:0 0 6px; display:flex; flex-direction:column; align-items:center;"><span style="width:7px; height:7px; border-radius:50%; background:#5A1A74; margin-top:5px;"></span><span style="width:1px; flex:1; background:#e8e2e6;"></span></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
+                  <span style="font-size:13.5px; font-weight:600;">Today, in Discover</span>
+                  <span style="font-size:12.5px; color:#a99aa8;">You typed it yourself</span>
+                </div>
+              </div>
+              <div style="display:flex; gap:13px; padding-bottom:13px;">
+                <div style="flex:0 0 6px; display:flex; flex-direction:column; align-items:center;"><span style="width:7px; height:7px; border-radius:50%; background:#d8cfd6; margin-top:5px;"></span><span style="width:1px; flex:1; background:#e8e2e6;"></span></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
+                  <span style="font-size:13.5px; font-weight:600;">19 August &middot; Die Verwandlung</span>
+                  <span style="font-family:'Literata',serif; font-size:13.5px; font-style:italic; line-height:1.5; color:#5f5560;">&bdquo;&hellip; die neueste <span style="font-style:normal;">Ausgabe</span> lag ungelesen auf dem Tisch.&ldquo;</span>
+                </div>
+              </div>
+              <div style="display:flex; gap:13px;">
+                <div style="flex:0 0 6px; display:flex; flex-direction:column; align-items:center;"><span style="width:7px; height:7px; border-radius:50%; background:#d8cfd6; margin-top:5px;"></span></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
+                  <span style="font-size:13.5px; font-weight:600;">2 August &middot; a pasted sentence</span>
+                  <span style="font-size:12.5px; color:#a99aa8;">Sense 2, the money one</span>
+                </div>
+              </div>
+            </div>
+            <p style="margin:0; font-size:12.5px; line-height:1.55; color:#5f5560;">It appears 14 more times across the books on your shelf.</p>
+            <span style="font-size:12.5px; color:#872657;">Show them</span>
+          </div>
+
+          <div style="background:#fff; border-radius:26px; padding:22px 26px; display:flex; flex-direction:column; gap:9px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+            <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">This entry</span>
+            <p style="margin:0; font-size:13px; line-height:1.55; color:#5f5560;">Written once, cached, and served to everyone. If something here is wrong, say so and it is fixed for every reader.</p>
+            <span style="font-size:12.5px; color:#872657;">Suggest a correction</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8; margin-top:2px;">entry v4 &middot; generated 2026-03-11 &middot; corrected once</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start;">
+
+    <div id="1c" style="display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1c</span>
+        <span style="font-size:13px; color:#5f5560;">The same sheet to a stranger &mdash; public, no account, indexable</span>
+      </div>
+      <div style="width:820px; background:#F9F6F5; border-radius:20px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1);" data-screen-label="Word sheet public">
+
+        <div style="background:#fff; border-bottom:1px solid #edebe8; height:58px; padding:0 24px; display:flex; align-items:center; gap:12px;">
+          <img src="./assets/logo.svg" alt="" style="width:24px; height:24px; display:block;">
+          <img src="./assets/wordmark.svg" alt="Almonium" style="height:17px; width:auto; display:block;">
+          <span style="margin-left:auto; font-size:13px; font-weight:500; color:#5f5560;">Read</span>
+          <span style="font-size:13px; font-weight:500; color:#5f5560;">Pricing</span>
+          <span style="border:1.5px solid #2C2530; color:#2C2530; font-size:13px; font-weight:600; padding:7px 17px; border-radius:9999px;">Sign in</span>
+        </div>
+
+        <div style="padding:24px; display:flex; flex-direction:column; gap:14px;">
+
+          <div style="background:#fff; border-radius:26px; padding:26px 28px 24px; display:flex; flex-direction:column; gap:16px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+            <div style="display:flex; align-items:flex-end; gap:14px;">
+              <div style="display:flex; flex-direction:column; gap:5px;">
+                <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">German &middot; noun, feminine</span>
+                <div style="display:flex; align-items:baseline; gap:12px;">
+                  <span style="font-family:'Literata',serif; font-size:42px; font-weight:600; line-height:1;">die Ausgabe</span>
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:14px; color:#5f5560;">[ˈaʊsˌɡaːbə]</span>
+                </div>
+              </div>
+              <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">almonium.com/de/ausgabe</span>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:18px; background:#F9F6F5; border-radius:14px; padding:13px 17px;">
+              <div style="display:flex; align-items:flex-end; gap:3px; height:26px; flex:0 0 150px;">
+                <span style="flex:1; height:6px; background:#e8e2e6; border-radius:2px;"></span>
+                <span style="flex:1; height:10px; background:#e8e2e6; border-radius:2px;"></span>
+                <span style="flex:1; height:14px; background:#cbb6d8; border-radius:2px;"></span>
+                <span style="flex:1; height:18px; background:#5A1A74; border-radius:2px;"></span>
+                <span style="flex:1; height:22px; background:#e8e2e6; border-radius:2px;"></span>
+                <span style="flex:1; height:26px; background:#e8e2e6; border-radius:2px;"></span>
+                <span style="flex:1; height:26px; background:#e8e2e6; border-radius:2px;"></span>
+              </div>
+              <span style="font-size:13.5px; line-height:1.5; color:#5f5560;"><strong style="color:#2C2530;">Common in print.</strong> About 25 uses per million words, the 3,100th most common German word.</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:14px;">
+              <div style="display:flex; gap:16px; border-top:1px solid #edebe8; padding-top:14px;">
+                <span style="flex:0 0 24px; font-family:'Literata',serif; font-size:19px; font-weight:600; color:#a99aa8;">1</span>
+                <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                  <span style="font-family:'Literata',serif; font-size:19px; font-weight:600;">An edition or issue</span>
+                  <span style="font-size:14px; line-height:1.55; color:#5f5560;">One printing of a newspaper, a magazine or a book.</span>
+                  <div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">UA</span><span style="font-family:'Literata',serif; font-size:15px;">видання</span></div>
+                  <p style="margin:2px 0 0; font-family:'Literata',serif; font-size:15px; line-height:1.55; color:#33292E;">&bdquo;Die zweite <strong style="font-weight:600; color:#5A1A74;">Ausgabe</strong> der Zeitung erschien erst am Abend.&ldquo;</p>
+                </div>
+              </div>
+              <div style="display:flex; gap:16px; border-top:1px solid #edebe8; padding-top:14px;">
+                <span style="flex:0 0 24px; font-family:'Literata',serif; font-size:19px; font-weight:600; color:#a99aa8;">2</span>
+                <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                  <span style="font-family:'Literata',serif; font-size:19px; font-weight:600;">An amount spent</span>
+                  <span style="font-size:14px; line-height:1.55; color:#5f5560;">An expense or outlay, usually in the plural.</span>
+                  <div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">UA</span><span style="font-family:'Literata',serif; font-size:15px;">витрати</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#fff; border-radius:24px; padding:22px 26px; display:flex; flex-direction:column; gap:13px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+            <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Roots</span>
+            <div style="display:flex; align-items:center; gap:9px;">
+              <span style="background:#F9F6F5; border-radius:13px; padding:10px 15px; font-family:'Literata',serif; font-size:20px; font-weight:600; color:#5A1A74;">aus-</span>
+              <span style="font-size:17px; color:#a99aa8;">+</span>
+              <span style="background:#F9F6F5; border-radius:13px; padding:10px 15px; font-family:'Literata',serif; font-size:20px; font-weight:600; color:#5A1A74;">-gabe</span>
+              <span style="font-size:14px; line-height:1.5; color:#5f5560; padding-left:8px;">out + a giving, from <em style="font-style:normal; font-family:'Literata',serif;">geben</em>. A giving-out.</span>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:7px;">
+              <span style="font-family:'Literata',serif; font-size:15px; background:#F9F6F5; padding:6px 12px; border-radius:9999px;">die Aufgabe</span>
+              <span style="font-family:'Literata',serif; font-size:15px; background:#F9F6F5; padding:6px 12px; border-radius:9999px;">die Angabe</span>
+              <span style="font-family:'Literata',serif; font-size:15px; background:#F9F6F5; padding:6px 12px; border-radius:9999px;">die Abgabe</span>
+              <span style="font-family:'Literata',serif; font-size:15px; background:#F9F6F5; padding:6px 12px; border-radius:9999px;">die &Uuml;bergabe</span>
+              <span style="font-family:'Literata',serif; font-size:15px; background:#F9F6F5; padding:6px 12px; border-radius:9999px;">die Hingabe</span>
+            </div>
+          </div>
+
+          <div style="background:#2C2530; border-radius:24px; padding:24px 28px; display:flex; align-items:center; gap:22px;">
+            <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+              <span style="font-family:'Literata',serif; font-size:21px; font-weight:600; color:#F9F6F5;">Keep this word and it comes back until you know it</span>
+              <p style="margin:0; font-size:13.5px; line-height:1.6; color:rgba(249,246,245,.7); max-width:52ch; text-wrap:pretty;">An account also remembers where you met it, in which book, and which word you confuse it with. Looking words up stays free and unlimited either way.</p>
+            </div>
+            <div style="flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-start; gap:9px;">
+              <span style="background:#E0C4EE; color:#2C2530; font-size:14.5px; font-weight:600; padding:12px 26px; border-radius:9999px;">Keep it &mdash; free</span>
+              <span style="font-size:12.5px; color:rgba(249,246,245,.5);">A hundred words, no card</span>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:10px; padding:2px 6px;">
+            <span style="font-size:12.5px; color:#5f5560;">Next in the family:</span>
+            <span style="font-size:12.5px; color:#872657;">die Aufgabe</span>
+            <span style="font-size:12.5px; color:#872657;">die Angabe</span>
+            <span style="font-size:12.5px; color:#872657;">ausgeben</span>
+            <span style="margin-left:auto; font-size:12.5px; color:#a99aa8;">Also on this page: 400 words from Effi Briest</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div id="1d" style="display:flex; flex-direction:column; gap:10px; width:512px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1d</span>
+        <span style="font-size:13px; color:#5f5560;">A pasted sentence &mdash; the demo a stranger actually tries</span>
+      </div>
+      <div style="background:#F9F6F5; border-radius:20px; padding:24px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);" data-screen-label="Pasted sentence">
+
+        <div style="background:#fff; border-radius:22px; padding:22px 24px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+          <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Your sentence</span>
+          <p style="margin:0; font-family:'Literata',serif; font-size:21px; line-height:1.75; color:#33292E; text-wrap:pretty;">Die zweite <span style="background:#f4eef6; color:#5A1A74; border-radius:5px; padding:1px 4px;">Ausgabe</span> der <span style="border-bottom:1px dotted #b9a8b8;">Zeitung</span> <span style="border-bottom:1px dotted #b9a8b8;">erschien</span> erst am Abend.</p>
+          <div style="display:flex; align-items:center; gap:10px; border-top:1px solid #edebe8; padding-top:12px;">
+            <span style="font-size:13px; color:#5f5560;">Three words are above B1. Tap any word for its sheet.</span>
+            <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">de &middot; detected</span>
+          </div>
+        </div>
+
+        <div style="background:#fff; border-radius:22px; padding:20px 24px; display:flex; flex-direction:column; gap:11px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+          <div style="display:flex; align-items:baseline; gap:10px;">
+            <span style="font-family:'Literata',serif; font-size:26px; font-weight:600;">Ausgabe</span>
+            <span style="font-size:13px; color:#5f5560;">here: an edition</span>
+            <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#5A1A74; background:#f4eef6; padding:3px 7px; border-radius:5px;">sense 1 of 4</span>
+          </div>
+          <p style="margin:0; font-size:14px; line-height:1.6; color:#5f5560; text-wrap:pretty;">The sentence decides the sense. <em>Zeitung</em> beside it rules out the money reading, so the sheet opens on the right one instead of making you choose.</p>
+          <div style="display:flex; align-items:center; gap:12px; padding-top:4px;">
+            <span style="background:#5A1A74; color:#fff; font-size:14px; font-weight:600; padding:11px 24px; border-radius:9999px;">Open the full sheet</span>
+            <span style="font-size:13px; color:#872657;">Whole sentence into review</span>
+          </div>
+        </div>
+
+        <div style="background:#fff; border-radius:22px; padding:18px 24px; display:flex; flex-direction:column; gap:7px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+          <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Signed out</span>
+          <p style="margin:0; font-size:13.5px; line-height:1.6; color:#5f5560;">One sentence at a time, as many times as you like. A paragraph, and keeping what you find, needs an account.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start;">
+
+    <div id="1e" style="display:flex; flex-direction:column; gap:10px; width:560px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1e</span>
+        <span style="font-size:13px; color:#5f5560;">Unfold and fold, live &mdash; the two motions Discover owns</span>
+      </div>
+
+      <div style="background:#fff; border-radius:24px; padding:26px 28px; display:flex; flex-direction:column; gap:18px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+        <p style="margin:0; font-size:14px; line-height:1.6; color:#5f5560; text-wrap:pretty;">The constitution gives the mark two meanings and forbids mixing them. Discover is the only surface that uses both, seconds apart: the entry unfolds while it loads, and folds when the word is kept.</p>
+
+        <div style="display:flex; gap:16px;">
+          <div style="flex:1; background:#F9F6F5; border-radius:18px; padding:20px; display:flex; flex-direction:column; align-items:center; gap:12px;">
+            <svg ref="{{ unfoldRef }}" viewBox="0 0 1092 1111" width="104" height="106" aria-hidden="true"><g transform="translate(0,1111) scale(0.1,-0.1)" fill="#5A1A74"><use href="#bl1"></use><use href="#bl2"></use><use href="#bl3"></use><use href="#bl4"></use><use href="#bl5"></use><use href="#bl6"></use><use href="#bl7"></use><use href="#bl8"></use><use href="#bl9"></use><use href="#bl10"></use></g></svg>
+            <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+              <span style="font-family:'Literata',serif; font-size:18px; font-weight:600;">Unfold</span>
+              <span style="font-size:13px; line-height:1.5; color:#5f5560; text-align:center;">One becoming many. Plays while the entry loads and while a word opens into its senses.</span>
+            </div>
+          </div>
+          <div style="flex:1; background:#F9F6F5; border-radius:18px; padding:20px; display:flex; flex-direction:column; align-items:center; gap:12px;">
+            <svg ref="{{ foldRef }}" viewBox="0 0 1092 1111" width="104" height="106" aria-hidden="true"><g transform="translate(0,1111) scale(0.1,-0.1)" fill="#5A1A74"><use href="#bl1"></use><use href="#bl2"></use><use href="#bl3"></use><use href="#bl4"></use><use href="#bl5"></use><use href="#bl6"></use><use href="#bl7"></use><use href="#bl8"></use><use href="#bl9"></use><use href="#bl10"></use></g></svg>
+            <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+              <span style="font-family:'Literata',serif; font-size:18px; font-weight:600;">Fold</span>
+              <span style="font-size:13px; line-height:1.5; color:#5f5560; text-align:center;">Many becoming one. Plays once on Keep, inside the button, and does not repeat.</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px; line-height:1.6;">
+          <div style="background:#F9F6F5; border-radius:13px; padding:11px 14px;"><strong>Unfold is the only loader on this route.</strong> Three to four blades inside 250ms, the rest blooming after, then a hold. If the entry is cached &mdash; which is the normal case &mdash; it never appears at all, and nothing flashes.</div>
+          <div style="background:#F9F6F5; border-radius:13px; padding:11px 14px;"><strong>Fold belongs to Keep, not to the page.</strong> It runs inside the button at 26px, the label changes to <em>Kept</em>, and the sheet stays where it is. Saving must not navigate.</div>
+          <div style="background:#F9F6F5; border-radius:13px; padding:11px 14px;"><strong>Neither is a celebration.</strong> Keeping a word happens forty times a session. No confetti, no particles, no sound &mdash; the three rationed celebrations are elsewhere.</div>
+          <div style="background:#F9F6F5; border-radius:13px; padding:11px 14px;"><strong>Reduced motion.</strong> Unfold becomes a static mark at rest; fold becomes the label change alone.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="1f" style="display:flex; flex-direction:column; gap:10px; width:772px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1f</span>
+        <span style="font-size:13px; color:#5f5560;">Who gets what &mdash; and the rule that decides it</span>
+      </div>
+
+      <div style="background:#fff; border-radius:24px; padding:26px 28px; display:flex; flex-direction:column; gap:16px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+        <p style="margin:0; font-size:14px; line-height:1.6; color:#5f5560; text-wrap:pretty;">Free where the cost is amortised, paid where it scales per user. A lexical entry is written once and served to everyone, so the whole sheet is public. Audio is spoken for one person at a time, so it is not. Nothing on this page is withheld to create a reason to pay.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 118px 118px 118px; gap:0; font-size:13.5px;">
+          <div style="padding:9px 10px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#872657;">On the sheet</div>
+          <div style="padding:9px 10px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#872657; text-align:center;">Signed out</div>
+          <div style="padding:9px 10px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#872657; text-align:center;">Free</div>
+          <div style="padding:9px 10px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#872657; text-align:center;">Member</div>
+
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8;">Look up any word, any number of times</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8;">All senses, examples, grammar, IPA</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8;">Roots, the word family, frequency with its source</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8;">Paste text</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#5f5560;">one sentence</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#5f5560;">a paragraph</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#5f5560;">a paragraph</div>
+
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8;">Meaning shown in the languages you speak</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#5f5560;">one, from locale</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#5f5560;">one, chosen</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#5f5560;">all of them</div>
+
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8;">Keep the word, with an intent</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#a99aa8;">sign up</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#5f5560;">100 words</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#5f5560;">no cap</div>
+
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8;">Encounter history, and where it is in your books</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#a99aa8;">&mdash;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8;">Confusion edges from your own answers</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#a99aa8;">&mdash;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8;">Suggest a correction to the entry</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#a99aa8;">&mdash;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8;">Hear it spoken, at two speeds</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#a99aa8;">&mdash;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; font-size:12px; color:#a99aa8;">&mdash;</div>
+          <div style="padding:9px 10px; border-bottom:1px solid #edebe8; text-align:center; color:#5A1A74;">&bull;</div>
+
+          <div style="padding:9px 10px;">A fresh example sentence, written now</div>
+          <div style="padding:9px 10px; text-align:center; font-size:12px; color:#a99aa8;">&mdash;</div>
+          <div style="padding:9px 10px; text-align:center; font-size:12px; color:#a99aa8;">&mdash;</div>
+          <div style="padding:9px 10px; text-align:center; color:#5A1A74;">&bull;</div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px; line-height:1.6;">
+          <div style="background:#F9F6F5; border-radius:13px; padding:11px 14px;"><strong>The signed-out sheet is the marketing.</strong> It is a real page at a real URL, server-rendered, one per word, linked from the parallel-text pages. Cutting it down to tease a signup would cost the only acquisition channel that scales without the founder.</div>
+          <div style="background:#F9F6F5; border-radius:13px; padding:11px 14px;"><strong>The wall is keeping, not knowing.</strong> Signed out, everything on the sheet is legible and nothing is blurred; the single ask sits at the bottom, where a stranger has already got what they came for.</div>
+          <div style="background:#F9F6F5; border-radius:13px; padding:11px 14px;"><strong>The two member lines are the two that cost per use.</strong> Audio is spoken tokens; a fresh example is generated tokens. Everything else on the sheet was written once and is served from cache, so charging for it would be charging for nothing.</div>
+          <div style="background:#F9F6F5; border-radius:13px; padding:11px 14px;"><strong>State the cap, not the restriction.</strong> At the hundredth word the sheet still opens and still says everything; Keep becomes a line reading &ldquo;Free covers a hundred words &mdash; you have kept a hundred&rdquo; with a plum link. Grey text, no raspberry.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="width:1360px; background:#fff; border-radius:20px; padding:24px 28px; display:flex; flex-direction:column; gap:11px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">What this asserts, and why</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:9px; font-size:13.5px; line-height:1.6;">
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>Frequency is evidence, not a score.</strong> A number out of a hundred with a mood attached &mdash; sixty, comfort zone &mdash; cannot be checked and does not say what it measures. A band with the count behind it can: how often, in what corpus, and whether that is print or speech. The same field also drives which words the reader is shown from a chapter.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>The band names describe register, not the reader.</strong> &ldquo;Common in print, uncommon in speech&rdquo; is a fact about German. &ldquo;You probably know it&rdquo; is a guess about a person, and it will be wrong for the C1 reader who has never met the word, which is exactly the reader who just looked it up.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>Roots carry the confusion.</strong> The reason <em>Ausgabe</em> and <em>Aufgabe</em> cross is that they differ by one prefix on one stem. Showing the family at lookup time is prevention; the confusion feedback in review is the cure. They are the same idea at two moments, and both fall out of one morphology field.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>Etymology stops at the useful depth.</strong> Prefix, stem, and the living family a learner will actually meet. Proto-Germanic <em>*gebaną</em> is charming and does not help anyone hold two nouns apart; it belongs behind a link, if anywhere.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>Intent is chosen at save, on this page.</strong> It is one tap with a sensible default, and it is the only moment the learner has the context to answer. Asking later, in review, is asking someone to remember why they saved something.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>Senses are saved individually.</strong> The domain model has one spelling and many senses at different levels, so Keep binds to a sense, not to a spelling. Keeping <em>Ausgabe</em> as an edition and later as an expense is two items sharing one entry, not a duplicate.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>The pasted sentence chooses the sense.</strong> Which is the argument for pasting, and the reason the demo asks for a sentence rather than a word. It is also the cheapest disambiguation available &mdash; one deterministic pass over the entry, no model call.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>The entry states its own provenance.</strong> Version, date, and whether a human has corrected it. Corrections are how the database becomes better than the model that seeded it, and nobody reports an error in a source that will not admit to having one.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>&ldquo;Looked up, not kept&rdquo; is free retention.</strong> Two lookups of the same word is the strongest save signal in the product and costs one row. It is also the honest version of a nag: a list, not a prompt.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>The diacritic helper stays.</strong> A Ukrainian keyboard has no umlaut, and a learner should not have to know that <em>oe</em> works. The held-key popup from the current build is right; the visible row beneath it is for people who never discover a held key.</div>
+    </div>
+    <p style="margin:4px 0 0; font-size:13px; line-height:1.6; color:#5f5560; text-wrap:pretty;">What this needs that does not exist yet: the structured entry with a morphology field and a family edge, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">wordfreq</code> loaded with band thresholds per language and its provenance stored beside the number, sense-level saving, the correction queue, and server-rendered public word pages. The family edge is the same table as <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">ConfusionEdge</code> with a different type, so it costs nothing extra.</p>
+  </div>
+
+  <div style="width:1360px; background:#2C2530; border-radius:20px; padding:24px 28px; display:flex; flex-direction:column; gap:10px;">
+    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#c9a8c4;">Decisions I made for you &mdash; overrule freely</div>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.65; color:rgba(249,246,245,.82);">
+      <div>The whole sheet is public. The alternative &mdash; two senses free, the rest behind signup &mdash; converts better in the short run and kills the SEO argument for having the page at all.</div>
+      <div>Frequency bands are named for register rather than for the learner's likely knowledge, which drops the &ldquo;you probably know it&rdquo; line from the current build. If you want a personal reading, it should come from your own history, not from a corpus.</div>
+      <div>The word family is capped at six visible, ordered by frequency, with the rest behind a link. For a productive prefix like <em>ver-</em> the true family runs to hundreds.</div>
+      <div>Audio is a member line. It is the only workload in the brief that scales linearly per user, and a free tier that speaks every lookup is the one way this page can cost real money.</div>
+      <div>No mascot anywhere on this route. Discover holds content on every state including the empty one, where the field itself is the instruction.</div>
+      <div>Etymology beyond the living family is left out entirely rather than shown collapsed. If you want it, it is a link to a separate panel, not a section on this page.</div>
+    </div>
+  </div>
+
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;freqDisplay&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Band and numbers&quot;,&quot;Band only&quot;],&quot;default&quot;:&quot;Band and numbers&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Frequency&quot;},&quot;showProvenance&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Frequency&quot;},&quot;bladeStagger&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:45,&quot;min&quot;:20,&quot;max&quot;:90,&quot;step&quot;:5,&quot;unit&quot;:&quot;ms&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Emblem motion&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.unfoldRef = React.createRef();
+    this.foldRef = React.createRef();
+  }
+  componentDidMount() {
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) return;
+    this.run = true;
+    this.cycle();
+  }
+  componentWillUnmount() {
+    this.run = false;
+    clearTimeout(this.t);
+  }
+  blades(ref) {
+    const el = ref.current;
+    return el ? Array.prototype.slice.call(el.querySelectorAll('use')) : [];
+  }
+  cycle() {
+    if (!this.run) return;
+    const st = Number(this.props.bladeStagger ?? 45);
+    const hold = 1100;
+    const up = this.blades(this.unfoldRef);
+    const down = this.blades(this.foldRef);
+    up.forEach((el, i) => {
+      el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 240, delay: i * st, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'both' });
+    });
+    down.forEach((el, i) => {
+      const order = down.length - 1 - i;
+      el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, delay: order * st, easing: 'ease-in', fill: 'both' });
+    });
+    if (this.unfoldRef.current) this.unfoldRef.current.animate([{ transform: 'scale(.93)' }, { transform: 'scale(1)' }], { duration: 10 * st + 240, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'both' });
+    if (this.foldRef.current) this.foldRef.current.animate([{ transform: 'scale(1)' }, { transform: 'scale(.9)' }], { duration: 10 * st + 200, easing: 'ease-in', fill: 'both' });
+    const span = 10 * st + 260 + hold;
+    this.t = setTimeout(() => {
+      up.forEach((el) => el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: 'ease-in', fill: 'both' }));
+      down.forEach((el) => el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out', fill: 'both' }));
+      this.t = setTimeout(() => this.cycle(), 420);
+    }, span);
+  }
+  renderVals() {
+    const mode = this.props.freqDisplay ?? 'Band and numbers';
+    return {
+      unfoldRef: this.unfoldRef,
+      foldRef: this.foldRef,
+      showNumbers: mode !== 'Band only',
+      showProvenance: (this.props.showProvenance ?? true) && mode !== 'Band only'
+    };
+  }
+}
+</script>
+</body>
+</html>

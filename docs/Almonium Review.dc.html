@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: #efe9e6; color: #2C2530; font-family: 'IBM Plex Sans', sans-serif; }
+  a { color: #872657; text-decoration: none; }
+  a:hover { color: #5A1A74; }
+</style>
+</helmet>
+
+<div style="padding:44px 40px 120px; display:flex; flex-direction:column; gap:46px;">
+
+<section style="display:flex; flex-direction:column; gap:30px;">
+
+  <div style="max-width:980px; display:flex; flex-direction:column; gap:11px;">
+    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Almonium &middot; /review</div>
+    <h1 style="margin:0; font-family:'Literata',serif; font-size:40px; font-weight:600; line-height:1.15;">Review is where the product stops being a reader</h1>
+    <p style="margin:0; font-size:15px; line-height:1.65; color:#5f5560; max-width:82ch; text-wrap:pretty;">Everything distinctive in the brief lands on this one surface: receptive and productive intents, confusion-aware feedback, paraphrase rotation, weighted hints, leeches that cannot be escaped by lying, the dessert story. None of it is visible in a flashcard that flips. Four screens below &mdash; what is due, a prompt, a wrong answer, and the end of a session &mdash; plus what each of them assumes about the backend.</p>
+  </div>
+
+  <div id="1a" style="display:flex; flex-direction:column; gap:10px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1a</span>
+      <span style="font-size:13px; color:#5f5560;">/review &mdash; fourteen due, ten in a session, three that have stopped moving</span>
+    </div>
+
+    <div style="width:1360px; background:#F9F6F5; border-radius:20px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1);" data-screen-label="Review index">
+
+      <div style="background:#fff; border-bottom:3px solid #6C7FA8;">
+        <div style="height:64px; padding:0 28px; display:flex; align-items:center; gap:28px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img src="./assets/logo.svg" alt="" style="width:28px; height:28px; display:block;">
+            <img src="./assets/wordmark.svg" alt="Almonium" style="height:20px; width:auto; display:block;">
+          </div>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="font-size:13.5px; font-weight:500; color:#5f5560; padding:7px 13px;">Home</span>
+            <span style="font-size:13.5px; font-weight:500; color:#5f5560; padding:7px 13px;">Read</span>
+            <span style="font-size:13.5px; font-weight:500; color:#5f5560; padding:7px 13px;">Discover</span>
+            <span style="font-size:13.5px; font-weight:600; color:#5A1A74; background:#f4eef6; padding:7px 13px; border-radius:9999px;">Review</span>
+            <span style="font-size:13.5px; font-weight:500; color:#5f5560; padding:7px 13px;">Play</span>
+          </div>
+          <div style="flex:1; max-width:420px; display:flex; align-items:center; gap:9px; border:1px solid #d8cfd6; border-radius:9999px; padding:8px 15px;">
+            <span style="font-size:13px; color:#a99aa8;">Look up a word, or paste a sentence</span>
+          </div>
+          <div style="margin-left:auto; display:flex; align-items:center; gap:14px;">
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.5px; color:#6C7FA8; border:1px solid #cdd4e2; padding:4px 9px; border-radius:7px;">DE</span>
+            <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#8F2356,#5A1A74); display:flex; align-items:center; justify-content:center; font-family:'Literata',serif; font-size:15px; font-weight:600; color:#F9F6F5;">K</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:30px 28px 34px; display:flex; flex-direction:column; gap:20px;">
+
+        <div style="display:flex; align-items:flex-end; gap:30px;">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Review</div>
+            <h2 style="margin:0; font-family:'Literata',serif; font-size:34px; font-weight:600; line-height:1.1;">Fourteen words are due</h2>
+            <p style="margin:0; font-size:14.5px; line-height:1.6; color:#5f5560; max-width:70ch; text-wrap:pretty;">Ten of them make a session, which is about seven minutes. The other four keep until tomorrow, or you can go again straight after.</p>
+          </div>
+          <div style="margin-left:auto;">
+            <span style="background:#5A1A74; color:#fff; font-size:15px; font-weight:600; padding:13px 30px; border-radius:9999px; display:inline-block;">Start</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:16px; align-items:stretch;">
+
+          <div style="flex:1; background:#fff; border-radius:26px; padding:24px 26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+            <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">What this session asks of you</div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+
+              <div style="display:flex; align-items:baseline; gap:18px;">
+                <span style="font-family:'Literata',serif; font-size:30px; font-weight:600; width:38px; text-align:right;">6</span>
+                <div style="display:flex; flex-direction:column; gap:3px;">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:#5A1A74;">Understand</span>
+                  <span style="font-size:14px; line-height:1.55; color:#5f5560;">You want to recognise these when they turn up in a page. You will read them and say what they mean.</span>
+                </div>
+              </div>
+
+              <div style="display:flex; align-items:baseline; gap:18px;">
+                <span style="font-family:'Literata',serif; font-size:30px; font-weight:600; width:38px; text-align:right;">3</span>
+                <div style="display:flex; flex-direction:column; gap:3px;">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:#5A1A74;">Produce</span>
+                  <span style="font-size:14px; line-height:1.55; color:#5f5560;">You already understand these. Here you have to come up with them from the meaning, which is a different skill and a harder one.</span>
+                </div>
+              </div>
+
+              <div style="display:flex; align-items:baseline; gap:18px;">
+                <span style="font-family:'Literata',serif; font-size:30px; font-weight:600; width:38px; text-align:right;">1</span>
+                <div style="display:flex; flex-direction:column; gap:3px;">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:#5A1A74;">Tell apart</span>
+                  <span style="font-size:14px; line-height:1.55; color:#5f5560;"><em style="font-style:normal; font-family:'Literata',serif; font-weight:600;">Ausgabe</em> and <em style="font-style:normal; font-family:'Literata',serif; font-weight:600;">Aufgabe</em> have crossed twice. They come back together until they stop.</span>
+                </div>
+              </div>
+
+            </div>
+            <p style="margin:2px 0 0; font-size:13px; line-height:1.55; color:#a99aa8; text-wrap:pretty;">Intents are set when you save a word and changed any time from the word itself. A word can carry more than one.</p>
+          </div>
+
+          <div style="flex:0 0 420px; display:flex; flex-direction:column; gap:16px;">
+
+            <div style="background:#fff; border-radius:26px; padding:22px 24px; display:flex; flex-direction:column; gap:11px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+              <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Three words have stopped moving</div>
+              <div style="display:flex; flex-wrap:wrap; gap:7px;">
+                <span style="font-family:'Literata',serif; font-size:16px; font-weight:600; background:#F9F6F5; padding:6px 13px; border-radius:9999px;">der Ausdruck</span>
+                <span style="font-family:'Literata',serif; font-size:16px; font-weight:600; background:#F9F6F5; padding:6px 13px; border-radius:9999px;">bei&shy;l&auml;ufig</span>
+                <span style="font-family:'Literata',serif; font-size:16px; font-weight:600; background:#F9F6F5; padding:6px 13px; border-radius:9999px;">der Anschlag</span>
+              </div>
+              <p style="margin:0; font-size:14px; line-height:1.6; color:#5f5560; text-wrap:pretty;">Each has come back four times in the same shape without sticking. Asking a fifth time the same way will not work.</p>
+              <div style="display:flex; align-items:center; gap:14px; margin-top:2px;">
+                <span style="border:1px solid #d8cfd6; color:#5A1A74; font-size:13.5px; font-weight:600; padding:9px 19px; border-radius:9999px;">Meet them again</span>
+                <span style="font-size:12.5px; color:#a99aa8; line-height:1.4;">New sentence, new form,<br>out of the queue meanwhile</span>
+              </div>
+            </div>
+
+            <div style="background:#fff; border-radius:26px; padding:22px 24px; display:flex; flex-direction:column; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+              <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">This week</div>
+              <div style="display:flex; align-items:flex-end; gap:8px; height:52px;">
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:30px; background:#5A1A74; border-radius:4px;"></div><span style="font-size:10.5px; color:#a99aa8;">M</span></div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:8px; background:#e8e2e6; border-radius:4px;"></div><span style="font-size:10.5px; color:#a99aa8;">T</span></div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:38px; background:#5A1A74; border-radius:4px;"></div><span style="font-size:10.5px; color:#a99aa8;">W</span></div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:22px; background:#5A1A74; border-radius:4px;"></div><span style="font-size:10.5px; color:#a99aa8;">T</span></div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:8px; background:#e8e2e6; border-radius:4px;"></div><span style="font-size:10.5px; color:#a99aa8;">F</span></div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:8px; background:#e8e2e6; border-radius:4px;"></div><span style="font-size:10.5px; color:#a99aa8;">S</span></div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;"><div style="width:100%; height:8px; background:#e8e2e6; border-radius:4px;"></div><span style="font-size:10.5px; color:#a99aa8;">S</span></div>
+              </div>
+              <p style="margin:0; font-size:13.5px; line-height:1.55; color:#5f5560;">Three sessions. You set the target at four, and you can change it or turn it off in settings.</p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="1b" style="display:flex; flex-direction:column; gap:10px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1b</span>
+      <span style="font-size:13px; color:#5f5560;">In session &mdash; a productive prompt, hints priced before you take them</span>
+    </div>
+
+    <div style="width:1360px; background:#F9F6F5; border-radius:20px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1);" data-screen-label="Review session">
+
+      <div style="background:#fff; border-bottom:1px solid #edebe8;">
+        <div style="height:60px; padding:0 28px; display:flex; align-items:center; gap:22px;">
+          <span style="font-size:13.5px; font-weight:500; color:#5f5560;">Leave</span>
+          <div style="display:flex; align-items:center; gap:5px; margin:0 auto;">
+            <div style="width:22px; height:9px; border-radius:9999px; background:#5A1A74;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#5A1A74;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#5A1A74;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#fff; border:1.5px solid #5A1A74;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#5f5560; margin-left:9px;">4 / 10</span>
+          </div>
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.5px; color:#6C7FA8; border:1px solid #cdd4e2; padding:4px 9px; border-radius:7px;">DE</span>
+        </div>
+      </div>
+
+      <div style="padding:38px 28px 42px; display:flex; justify-content:center;">
+        <div style="width:860px; display:flex; flex-direction:column; gap:16px;">
+
+          <div style="background:#fff; border-radius:28px; padding:34px 38px 30px; display:flex; flex-direction:column; gap:20px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:#5A1A74; background:#f4eef6; padding:4px 9px; border-radius:6px;">Produce</span>
+              <span style="font-size:12.5px; color:#a99aa8;">Saved 12 days ago while reading &middot; seen 5 times</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:9px;">
+              <p style="margin:0; font-family:'Literata',serif; font-size:29px; font-weight:500; line-height:1.35; text-wrap:pretty;">A single printing of a newspaper or a book &mdash; the copies that come off the press together.</p>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:#a99aa8;">UA</span>
+                <span style="font-family:'Literata',serif; font-size:17px; color:#5f5560;">&#1074;&#1080;&#1076;&#1072;&#1085;&#1085;&#1103;, &#1085;&#1072;&#1082;&#1083;&#1072;&#1076;</span>
+              </div>
+            </div>
+
+            <div style="height:1px; background:#edebe8;"></div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="border:1.5px solid #5A1A74; border-radius:16px; padding:15px 20px; display:flex; align-items:center; gap:2px;">
+                <span style="font-family:'Literata',serif; font-size:24px; color:#2C2530;">Aus</span>
+                <span style="width:2px; height:28px; background:#5A1A74;"></span>
+                <span style="font-size:14px; color:#a99aa8; margin-left:auto;">German, with the article</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="background:#5A1A74; color:#fff; font-size:15px; font-weight:600; padding:12px 28px; border-radius:9999px;">Check</span>
+                <span style="font-size:13.5px; font-weight:600; color:#5A1A74; padding:12px 4px;">Show me the answer</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div style="background:#fff; border-radius:22px; padding:20px 24px; display:flex; flex-direction:column; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+            <div style="display:flex; align-items:baseline; gap:12px;">
+              <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Hints</div>
+              <span style="font-size:12.5px; color:#a99aa8;">Each one you open shortens the next gap. Nothing is hidden from you, and nothing is free.</span>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1; border:1px solid #d8cfd6; border-radius:14px; padding:13px 16px; display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size:14px; font-weight:600; color:#2C2530;">The gender</span>
+                <span style="font-size:12.5px; color:#a99aa8;">Costs a little</span>
+              </div>
+              <div style="flex:1; border:1px solid #d8cfd6; border-radius:14px; padding:13px 16px; display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size:14px; font-weight:600; color:#2C2530;">Two more letters</span>
+                <span style="font-size:12.5px; color:#a99aa8;">Costs more</span>
+              </div>
+              <div style="flex:1; background:#F9F6F5; border:1px solid #edebe8; border-radius:14px; padding:13px 16px; display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size:14px; font-weight:600; color:#5f5560;">The sentence you saved it from</span>
+                <span style="font-size:12.5px; color:#5f5560;">Opened &mdash; counts as a miss you recovered</span>
+              </div>
+            </div>
+            <p style="margin:2px 0 0; font-family:'Literata',serif; font-size:17px; line-height:1.6; color:#33292E;">&bdquo;Die zweite <span style="color:#a99aa8;">&#8212;&#8212;&#8212;</span> der Zeitung erschien erst am Abend.&ldquo;</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="1c" style="display:flex; flex-direction:column; gap:10px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1c</span>
+      <span style="font-size:13px; color:#5f5560;">A wrong answer &mdash; the one screen no competitor has</span>
+    </div>
+
+    <div style="width:1360px; background:#F9F6F5; border-radius:20px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1);" data-screen-label="Confusion feedback">
+
+      <div style="background:#fff; border-bottom:1px solid #edebe8;">
+        <div style="height:60px; padding:0 28px; display:flex; align-items:center; gap:22px;">
+          <span style="font-size:13.5px; font-weight:500; color:#5f5560;">Leave</span>
+          <div style="display:flex; align-items:center; gap:5px; margin:0 auto;">
+            <div style="width:22px; height:9px; border-radius:9999px; background:#5A1A74;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#5A1A74;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#5A1A74;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#fff; border:1.5px solid #5A1A74;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <div style="width:22px; height:9px; border-radius:9999px; background:#e8e2e6;"></div>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#5f5560; margin-left:9px;">4 / 10</span>
+          </div>
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.5px; color:#6C7FA8; border:1px solid #cdd4e2; padding:4px 9px; border-radius:7px;">DE</span>
+        </div>
+      </div>
+
+      <div style="padding:34px 28px 42px; display:flex; justify-content:center;">
+        <div style="width:860px; display:flex; flex-direction:column; gap:16px;">
+
+          <div style="background:#fff; border-radius:28px; padding:30px 38px 32px; display:flex; flex-direction:column; gap:22px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+
+            <div style="display:flex; align-items:center; gap:11px;">
+              <span style="width:22px; height:22px; border-radius:50%; border:1.5px solid #ea6644; color:#ea6644; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">&times;</span>
+              <span style="font-size:15px; font-weight:600; color:#2C2530;">You wrote <em style="font-style:normal; font-family:'Literata',serif;">die Aufgabe</em>. That is a real word, and it is not this one.</span>
+            </div>
+
+            <div style="display:flex; gap:0; border-radius:18px; overflow:hidden; border:1px solid #edebe8;">
+              <div style="flex:1; background:#F9F6F5; padding:22px 24px; display:flex; flex-direction:column; gap:7px;">
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:#a99aa8;">What you wrote</span>
+                <div style="font-family:'Literata',serif; font-size:27px; font-weight:600;">die Aufgabe</div>
+                <p style="margin:0; font-size:14.5px; line-height:1.6; color:#5f5560; text-wrap:pretty;">A task. Something set for you to do &mdash; homework, an assignment, a job to get through.</p>
+                <p style="margin:4px 0 0; font-family:'Literata',serif; font-size:15px; line-height:1.55; color:#33292E;">&bdquo;Das ist nicht meine <strong style="font-weight:600;">Aufgabe</strong>.&ldquo;</p>
+              </div>
+              <div style="width:1px; background:#edebe8;"></div>
+              <div style="flex:1; background:#fff; padding:22px 24px; display:flex; flex-direction:column; gap:7px;">
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:#5A1A74;">What was being asked</span>
+                <div style="font-family:'Literata',serif; font-size:27px; font-weight:600; color:#5A1A74;">die Ausgabe</div>
+                <p style="margin:0; font-size:14.5px; line-height:1.6; color:#5f5560; text-wrap:pretty;">An issue or edition &mdash; one printing of a paper or a book. Also an amount spent.</p>
+                <p style="margin:4px 0 0; font-family:'Literata',serif; font-size:15px; line-height:1.55; color:#33292E;">&bdquo;Die zweite <strong style="font-weight:600;">Ausgabe</strong> der Zeitung erschien erst am Abend.&ldquo;</p>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:20px; align-items:flex-start;">
+              <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Why they cross</div>
+                <p style="margin:0; font-size:14.5px; line-height:1.6; color:#5f5560; text-wrap:pretty;">Both are <em>-gabe</em> nouns built on <em>geben</em>. <em>Auf-</em> puts something on you; <em>aus-</em> puts something out. Third time these two have swapped for you, and the swap has only ever gone this direction.</p>
+              </div>
+              <div style="flex:0 0 250px; background:#F9F6F5; border-radius:16px; padding:15px 17px; display:flex; flex-direction:column; gap:7px;">
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:#a99aa8;">Together in your deck</span>
+                <div style="display:flex; align-items:center; gap:8px; font-size:13.5px; color:#5f5560;"><span style="width:6px; height:6px; border-radius:50%; background:#5A1A74;"></span>Both return tomorrow, side by side</div>
+                <div style="display:flex; align-items:center; gap:8px; font-size:13.5px; color:#5f5560;"><span style="width:6px; height:6px; border-radius:50%; background:#5A1A74;"></span>Next ask is which is which</div>
+                <div style="display:flex; align-items:center; gap:8px; font-size:13.5px; color:#5f5560;"><span style="width:6px; height:6px; border-radius:50%; background:#5A1A74;"></span>They separate once you clear both twice</div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:16px; padding-top:4px;">
+              <span style="background:#5A1A74; color:#fff; font-size:15px; font-weight:600; padding:12px 30px; border-radius:9999px;">Next word</span>
+              <span style="font-size:13.5px; font-weight:600; color:#5A1A74;">Not a confusion &mdash; I just mistyped</span>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="1d" style="display:flex; flex-direction:column; gap:10px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1d</span>
+      <span style="font-size:13px; color:#5f5560;">End of session &mdash; the record, then the dessert story</span>
+    </div>
+
+    <div style="width:1360px; background:#F9F6F5; border-radius:20px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1);" data-screen-label="Session end">
+
+      <div style="padding:44px 28px 46px; display:flex; justify-content:center;">
+        <div style="width:900px; display:flex; flex-direction:column; gap:16px;">
+
+          <div style="background:#fff; border-radius:28px; padding:32px 38px; display:flex; flex-direction:column; gap:18px; box-shadow:0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);">
+            <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Session complete</div>
+            <h2 style="margin:0; font-family:'Literata',serif; font-size:32px; font-weight:600; line-height:1.15;">Ten words, seven minutes</h2>
+            <div style="display:flex; gap:34px;">
+              <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-family:'Literata',serif; font-size:32px; font-weight:600;">6</span><span style="font-size:13.5px; color:#5f5560;">straight through</span></div>
+              <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-family:'Literata',serif; font-size:32px; font-weight:600;">3</span><span style="font-size:13.5px; color:#5f5560;">after a hint</span></div>
+              <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-family:'Literata',serif; font-size:32px; font-weight:600;">1</span><span style="font-size:13.5px; color:#5f5560;">crossed with a word you know</span></div>
+              <div style="display:flex; flex-direction:column; gap:2px; margin-left:auto; align-items:flex-end;"><span style="font-family:'Literata',serif; font-size:32px; font-weight:600; color:#5f5560;">4</span><span style="font-size:13.5px; color:#5f5560;">still due today</span></div>
+            </div>
+            <p style="margin:0; font-size:14.5px; line-height:1.6; color:#5f5560; max-width:70ch; text-wrap:pretty;">Nothing here is lost if you stop now. The four remaining keep their place, and tomorrow's queue is already built.</p>
+          </div>
+
+          <div style="background:#2C2530; border-radius:28px; padding:32px 38px; display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; align-items:baseline; gap:12px;">
+              <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#D98BA8;">Dessert</div>
+              <span style="font-size:13px; color:rgba(249,246,245,.55);">Four sentences written this minute around the three you missed</span>
+            </div>
+            <p style="margin:0; font-family:'Literata',serif; font-size:21px; line-height:1.7; color:#F9F6F5; text-wrap:pretty;">Die neue <span style="color:#E0C4EE;">Ausgabe</span> lag schon am Kiosk, als er ankam. <span style="color:#E0C4EE;">Vorl&auml;ufig</span> kaufte er nur eine, denn er wusste nicht, ob ihm die &Uuml;bersetzung <span style="color:#E0C4EE;">gelingen</span> w&uuml;rde. Am Abend las er den Artikel zweimal. Beim zweiten Mal <span style="color:#E0C4EE;">gelang</span> ihm fast jeder Satz.</p>
+            <div style="display:flex; align-items:center; gap:16px; padding-top:4px;">
+              <span style="background:#E0C4EE; color:#2C2530; font-size:15px; font-weight:600; padding:12px 28px; border-radius:9999px;">Read it with the translation</span>
+              <span style="font-size:13.5px; font-weight:600; color:#E0C4EE;">Done for now</span>
+            </div>
+            <p style="margin:2px 0 0; font-size:12.5px; line-height:1.55; color:rgba(249,246,245,.5);">Free accounts get three of these a week. This was your second.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="width:1360px; background:#fff; border-radius:20px; padding:24px 28px; display:flex; flex-direction:column; gap:11px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">What this asserts, and why</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:9px; font-size:13.5px; line-height:1.6;">
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>A session is ten items, not the backlog.</strong> A queue that empties is finishable; a queue of 140 is a debt. Ten also makes the emblem an exact gauge &mdash; one blade per item &mdash; which is the only honest way to use it.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>Intent is stated before the session, not inferred.</strong> &ldquo;Six to understand, three to say, one to tell apart&rdquo; is the differentiator in one line, and it explains why the same word can feel easy and still be due.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>No self-graded buttons.</strong> Nothing on these screens asks the user to rate their own memory. The answer is typed, graded fuzzily and semantically, and the grade comes from what happened, not from a claim about it.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>A wrong answer is a diagnosis, not a red flash.</strong> Naming the word the learner actually produced, side by side with the one that was asked, is the single most distinctive thing in the product and costs a lookup on a confusion edge.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>Hints are priced, not hidden.</strong> Three rungs, each stated before it is taken, the last one being the source sentence. A hint taken is a recovered miss and is recorded as one &mdash; that is what keeps the schedule truthful.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>&ldquo;I just mistyped&rdquo; exists.</strong> Without it, one fat finger writes a permanent confusion edge. With it, the correction is a first-class signal and the deck gets better than the model that seeded it.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>Leeches leave the queue.</strong> Four failures in the same shape is evidence about the prompt, not the learner. They come back re-encountered &mdash; new sentence, different intent &mdash; and never as a card the user must lie to escape.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>The dessert is the only warm surface here.</strong> Ink ground, light-end ramp, no mascot, no confetti: session complete is one of the three rationed celebrations, and it celebrates by giving the reader something to read.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>The prompt wording rotates.</strong> Four to six paraphrases per sense are generated once at creation, so the fifth review does not train the shape of a sentence the learner has already memorised.</div>
+      <div style="background:#F9F6F5; border-radius:13px; padding:12px 15px;"><strong>Provenance is on the card.</strong> &ldquo;Saved 12 days ago while reading &middot; seen 5 times&rdquo; costs nothing and is the emotional half of the memory system. The full encounter history sits one tap behind the word.</div>
+    </div>
+    <p style="margin:4px 0 0; font-size:13px; line-height:1.6; color:#5f5560; text-wrap:pretty;">What this needs that does not exist yet: FSRS on the backend rather than device-local intervals, <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">ConfusionEdge</code> with direction and count, the paraphrase pool, a hint ledger on <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">ReviewEvent</code>, and a leech rule. The dessert story is the only piece that spends tokens per use, which is why it is metered on free.</p>
+  </div>
+
+  <div style="width:1360px; background:#2C2530; border-radius:20px; padding:24px 28px; display:flex; flex-direction:column; gap:10px;">
+    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#c9a8c4;">Decisions I made for you &mdash; overrule freely</div>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13.5px; line-height:1.65; color:rgba(249,246,245,.82);">
+      <div>Typing is the default answer mode for every intent, including &ldquo;understand&rdquo;, where a recognition tap would be faster and weaker. If that proves too heavy on mobile, the fallback is tap-to-choose for understand only, never for produce.</div>
+      <div>The session length is fixed at ten rather than user-set, because a settable number turns into a target and a target turns into a streak.</div>
+      <div>Confusion feedback appears on the wrong answer itself rather than at the end of the session. It costs the flow of the run, and it is worth it.</div>
+      <div>Pronunciation is missing from these screens entirely. It is an intent in the domain model and it needs TTS, which is the one workload that scales per user &mdash; so it is a premium surface and a separate draft.</div>
+    </div>
+  </div>
+
+</section>
+</div>
+
+</x-dc>
+</body>
+</html>
