@@ -59,6 +59,10 @@ export function cardUpdate(
     falseFriend: draft.falseFriend,
     irregularSpelling: draft.irregularSpelling,
     priority: draft.priority,
+    partOfSpeech: draft.partOfSpeech,
+    selectedSense: draft.selectedSense,
+    sourceContext: draft.sourceContext,
+    learningIntents: draft.learningIntents,
     deletedTranslationsIds,
   };
 }

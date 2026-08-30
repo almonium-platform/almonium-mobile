@@ -6,10 +6,12 @@ import {
 import { Literata_400Regular, Literata_600SemiBold } from '@expo-google-fonts/literata';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -18,6 +20,16 @@ import { persistOptions, queryClient } from '@/src/query-client';
 import { colors } from '@/src/theme';
 
 void SplashScreen.preventAutoHideAsync();
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -31,6 +43,15 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded || fontError) void SplashScreen.hideAsync();
   }, [fontError, fontsLoaded]);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const url = response.notification.request.content.data.url;
+      if (url === '/review') router.push('/review');
+    });
+    return () => subscription.remove();
+  }, []);
 
   if (!fontsLoaded && !fontError) return null;
 
@@ -55,8 +76,10 @@ export default function RootLayout() {
                 name="reader/[bookId]"
                 options={{ title: 'Reader', headerBackTitle: 'Library' }}
               />
-              <Stack.Screen name="card/new" options={{ title: 'New card' }} />
-              <Stack.Screen name="card/[cardId]" options={{ title: 'Card' }} />
+              <Stack.Screen name="item/new" options={{ title: 'New learning item' }} />
+              <Stack.Screen name="item/[itemId]" options={{ title: 'Learning item' }} />
+              <Stack.Screen name="card/new" options={{ title: 'New learning item' }} />
+              <Stack.Screen name="card/[cardId]" options={{ title: 'Learning item' }} />
               <Stack.Screen name="review" options={{ headerShown: false }} />
               <Stack.Screen name="profile/[userId]" options={{ title: 'Reader profile' }} />
               <Stack.Screen name="membership" options={{ title: 'Membership' }} />

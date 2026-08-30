@@ -61,7 +61,7 @@ export default function PlayScreen() {
           <Button disabled>In development</Button>
           {!count && (
             <Pressable
-              onPress={() => router.push({ pathname: '/card/new', params: { language } })}
+              onPress={() => router.push({ pathname: '/item/new', params: { language } })}
             >
               <Text style={styles.link}>Keep a few words first</Text>
             </Pressable>

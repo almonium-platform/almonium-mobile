@@ -92,7 +92,7 @@ export interface CardExample {
   translation?: string;
 }
 
-export interface LearningCard {
+export interface LearningItem {
   id: string;
   publicId?: string;
   userId?: string;
@@ -115,6 +115,9 @@ export interface LearningCard {
   sourceContext?: string;
   learningIntents?: LearningIntent[];
 }
+
+/** @deprecated API paths still use /cards during the backend migration. */
+export type LearningCard = LearningItem;
 
 export type LearningIntent = 'UNDERSTAND' | 'PRODUCE' | 'DISAMBIGUATE' | 'PRONOUNCE' | 'CHUNK';
 

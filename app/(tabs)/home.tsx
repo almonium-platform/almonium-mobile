@@ -172,7 +172,7 @@ export default function HomeScreen() {
             {recentCards.map((card) => (
               <Pressable
                 key={card.id}
-                onPress={() => router.push({ pathname: '/card/[cardId]', params: { cardId: card.id, language } })}
+                onPress={() => router.push({ pathname: '/item/[itemId]', params: { itemId: card.id, language } })}
                 style={styles.wordRow}>
                 <View style={styles.wordCopy}>
                   <Text style={styles.word}>{card.entry}</Text>

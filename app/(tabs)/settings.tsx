@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Linking,
+  Platform,
   Pressable,
   StyleSheet,
   Switch,
@@ -21,10 +22,12 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { config } from '@/src/config';
 import { languageName, sortLanguages } from '@/src/languages';
+import { configureDailyReminder, getReminderSettings, reminderTimeLabel } from '@/src/reminders';
 import { colors } from '@/src/theme';
 import type { CefrLevel, Learner } from '@/src/types';
 
 const levels: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+const reminderHours = [18, 20, 21];
 
 function LanguageRow({
   learner,
@@ -132,6 +135,10 @@ export default function SettingsScreen() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [showDeletionAuth, setShowDeletionAuth] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [reminderEnabled, setReminderEnabled] = useState(false);
+  const [reminderHour, setReminderHour] = useState(20);
+  const [savingReminder, setSavingReminder] = useState(false);
+  const [reminderError, setReminderError] = useState('');
   const usesPassword = firebaseUser?.providerData.some((provider) => provider.providerId === 'password');
   const usesGoogle = firebaseUser?.providerData.some((provider) => provider.providerId === 'google.com');
   const usesApple = firebaseUser?.providerData.some((provider) => provider.providerId === 'apple.com');
@@ -151,6 +158,12 @@ export default function SettingsScreen() {
     setEditingUsername(false);
   }, [profile?.username]);
   useEffect(() => setPrivacyHidden(profile?.hidden ?? false), [profile?.hidden]);
+  useEffect(() => {
+    void getReminderSettings().then((settings) => {
+      setReminderEnabled(settings.enabled);
+      setReminderHour(settings.hour);
+    });
+  }, []);
   useEffect(() => {
     if (savingInterestsRef.current) return;
     const interests = profile?.interests.map((interest) => interest.id) || [];
@@ -200,6 +213,26 @@ export default function SettingsScreen() {
   async function signOut() {
     await logOut();
     router.replace('/(auth)/sign-in');
+  }
+
+  async function saveReminder(enabled: boolean, hour = reminderHour) {
+    const previousEnabled = reminderEnabled;
+    const previousHour = reminderHour;
+    setReminderEnabled(enabled);
+    setReminderHour(hour);
+    setSavingReminder(true);
+    setReminderError('');
+    try {
+      const settings = await configureDailyReminder(enabled, hour);
+      setReminderEnabled(settings.enabled);
+      setReminderHour(settings.hour);
+    } catch (error) {
+      setReminderEnabled(previousEnabled);
+      setReminderHour(previousHour);
+      setReminderError(error instanceof Error ? error.message : 'The reminder could not be changed.');
+    } finally {
+      setSavingReminder(false);
+    }
   }
 
   async function persistInterests() {
@@ -272,7 +305,7 @@ export default function SettingsScreen() {
   function deleteLanguage(learner: Learner) {
     Alert.alert(
       `Remove ${languageName(learner.language)}?`,
-      'Its flashcards and learning progress will also be removed.',
+      'Its saved items and learning progress will also be removed.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -377,6 +410,46 @@ export default function SettingsScreen() {
           <View style={styles.settingCopy}><Text style={styles.settingLabel}>Membership</Text><Text style={styles.caption}>{profile?.subscription.name ?? 'Free'} · usage and billing</Text></View>
           <Ionicons name="chevron-forward" color={colors.muted} size={19} />
         </Pressable>
+      </Card>
+
+      <Card>
+        <View style={styles.sectionTitle}>
+          <Ionicons name="notifications-outline" color={colors.primary} size={20} />
+          <Text style={styles.sectionTitleText}>Review reminder</Text>
+        </View>
+        <View style={styles.settingRow}>
+          <View style={styles.settingCopy}>
+            <Text style={styles.settingLabel}>One daily window</Text>
+            <Text style={styles.caption}>Off by default. No streak warnings and nothing to lose.</Text>
+          </View>
+          <Switch
+            disabled={savingReminder || Platform.OS === 'web'}
+            value={reminderEnabled}
+            onValueChange={(enabled) => void saveReminder(enabled)}
+            trackColor={{ false: colors.line, true: colors.accentBorder }}
+            thumbColor={reminderEnabled ? colors.primary : colors.muted}
+            ios_backgroundColor={colors.line}
+          />
+        </View>
+        {reminderEnabled && (
+          <View style={styles.reminderTimes}>
+            {reminderHours.map((hour) => (
+              <Pressable
+                accessibilityRole="radio"
+                accessibilityState={{ selected: reminderHour === hour }}
+                disabled={savingReminder}
+                key={hour}
+                onPress={() => void saveReminder(true, hour)}
+                style={[styles.reminderTime, reminderHour === hour && styles.reminderTimeActive]}>
+                <Text style={[styles.reminderTimeText, reminderHour === hour && styles.reminderTimeTextActive]}>
+                  {reminderTimeLabel(hour)}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
+        {Platform.OS === 'web' && <Text style={styles.caption}>Available in the iOS and Android app.</Text>}
+        {!!reminderError && <Text accessibilityRole="alert" style={styles.inlineError}>{reminderError}</Text>}
       </Card>
 
       <Card>
@@ -625,7 +698,7 @@ export default function SettingsScreen() {
           <Text style={styles.deleteText}>Delete account permanently</Text>
         </Pressable>
       </Card>
-      <PaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
+      <PaywallModal context="second-language" visible={showPaywall} onClose={() => setShowPaywall(false)} />
     </Screen>
   );
 }
@@ -687,4 +760,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   cancelDeletionText: { color: colors.primary, fontSize: 14, fontWeight: '600' },
+  reminderTimes: { flexDirection: 'row', gap: 7 },
+  reminderTime: { flex: 1, minHeight: 42, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 21 },
+  reminderTimeActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
+  reminderTimeText: { color: colors.muted, fontSize: 12, fontWeight: '600' },
+  reminderTimeTextActive: { color: colors.primary },
+  inlineError: { color: colors.danger, fontSize: 12, lineHeight: 18 },
 });

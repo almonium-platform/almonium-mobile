@@ -8,6 +8,7 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -21,9 +22,11 @@ import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { colors, fonts, shadows } from '@/src/theme';
-import type { LearningCard } from '@/src/types';
+import { intentLabel } from '@/src/review';
+import type { LearningIntent, LearningItem } from '@/src/types';
 
 const cardLanguageKey = 'almonium:card-language';
+const intentFilters: ('ALL' | LearningIntent)[] = ['ALL', 'UNDERSTAND', 'PRODUCE', 'DISAMBIGUATE', 'PRONOUNCE', 'CHUNK'];
 
 export default function CardsScreen() {
   const { firebaseUser, profile } = useAuth();
@@ -33,6 +36,7 @@ export default function CardsScreen() {
   );
   const [language, setLanguage] = useState(activeLanguages[0] ?? '');
   const [search, setSearch] = useState('');
+  const [intent, setIntent] = useState<'ALL' | LearningIntent>('ALL');
 
   useEffect(() => {
     void AsyncStorage.getItem(cardLanguageKey).then((saved) => {
@@ -52,14 +56,16 @@ export default function CardsScreen() {
   });
   const filtered = useMemo(() => {
     const needle = search.trim().toLocaleLowerCase();
-    return (query.data ?? []).filter(
-      (card) =>
-        !needle ||
-        card.entry.toLocaleLowerCase().includes(needle) ||
-        card.translations.some((item) => item.translation.toLocaleLowerCase().includes(needle)) ||
-        card.tags?.some((tag) => tag.text?.toLocaleLowerCase().includes(needle)),
-    );
-  }, [query.data, search]);
+    return (query.data ?? []).filter((item) => {
+      const matchesIntent = intent === 'ALL' || item.learningIntents?.includes(intent);
+      const matchesSearch = !needle ||
+        item.entry.toLocaleLowerCase().includes(needle) ||
+        item.translations.some((translation) => translation.translation.toLocaleLowerCase().includes(needle)) ||
+        item.tags?.some((tag) => tag.text?.toLocaleLowerCase().includes(needle)) ||
+        item.sourceContext?.toLocaleLowerCase().includes(needle);
+      return matchesIntent && matchesSearch;
+    });
+  }, [intent, query.data, search]);
   const due = review.data?.dueCount ?? 0;
 
   function chooseLanguage(code: string) {
@@ -73,8 +79,8 @@ export default function CardsScreen() {
     chooseLanguage(activeLanguages[(index + 1) % activeLanguages.length]);
   }
 
-  function openCard(card: LearningCard) {
-    router.push({ pathname: '/card/[cardId]', params: { cardId: card.id, language } });
+  function openItem(item: LearningItem) {
+    router.push({ pathname: '/item/[itemId]', params: { itemId: item.id, language } });
   }
 
   if (!language) {
@@ -122,7 +128,7 @@ export default function CardsScreen() {
                   <Text style={styles.reviewCountText}>{due}</Text>
                 </View>
                 <View style={styles.actionCopy}>
-                  <Text style={styles.actionTitle}>Review due cards</Text>
+                  <Text style={styles.actionTitle}>Review due items</Text>
                   <Text style={styles.actionCaption}>Your schedule follows you</Text>
                 </View>
                 <Ionicons name="arrow-forward" size={20} color={colors.white} />
@@ -130,21 +136,21 @@ export default function CardsScreen() {
             </Pressable>
             <Button
               variant="secondary"
-              onPress={() => router.push({ pathname: '/card/new', params: { language } })}>
-              Add a card
+              onPress={() => router.push({ pathname: '/item/new', params: { language } })}>
+              Add an item
             </Button>
           </View> : (
             <View style={styles.caughtUp}>
               <BrandMark size={72} />
               <View style={styles.caughtUpCopy}>
                 <Text style={styles.caughtUpTitle}>Nothing due</Text>
-                <Text style={styles.subhead}>Come back when the next word is ready, or practise ahead.</Text>
+                <Text style={styles.subhead}>Come back when the next word is ready, or meet another one in a book.</Text>
               </View>
               <Button
                 variant="secondary"
                 onPress={() => query.data?.length
                   ? router.push('/(tabs)/books')
-                  : router.push({ pathname: '/card/new', params: { language } })}>
+                  : router.push({ pathname: '/item/new', params: { language } })}>
                 {query.data?.length ? 'Open your shelf' : 'Keep your first word'}
               </Button>
             </View>
@@ -159,13 +165,27 @@ export default function CardsScreen() {
               style={styles.searchInput}
             />
           </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+            {intentFilters.map((value) => (
+              <Pressable
+                accessibilityRole="radio"
+                accessibilityState={{ selected: intent === value }}
+                key={value}
+                onPress={() => setIntent(value)}
+                style={[styles.filter, intent === value && styles.filterActive]}>
+                <Text style={[styles.filterText, intent === value && styles.filterTextActive]}>
+                  {value === 'ALL' ? 'All saved' : intentLabel(value)}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
           {(query.isError || review.isError) && (query.data || review.data) && (
             <Text style={styles.offline}>Showing available review details. Reconnect to refresh the schedule.</Text>
           )}
         </View>
       }
       renderItem={({ item }) => (
-        <Pressable onPress={() => openCard(item)} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+        <Pressable onPress={() => openItem(item)} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
           <View style={styles.cardIcon}>
             <Text style={styles.cardIconText}>{item.entry.slice(0, 1).toUpperCase()}</Text>
           </View>
@@ -190,13 +210,13 @@ export default function CardsScreen() {
         ) : (
           <View style={styles.emptyInline}>
             <Ionicons name="layers-outline" size={38} color={colors.primary} />
-            <Text style={styles.emptyTitle}>{search ? 'No matching cards' : 'Your first word goes here'}</Text>
+            <Text style={styles.emptyTitle}>{search || intent !== 'ALL' ? 'No matching items' : 'Your first word goes here'}</Text>
             <Text style={styles.emptyText}>
               {query.isError && !query.data
-                ? query.error instanceof Error ? query.error.message : 'Could not load your cards.'
-                : search ? 'Try a different spelling or tag.' : 'Create a card, then begin a short review.'}
+                ? query.error instanceof Error ? query.error.message : 'Could not load your saved items.'
+                : search || intent !== 'ALL' ? 'Try a different search or learning intent.' : 'Keep a word, then begin a short review.'}
             </Text>
-            {!search && <Button onPress={() => router.push({ pathname: '/card/new', params: { language } })}>Create card</Button>}
+            {!search && intent === 'ALL' && <Button onPress={() => router.push({ pathname: '/item/new', params: { language } })}>Keep a word</Button>}
           </View>
         )
       }
@@ -225,6 +245,11 @@ const styles = StyleSheet.create({
   actionCaption: { color: colors.white, fontSize: 12, opacity: 0.84 },
   search: { minHeight: 50, borderRadius: 999, paddingHorizontal: 16, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, ...shadows.field },
   searchInput: { flex: 1, color: colors.ink, fontSize: 15 },
+  filters: { gap: 7, paddingRight: 4 },
+  filter: { minHeight: 40, justifyContent: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 20, paddingHorizontal: 13, backgroundColor: colors.surface },
+  filterActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
+  filterText: { color: colors.muted, fontSize: 12, fontWeight: '600' },
+  filterTextActive: { color: colors.primary },
   offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, borderRadius: 10, padding: 10 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 13, borderRadius: 20, padding: 15, backgroundColor: colors.surface, ...shadows.card },
   cardIcon: { width: 45, height: 45, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accentSoft },
