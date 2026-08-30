@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Pressable,
   RefreshControl,
+  ScrollView,
   SectionList,
   StyleSheet,
   Text,
@@ -23,9 +25,11 @@ import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { downloadedBooks } from '@/src/offline-books';
 import { colors, fonts, shadows } from '@/src/theme';
-import type { BookSummary } from '@/src/types';
+import type { BookSummary, CefrLevel } from '@/src/types';
 
 const shelfLanguageKey = 'almonium:shelf-language';
+const levelFilters: ('ALL' | CefrLevel)[] = ['ALL', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+type LengthFilter = 'ALL' | 'SHORT' | 'MEDIUM' | 'LONG';
 
 export default function BooksScreen() {
   const { firebaseUser, profile } = useAuth();
@@ -39,6 +43,8 @@ export default function BooksScreen() {
   );
   const [language, setLanguage] = useState(activeLanguages[0] || '');
   const [search, setSearch] = useState('');
+  const [levelFilter, setLevelFilter] = useState<'ALL' | CefrLevel>('ALL');
+  const [lengthFilter, setLengthFilter] = useState<LengthFilter>('ALL');
 
   useEffect(() => {
     void AsyncStorage.getItem(shelfLanguageKey).then((stored) => {
@@ -62,19 +68,24 @@ export default function BooksScreen() {
     if (!query.data && !downloads.data?.length) return [];
     const needle = search.trim().toLocaleLowerCase();
     const filter = (books: BookSummary[]) =>
-      books.filter(
-        (book) =>
-          !needle ||
+      books.filter((book) => {
+        const matchesSearch = !needle ||
           book.title.toLocaleLowerCase().includes(needle) ||
-          book.author.toLocaleLowerCase().includes(needle),
-      );
+          book.author.toLocaleLowerCase().includes(needle);
+        const matchesLevel = levelFilter === 'ALL' || book.cefrLevel === levelFilter;
+        const matchesLength = lengthFilter === 'ALL' ||
+          (lengthFilter === 'SHORT' && book.wordCount < 15_000) ||
+          (lengthFilter === 'MEDIUM' && book.wordCount >= 15_000 && book.wordCount < 40_000) ||
+          (lengthFilter === 'LONG' && book.wordCount >= 40_000);
+        return matchesSearch && matchesLevel && matchesLength;
+      });
     return [
       { title: 'Downloads', data: filter((downloads.data ?? []).filter((book) => book.language === language)) },
       { title: 'Continue reading', data: filter(query.data?.continueReading ?? []) },
       { title: 'Favorites', data: filter(query.data?.favorites ?? []) },
       { title: 'Available', data: filter(query.data?.available ?? []) },
     ].filter((section) => section.data.length);
-  }, [downloads.data, language, query.data, search]);
+  }, [downloads.data, language, lengthFilter, levelFilter, query.data, search]);
 
   async function resetProgress(book: BookSummary) {
     if (!book.progressPercentage) return;
@@ -163,6 +174,22 @@ export default function BooksScreen() {
               style={styles.searchInput}
             />
           </View>
+          <View style={styles.filterGroup}>
+            <Text style={styles.filterLabel}>LEVEL</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+              {levelFilters.map((value) => (
+                <FilterChip key={value} label={value === 'ALL' ? 'Any level' : value} selected={levelFilter === value} onPress={() => setLevelFilter(value)} />
+              ))}
+            </ScrollView>
+          </View>
+          <View style={styles.filterGroup}>
+            <Text style={styles.filterLabel}>LENGTH</Text>
+            <View style={styles.filters}>
+              {(['ALL', 'SHORT', 'MEDIUM', 'LONG'] as const).map((value) => (
+                <FilterChip key={value} label={value === 'ALL' ? 'Any' : value[0] + value.slice(1).toLowerCase()} selected={lengthFilter === value} onPress={() => setLengthFilter(value)} />
+              ))}
+            </View>
+          </View>
           <Text style={styles.hint}>Tip: hold a book to reset its progress.</Text>
           {query.isError && query.data && (
             <Text style={styles.offline}>Showing your saved shelf. Reconnect to refresh it.</Text>
@@ -193,6 +220,14 @@ export default function BooksScreen() {
   );
 }
 
+function FilterChip({ label, selected, onPress }: { label: string; selected: boolean; onPress(): void }) {
+  return (
+    <Pressable accessibilityRole="radio" accessibilityState={{ selected }} onPress={onPress} style={[styles.filter, selected && styles.filterActive]}>
+      <Text style={[styles.filterText, selected && styles.filterTextActive]}>{label}</Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
@@ -203,6 +238,13 @@ const styles = StyleSheet.create({
   subhead: { color: colors.muted, fontSize: 13.5, lineHeight: 20 },
   search: { minHeight: 50, borderRadius: 999, paddingHorizontal: 16, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, ...shadows.field },
   searchInput: { flex: 1, color: colors.ink, fontSize: 15 },
+  filterGroup: { gap: 6 },
+  filterLabel: { color: colors.metadata, fontSize: 9.5, fontWeight: '600', letterSpacing: 1.2 },
+  filters: { flexDirection: 'row', gap: 7, paddingRight: 3 },
+  filter: { minHeight: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 19, paddingHorizontal: 12, backgroundColor: colors.surface },
+  filterActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
+  filterText: { color: colors.muted, fontSize: 11.5, fontWeight: '600' },
+  filterTextActive: { color: colors.primary },
   hint: { color: colors.muted, fontSize: 11 },
   offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, borderRadius: 10, padding: 10 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 10 },
