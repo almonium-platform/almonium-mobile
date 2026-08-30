@@ -65,12 +65,6 @@ export default function HomeScreen() {
     await Promise.all([shelf.refetch(), cards.refetch(), review.refetch()]);
   }
 
-  function chooseNextLanguage() {
-    if (activeLanguages.length < 2) return;
-    const index = activeLanguages.indexOf(language);
-    setLanguage(activeLanguages[(index + 1) % activeLanguages.length]);
-  }
-
   if (!language) {
     return (
       <View style={styles.center}>
@@ -85,7 +79,7 @@ export default function HomeScreen() {
     <View style={styles.screen}>
       <AppHeader
         language={language}
-        onLanguagePress={activeLanguages.length > 1 ? chooseNextLanguage : undefined}
+        onLanguageChange={activeLanguages.length > 1 ? setLanguage : undefined}
       />
       <ScrollView
         contentContainerStyle={styles.content}

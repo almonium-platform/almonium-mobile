@@ -51,12 +51,6 @@ export default function BooksScreen() {
     void AsyncStorage.setItem(shelfLanguageKey, nextLanguage);
   }
 
-  function chooseNextLanguage() {
-    if (activeLanguages.length < 2) return;
-    const index = activeLanguages.indexOf(language);
-    chooseLanguage(activeLanguages[(index + 1) % activeLanguages.length]);
-  }
-
   const query = useQuery({
     queryKey: ['bookshelf', firebaseUser?.uid, language],
     queryFn: () => api.bookshelf(language),
@@ -136,7 +130,7 @@ export default function BooksScreen() {
     <View style={styles.screen}>
       <AppHeader
         language={language}
-        onLanguagePress={activeLanguages.length > 1 ? chooseNextLanguage : undefined}
+        onLanguageChange={activeLanguages.length > 1 ? chooseLanguage : undefined}
       />
       <SectionList
       sections={sections}

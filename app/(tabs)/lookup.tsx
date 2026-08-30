@@ -104,10 +104,7 @@ export default function LookupScreen() {
     },
   });
 
-  function chooseNextLanguage() {
-    if (activeLanguages.length < 2) return;
-    const index = activeLanguages.indexOf(language);
-    const next = activeLanguages[(index + 1) % activeLanguages.length];
+  function chooseLanguage(next: string) {
     setLanguage(next);
     setLookup(null);
     setTokens([]);
@@ -140,7 +137,7 @@ export default function LookupScreen() {
     <View style={styles.screen}>
       <AppHeader
         language={language}
-        onLanguagePress={activeLanguages.length > 1 ? chooseNextLanguage : undefined}
+        onLanguageChange={activeLanguages.length > 1 ? chooseLanguage : undefined}
       />
       <ScrollView
         contentContainerStyle={styles.content}

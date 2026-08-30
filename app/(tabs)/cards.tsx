@@ -73,12 +73,6 @@ export default function CardsScreen() {
     void AsyncStorage.setItem(cardLanguageKey, code);
   }
 
-  function chooseNextLanguage() {
-    if (activeLanguages.length < 2) return;
-    const index = activeLanguages.indexOf(language);
-    chooseLanguage(activeLanguages[(index + 1) % activeLanguages.length]);
-  }
-
   function openItem(item: LearningItem) {
     router.push({ pathname: '/item/[itemId]', params: { itemId: item.id, language } });
   }
@@ -97,7 +91,7 @@ export default function CardsScreen() {
     <View style={styles.screen}>
       <AppHeader
         language={language}
-        onLanguagePress={activeLanguages.length > 1 ? chooseNextLanguage : undefined}
+        onLanguageChange={activeLanguages.length > 1 ? chooseLanguage : undefined}
       />
       <FlatList
       data={filtered}
