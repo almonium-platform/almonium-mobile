@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -15,7 +14,7 @@ import {
 } from 'react-native';
 
 import { Screen } from '@/components/screen';
-import { AvatarPicker } from '@/components/avatar-picker';
+import { AvatarMark } from '@/components/avatar-mark';
 import { PaywallModal } from '@/components/paywall-modal';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { api } from '@/src/api';
@@ -351,13 +350,7 @@ export default function SettingsScreen() {
   return (
     <Screen>
       <View style={styles.heading}>
-        <View style={styles.avatar}>
-          {profile?.avatarUrl ? (
-            <Image source={profile.avatarUrl} style={styles.avatarImage} contentFit="cover" />
-          ) : (
-            <Text style={styles.avatarText}>{(profile?.username || profile?.email || 'A')[0].toUpperCase()}</Text>
-          )}
-        </View>
+        <AvatarMark premium={profile?.premium} size={58} />
         <View style={styles.headingCopy}>
           <Title>{profile?.username || 'Your profile'}</Title>
           <Text style={styles.caption}>{profile?.email}</Text>
@@ -435,7 +428,6 @@ export default function SettingsScreen() {
             </Pressable>
           </View>
         )}
-        <AvatarPicker currentAvatarUrl={profile?.avatarUrl ?? null} onChanged={changed} />
         <View style={styles.settingRow}>
           <View style={styles.settingCopy}>
             <Text style={styles.settingLabel}>Private profile</Text>
@@ -641,9 +633,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   heading: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 4 },
   headingCopy: { flex: 1, gap: 3 },
-  avatar: { width: 58, height: 58, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary, overflow: 'hidden' },
-  avatarImage: { width: '100%', height: '100%' },
-  avatarText: { color: colors.white, fontWeight: '600', fontSize: 24 },
   caption: { color: colors.muted, fontSize: 14, lineHeight: 20 },
   sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   interestsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

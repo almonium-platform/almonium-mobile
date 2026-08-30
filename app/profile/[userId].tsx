@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui';
+import { AvatarMark } from '@/components/avatar-mark';
 import { api } from '@/src/api';
 import { config } from '@/src/config';
 import { languageName } from '@/src/languages';
@@ -47,7 +47,6 @@ export default function UserProfileScreen() {
         <View style={styles.identity}>
           <View style={styles.nameRow}>
             <Text style={styles.title}>@{user.username}</Text>
-            {user.premium && <View style={styles.premium}><Ionicons name="star" size={13} color={colors.white} /></View>}
           </View>
           <Text style={styles.meta}>Joined {formatMonth(user.registeredAt)}</Text>
         </View>
@@ -119,8 +118,7 @@ export default function UserProfileScreen() {
 }
 
 function Avatar({ profile }: { profile: UserProfile }) {
-  if (profile.avatarUrl) return <Image source={profile.avatarUrl} style={styles.avatar} contentFit="cover" />;
-  return <View style={[styles.avatar, profile.premium && styles.avatarPremium]}><Text style={[styles.avatarText, profile.premium && styles.avatarTextPremium]}>{profile.username.match(/[\p{L}\p{N}]/u)?.[0]?.toUpperCase() ?? '·'}</Text></View>;
+  return <AvatarMark premium={profile.premium} size={92} />;
 }
 
 function ProfileSection({ label, children }: { label: string; children: React.ReactNode }) {
@@ -137,15 +135,10 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 38, gap: 13 },
   center: { flex: 1, padding: 32, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: colors.canvas },
   card: { alignItems: 'center', gap: 18, borderRadius: 30, padding: 24, backgroundColor: colors.surface, ...shadows.card },
-  avatar: { width: 92, height: 92, borderRadius: 46, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.disabled },
-  avatarPremium: { backgroundColor: colors.raspberry },
-  avatarText: { color: colors.ink, fontFamily: fonts.serif, fontSize: 35, fontWeight: '600' },
-  avatarTextPremium: { color: colors.white },
   identity: { alignItems: 'center', gap: 4 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: 34, fontWeight: '600', textAlign: 'center' },
   subtitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, lineHeight: 25, fontWeight: '600', textAlign: 'center' },
-  premium: { width: 25, height: 25, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.raspberry },
   meta: { color: colors.muted, fontSize: 12, textAlign: 'center' },
   copy: { color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: 'center' },
   privateBlock: { alignItems: 'center', gap: 8, borderRadius: 18, padding: 17, backgroundColor: colors.canvas },

@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandMark } from '@/components/brand-mark';
+import { AvatarMark } from '@/components/avatar-mark';
 import { useAuth } from '@/src/auth-context';
 import { colors, fonts } from '@/src/theme';
 
@@ -16,8 +16,6 @@ export function AppHeader({
   onLanguagePress?: () => void;
 }) {
   const { profile } = useAuth();
-  const initial = profile?.username?.trim().slice(0, 1).toUpperCase() || 'A';
-
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       <View style={styles.row}>
@@ -44,11 +42,7 @@ export function AppHeader({
           accessibilityLabel="Open settings"
           onPress={() => router.push('/(tabs)/settings')}
           style={({ pressed }) => [styles.avatar, pressed && styles.pressed]}>
-          {profile?.avatarUrl ? (
-            <Image source={profile.avatarUrl} style={styles.avatarImage} contentFit="cover" />
-          ) : (
-            <Text style={styles.avatarText}>{initial}</Text>
-          )}
+          <AvatarMark premium={profile?.premium} size={36} />
         </Pressable>
       </View>
       <View style={styles.rail} />
@@ -89,14 +83,10 @@ const styles = StyleSheet.create({
   avatar: {
     width: 36,
     height: 36,
-    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 18,
-    backgroundColor: colors.primary,
   },
-  avatarImage: { width: '100%', height: '100%' },
-  avatarText: { color: colors.canvas, fontFamily: fonts.serif, fontSize: 15 },
   rail: { height: 3, backgroundColor: colors.languageRail },
   pressed: { opacity: 0.72 },
 });

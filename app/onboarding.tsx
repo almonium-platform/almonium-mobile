@@ -1,12 +1,11 @@
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { AvatarPicker } from '@/components/avatar-picker';
+import { AvatarMark } from '@/components/avatar-mark';
 import { BrandMark } from '@/components/brand-mark';
 import { Screen } from '@/components/screen';
 import { Button, Card, Field, Title } from '@/components/ui';
@@ -16,8 +15,16 @@ import { languageName, sortLanguages } from '@/src/languages';
 import { colors } from '@/src/theme';
 import type { CefrLevel, SetupStep } from '@/src/types';
 
-const steps: SetupStep[] = ['WELCOME', 'LANGUAGES', 'PROFILE', 'INTERESTS'];
+const steps: SetupStep[] = ['WELCOME', 'LANGUAGES', 'LEVEL', 'INTERESTS', 'PROFILE', 'GREETING'];
 const levels: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+const levelCopy: Record<CefrLevel, string> = {
+  A1: 'I know some words and set phrases.',
+  A2: 'I follow short sentences about familiar things.',
+  B1: 'I can get through a simple story with regular lookups.',
+  B2: 'I can follow a novel with a dictionary nearby.',
+  C1: 'I read fluently and stop at unusual or literary words.',
+  C2: 'I read almost anything, including specialised prose.',
+};
 
 const copy: Record<SetupStep, { eyebrow: string; title: string; description: string }> = {
   WELCOME: {
@@ -25,15 +32,15 @@ const copy: Record<SetupStep, { eyebrow: string; title: string; description: str
     title: 'Your next language lives in stories.',
     description: 'A quick setup will shape your library around what you know and what you want to learn.',
   },
-  PLAN: {
-    eyebrow: 'ONE MOMENT',
-    title: 'Opening your setup.',
-    description: 'Your language choices are next.',
-  },
   LANGUAGES: {
     eyebrow: 'LANGUAGES',
     title: 'Build your first shelf.',
     description: 'Tell us one language you know and one you are learning. You can add more later.',
+  },
+  LEVEL: {
+    eyebrow: 'LEVEL',
+    title: 'How much can you read?',
+    description: 'Choose the closest description. This only tunes your first shelf and can change later.',
   },
   PROFILE: {
     eyebrow: 'PROFILE',
@@ -44,6 +51,11 @@ const copy: Record<SetupStep, { eyebrow: string; title: string; description: str
     eyebrow: 'INTERESTS',
     title: 'Tune your recommendations.',
     description: 'Pick anything you enjoy—or skip this for now.',
+  },
+  GREETING: {
+    eyebrow: 'READY',
+    title: 'That’s everything. Let’s open a book.',
+    description: 'Almo will be around when a shelf is empty or something needs another try.',
   },
   COMPLETED: {
     eyebrow: 'READY',
@@ -63,6 +75,7 @@ export default function OnboardingScreen() {
   const [selectedInterests, setSelectedInterests] = useState<number[]>(
     profile?.interests.map((interest) => interest.id) || [],
   );
+  const [errorMessage, setErrorMessage] = useState('');
 
   const languagesQuery = useQuery({
     queryKey: ['supported-languages'],
@@ -83,28 +96,20 @@ export default function OnboardingScreen() {
     if (step === 'COMPLETED') router.replace('/(tabs)/home');
   }, [step]);
 
-  useEffect(() => {
-    if (step !== 'PLAN') return;
-    setBusy(true);
-    void api.completeOnboardingStep('PLAN')
-      .then(refreshProfile)
-      .catch((error) => Alert.alert('Setup could not continue', error instanceof Error ? error.message : 'Try again.'))
-      .finally(() => setBusy(false));
-  }, [refreshProfile, step]);
-
   async function run(action: () => Promise<unknown>) {
     setBusy(true);
+    setErrorMessage('');
     try {
       await action();
       await refreshProfile();
     } catch (error) {
-      Alert.alert('Setup could not continue', error instanceof Error ? error.message : 'Try again.');
+      setErrorMessage(error instanceof Error ? error.message : 'Setup could not continue. Try again.');
     } finally {
       setBusy(false);
     }
   }
 
-  async function completeSimple(currentStep: 'WELCOME' | 'PROFILE') {
+  async function completeSimple(currentStep: 'WELCOME' | 'PROFILE' | 'GREETING') {
     await run(async () => {
       if (currentStep === 'PROFILE' && username.trim() !== profile?.username) {
         await api.updateUsername(username.trim());
@@ -114,7 +119,13 @@ export default function OnboardingScreen() {
   }
 
   async function saveLanguages() {
-    await run(() => api.setupLanguages([fluentLanguage], targetLanguage, level));
+    await run(() => api.setupLanguages([fluentLanguage], targetLanguage, 'B1'));
+  }
+
+  async function saveLevel() {
+    const language = profile?.learners[0]?.language || targetLanguage;
+    if (!language) return;
+    await run(() => api.setupLevels([{ language, cefrLevel: level }]));
   }
 
   async function saveInterests() {
@@ -143,6 +154,7 @@ export default function OnboardingScreen() {
       <View style={styles.progressTrack}>
         <View style={[styles.progress, { width: `${((stepIndex + 1) / steps.length) * 100}%` }]} />
       </View>
+      <Text style={styles.progressLabel}>STEP {Math.min(stepIndex + 1, steps.length)} OF {steps.length}</Text>
       <View style={styles.intro}>
         <Text style={styles.eyebrow}>{currentCopy.eyebrow}</Text>
         <Title>{currentCopy.title}</Title>
@@ -171,10 +183,6 @@ export default function OnboardingScreen() {
         </Card>
       )}
 
-      {step === 'PLAN' && (
-        <Card><ActivityIndicator size="large" color={colors.primary} /></Card>
-      )}
-
       {step === 'LANGUAGES' && (
         <Card>
           <Text style={styles.label}>I already know</Text>
@@ -197,38 +205,42 @@ export default function OnboardingScreen() {
                 ))}
             </Picker>
           </View>
-          <Text style={styles.label}>My current level</Text>
-          <View style={styles.levels}>
-            {levels.map((candidate) => (
-              <Pressable
-                key={candidate}
-                onPress={() => setLevel(candidate)}
-                style={[styles.level, level === candidate && styles.levelActive]}>
-                <Text style={[styles.levelText, level === candidate && styles.levelTextActive]}>
-                  {candidate}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
           <Button
             loading={busy}
             disabled={!fluentLanguage || !targetLanguage || languagesQuery.isLoading}
             onPress={saveLanguages}>
-            Create my shelf
+            Continue
           </Button>
+        </Card>
+      )}
+
+      {step === 'LEVEL' && (
+        <Card>
+          <View style={styles.levelOptions}>
+            {levels.map((candidate) => (
+              <Pressable
+                accessibilityRole="radio"
+                accessibilityState={{ selected: level === candidate }}
+                key={candidate}
+                onPress={() => setLevel(candidate)}
+                style={[styles.levelOption, level === candidate && styles.levelOptionActive]}>
+                <Text style={[styles.levelCode, level === candidate && styles.levelCodeActive]}>
+                  {candidate}
+                </Text>
+                <Text style={styles.levelDescription}>{levelCopy[candidate]}</Text>
+              </Pressable>
+            ))}
+          </View>
+          <Pressable onPress={() => setLevel('B1')} style={styles.unsureAction}>
+            <Text style={styles.unsureText}>I’m not sure — start me at B1</Text>
+          </Pressable>
+          <Button loading={busy} onPress={saveLevel}>Use {level}</Button>
         </Card>
       )}
 
       {step === 'PROFILE' && (
         <Card>
-          <View style={styles.profileMark}>
-            {profile?.avatarUrl ? (
-              <Image source={profile.avatarUrl} style={styles.profileImage} contentFit="cover" />
-            ) : (
-              <Text style={styles.profileMarkText}>{(username || 'A')[0].toUpperCase()}</Text>
-            )}
-          </View>
-          <AvatarPicker currentAvatarUrl={profile?.avatarUrl ?? null} onChanged={refreshProfile} />
+          <View style={styles.profileMark}><AvatarMark premium={profile?.premium} size={72} /></View>
           <Field
             value={username}
             onChangeText={setUsername}
@@ -270,9 +282,28 @@ export default function OnboardingScreen() {
             })}
           </View>
           <Button loading={busy} onPress={saveInterests}>
-            {selectedInterests.length ? 'Finish setup' : 'Skip and finish'}
+            {selectedInterests.length ? 'Continue' : 'Skip for now'}
           </Button>
         </Card>
+      )}
+
+      {step === 'GREETING' && (
+        <Card>
+          <View style={styles.greetingMark}>
+            <BrandMark size={116} />
+          </View>
+          <Text style={styles.greetingCopy}>
+            {languageName(profile?.learners[0]?.language || targetLanguage)}, {profile?.learners[0]?.selfReportedLevel || level}, {profile?.interests.length || 0} {(profile?.interests.length || 0) === 1 ? 'interest' : 'interests'}. You can change any of it later.
+          </Text>
+          <Button loading={busy} onPress={() => completeSimple('GREETING')}>Open my shelf</Button>
+        </Card>
+      )}
+
+      {!!errorMessage && (
+        <View accessibilityRole="alert" style={styles.errorSurface}>
+          <Ionicons name="alert-circle-outline" size={21} color={colors.danger} />
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        </View>
       )}
     </Screen>
   );
@@ -284,6 +315,7 @@ const styles = StyleSheet.create({
   logo: { color: colors.primary, fontSize: 13, fontWeight: '600', letterSpacing: 2 },
   progressTrack: { height: 5, borderRadius: 3, overflow: 'hidden', backgroundColor: colors.line },
   progress: { height: 5, borderRadius: 3, backgroundColor: colors.primary },
+  progressLabel: { alignSelf: 'flex-end', color: colors.metadata, fontSize: 10, fontWeight: '600', letterSpacing: 1.2 },
   intro: { gap: 10, paddingVertical: 10 },
   eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
   description: { color: colors.muted, fontSize: 16, lineHeight: 24 },
@@ -300,9 +332,19 @@ const styles = StyleSheet.create({
   levelActive: { backgroundColor: colors.primary },
   levelText: { color: colors.muted, fontSize: 13, fontWeight: '600' },
   levelTextActive: { color: colors.white },
-  profileMark: { width: 72, height: 72, borderRadius: 24, alignSelf: 'center', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accentSoft, overflow: 'hidden' },
-  profileImage: { width: '100%', height: '100%' },
-  profileMarkText: { color: colors.primaryDark, fontSize: 30, fontWeight: '600' },
+  levelOptions: { gap: 7 },
+  levelOption: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: colors.line, borderRadius: 16, padding: 10 },
+  levelOptionActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
+  levelCode: { width: 30, color: colors.muted, fontWeight: '600' },
+  levelCodeActive: { color: colors.primary },
+  levelDescription: { flex: 1, color: colors.ink, fontSize: 13, lineHeight: 18 },
+  unsureAction: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  unsureText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
+  profileMark: { alignSelf: 'center' },
+  greetingMark: { alignItems: 'center', paddingVertical: 8 },
+  greetingCopy: { color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: 'center' },
+  errorSurface: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 16, padding: 14, backgroundColor: colors.dangerSoft },
+  errorText: { flex: 1, color: colors.danger, fontSize: 13, lineHeight: 19 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 9, backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.line },
   chipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },

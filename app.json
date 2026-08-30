@@ -35,13 +35,6 @@
       "expo-router",
       "expo-apple-authentication",
       [
-        "expo-image-picker",
-        {
-          "photosPermission": "Allow Almonium to access your photos so you can set a profile picture.",
-          "microphonePermission": false
-        }
-      ],
-      [
         "expo-splash-screen",
         {
           "image": "./assets/images/almonium-logo.png",

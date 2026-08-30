@@ -30,16 +30,18 @@ export interface UserInfo {
   interests: Interest[];
 }
 
-export type SetupStep = 'WELCOME' | 'PLAN' | 'LANGUAGES' | 'PROFILE' | 'INTERESTS' | 'COMPLETED';
+export type SetupStep =
+  | 'WELCOME'
+  | 'LANGUAGES'
+  | 'LEVEL'
+  | 'INTERESTS'
+  | 'PROFILE'
+  | 'GREETING'
+  | 'COMPLETED';
 
 export interface Interest {
   id: number;
   name: string;
-}
-
-export interface Avatar {
-  id: string;
-  url: string;
 }
 
 export interface BookSummary {

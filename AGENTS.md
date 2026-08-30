@@ -34,25 +34,26 @@ the host toolchain is available.
 
 ## Visual system
 
-- Treat `docs/Almonium design system analysis.md` as the visual source of
-  truth and consult `../almonium-fe` for shipped examples before introducing
-  or changing UI patterns.
+- Treat `docs/Almonium Constitution.dc.html` and
+  `docs/Almonium Master Brief.dc.html` as the visual and product sources of
+  truth. Consult `../almonium-fe` for shipped examples before introducing or
+  changing UI patterns.
 - Use semantic values from `src/theme.ts`; do not add screen-local brand
   colours. New brand tokens must be justified against the analysis and added
   centrally.
 - Preserve the core identity: `#F9F6F5` paper-warm page ground, pure-white
-  raised surfaces, charcoal text, plum/aubergine brand accents, and the
-  plum-to-raspberry gradient for the primary commit action. Green is only a
-  semantic success state, never a general accent.
+  raised surfaces, charcoal text, and plum/aubergine brand accents. Primary
+  actions are solid plum. The plum-to-raspberry gradient is premium-only.
+  Green is only a semantic success state, never a general accent.
 - Pair serif display/entity titles with sans-serif controls and body copy.
   Prefer medium/semibold weights over heavy black UI typography.
 - Use very round geometry: pill buttons and inputs, 20px content panels, and
   roughly 24-35px raised cards. A raised surface uses shadow without a border;
   a flat interactive surface may use a 1px warm-grey or semantic border.
-- Use colour to communicate data or state, not as decoration. Orange is for
-  reading metadata/progress; pink is danger; green is success; cyan-violet is
-  premium. Keep ordinary screens to one cream ground, one white surface tier,
-  and one primary gradient action.
+- Use colour to communicate data or state, not as decoration. Pink is danger,
+  green is success, and the plum-to-raspberry gradient is premium. Keep
+  ordinary screens to one cream ground, one white surface tier, and one solid
+  plum primary action. Do not introduce cyan or off-ramp reading accents.
 - Adapt desktop compositions to native ergonomics instead of reproducing them
   literally: retain native bottom tabs, safe areas, platform controls, 44px
   minimum touch targets, readable insets, and single-column phone layouts.

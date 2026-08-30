@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui';
+import { AvatarMark } from '@/components/avatar-mark';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { colors, fonts, shadows } from '@/src/theme';
@@ -146,9 +146,7 @@ function SearchResult({ user }: { user: PublicUserSummary }) {
 }
 
 function Avatar({ user }: { user: PublicUserSummary }) {
-  return user.avatarUrl ? <Image source={user.avatarUrl} style={styles.avatar} contentFit="cover" /> : (
-    <View style={[styles.avatar, user.premium && styles.avatarPremium]}><Text style={[styles.avatarText, user.premium && styles.avatarTextPremium]}>{user.username.match(/[\p{L}\p{N}]/u)?.[0]?.toUpperCase() ?? '·'}</Text></View>
-  );
+  return <AvatarMark premium={user.premium} size={46} />;
 }
 
 function SmallAction({ label, primary = false, onPress }: { label: string; primary?: boolean; onPress(): void }) {
@@ -185,10 +183,6 @@ const styles = StyleSheet.create({
   resultRow: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 20, padding: 11, backgroundColor: colors.surface },
   personRow: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 22, padding: 13, backgroundColor: colors.surface, ...shadows.card },
   identity: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 11 },
-  avatar: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.disabled },
-  avatarPremium: { backgroundColor: colors.raspberry },
-  avatarText: { color: colors.ink, fontFamily: fonts.serif, fontSize: 18, fontWeight: '600' },
-  avatarTextPremium: { color: colors.white },
   personCopy: { flex: 1, gap: 3 },
   username: { color: colors.ink, fontSize: 14, fontWeight: '600' },
   relationship: { color: colors.muted, fontSize: 11 },
