@@ -28,7 +28,13 @@ import { colors, fonts, shadows } from '@/src/theme';
 import { isUuid } from '@/src/uuid';
 
 type ReaderTheme = 'paper' | 'night';
+type ReaderFace = 'literary' | 'classic' | 'clear';
 const settingsKey = 'almonium:reader-settings';
+const readerFaces: { value: ReaderFace; label: string; family: string }[] = [
+  { value: 'literary', label: 'Literary', family: 'Georgia, "Times New Roman", serif' },
+  { value: 'classic', label: 'Classic', family: 'Palatino, "Book Antiqua", serif' },
+  { value: 'clear', label: 'Clear', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
+];
 
 const baseProgressScript = `
   (function () {
@@ -69,9 +75,10 @@ const selectionScript = `
   })();
 `;
 
-function appearanceScript(fontSize: number, theme: ReaderTheme, progress: number) {
+function appearanceScript(fontSize: number, theme: ReaderTheme, face: ReaderFace, progress: number) {
   const background = theme === 'night' ? '#241f25' : colors.canvas;
   const foreground = theme === 'night' ? '#f1ecef' : colors.ink;
+  const fontFamily = readerFaces.find((candidate) => candidate.value === face)?.family ?? readerFaces[0].family;
   return `
     (function () {
       let style = document.getElementById('almonium-reader-style');
@@ -86,7 +93,7 @@ function appearanceScript(fontSize: number, theme: ReaderTheme, progress: number
           margin: 0 auto !important;
           padding: 28px 24px 110px !important;
           max-width: 720px !important;
-          font-family: Georgia, "Times New Roman", serif !important;
+          font-family: ${fontFamily} !important;
           font-size: ${fontSize}px !important;
           line-height: 1.72 !important;
         }
@@ -127,7 +134,9 @@ export default function ReaderScreen() {
   const progressRef = useRef(0);
   const [fontSize, setFontSize] = useState(20);
   const [theme, setTheme] = useState<ReaderTheme>('paper');
+  const [face, setFace] = useState<ReaderFace>('literary');
   const [parallel, setParallel] = useState(false);
+  const [settingsVisible, setSettingsVisible] = useState(false);
   const [selection, setSelection] = useState<{ entry: string; context: string } | null>(null);
   const [savingWord, setSavingWord] = useState(false);
   const [wordSaved, setWordSaved] = useState(false);
@@ -184,9 +193,11 @@ export default function ReaderScreen() {
     void AsyncStorage.getItem(settingsKey).then((value) => {
       if (!value) return;
       try {
-        const settings = JSON.parse(value) as { fontSize?: number; theme?: ReaderTheme };
+        const settings = JSON.parse(value) as { fontSize?: number; theme?: ReaderTheme; face?: ReaderFace; parallel?: boolean };
         if (settings.fontSize) setFontSize(settings.fontSize);
         if (settings.theme) setTheme(settings.theme);
+        if (settings.face) setFace(settings.face);
+        if (typeof settings.parallel === 'boolean') setParallel(settings.parallel);
       } catch {
         // Ignore stale settings from an incompatible app version.
       }
@@ -225,9 +236,9 @@ export default function ReaderScreen() {
   }, [flush]);
 
   useEffect(() => {
-    void AsyncStorage.setItem(settingsKey, JSON.stringify({ fontSize, theme }));
-    webView.current?.injectJavaScript(appearanceScript(fontSize, theme, progressRef.current));
-  }, [fontSize, theme]);
+    void AsyncStorage.setItem(settingsKey, JSON.stringify({ fontSize, theme, face, parallel }));
+    webView.current?.injectJavaScript(appearanceScript(fontSize, theme, face, progressRef.current));
+  }, [face, fontSize, parallel, theme]);
 
   function onProgress(event: WebViewMessageEvent) {
     const message = event.nativeEvent.data;
@@ -337,17 +348,11 @@ export default function ReaderScreen() {
                 <Text style={styles.readerMeta}>{sourceLanguage} → {translationLanguage}</Text>
               </View>
               <Pressable
-                accessibilityLabel="Change text size"
-                onPress={() => setFontSize((size) => size >= 24 ? 18 : size + 2)}
-                style={styles.toolButton}>
-                <Text style={[styles.largeA, theme === 'night' && styles.nightText]}>Aa</Text>
-              </Pressable>
-              <Pressable
-                accessibilityLabel={parallelLanguage ? 'Toggle parallel translation' : 'Toggle reader theme'}
-                onPress={() => parallelLanguage ? setParallel((value) => !value) : setTheme((value) => value === 'paper' ? 'night' : 'paper')}
+                accessibilityLabel="Open reader settings"
+                onPress={() => setSettingsVisible(true)}
                 style={styles.toolButton}>
                 <Ionicons
-                  name={parallelLanguage ? 'git-compare-outline' : theme === 'paper' ? 'moon-outline' : 'sunny-outline'}
+                  name="text-outline"
                   size={20}
                   color={theme === 'night' ? colors.white : colors.muted}
                 />
@@ -359,7 +364,7 @@ export default function ReaderScreen() {
             key={parallel ? `parallel-${parallelLanguage}` : 'single'}
             ref={webView}
             source={{ html: readerHtml(content) }}
-            injectedJavaScript={`${appearanceScript(fontSize, theme, progress)}${baseProgressScript}${selectionScript}true;`}
+            injectedJavaScript={`${appearanceScript(fontSize, theme, face, progress)}${baseProgressScript}${selectionScript}true;`}
             onMessage={onProgress}
             onShouldStartLoadWithRequest={(request) => {
               if (request.url.startsWith('about:blank')) return true;
@@ -373,7 +378,7 @@ export default function ReaderScreen() {
       )}
       <Modal transparent animationType="slide" visible={Boolean(selection)} onRequestClose={() => setSelection(null)}>
         <Pressable style={styles.scrim} onPress={() => setSelection(null)} />
-        <SafeAreaView edges={['bottom']} style={styles.wordSheet}>
+        <SafeAreaView edges={['bottom']} style={[styles.wordSheet, theme === 'night' && styles.wordSheetNight]}>
           <View style={styles.grabber} />
           <ScrollView contentContainerStyle={styles.wordSheetContent}>
             {selectionQuery.isLoading ? (
@@ -387,7 +392,7 @@ export default function ReaderScreen() {
               <>
                 <View style={styles.sheetHeading}>
                   <View style={styles.sheetHeadingCopy}>
-                    <Text style={styles.sheetEntry}>{selectionQuery.data.senses[0]?.headword || selectionQuery.data.entry}</Text>
+                    <Text style={[styles.sheetEntry, theme === 'night' && styles.nightText]}>{selectionQuery.data.senses[0]?.headword || selectionQuery.data.entry}</Text>
                     <Text style={styles.sheetMeta}>
                       {selectionQuery.data.senses[0]?.partOfSpeech || 'word'}
                       {selectionQuery.data.senses[0]?.transcription ? ` · /${selectionQuery.data.senses[0].transcription}/` : ''}
@@ -404,11 +409,11 @@ export default function ReaderScreen() {
                     <Ionicons name="volume-medium-outline" size={21} color={colors.primary} />
                   </Pressable>
                 </View>
-                <View style={styles.definition}>
+                <View style={[styles.definition, theme === 'night' && styles.definitionNight]}>
                   <Text style={styles.senseIndex}>{selectionQuery.data.senses[0]?.index ?? 1}</Text>
                   <View style={styles.definitionCopy}>
-                    <Text style={styles.definitionText}>{selectionQuery.data.senses[0]?.translations.join(', ') || 'Meaning not supplied'}</Text>
-                    {!!selectionQuery.data.sourceContext && <Text style={styles.sourceContext}>“{selectionQuery.data.sourceContext}”</Text>}
+                    <Text style={[styles.definitionText, theme === 'night' && styles.nightText]}>{selectionQuery.data.senses[0]?.translations.join(', ') || 'Meaning not supplied'}</Text>
+                    {!!selectionQuery.data.sourceContext && <Text style={[styles.sourceContext, theme === 'night' && styles.nightMutedText]}>“{selectionQuery.data.sourceContext}”</Text>}
                   </View>
                 </View>
                 <View style={styles.sheetIntents}>
@@ -431,8 +436,54 @@ export default function ReaderScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
+      <Modal transparent animationType="slide" visible={settingsVisible} onRequestClose={() => setSettingsVisible(false)}>
+        <Pressable style={styles.scrim} onPress={() => setSettingsVisible(false)} />
+        <SafeAreaView edges={['bottom']} style={[styles.settingsSheet, theme === 'night' && styles.settingsSheetNight]}>
+          <View style={styles.grabber} />
+          <View style={styles.settingsContent}>
+            <View style={styles.settingsHeading}>
+              <Text style={[styles.settingsTitle, theme === 'night' && styles.nightText]}>Reader settings</Text>
+              <Pressable accessibilityLabel="Close reader settings" onPress={() => setSettingsVisible(false)} style={styles.toolButton}>
+                <Ionicons name="close" size={22} color={theme === 'night' ? colors.white : colors.ink} />
+              </Pressable>
+            </View>
+            <View style={styles.settingGroup}>
+              <Text style={styles.settingLabel}>TEXT SIZE</Text>
+              <View style={styles.sizeControl}>
+                <Pressable accessibilityLabel="Decrease text size" onPress={() => setFontSize((size) => Math.max(16, size - 2))} style={styles.sizeButton}><Text style={[styles.sizeButtonText, theme === 'night' && styles.nightText]}>A−</Text></Pressable>
+                <Text style={[styles.sizeValue, theme === 'night' && styles.nightText]}>{fontSize}</Text>
+                <Pressable accessibilityLabel="Increase text size" onPress={() => setFontSize((size) => Math.min(28, size + 2))} style={styles.sizeButton}><Text style={[styles.sizeButtonText, theme === 'night' && styles.nightText]}>A+</Text></Pressable>
+              </View>
+            </View>
+            <View style={styles.settingGroup}>
+              <Text style={styles.settingLabel}>READING FACE</Text>
+              <View style={styles.optionRow}>
+                {readerFaces.map((candidate) => <ReaderOption key={candidate.value} label={candidate.label} selected={face === candidate.value} night={theme === 'night'} onPress={() => setFace(candidate.value)} />)}
+              </View>
+            </View>
+            <View style={styles.settingGroup}>
+              <Text style={styles.settingLabel}>PAGE</Text>
+              <View style={styles.optionRow}>
+                <ReaderOption label="Paper" selected={theme === 'paper'} night={theme === 'night'} onPress={() => setTheme('paper')} />
+                <ReaderOption label="Night" selected={theme === 'night'} night={theme === 'night'} onPress={() => setTheme('night')} />
+              </View>
+            </View>
+            {parallelLanguage && <View style={styles.settingGroup}>
+              <Text style={styles.settingLabel}>TRANSLATION</Text>
+              <View style={styles.optionRow}>
+                <ReaderOption label="Original" selected={!parallel} night={theme === 'night'} onPress={() => setParallel(false)} />
+                <ReaderOption label="Parallel" selected={parallel} night={theme === 'night'} onPress={() => setParallel(true)} />
+              </View>
+            </View>}
+          </View>
+        </SafeAreaView>
+      </Modal>
     </View>
   );
+}
+
+function ReaderOption({ label, selected, night, onPress }: { label: string; selected: boolean; night: boolean; onPress(): void }) {
+  return <Pressable accessibilityRole="radio" accessibilityState={{ selected }} onPress={onPress} style={[styles.readerOption, night && styles.readerOptionNight, selected && styles.readerOptionActive, selected && night && styles.readerOptionActiveNight]}><Text style={[styles.readerOptionText, night && styles.nightText, selected && styles.readerOptionTextActive, selected && night && styles.readerOptionTextActiveNight]}>{label}</Text></Pressable>;
 }
 
 const styles = StyleSheet.create({
@@ -453,8 +504,29 @@ const styles = StyleSheet.create({
   toolButton: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
   largeA: { color: colors.ink, fontFamily: fonts.serif, fontSize: 16 },
   nightText: { color: colors.white },
+  nightMutedText: { color: '#BEB2C2' },
   scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(44,37,48,0.72)' },
   wordSheet: { position: 'absolute', right: 0, bottom: 0, left: 0, maxHeight: '88%', borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: colors.canvas, ...shadows.media },
+  wordSheetNight: { backgroundColor: '#302a31', borderWidth: 1, borderColor: '#4c414b' },
+  settingsSheet: { position: 'absolute', right: 0, bottom: 0, left: 0, borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: colors.canvas, ...shadows.media },
+  settingsSheetNight: { backgroundColor: '#302a31', borderWidth: 1, borderColor: '#4c414b' },
+  settingsContent: { gap: 18, padding: 18, paddingBottom: 22 },
+  settingsHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  settingsTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 23 },
+  settingGroup: { gap: 8 },
+  settingLabel: { color: colors.metadata, fontSize: 10, fontWeight: '600', letterSpacing: 1.3 },
+  sizeControl: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: colors.border, borderRadius: 24, paddingHorizontal: 6 },
+  sizeButton: { minWidth: 64, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  sizeButtonText: { color: colors.ink, fontFamily: fonts.serif, fontSize: 16 },
+  sizeValue: { color: colors.ink, fontSize: 13, fontWeight: '600' },
+  optionRow: { flexDirection: 'row', gap: 7 },
+  readerOption: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderRadius: 22 },
+  readerOptionNight: { borderColor: '#4c414b' },
+  readerOptionActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
+  readerOptionActiveNight: { borderColor: '#B07BD0', backgroundColor: '#453D51' },
+  readerOptionText: { color: colors.muted, fontSize: 12, fontWeight: '600' },
+  readerOptionTextActive: { color: colors.primary },
+  readerOptionTextActiveNight: { color: '#E0C4EE' },
   grabber: { width: 38, height: 4, alignSelf: 'center', marginTop: 10, borderRadius: 2, backgroundColor: colors.border },
   wordSheetContent: { gap: 16, padding: 20, paddingTop: 14 },
   sheetLoading: { minHeight: 220, alignItems: 'center', justifyContent: 'center', gap: 12 },
@@ -464,6 +536,7 @@ const styles = StyleSheet.create({
   sheetMeta: { color: colors.metadata, fontSize: 12 },
   sheetAudio: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderRadius: 22 },
   definition: { flexDirection: 'row', gap: 12, padding: 16, borderRadius: 20, backgroundColor: colors.surface, ...shadows.card },
+  definitionNight: { backgroundColor: '#272130', borderWidth: 1, borderColor: '#332C3C', shadowOpacity: 0, elevation: 0 },
   senseIndex: { color: colors.primary, fontSize: 12, paddingTop: 2 },
   definitionCopy: { flex: 1, gap: 7 },
   definitionText: { color: colors.ink, fontFamily: fonts.sansMedium, fontSize: 15, lineHeight: 22 },

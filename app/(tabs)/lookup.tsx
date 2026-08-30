@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Keyboard,
@@ -26,6 +26,7 @@ import { colors, fonts, shadows } from '@/src/theme';
 const lookupLanguageKey = 'almonium:lookup-language';
 
 export default function LookupScreen() {
+  const params = useLocalSearchParams<{ text?: string }>();
   const { firebaseUser, profile } = useAuth();
   const queryClient = useQueryClient();
   const activeLanguages = useMemo(
@@ -41,6 +42,7 @@ export default function LookupScreen() {
   const [produce, setProduce] = useState(false);
   const [saved, setSaved] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
+  const handledSharedText = useRef('');
 
   useEffect(() => {
     void AsyncStorage.getItem(lookupLanguageKey).then((stored) => {
@@ -63,6 +65,21 @@ export default function LookupScreen() {
       setHistory((current) => [result.entry, ...current.filter((item) => item !== result.entry)].slice(0, 6));
     },
   });
+
+  useEffect(() => {
+    const sharedText = typeof params.text === 'string' ? params.text.trim().slice(0, 500) : '';
+    if (!sharedText || handledSharedText.current === sharedText) return;
+    handledSharedText.current = sharedText;
+    setSearch(sharedText);
+    const sharedTokens = tokenizeSentence(sharedText);
+    if (sharedTokens.length > 1) {
+      setContext(sharedText);
+      setTokens(sharedTokens);
+    } else {
+      const entry = normalizedLookupEntry(sharedTokens[0] ?? sharedText);
+      if (entry) lookupMutation.mutate({ entry });
+    }
+  }, [lookupMutation, params.text]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
