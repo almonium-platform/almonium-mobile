@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -15,12 +15,14 @@ import {
 } from 'react-native';
 
 import { AppHeader } from '@/components/app-header';
+import { PaywallModal, type PaywallContext } from '@/components/paywall-modal';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { createCardDraft } from '@/src/card-utils';
 import { normalizedLookupEntry, tokenizeSentence, type DiscoverLookup } from '@/src/discover';
 import { languageName } from '@/src/languages';
+import { freeSavedItemLimit } from '@/src/limits';
 import { colors, fonts, shadows } from '@/src/theme';
 
 const lookupLanguageKey = 'almonium:lookup-language';
@@ -42,6 +44,7 @@ export default function LookupScreen() {
   const [produce, setProduce] = useState(false);
   const [saved, setSaved] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
+  const [paywallContext, setPaywallContext] = useState<PaywallContext | null>(null);
   const handledSharedText = useRef('');
 
   useEffect(() => {
@@ -53,6 +56,11 @@ export default function LookupScreen() {
   const translationLanguage =
     profile?.fluentLangs.find((code) => code !== language) ?? (language === 'EN' ? 'UK' : 'EN');
   const selectedSense = lookup?.senses[senseIndex];
+  const itemsQuery = useQuery({
+    queryKey: ['cards', firebaseUser?.uid, language],
+    queryFn: () => api.cards(language),
+    enabled: Boolean(firebaseUser && language),
+  });
 
   const lookupMutation = useMutation({
     mutationFn: ({ entry, sourceContext }: { entry: string; sourceContext?: string }) =>
@@ -124,6 +132,14 @@ export default function LookupScreen() {
       return;
     }
     openWord(nextTokens[0] ?? input);
+  }
+
+  function keepWord() {
+    if (!profile?.premium && (itemsQuery.data?.length ?? 0) >= freeSavedItemLimit) {
+      setPaywallContext('item-cap');
+      return;
+    }
+    saveMutation.mutate();
   }
 
   function openWord(value: string, sourceContext?: string) {
@@ -225,7 +241,7 @@ export default function LookupScreen() {
               </View>
               <Pressable
                 accessibilityLabel="Learn about premium audio"
-                onPress={() => router.push('/membership')}
+                onPress={() => setPaywallContext('audio')}
                 style={styles.audioButton}>
                 <Ionicons name="volume-medium-outline" size={20} color={colors.primary} />
               </Pressable>
@@ -277,7 +293,7 @@ export default function LookupScreen() {
             </View>
             <Button
               disabled={!selectedSense?.translations.length || saveMutation.isPending || saved}
-              onPress={() => saveMutation.mutate()}>
+              onPress={keepWord}>
               {saved ? 'Kept' : saveMutation.isPending ? 'Keeping…' : 'Keep this word'}
             </Button>
             {saveMutation.isError && (
@@ -302,6 +318,11 @@ export default function LookupScreen() {
           </View>
         )}
       </ScrollView>
+      <PaywallModal
+        context={paywallContext ?? 'general'}
+        visible={Boolean(paywallContext)}
+        onClose={() => setPaywallContext(null)}
+      />
     </View>
   );
 }

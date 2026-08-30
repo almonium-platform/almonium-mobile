@@ -33,6 +33,23 @@ export const colors = {
   white: '#FFFFFF',
 } as const;
 
+export const darkColors = {
+  canvas: '#14111A',
+  surface: '#1E1A26',
+  nested: '#272130',
+  overlay: '#2E2736',
+  line: '#332C3C',
+  border: '#453D51',
+  ink: '#F1EAEF',
+  muted: '#BEB2C2',
+  metadata: '#8D8298',
+  primary: '#B07BD0',
+  primaryLight: '#E0C4EE',
+  primaryMid: '#CBA3E0',
+  primaryPressed: '#9059BC',
+  raspberry: '#D98BA8',
+} as const;
+
 export const gradients = {
   auth: ['#F4E5EC', colors.canvas, '#EEE7F4'] as const,
   premium: [colors.premium, colors.primary] as const,

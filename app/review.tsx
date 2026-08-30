@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -26,6 +26,7 @@ import {
   type ReviewSession,
   type ReviewSessionResult,
 } from '@/src/review';
+import { configureDailyReminder, dismissReviewReminderOffer, shouldOfferReviewReminder } from '@/src/reminders';
 import { colors, fonts, shadows } from '@/src/theme';
 
 export default function ReviewScreen() {
@@ -356,6 +357,31 @@ function FeedbackState({ feedback, prompt, sourceContext, submitting, mistypeRec
 }
 
 function CompleteState({ result, onDone }: { result: ReviewSessionResult; onDone(): void }) {
+  const [offerReminder, setOfferReminder] = useState(false);
+  const [savingReminder, setSavingReminder] = useState(false);
+  const [reminderError, setReminderError] = useState('');
+  useEffect(() => {
+    if (Platform.OS !== 'web') void shouldOfferReviewReminder().then(setOfferReminder);
+  }, []);
+
+  async function enableReminder() {
+    setSavingReminder(true);
+    setReminderError('');
+    try {
+      await configureDailyReminder(true, 20);
+      setOfferReminder(false);
+    } catch (cause) {
+      setReminderError(cause instanceof Error ? cause.message : 'The reminder could not be enabled.');
+    } finally {
+      setSavingReminder(false);
+    }
+  }
+
+  function dismissReminder() {
+    setOfferReminder(false);
+    void dismissReviewReminderOffer();
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.completeContent}>
@@ -372,6 +398,16 @@ function CompleteState({ result, onDone }: { result: ReviewSessionResult; onDone
             <Text style={styles.dessertEyebrow}>A SHORT RE-ENCOUNTER</Text>
             <Text style={styles.dessertTitle}>Saved sentences around the words that resisted</Text>
             {result.dessertSentences.slice(0, 3).map((sentence) => <Text key={sentence} style={styles.dessertCopy}>{sentence}</Text>)}
+          </View>
+        )}
+        {offerReminder && (
+          <View style={styles.reminderOffer}>
+            <Ionicons name="notifications-outline" size={25} color={colors.primary} />
+            <Text style={styles.reminderTitle}>Want one calm reminder?</Text>
+            <Text style={styles.stateCopy}>Choose a daily 8:00 PM window. It stays off unless you say yes.</Text>
+            {!!reminderError && <Text style={styles.error}>{reminderError}</Text>}
+            <Button loading={savingReminder} onPress={enableReminder}>Turn on review reminder</Button>
+            <Pressable disabled={savingReminder} onPress={dismissReminder} style={styles.revealAction}><Text style={styles.revealText}>Not now</Text></Pressable>
           </View>
         )}
         <Text style={styles.stateCopy}>{result.stillDue ? `${result.stillDue} still due. Nothing was lost by stopping here.` : 'You are clear for now.'}</Text>
@@ -457,4 +493,6 @@ const styles = StyleSheet.create({
   dessertEyebrow: { color: colors.accentBorder, fontSize: 10, letterSpacing: 1.3 },
   dessertTitle: { color: colors.canvas, fontFamily: fonts.serif, fontSize: 21, lineHeight: 27 },
   dessertCopy: { color: colors.canvas, fontFamily: fonts.serifRegular, fontSize: 16, lineHeight: 25, opacity: 0.82 },
+  reminderOffer: { width: '100%', alignItems: 'center', gap: 9, borderRadius: 24, padding: 18, backgroundColor: colors.surface, ...shadows.card },
+  reminderTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 20 },
 });

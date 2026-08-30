@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { colors, gradients, radii } from './theme';
+import { colors, darkColors, gradients, radii } from './theme';
 
 vi.mock('react-native', () => ({
   Platform: {
@@ -22,6 +22,12 @@ describe('Almonium visual system', () => {
   it('reserves green for success rather than the brand accent', () => {
     expect(colors.success).toBe('#16BA7F');
     expect(colors.primary).not.toBe(colors.success);
+  });
+
+  it('defines the night-reader palette as semantic tokens', () => {
+    expect(darkColors.canvas).toBe('#14111A');
+    expect(darkColors.ink).toBe('#F1EAEF');
+    expect(darkColors.primary).toBe('#B07BD0');
   });
 
   it('uses mobile-safe rounded controls', () => {

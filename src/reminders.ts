@@ -7,6 +7,7 @@ import { normalizeReminderHour } from '@/src/reminder-utils';
 export { reminderTimeLabel } from '@/src/reminder-utils';
 
 const settingsKey = 'almonium:review-reminder';
+const offerKey = 'almonium:review-reminder-offered';
 const channelId = 'review-reminders';
 
 export interface ReminderSettings {
@@ -71,6 +72,21 @@ export async function configureDailyReminder(enabled: boolean, hour: number) {
     },
   });
   const settings = { enabled: true, hour: normalizedHour, notificationId };
-  await AsyncStorage.setItem(settingsKey, JSON.stringify(settings));
+  await Promise.all([
+    AsyncStorage.setItem(settingsKey, JSON.stringify(settings)),
+    AsyncStorage.setItem(offerKey, 'true'),
+  ]);
   return settings;
+}
+
+export async function shouldOfferReviewReminder() {
+  const [settings, offered] = await Promise.all([
+    getReminderSettings(),
+    AsyncStorage.getItem(offerKey),
+  ]);
+  return !settings.enabled && offered !== 'true';
+}
+
+export async function dismissReviewReminderOffer() {
+  await AsyncStorage.setItem(offerKey, 'true');
 }

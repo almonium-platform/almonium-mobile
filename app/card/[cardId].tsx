@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
+import { PaywallModal } from '@/components/paywall-modal';
 import { Button, Card, Field } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { cardUpdate, createCardDraft } from '@/src/card-utils';
 import { languageName } from '@/src/languages';
+import { freeSavedItemLimit } from '@/src/limits';
 import { intentLabel } from '@/src/review';
 import { colors, fonts } from '@/src/theme';
 import type { LearningIntent } from '@/src/types';
@@ -24,7 +26,7 @@ export default function CardEditorScreen() {
   const resolvedItemId = itemId || cardId;
   const editing = Boolean(resolvedItemId && resolvedItemId !== 'new');
   const language = languageParam || '';
-  const { firebaseUser } = useAuth();
+  const { firebaseUser, profile } = useAuth();
   const queryClient = useQueryClient();
   const [entry, setEntry] = useState('');
   const [translations, setTranslations] = useState('');
@@ -33,10 +35,16 @@ export default function CardEditorScreen() {
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [showItemCap, setShowItemCap] = useState(false);
   const cardQuery = useQuery({
     queryKey: ['card', firebaseUser?.uid, resolvedItemId],
     queryFn: () => api.card(resolvedItemId as string),
     enabled: Boolean(editing && firebaseUser),
+  });
+  const itemsQuery = useQuery({
+    queryKey: ['cards', firebaseUser?.uid, language],
+    queryFn: () => api.cards(language),
+    enabled: Boolean(!editing && firebaseUser && language),
   });
 
   useEffect(() => {
@@ -57,6 +65,10 @@ export default function CardEditorScreen() {
 
   async function save() {
     if (!valid) return;
+    if (!editing && !profile?.premium && (itemsQuery.data?.length ?? 0) >= freeSavedItemLimit) {
+      setShowItemCap(true);
+      return;
+    }
     setSaving(true);
     setErrorMessage('');
     try {
@@ -201,6 +213,7 @@ export default function CardEditorScreen() {
           <Button variant="danger" disabled={saving || !cardQuery.data} onPress={remove}>Delete item</Button>
         )
       )}
+      <PaywallModal context="item-cap" visible={showItemCap} onClose={() => setShowItemCap(false)} />
     </Screen>
   );
 }

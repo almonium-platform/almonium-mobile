@@ -18,13 +18,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
 import { Button } from '@/components/ui';
+import { PaywallModal, type PaywallContext } from '@/components/paywall-modal';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { ReadingProgressSync } from '@/src/reading-progress';
 import { createCardDraft } from '@/src/card-utils';
 import { normalizedLookupEntry } from '@/src/discover';
+import { freeSavedItemLimit } from '@/src/limits';
 import { downloadedBooks, readDownloadedBook } from '@/src/offline-books';
-import { colors, fonts, shadows } from '@/src/theme';
+import { colors, darkColors, fonts, shadows } from '@/src/theme';
 import { isUuid } from '@/src/uuid';
 
 type ReaderTheme = 'paper' | 'night';
@@ -76,8 +78,8 @@ const selectionScript = `
 `;
 
 function appearanceScript(fontSize: number, theme: ReaderTheme, face: ReaderFace, progress: number) {
-  const background = theme === 'night' ? '#241f25' : colors.canvas;
-  const foreground = theme === 'night' ? '#f1ecef' : colors.ink;
+  const background = theme === 'night' ? darkColors.canvas : colors.canvas;
+  const foreground = theme === 'night' ? darkColors.ink : colors.ink;
   const fontFamily = readerFaces.find((candidate) => candidate.value === face)?.family ?? readerFaces[0].family;
   return `
     (function () {
@@ -137,6 +139,7 @@ export default function ReaderScreen() {
   const [face, setFace] = useState<ReaderFace>('literary');
   const [parallel, setParallel] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [paywallContext, setPaywallContext] = useState<PaywallContext | null>(null);
   const [selection, setSelection] = useState<{ entry: string; context: string } | null>(null);
   const [savingWord, setSavingWord] = useState(false);
   const [wordSaved, setWordSaved] = useState(false);
@@ -187,6 +190,11 @@ export default function ReaderScreen() {
     queryFn: () =>
       api.discover(selection!.entry, sourceLanguage, translationLanguage, selection!.context),
     enabled: Boolean(selection && sourceLanguage),
+  });
+  const itemsQuery = useQuery({
+    queryKey: ['cards', firebaseUser?.uid, sourceLanguage],
+    queryFn: () => api.cards(sourceLanguage),
+    enabled: Boolean(firebaseUser && sourceLanguage),
   });
 
   useEffect(() => {
@@ -273,6 +281,11 @@ export default function ReaderScreen() {
     const lookup = selectionQuery.data;
     const sense = lookup?.senses[0];
     if (!lookup || !sense?.translations.length || savingWord) return;
+    if (!profile?.premium && (itemsQuery.data?.length ?? 0) >= freeSavedItemLimit) {
+      setSelection(null);
+      setPaywallContext('item-cap');
+      return;
+    }
     const draft = createCardDraft(
       sense.headword || lookup.entry,
       lookup.language,
@@ -403,7 +416,7 @@ export default function ReaderScreen() {
                     accessibilityLabel="Learn about premium audio"
                     onPress={() => {
                       setSelection(null);
-                      router.push('/membership');
+                      setPaywallContext('audio');
                     }}
                     style={styles.sheetAudio}>
                     <Ionicons name="volume-medium-outline" size={21} color={colors.primary} />
@@ -478,6 +491,11 @@ export default function ReaderScreen() {
           </View>
         </SafeAreaView>
       </Modal>
+      <PaywallModal
+        context={paywallContext ?? 'general'}
+        visible={Boolean(paywallContext)}
+        onClose={() => setPaywallContext(null)}
+      />
     </View>
   );
 }
@@ -488,7 +506,7 @@ function ReaderOption({ label, selected, night, onPress }: { label: string; sele
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  containerNight: { backgroundColor: '#241f25' },
+  containerNight: { backgroundColor: darkColors.canvas },
   webview: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32, backgroundColor: colors.canvas },
   status: { color: colors.muted, fontSize: 15, textAlign: 'center' },
@@ -500,16 +518,16 @@ const styles = StyleSheet.create({
   readerMeta: { color: colors.metadata, fontSize: 10.5 },
   headerTrack: { height: 3, backgroundColor: colors.line },
   headerBar: { height: 3, backgroundColor: colors.primary },
-  toolbarNight: { backgroundColor: '#302a31', borderTopColor: '#4c414b' },
+  toolbarNight: { backgroundColor: darkColors.surface, borderTopColor: darkColors.border },
   toolButton: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
   largeA: { color: colors.ink, fontFamily: fonts.serif, fontSize: 16 },
   nightText: { color: colors.white },
-  nightMutedText: { color: '#BEB2C2' },
+  nightMutedText: { color: darkColors.muted },
   scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(44,37,48,0.72)' },
   wordSheet: { position: 'absolute', right: 0, bottom: 0, left: 0, maxHeight: '88%', borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: colors.canvas, ...shadows.media },
-  wordSheetNight: { backgroundColor: '#302a31', borderWidth: 1, borderColor: '#4c414b' },
+  wordSheetNight: { backgroundColor: darkColors.overlay, borderWidth: 1, borderColor: darkColors.border },
   settingsSheet: { position: 'absolute', right: 0, bottom: 0, left: 0, borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: colors.canvas, ...shadows.media },
-  settingsSheetNight: { backgroundColor: '#302a31', borderWidth: 1, borderColor: '#4c414b' },
+  settingsSheetNight: { backgroundColor: darkColors.overlay, borderWidth: 1, borderColor: darkColors.border },
   settingsContent: { gap: 18, padding: 18, paddingBottom: 22 },
   settingsHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   settingsTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 23 },
@@ -521,12 +539,12 @@ const styles = StyleSheet.create({
   sizeValue: { color: colors.ink, fontSize: 13, fontWeight: '600' },
   optionRow: { flexDirection: 'row', gap: 7 },
   readerOption: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderRadius: 22 },
-  readerOptionNight: { borderColor: '#4c414b' },
+  readerOptionNight: { borderColor: darkColors.border },
   readerOptionActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
-  readerOptionActiveNight: { borderColor: '#B07BD0', backgroundColor: '#453D51' },
+  readerOptionActiveNight: { borderColor: darkColors.primary, backgroundColor: darkColors.border },
   readerOptionText: { color: colors.muted, fontSize: 12, fontWeight: '600' },
   readerOptionTextActive: { color: colors.primary },
-  readerOptionTextActiveNight: { color: '#E0C4EE' },
+  readerOptionTextActiveNight: { color: darkColors.primaryLight },
   grabber: { width: 38, height: 4, alignSelf: 'center', marginTop: 10, borderRadius: 2, backgroundColor: colors.border },
   wordSheetContent: { gap: 16, padding: 20, paddingTop: 14 },
   sheetLoading: { minHeight: 220, alignItems: 'center', justifyContent: 'center', gap: 12 },
@@ -536,7 +554,7 @@ const styles = StyleSheet.create({
   sheetMeta: { color: colors.metadata, fontSize: 12 },
   sheetAudio: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderRadius: 22 },
   definition: { flexDirection: 'row', gap: 12, padding: 16, borderRadius: 20, backgroundColor: colors.surface, ...shadows.card },
-  definitionNight: { backgroundColor: '#272130', borderWidth: 1, borderColor: '#332C3C', shadowOpacity: 0, elevation: 0 },
+  definitionNight: { backgroundColor: darkColors.nested, borderWidth: 1, borderColor: darkColors.line, shadowOpacity: 0, elevation: 0 },
   senseIndex: { color: colors.primary, fontSize: 12, paddingTop: 2 },
   definitionCopy: { flex: 1, gap: 7 },
   definitionText: { color: colors.ink, fontFamily: fonts.sansMedium, fontSize: 15, lineHeight: 22 },
