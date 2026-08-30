@@ -13,12 +13,12 @@ import {
   View,
 } from 'react-native';
 
+import { AppHeader } from '@/components/app-header';
 import { BookCover } from '@/components/book-cover';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { dueCards, type ReviewState } from '@/src/card-utils';
-import { languageName } from '@/src/languages';
 import { colors, fonts, shadows } from '@/src/theme';
 
 const reviewKey = (uid: string, language: string) => `almonium:review:${uid}:${language}`;
@@ -78,41 +78,35 @@ export default function HomeScreen() {
     await Promise.all([shelf.refetch(), cards.refetch()]);
   }
 
+  function chooseNextLanguage() {
+    if (activeLanguages.length < 2) return;
+    const index = activeLanguages.indexOf(language);
+    setLanguage(activeLanguages[(index + 1) % activeLanguages.length]);
+  }
+
   if (!language) {
     return (
       <View style={styles.center}>
         <Ionicons name="language-outline" size={44} color={colors.primary} />
         <Text style={styles.emptyTitle}>Choose a learning language</Text>
-        <Text style={styles.emptyCopy}>Add or activate a target language in More to build your home.</Text>
+        <Text style={styles.emptyCopy}>Add or activate a target language in Settings to build your home.</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}>
+    <View style={styles.screen}>
+      <AppHeader
+        language={language}
+        onLanguagePress={activeLanguages.length > 1 ? chooseNextLanguage : undefined}
+      />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}>
       <View style={styles.topline}>
         <Text style={styles.date}>
           {new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())}
         </Text>
-        {activeLanguages.length > 1 && (
-          <View style={styles.languages}>
-            {activeLanguages.map((code) => (
-              <Pressable
-                key={code}
-                accessibilityRole="button"
-                accessibilityState={{ selected: code === language }}
-                onPress={() => setLanguage(code)}
-                style={[styles.language, code === language && styles.languageActive]}>
-                <Text style={[styles.languageText, code === language && styles.languageTextActive]}>
-                  {code.toUpperCase()}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
       </View>
 
       {loading ? (
@@ -145,7 +139,7 @@ export default function HomeScreen() {
                     <View style={[styles.progress, { width: `${continueBook.progressPercentage ?? 0}%` }]} />
                   </View>
                   <Text style={styles.progressLabel}>{continueBook.progressPercentage ?? 0}% · your place is saved</Text>
-                  <Button onPress={() => router.push({ pathname: '/reader/[bookId]', params: { bookId: continueBook.id } })}>
+                  <Button onPress={() => router.push({ pathname: '/reader/[bookId]', params: { bookId: continueBook.id, title: continueBook.title } })}>
                     Continue
                   </Button>
                 </View>
@@ -158,6 +152,23 @@ export default function HomeScreen() {
                 <Button onPress={() => router.push('/(tabs)/books')}>Open the library</Button>
               </View>
             )}
+          </View>
+
+          <View style={styles.reviewPanel}>
+            <View style={styles.reviewCopy}>
+              <Text style={styles.eyebrow}>REVIEW</Text>
+              <Text style={styles.panelTitle}>{due === 1 ? 'One word is due' : `${due} words are due`}</Text>
+              <Text style={styles.meta}>
+                {Math.min(10, due)} make a session, about {Math.max(1, Math.ceil(Math.min(10, due) * 0.7))} minutes.
+              </Text>
+            </View>
+            <View style={styles.reviewStats}>
+              <View><Text style={styles.reviewNumber}>{due}</Text><Text style={styles.reviewLabel}>UNDERSTAND</Text></View>
+              <View><Text style={styles.reviewNumber}>{Math.min(due, recentCards.filter((card) => card.activeLearning).length)}</Text><Text style={styles.reviewLabel}>ACTIVE</Text></View>
+            </View>
+            <Button variant="secondary" onPress={() => router.push({ pathname: '/review', params: { language } })}>
+              Start a session
+            </Button>
           </View>
 
           <View style={styles.panel}>
@@ -187,22 +198,6 @@ export default function HomeScreen() {
             ))}
           </View>
 
-          <View style={styles.reviewPanel}>
-            <View style={styles.reviewCount}><Text style={styles.reviewNumber}>{due}</Text></View>
-            <View style={styles.reviewCopy}>
-              <Text style={styles.eyebrow}>READY TO REVIEW</Text>
-              <Text style={styles.panelTitle}>{due === 1 ? 'One word is' : `${due} words are`} ready to come back</Text>
-              <Text style={styles.meta}>A short session in {languageName(language)}.</Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Start review"
-              onPress={() => router.push({ pathname: '/review', params: { language } })}
-              style={styles.circleAction}>
-              <Ionicons name="arrow-forward" size={22} color={colors.white} />
-            </Pressable>
-          </View>
-
           <View style={styles.planLine}>
             <Text style={styles.meta}>You’re on {profile?.subscription?.name ?? (profile?.premium ? 'Premium' : 'Free')}.</Text>
             <Pressable onPress={() => router.push('/membership')}><Text style={styles.link}>Membership</Text></Pressable>
@@ -213,21 +208,17 @@ export default function HomeScreen() {
       {(shelf.isError || cards.isError) && (
         <Text style={styles.error}>Some home details could not be refreshed. Available sections are shown.</Text>
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
-  content: { padding: 20, paddingBottom: 38, gap: 16 },
+  content: { padding: 16, paddingBottom: 38, gap: 14 },
   center: { flex: 1, padding: 32, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: colors.canvas },
   topline: { minHeight: 36, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   date: { color: colors.muted, fontSize: 13 },
-  languages: { flexDirection: 'row', gap: 6 },
-  language: { minWidth: 40, minHeight: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.line },
-  languageActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  languageText: { color: colors.primary, fontSize: 11, fontWeight: '600' },
-  languageTextActive: { color: colors.white },
   loadingCard: { minHeight: 220, borderRadius: 26, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, ...shadows.card },
   emptyCard: { minHeight: 390, borderRadius: 28, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 28, backgroundColor: colors.surface, ...shadows.card },
   emptyTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 28, lineHeight: 35, fontWeight: '600', textAlign: 'center' },
@@ -250,11 +241,11 @@ const styles = StyleSheet.create({
   word: { color: colors.primaryDark, fontFamily: fonts.serif, fontSize: 18, fontWeight: '600' },
   translation: { color: colors.muted, fontSize: 13 },
   warning: { color: colors.raspberry, fontSize: 10, fontWeight: '600', backgroundColor: colors.accentSoft, paddingHorizontal: 7, paddingVertical: 4, borderRadius: 8 },
-  reviewPanel: { flexDirection: 'row', alignItems: 'center', gap: 13, padding: 18, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
-  reviewCount: { width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accentSoft },
+  reviewPanel: { gap: 14, padding: 18, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
   reviewNumber: { color: colors.primaryDark, fontFamily: fonts.serif, fontSize: 25, fontWeight: '600' },
   reviewCopy: { flex: 1, gap: 2 },
-  circleAction: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary },
+  reviewStats: { flexDirection: 'row', gap: 30 },
+  reviewLabel: { color: colors.primary, fontSize: 10, letterSpacing: 1 },
   planLine: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingHorizontal: 5 },
   error: { color: colors.danger, fontSize: 12, lineHeight: 18, textAlign: 'center' },
 });

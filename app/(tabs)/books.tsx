@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Pressable,
   RefreshControl,
   SectionList,
   StyleSheet,
@@ -15,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AppHeader } from '@/components/app-header';
 import { BookCard } from '@/components/book-card';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
@@ -46,6 +46,12 @@ export default function BooksScreen() {
   function chooseLanguage(nextLanguage: string) {
     setLanguage(nextLanguage);
     void AsyncStorage.setItem(shelfLanguageKey, nextLanguage);
+  }
+
+  function chooseNextLanguage() {
+    if (activeLanguages.length < 2) return;
+    const index = activeLanguages.indexOf(language);
+    chooseLanguage(activeLanguages[(index + 1) % activeLanguages.length]);
   }
 
   const query = useQuery({
@@ -122,7 +128,12 @@ export default function BooksScreen() {
   }
 
   return (
-    <SectionList
+    <View style={styles.screen}>
+      <AppHeader
+        language={language}
+        onLanguagePress={activeLanguages.length > 1 ? chooseNextLanguage : undefined}
+      />
+      <SectionList
       sections={sections}
       keyExtractor={(book, index) => `${book.id}-${index}`}
       contentContainerStyle={styles.list}
@@ -136,26 +147,13 @@ export default function BooksScreen() {
       }
       ListHeaderComponent={
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>YOUR LIBRARY</Text>
-          <Text style={styles.heroTitle}>Keep the story moving.</Text>
-          {activeLanguages.length > 1 && (
-            <View style={styles.languageChips}>
-              {activeLanguages.map((code) => (
-                <Pressable
-                  key={code}
-                  onPress={() => chooseLanguage(code)}
-                  style={[styles.languageChip, language === code && styles.languageChipActive]}>
-                  <Text
-                    style={[
-                      styles.languageChipText,
-                      language === code && styles.languageChipTextActive,
-                    ]}>
-                    {languageName(code)}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
+          <Text style={styles.eyebrow}>YOUR SHELF</Text>
+          <Text style={styles.heroTitle}>
+            {query.data?.continueReading.length
+              ? `${query.data.continueReading.length} ${query.data.continueReading.length === 1 ? 'book' : 'books'} open`
+              : 'Choose your next page'}
+          </Text>
+          <Text style={styles.subhead}>Everything you have started, and where you stopped.</Text>
           <View style={styles.search}>
             <Ionicons name="search" size={19} color={colors.muted} />
             <TextInput
@@ -191,21 +189,19 @@ export default function BooksScreen() {
           </Text>
         </View>
       }
-    />
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.canvas },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
-  list: { padding: 20, backgroundColor: colors.canvas, flexGrow: 1 },
+  list: { padding: 16, paddingBottom: 32, backgroundColor: colors.canvas, flexGrow: 1 },
   header: { gap: 12, paddingBottom: 20 },
   eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
   heroTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 36, fontWeight: '600' },
-  languageChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  languageChip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.accentSoft },
-  languageChipActive: { backgroundColor: colors.primary },
-  languageChipText: { color: colors.primaryDark, fontSize: 13, fontWeight: '600' },
-  languageChipTextActive: { color: colors.white },
+  subhead: { color: colors.muted, fontSize: 13.5, lineHeight: 20 },
   search: { minHeight: 50, borderRadius: 999, paddingHorizontal: 16, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, ...shadows.field },
   searchInput: { flex: 1, color: colors.ink, fontSize: 15 },
   hint: { color: colors.muted, fontSize: 11 },

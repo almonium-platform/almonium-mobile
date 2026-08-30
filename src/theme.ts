@@ -29,6 +29,8 @@ export const colors = {
   success: '#16BA7F',
   successSoft: '#E7F8F2',
   reader: '#33292E',
+  languageRail: '#6C7FA8',
+  languageRailSoft: '#CDD4E2',
   white: '#FFFFFF',
 } as const;
 

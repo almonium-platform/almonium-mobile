@@ -20,6 +20,7 @@ import type {
 } from '@/src/types';
 import { config } from '@/src/config';
 import { decodeJsonBody, errorMessageFromBody } from '@/src/http-errors';
+import type { DiscoverLookup } from '@/src/discover';
 
 export class ApiError extends Error {
   constructor(
@@ -118,6 +119,13 @@ export const api = {
     }),
   supportedLanguages: () => publicRequest<string[]>('/public/info/languages/supported'),
   interests: () => publicRequest<Interest[]>('/public/info/interests'),
+  discover: (entry: string, language: string, translationLanguage: string, context?: string) => {
+    const query = new URLSearchParams({ entry });
+    if (context) query.set('context', context);
+    return publicRequest<DiscoverLookup>(
+      `/public/discover/lookup/${encodeURIComponent(language)}/${encodeURIComponent(translationLanguage)}?${query}`,
+    );
+  },
   updateUsername: (username: string) =>
     request<void>('/users/me/username', {
       method: 'PATCH',

@@ -108,7 +108,13 @@ export interface LearningCard {
   irregularPlural?: boolean;
   irregularSpelling?: boolean;
   falseFriend?: boolean;
+  partOfSpeech?: string;
+  selectedSense?: string;
+  sourceContext?: string;
+  learningIntents?: LearningIntent[];
 }
+
+export type LearningIntent = 'UNDERSTAND' | 'PRODUCE' | 'DISAMBIGUATE' | 'PRONOUNCE';
 
 export interface CardDraft {
   entry: string;
@@ -123,6 +129,10 @@ export interface CardDraft {
   irregularSpelling: boolean;
   learnt: boolean;
   priority: number;
+  partOfSpeech?: string;
+  selectedSense?: string;
+  sourceContext?: string;
+  learningIntents?: LearningIntent[];
 }
 
 export type NotificationType =

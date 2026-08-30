@@ -3,10 +3,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui';
+import { BrandMark } from '@/components/brand-mark';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import {
@@ -28,13 +29,19 @@ const ratings: { value: ReviewRating; label: string; hint: string; color: string
 ];
 
 export default function ReviewScreen() {
-  const { language = '' } = useLocalSearchParams<{ language: string }>();
+  const { language = '', ahead } = useLocalSearchParams<{ language: string; ahead?: string }>();
   const { firebaseUser } = useAuth();
   const [schedule, setSchedule] = useState<Record<string, ReviewState>>({});
   const [ready, setReady] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [reviewed, setReviewed] = useState(0);
   const [sessionIds, setSessionIds] = useState<string[] | null>(null);
+  const [ratingsGiven, setRatingsGiven] = useState<Record<ReviewRating, number>>({
+    again: 0,
+    hard: 0,
+    good: 0,
+    easy: 0,
+  });
   const query = useQuery({
     queryKey: ['cards', firebaseUser?.uid, language],
     queryFn: () => api.cards(language),
@@ -54,7 +61,10 @@ export default function ReviewScreen() {
     });
   }, [firebaseUser, language]);
 
-  const due = useMemo(() => dueCards(query.data ?? [], schedule), [query.data, schedule]);
+  const due = useMemo(
+    () => ahead === '1' ? [...(query.data ?? [])] : dueCards(query.data ?? [], schedule),
+    [ahead, query.data, schedule],
+  );
   useEffect(() => {
     if (ready && query.data && sessionIds === null) {
       setSessionIds(due.map((card) => card.id));
@@ -72,10 +82,12 @@ export default function ReviewScreen() {
     setSchedule(updated);
     setRevealed(false);
     setReviewed((count) => count + 1);
+    setRatingsGiven((counts) => ({ ...counts, [value]: counts[value] + 1 }));
+    setSessionIds((ids) => ids?.filter((id) => id !== current.id) ?? null);
     await AsyncStorage.setItem(reviewKey(firebaseUser.uid, language), JSON.stringify(updated));
   }
 
-  if (query.isLoading || !ready) {
+  if (query.isLoading || !ready || (Boolean(query.data) && sessionIds === null)) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -98,18 +110,62 @@ export default function ReviewScreen() {
   }
 
   if (!current) {
+    const dessert = query.data
+      ?.flatMap((card) => card.examples ?? [])
+      .map((example) => example.example)
+      .find(Boolean);
     return (
-      <SafeAreaView style={styles.center}>
-        <View style={styles.completeIcon}>
-          <Ionicons name="checkmark" size={38} color={colors.white} />
-        </View>
-        <Text style={styles.completeTitle}>{reviewed ? 'Session complete' : 'You’re caught up'}</Text>
-        <Text style={styles.completeCopy}>
-          {reviewed
-            ? `You reviewed ${reviewed} ${reviewed === 1 ? 'card' : 'cards'}. Come back when the next one is due.`
-            : `No ${languageName(language)} cards are due right now.`}
-        </Text>
-        <Button onPress={() => router.back()}>Back to cards</Button>
+      <SafeAreaView style={styles.completeSafe}>
+        <ScrollView contentContainerStyle={styles.completeContent}>
+          {reviewed ? (
+            <>
+              <View style={styles.completeIcon}>
+                <Ionicons name="checkmark" size={38} color={colors.white} />
+              </View>
+              <Text style={styles.completeEyebrow}>SESSION COMPLETE</Text>
+              <Text style={styles.completeTitle}>{reviewed} {reviewed === 1 ? 'word' : 'words'}</Text>
+              <View style={styles.recordRow}>
+                <View style={styles.record}>
+                  <Text style={styles.recordNumber}>{ratingsGiven.good + ratingsGiven.easy}</Text>
+                  <Text style={styles.recordLabel}>STRAIGHT THROUGH</Text>
+                </View>
+                <View style={styles.record}>
+                  <Text style={styles.recordNumber}>{ratingsGiven.hard}</Text>
+                  <Text style={styles.recordLabel}>WITH EFFORT</Text>
+                </View>
+                <View style={styles.record}>
+                  <Text style={styles.recordNumber}>{ratingsGiven.again}</Text>
+                  <Text style={styles.recordLabel}>COMING BACK</Text>
+                </View>
+              </View>
+              <View style={styles.dessertCard}>
+                <Text style={styles.dessertEyebrow}>A SHORT RE-ENCOUNTER</Text>
+                <Text style={styles.dessertTitle}>One more sentence, while the words are warm</Text>
+                <Text style={styles.dessertCopy}>
+                  {dessert || 'The words you met today will return in a new context.'}
+                </Text>
+              </View>
+              <Button onPress={() => router.replace('/(tabs)/books')}>Back to reading</Button>
+            </>
+          ) : (
+            <>
+              <BrandMark size={118} />
+              <Text style={styles.completeEyebrow}>NOTHING DUE</Text>
+              <Text style={styles.completeTitle}>You are clear for now</Text>
+              <Text style={styles.completeCopy}>
+                Almo has nothing to ask you today. Reading a page will add more.
+              </Text>
+              <Button onPress={() => router.replace('/(tabs)/books')}>Open your shelf</Button>
+              {!!query.data?.length && (
+                <Button
+                  variant="secondary"
+                  onPress={() => router.replace({ pathname: '/review', params: { language, ahead: '1' } })}>
+                  Practise ahead
+                </Button>
+              )}
+            </>
+          )}
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -206,7 +262,18 @@ const styles = StyleSheet.create({
   ratingHint: { color: colors.muted, fontSize: 10 },
   localNote: { color: colors.muted, textAlign: 'center', fontSize: 10 },
   center: { flex: 1, padding: 32, alignItems: 'center', justifyContent: 'center', gap: 13, backgroundColor: colors.canvas },
+  completeSafe: { flex: 1, backgroundColor: colors.canvas },
+  completeContent: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', gap: 13, padding: 24 },
   completeIcon: { width: 72, height: 72, borderRadius: 26, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  completeTitle: { color: colors.ink, fontSize: 25, fontWeight: '600', textAlign: 'center' },
+  completeEyebrow: { color: colors.raspberry, fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 1.5 },
+  completeTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 29, lineHeight: 36, textAlign: 'center' },
   completeCopy: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center', maxWidth: 330 },
+  recordRow: { width: '100%', flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 },
+  record: { flex: 1, alignItems: 'center', gap: 3 },
+  recordNumber: { color: colors.ink, fontFamily: fonts.serif, fontSize: 25 },
+  recordLabel: { color: colors.primary, fontSize: 9, letterSpacing: 0.8, textAlign: 'center' },
+  dessertCard: { width: '100%', gap: 9, padding: 20, borderRadius: 24, backgroundColor: colors.reader, ...shadows.card },
+  dessertEyebrow: { color: colors.accentBorder, fontFamily: fonts.sansSemibold, fontSize: 10, letterSpacing: 1.3 },
+  dessertTitle: { color: colors.canvas, fontFamily: fonts.serif, fontSize: 21, lineHeight: 27 },
+  dessertCopy: { color: colors.canvas, fontFamily: fonts.serifRegular, fontSize: 16, lineHeight: 25, opacity: 0.82 },
 });

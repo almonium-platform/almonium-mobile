@@ -15,11 +15,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AppHeader } from '@/components/app-header';
+import { BrandMark } from '@/components/brand-mark';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { dueCards, type ReviewState } from '@/src/card-utils';
-import { languageName } from '@/src/languages';
 import { colors, fonts, shadows } from '@/src/theme';
 import type { LearningCard } from '@/src/types';
 
@@ -77,6 +78,12 @@ export default function CardsScreen() {
     void AsyncStorage.setItem(cardLanguageKey, code);
   }
 
+  function chooseNextLanguage() {
+    if (activeLanguages.length < 2) return;
+    const index = activeLanguages.indexOf(language);
+    chooseLanguage(activeLanguages[(index + 1) % activeLanguages.length]);
+  }
+
   function openCard(card: LearningCard) {
     router.push({ pathname: '/card/[cardId]', params: { cardId: card.id, language } });
   }
@@ -92,7 +99,12 @@ export default function CardsScreen() {
   }
 
   return (
-    <FlatList
+    <View style={styles.screen}>
+      <AppHeader
+        language={language}
+        onLanguagePress={activeLanguages.length > 1 ? chooseNextLanguage : undefined}
+      />
+      <FlatList
       data={filtered}
       keyExtractor={(card) => card.id}
       contentContainerStyle={styles.list}
@@ -105,23 +117,12 @@ export default function CardsScreen() {
       }
       ListHeaderComponent={
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>FLASHCARDS</Text>
-          <Text style={styles.hero}>Turn new words into memory.</Text>
-          {activeLanguages.length > 1 && (
-            <View style={styles.chips}>
-              {activeLanguages.map((code) => (
-                <Pressable
-                  key={code}
-                  onPress={() => chooseLanguage(code)}
-                  style={[styles.chip, language === code && styles.chipActive]}>
-                  <Text style={[styles.chipText, language === code && styles.chipTextActive]}>
-                    {languageName(code)}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
-          <View style={styles.actions}>
+          <Text style={styles.eyebrow}>REVIEW</Text>
+          <Text style={styles.hero}>{due ? `${due} ${due === 1 ? 'word is' : 'words are'} due` : 'You are clear for now'}</Text>
+          <Text style={styles.subhead}>
+            {due ? `${Math.min(10, due)} make a session. Nothing is lost by stopping.` : 'Reading a page will give Almo more to ask you.'}
+          </Text>
+          {due ? <View style={styles.actions}>
             <Pressable
               style={styles.reviewAction}
               onPress={() => router.push({ pathname: '/review', params: { language } })}>
@@ -141,7 +142,22 @@ export default function CardsScreen() {
               onPress={() => router.push({ pathname: '/card/new', params: { language } })}>
               Add a card
             </Button>
-          </View>
+          </View> : (
+            <View style={styles.caughtUp}>
+              <BrandMark size={72} />
+              <View style={styles.caughtUpCopy}>
+                <Text style={styles.caughtUpTitle}>Nothing due</Text>
+                <Text style={styles.subhead}>Come back when the next word is ready, or practise ahead.</Text>
+              </View>
+              <Button
+                variant="secondary"
+                onPress={() => query.data?.length
+                  ? router.push({ pathname: '/review', params: { language, ahead: '1' } })
+                  : router.push({ pathname: '/card/new', params: { language } })}>
+                {query.data?.length ? 'Practise ahead' : 'Keep your first word'}
+              </Button>
+            </View>
+          )}
           <View style={styles.search}>
             <Ionicons name="search" size={19} color={colors.muted} />
             <TextInput
@@ -193,21 +209,22 @@ export default function CardsScreen() {
           </View>
         )
       }
-    />
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  list: { flexGrow: 1, padding: 20, paddingBottom: 32, backgroundColor: colors.canvas },
+  screen: { flex: 1, backgroundColor: colors.canvas },
+  list: { flexGrow: 1, padding: 16, paddingBottom: 32, backgroundColor: colors.canvas },
   header: { gap: 13, paddingBottom: 20 },
   eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
   hero: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 36, fontWeight: '600' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.accentSoft },
-  chipActive: { backgroundColor: colors.primary },
-  chipText: { color: colors.primaryDark, fontWeight: '600', fontSize: 13 },
-  chipTextActive: { color: colors.white },
+  subhead: { color: colors.muted, fontSize: 13.5, lineHeight: 20 },
   actions: { gap: 9 },
+  caughtUp: { alignItems: 'center', gap: 11, padding: 18, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
+  caughtUpCopy: { alignItems: 'center', gap: 3 },
+  caughtUpTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 22 },
   reviewAction: { minHeight: 70, borderRadius: 999, overflow: 'hidden' },
   reviewActionFill: { minHeight: 70, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, backgroundColor: colors.primary },
   reviewCount: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.18)' },
