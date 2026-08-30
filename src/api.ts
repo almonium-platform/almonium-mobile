@@ -147,7 +147,7 @@ export const api = {
       body: JSON.stringify({ avatarUrl }),
     }),
   updateLearner: (language: string, updates: { active?: boolean; level?: CefrLevel }) =>
-    request<void>(`/learners/${language}`, {
+    request<Learner>(`/learners/${language}`, {
       method: 'PATCH',
       body: JSON.stringify(updates),
     }),
