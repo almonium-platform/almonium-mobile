@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { AvatarMark } from '@/components/avatar-mark';
 import { BrandMark } from '@/components/brand-mark';
@@ -12,7 +12,7 @@ import { Button, Card, Field, Title } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName, sortLanguages } from '@/src/languages';
-import { colors } from '@/src/theme';
+import { createThemedStyles, useTheme } from '@/src/theme';
 import type { CefrLevel, SetupStep } from '@/src/types';
 
 const steps: SetupStep[] = ['WELCOME', 'LANGUAGES', 'LEVEL', 'INTERESTS', 'PROFILE', 'GREETING'];
@@ -65,6 +65,8 @@ const copy: Record<SetupStep, { eyebrow: string; title: string; description: str
 };
 
 export default function OnboardingScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { profile, refreshProfile, logOut } = useAuth();
   const step = profile?.setupStep || 'WELCOME';
   const [busy, setBusy] = useState(false);
@@ -309,7 +311,7 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   topbar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   wordmark: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   logo: { color: colors.primary, fontSize: 13, fontWeight: '600', letterSpacing: 2 },
@@ -326,12 +328,12 @@ const styles = StyleSheet.create({
   checkRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   finePrint: { color: colors.muted, fontSize: 12, lineHeight: 18, textAlign: 'center' },
   label: { color: colors.ink, fontSize: 14, fontWeight: '600' },
-  pickerFrame: { borderWidth: 1, borderColor: colors.line, borderRadius: 20, overflow: 'hidden', backgroundColor: colors.white },
+  pickerFrame: { borderWidth: 1, borderColor: colors.border, borderRadius: 20, overflow: 'hidden', backgroundColor: colors.nested },
   levels: { flexDirection: 'row', gap: 6 },
   level: { flex: 1, minHeight: 42, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   levelActive: { backgroundColor: colors.primary },
   levelText: { color: colors.muted, fontSize: 13, fontWeight: '600' },
-  levelTextActive: { color: colors.white },
+  levelTextActive: { color: colors.onPrimary },
   levelOptions: { gap: 7 },
   levelOption: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: colors.line, borderRadius: 16, padding: 10 },
   levelOptionActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
@@ -349,5 +351,5 @@ const styles = StyleSheet.create({
   chip: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 9, backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.line },
   chipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { color: colors.ink, fontSize: 14, fontWeight: '600' },
-  chipTextSelected: { color: colors.white },
-});
+  chipTextSelected: { color: colors.onPrimary },
+}));

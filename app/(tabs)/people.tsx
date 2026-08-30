@@ -2,18 +2,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui';
 import { AvatarMark } from '@/components/avatar-mark';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
-import { colors, fonts, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import type { PublicUserSummary, RelatedUserSummary, RelationshipAction } from '@/src/types';
 
 type Section = 'friends' | 'requests' | 'blocked';
 
 export default function PeopleScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { firebaseUser } = useAuth();
   const queryClient = useQueryClient();
   const [section, setSection] = useState<Section>('friends');
@@ -129,6 +131,7 @@ export default function PeopleScreen() {
 }
 
 function SearchResult({ user }: { user: PublicUserSummary }) {
+  const styles = useStyles();
   const queryClient = useQueryClient();
   const request = useMutation({
     mutationFn: () => api.requestFriendship(user.id),
@@ -150,6 +153,7 @@ function Avatar({ user }: { user: PublicUserSummary }) {
 }
 
 function SmallAction({ label, primary = false, onPress }: { label: string; primary?: boolean; onPress(): void }) {
+  const styles = useStyles();
   return <Pressable onPress={onPress} style={[styles.smallAction, primary && styles.smallActionPrimary]}><Text style={[styles.smallActionText, primary && styles.smallActionTextPrimary]}>{label}</Text></Pressable>;
 }
 
@@ -161,7 +165,7 @@ function relationshipCopy(user: RelatedUserSummary) {
   return 'Reader';
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   list: { flexGrow: 1, padding: 20, paddingBottom: 36, backgroundColor: colors.canvas },
   header: { gap: 13, paddingBottom: 18 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -190,9 +194,9 @@ const styles = StyleSheet.create({
   smallAction: { minHeight: 40, justifyContent: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 20, paddingHorizontal: 10 },
   smallActionPrimary: { backgroundColor: colors.primary, borderColor: colors.primary },
   smallActionText: { color: colors.ink, fontSize: 11, fontWeight: '600' },
-  smallActionTextPrimary: { color: colors.white },
+  smallActionTextPrimary: { color: colors.onPrimary },
   loader: { marginTop: 50 },
   empty: { minHeight: 310, alignItems: 'center', justifyContent: 'center', gap: 9, padding: 24 },
   emptyTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 22, fontWeight: '600', textAlign: 'center' },
   emptyCopy: { color: colors.muted, fontSize: 13, lineHeight: 19, textAlign: 'center' },
-});
+}));

@@ -2,9 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 
 import { useAuth } from '@/src/auth-context';
-import { colors, fonts } from '@/src/theme';
+import { fonts, useTheme } from '@/src/theme';
 
 export default function TabsLayout() {
+  const { colors } = useTheme();
   const { firebaseUser, profile, loading } = useAuth();
   if (!loading && !firebaseUser) return <Redirect href="/(auth)/sign-in" />;
   if (!loading && !profile) return <Redirect href="/" />;

@@ -8,7 +8,6 @@ import {
   Linking,
   Platform,
   Pressable,
-  StyleSheet,
   Switch,
   Text,
   View,
@@ -24,7 +23,7 @@ import { config } from '@/src/config';
 import { languageName, sortLanguages } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { configureDailyReminder, getReminderSettings, reminderTimeLabel } from '@/src/reminders';
-import { colors } from '@/src/theme';
+import { createThemedStyles, useTheme, type AppearancePreference } from '@/src/theme';
 import type { CefrLevel, Learner } from '@/src/types';
 
 const levels: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
@@ -41,6 +40,8 @@ function LanguageRow({
   canDelete: boolean;
   onDelete(): void;
 }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const showNotice = useNotice();
   const [saving, setSaving] = useState(false);
   const [active, setActive] = useState(learner.active);
@@ -107,6 +108,8 @@ function LanguageRow({
 }
 
 export default function SettingsScreen() {
+  const { appearance, colors, setAppearance } = useTheme();
+  const styles = useStyles();
   const {
     firebaseUser,
     profile,
@@ -412,6 +415,33 @@ export default function SettingsScreen() {
 
       <Card>
         <View style={styles.sectionTitle}>
+          <Ionicons name="contrast-outline" color={colors.primary} size={20} />
+          <Text style={styles.sectionTitleText}>Appearance</Text>
+        </View>
+        <Text style={styles.caption}>Choose a theme, or follow this device.</Text>
+        <View accessibilityRole="radiogroup" style={styles.appearanceOptions}>
+          {(['light', 'dark', 'system'] as AppearancePreference[]).map((option) => (
+            <Pressable
+              accessibilityRole="radio"
+              accessibilityState={{ selected: appearance === option }}
+              key={option}
+              onPress={() => void setAppearance(option)}
+              style={[styles.appearanceOption, appearance === option && styles.appearanceOptionActive]}>
+              <Ionicons
+                name={option === 'light' ? 'sunny-outline' : option === 'dark' ? 'moon-outline' : 'phone-portrait-outline'}
+                color={appearance === option ? colors.primaryDark : colors.muted}
+                size={17}
+              />
+              <Text style={[styles.appearanceText, appearance === option && styles.appearanceTextActive]}>
+                {option[0].toUpperCase() + option.slice(1)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </Card>
+
+      <Card>
+        <View style={styles.sectionTitle}>
           <Ionicons name="notifications-outline" color={colors.primary} size={20} />
           <Text style={styles.sectionTitleText}>Review reminder</Text>
         </View>
@@ -701,7 +731,7 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   heading: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 4 },
   headingCopy: { flex: 1, gap: 3 },
   caption: { color: colors.muted, fontSize: 14, lineHeight: 20 },
@@ -727,7 +757,7 @@ const styles = StyleSheet.create({
   level: { flex: 1, minHeight: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   levelActive: { backgroundColor: colors.primary },
   levelText: { color: colors.muted, fontWeight: '600', fontSize: 12 },
-  levelTextActive: { color: colors.white },
+  levelTextActive: { color: colors.onPrimary },
   saving: { opacity: 0.6 },
   statRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 },
   stat: { color: colors.primary, fontWeight: '600' },
@@ -736,11 +766,11 @@ const styles = StyleSheet.create({
   chip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.line },
   chipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { color: colors.ink, fontSize: 13, fontWeight: '600' },
-  chipTextSelected: { color: colors.white },
+  chipTextSelected: { color: colors.onPrimary },
   deleteLink: { alignItems: 'center', paddingVertical: 8 },
   deleteText: { color: colors.danger, fontSize: 13, fontWeight: '600' },
   addLanguage: { gap: 10, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 14 },
-  pickerFrame: { borderWidth: 1, borderColor: colors.line, borderRadius: 20, overflow: 'hidden', backgroundColor: colors.white },
+  pickerFrame: { borderWidth: 1, borderColor: colors.border, borderRadius: 20, overflow: 'hidden', backgroundColor: colors.nested },
   legalRow: { flexDirection: 'row', justifyContent: 'center', gap: 20, paddingVertical: 4 },
   legalText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
   paywalledAction: { gap: 10 },
@@ -764,4 +794,9 @@ const styles = StyleSheet.create({
   reminderTimeText: { color: colors.muted, fontSize: 12, fontWeight: '600' },
   reminderTimeTextActive: { color: colors.primary },
   inlineError: { color: colors.danger, fontSize: 12, lineHeight: 18 },
-});
+  appearanceOptions: { flexDirection: 'row', gap: 7 },
+  appearanceOption: { flex: 1, minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderColor: colors.border, borderRadius: 23, backgroundColor: colors.nested },
+  appearanceOptionActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
+  appearanceText: { color: colors.muted, fontSize: 12, fontWeight: '600' },
+  appearanceTextActive: { color: colors.primaryDark },
+}));

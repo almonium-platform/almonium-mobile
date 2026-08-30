@@ -1,14 +1,15 @@
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 
 import { Screen } from '@/components/screen';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { useAuth } from '@/src/auth-context';
 import { useNotice } from '@/src/notice-context';
-import { colors } from '@/src/theme';
+import { createThemedStyles } from '@/src/theme';
 
 export default function RegisterScreen() {
+  const styles = useStyles();
   const { register } = useAuth();
   const showNotice = useNotice();
   const [email, setEmail] = useState('');
@@ -61,8 +62,8 @@ export default function RegisterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   content: { flexGrow: 1, justifyContent: 'center' },
   subtitle: { fontSize: 17, lineHeight: 25, color: colors.muted },
   link: { color: colors.primary, textAlign: 'center', fontWeight: '600' },
-});
+}));

@@ -1,9 +1,10 @@
 import { Image } from 'expo-image';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
-import { colors, shadows } from '@/src/theme';
+import { createThemedStyles, shadows } from '@/src/theme';
 
 export function BrandMark({ size = 54 }: { size?: number }) {
+  const styles = useStyles();
   return (
     <View style={[styles.frame, { width: size, height: size, borderRadius: size / 2 }]}>
       <Image
@@ -15,11 +16,11 @@ export function BrandMark({ size = 54 }: { size?: number }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors, isDark) => ({
   frame: {
     overflow: 'hidden',
-    backgroundColor: colors.white,
-    ...shadows.card,
+    backgroundColor: colors.surface,
+    ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card),
   },
   image: { width: '100%', height: '100%' },
-});
+}));

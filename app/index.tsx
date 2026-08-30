@@ -1,12 +1,14 @@
 import { Redirect } from 'expo-router';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui';
 import { useAuth } from '@/src/auth-context';
 import { authenticatedDestination } from '@/src/navigation';
-import { colors } from '@/src/theme';
+import { createThemedStyles, useTheme } from '@/src/theme';
 
 export default function Index() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { firebaseUser, profile, profileError, retryProfile, logOut, loading } = useAuth();
 
   if (loading) {
@@ -37,9 +39,9 @@ export default function Index() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   recovery: { flex: 1, justifyContent: 'center', gap: 14, padding: 28, backgroundColor: colors.canvas },
   title: { color: colors.ink, fontSize: 24, lineHeight: 30, fontWeight: '600', textAlign: 'center' },
   message: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center' },
-});
+}));

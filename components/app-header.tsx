@@ -8,7 +8,7 @@ import { BrandMark } from '@/components/brand-mark';
 import { AvatarMark } from '@/components/avatar-mark';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
-import { colors, fonts } from '@/src/theme';
+import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 
 export function AppHeader({
   language,
@@ -17,6 +17,8 @@ export function AppHeader({
   language: string;
   onLanguageChange?: (language: string) => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { profile } = useAuth();
   const [languagesVisible, setLanguagesVisible] = useState(false);
   const languages = profile?.learners.filter((learner) => learner.active).map((learner) => learner.language) ?? [];
@@ -79,7 +81,7 @@ export function AppHeader({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   safe: { backgroundColor: colors.surface },
   row: {
     minHeight: 54,
@@ -118,7 +120,7 @@ const styles = StyleSheet.create({
   },
   rail: { height: 3, backgroundColor: colors.languageRail },
   pressed: { opacity: 0.72 },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(44,37,48,0.72)' },
+  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.scrim },
   sheet: { position: 'absolute', right: 0, bottom: 0, left: 0, gap: 10, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 20, backgroundColor: colors.canvas },
   grabber: { width: 38, height: 4, alignSelf: 'center', borderRadius: 2, backgroundColor: colors.border },
   sheetEyebrow: { marginTop: 5, color: colors.raspberry, fontFamily: fonts.sansSemibold, fontSize: 10, letterSpacing: 1.5 },
@@ -131,4 +133,4 @@ const styles = StyleSheet.create({
   languageName: { flex: 1, color: colors.ink, fontSize: 15, fontWeight: '600' },
   manageLanguages: { minHeight: 46, alignItems: 'center', justifyContent: 'center' },
   manageLanguagesText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
-});
+}));

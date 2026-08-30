@@ -24,10 +24,17 @@ describe('Almonium visual system', () => {
     expect(colors.primary).not.toBe(colors.success);
   });
 
-  it('defines the night-reader palette as semantic tokens', () => {
+  it('defines the app-wide dark palette as semantic tokens', () => {
     expect(darkColors.canvas).toBe('#14111A');
+    expect(darkColors.surface).toBe('#1E1A26');
+    expect(darkColors.nested).toBe('#272130');
     expect(darkColors.ink).toBe('#F1EAEF');
     expect(darkColors.primary).toBe('#B07BD0');
+    expect(darkColors.onPrimary).toBe('#14111A');
+    expect(darkColors.danger).toBe('#FF8FA3');
+    expect(darkColors.success).toBe('#3DD69B');
+    expect(Object.keys(darkColors).sort()).toEqual(Object.keys(colors).sort());
+    expect(gradients.authDark).toEqual(['#272130', '#14111A', '#1E1A26']);
   });
 
   it('uses mobile-safe rounded controls', () => {

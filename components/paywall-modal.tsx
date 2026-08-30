@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui';
-import { colors, fonts, gradients, radii, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, gradients, radii, shadows, useTheme } from '@/src/theme';
 
 export type PaywallContext = 'second-language' | 'item-cap' | 'audio' | 'private-import' | 'general';
 
@@ -51,6 +51,8 @@ export function PaywallModal({
   onClose(): void;
   context?: PaywallContext;
 }) {
+  const { colors, isDark } = useTheme();
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const copy = wallCopy[context];
 
@@ -82,7 +84,7 @@ export function PaywallModal({
             { paddingBottom: Math.max(insets.bottom, 20) + 12 },
           ]}>
           <LinearGradient
-            colors={gradients.premium}
+            colors={isDark ? gradients.premiumDark : gradients.premium}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.premiumCard}>
@@ -110,7 +112,7 @@ export function PaywallModal({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors, isDark) => ({
   screen: { flex: 1, backgroundColor: colors.canvas },
   header: {
     flexDirection: 'row',
@@ -133,8 +135,8 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.white,
-    ...shadows.field,
+    backgroundColor: colors.surface,
+    ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.field),
   },
   pressed: { opacity: 0.72 },
   content: { paddingHorizontal: 20, gap: 16 },
@@ -149,8 +151,8 @@ const styles = StyleSheet.create({
     borderRadius: radii.card,
     padding: 22,
     gap: 16,
-    backgroundColor: colors.white,
-    ...shadows.card,
+    backgroundColor: colors.surface,
+    ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card),
   },
   planHeading: {
     flexDirection: 'row',
@@ -174,4 +176,4 @@ const styles = StyleSheet.create({
   feature: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   premiumFeatureText: { flex: 1, color: colors.white, fontSize: 15, lineHeight: 21 },
   freeFeatureText: { flex: 1, color: colors.ink, fontSize: 15, lineHeight: 21 },
-});
+}));

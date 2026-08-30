@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
 import { PaywallModal } from '@/components/paywall-modal';
@@ -12,12 +12,13 @@ import { cardUpdate, createCardDraft } from '@/src/card-utils';
 import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
 import { intentLabel } from '@/src/review';
-import { colors, fonts } from '@/src/theme';
+import { createThemedStyles, fonts } from '@/src/theme';
 import type { LearningIntent } from '@/src/types';
 
 const intents: LearningIntent[] = ['UNDERSTAND', 'PRODUCE', 'DISAMBIGUATE', 'PRONOUNCE', 'CHUNK'];
 
 export default function CardEditorScreen() {
+  const styles = useStyles();
   const { cardId, itemId, language: languageParam } = useLocalSearchParams<{
     cardId?: string;
     itemId?: string;
@@ -218,7 +219,7 @@ export default function CardEditorScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   heading: { gap: 5, paddingVertical: 3 },
   eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.4 },
   title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: 34, fontWeight: '600' },
@@ -241,4 +242,4 @@ const styles = StyleSheet.create({
   deleteTitle: { color: colors.ink, fontSize: 16, fontWeight: '600' },
   center: { justifyContent: 'center' },
   errorTitle: { color: colors.ink, fontSize: 22, fontWeight: '600' },
-});
+}));

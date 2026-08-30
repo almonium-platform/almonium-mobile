@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
-import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Share, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui';
 import { AvatarMark } from '@/components/avatar-mark';
@@ -9,10 +9,12 @@ import { api } from '@/src/api';
 import { config } from '@/src/config';
 import { useNotice } from '@/src/notice-context';
 import { languageName } from '@/src/languages';
-import { colors, fonts, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import type { RelationshipAction, UserProfile } from '@/src/types';
 
 export default function UserProfileScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { userId = '' } = useLocalSearchParams<{ userId: string }>();
   const queryClient = useQueryClient();
   const showNotice = useNotice();
@@ -124,6 +126,7 @@ function Avatar({ profile }: { profile: UserProfile }) {
 }
 
 function ProfileSection({ label, children }: { label: string; children: React.ReactNode }) {
+  const styles = useStyles();
   return <View style={styles.section}><Text style={styles.eyebrow}>{label}</Text>{children}</View>;
 }
 
@@ -132,7 +135,7 @@ function formatMonth(value: string) {
   return Number.isNaN(date.getTime()) ? 'recently' : date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.canvas },
   content: { padding: 20, paddingBottom: 38, gap: 13 },
   center: { flex: 1, padding: 32, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: colors.canvas },
@@ -156,4 +159,4 @@ const styles = StyleSheet.create({
   shareText: { color: colors.primary, fontSize: 14, fontWeight: '600' },
   blockAction: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   blockText: { color: colors.danger, fontSize: 13, fontWeight: '600' },
-});
+}));

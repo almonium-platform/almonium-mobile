@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createContext, type PropsWithChildren, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, fonts, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 
 type NoticeTone = 'error' | 'success' | 'info';
 
@@ -16,6 +16,8 @@ interface Notice {
 const NoticeContext = createContext<((notice: Notice) => void) | null>(null);
 
 export function NoticeProvider({ children }: PropsWithChildren) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const [notice, setNotice] = useState<Notice | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -58,7 +60,7 @@ export function useNotice() {
   return value;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   layer: { position: 'absolute', top: 0, right: 0, left: 0, zIndex: 100, paddingHorizontal: 14 },
   notice: { minHeight: 64, flexDirection: 'row', alignItems: 'flex-start', gap: 10, borderWidth: 1, borderRadius: 18, padding: 14, backgroundColor: colors.surface, ...shadows.media },
   error: { borderColor: colors.danger },
@@ -67,4 +69,4 @@ const styles = StyleSheet.create({
   copy: { flex: 1, gap: 2 },
   title: { color: colors.ink, fontFamily: fonts.sansSemibold, fontSize: 14 },
   message: { color: colors.muted, fontSize: 12, lineHeight: 18 },
-});
+}));

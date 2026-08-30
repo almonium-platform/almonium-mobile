@@ -26,7 +26,7 @@ import { createCardDraft } from '@/src/card-utils';
 import { normalizedLookupEntry } from '@/src/discover';
 import { freeSavedItemLimit } from '@/src/limits';
 import { downloadedBooks, readDownloadedBook } from '@/src/offline-books';
-import { colors, darkColors, fonts, shadows } from '@/src/theme';
+import { colors as lightColors, createThemedStyles, darkColors, fonts, shadows, useTheme } from '@/src/theme';
 import { isUuid } from '@/src/uuid';
 
 type ReaderTheme = 'paper' | 'night';
@@ -78,8 +78,8 @@ const selectionScript = `
 `;
 
 function appearanceScript(fontSize: number, theme: ReaderTheme, face: ReaderFace, progress: number) {
-  const background = theme === 'night' ? darkColors.canvas : colors.canvas;
-  const foreground = theme === 'night' ? darkColors.ink : colors.ink;
+  const background = theme === 'night' ? darkColors.canvas : lightColors.canvas;
+  const foreground = theme === 'night' ? darkColors.ink : lightColors.ink;
   const fontFamily = readerFaces.find((candidate) => candidate.value === face)?.family ?? readerFaces[0].family;
   return `
     (function () {
@@ -101,7 +101,7 @@ function appearanceScript(fontSize: number, theme: ReaderTheme, face: ReaderFace
         }
         p { margin: 0 0 1.15em !important; }
         img { max-width: 100% !important; height: auto !important; }
-        a { color: ${colors.raspberry} !important; }
+        a { color: ${lightColors.raspberry} !important; }
       \`;
       document.documentElement.style.background = '${background}';
       setTimeout(function () {
@@ -119,6 +119,8 @@ function readerHtml(content: string) {
 }
 
 export default function ReaderScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const params = useLocalSearchParams<{ bookId: string; language?: string; title?: string }>();
   const bookId = params.bookId;
   const validBookId = isUuid(bookId);
@@ -501,10 +503,11 @@ export default function ReaderScreen() {
 }
 
 function ReaderOption({ label, selected, night, onPress }: { label: string; selected: boolean; night: boolean; onPress(): void }) {
+  const styles = useStyles();
   return <Pressable accessibilityRole="radio" accessibilityState={{ selected }} onPress={onPress} style={[styles.readerOption, night && styles.readerOptionNight, selected && styles.readerOptionActive, selected && night && styles.readerOptionActiveNight]}><Text style={[styles.readerOptionText, night && styles.nightText, selected && styles.readerOptionTextActive, selected && night && styles.readerOptionTextActiveNight]}>{label}</Text></Pressable>;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   container: { flex: 1, backgroundColor: colors.surface },
   containerNight: { backgroundColor: darkColors.canvas },
   webview: { flex: 1, backgroundColor: 'transparent' },
@@ -523,7 +526,7 @@ const styles = StyleSheet.create({
   largeA: { color: colors.ink, fontFamily: fonts.serif, fontSize: 16 },
   nightText: { color: colors.white },
   nightMutedText: { color: darkColors.muted },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(44,37,48,0.72)' },
+  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.scrim },
   wordSheet: { position: 'absolute', right: 0, bottom: 0, left: 0, maxHeight: '88%', borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: colors.canvas, ...shadows.media },
   wordSheetNight: { backgroundColor: darkColors.overlay, borderWidth: 1, borderColor: darkColors.border },
   settingsSheet: { position: 'absolute', right: 0, bottom: 0, left: 0, borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: colors.canvas, ...shadows.media },
@@ -566,4 +569,4 @@ const styles = StyleSheet.create({
   sheetIntentText: { color: colors.muted, fontSize: 14 },
   sheetIntentDisabled: { opacity: 0.55 },
   sheetError: { color: colors.danger, fontSize: 12, lineHeight: 18, textAlign: 'center' },
-});
+}));

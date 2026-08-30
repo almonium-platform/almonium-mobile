@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { BookCover } from '@/components/book-cover';
 import { Screen } from '@/components/screen';
@@ -10,10 +10,12 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
 import { downloadBook, downloadedBooks, formattedDownloadSize, removeDownloadedBook } from '@/src/offline-books';
-import { colors, fonts } from '@/src/theme';
+import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 import { isUuid } from '@/src/uuid';
 
 export default function BookDetailsScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const params = useLocalSearchParams<{ bookId: string; language?: string }>();
   const bookId = params.bookId;
   const validBookId = isUuid(bookId);
@@ -220,7 +222,7 @@ export default function BookDetailsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   center: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: colors.muted, fontSize: 16 },
   errorTitle: { color: colors.ink, fontSize: 21, fontWeight: '600', textAlign: 'center' },
@@ -243,7 +245,7 @@ const styles = StyleSheet.create({
   variant: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: colors.canvas },
   variantActive: { backgroundColor: colors.primary },
   variantText: { color: colors.ink, fontSize: 13, fontWeight: '600' },
-  variantTextActive: { color: colors.white },
+  variantTextActive: { color: colors.onPrimary },
   parallelNote: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   parallelText: { flex: 1, color: colors.muted, fontSize: 13 },
   translator: { color: colors.primary, fontSize: 14, fontStyle: 'italic' },
@@ -252,4 +254,4 @@ const styles = StyleSheet.create({
   downloadText: { flex: 1, color: colors.ink, fontSize: 13, fontWeight: '600' },
   removeDownload: { color: colors.primary, fontSize: 13, fontWeight: '600' },
   downloadError: { color: colors.danger, fontSize: 12, lineHeight: 18, textAlign: 'center' },
-});
+}));

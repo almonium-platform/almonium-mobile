@@ -9,7 +9,6 @@ import {
   RefreshControl,
   ScrollView,
   SectionList,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -24,7 +23,7 @@ import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { downloadedBooks } from '@/src/offline-books';
-import { colors, fonts, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import type { BookSummary, CefrLevel } from '@/src/types';
 
 const shelfLanguageKey = 'almonium:shelf-language';
@@ -32,6 +31,8 @@ const levelFilters: ('ALL' | CefrLevel)[] = ['ALL', 'A1', 'A2', 'B1', 'B2', 'C1'
 type LengthFilter = 'ALL' | 'SHORT' | 'MEDIUM' | 'LONG';
 
 export default function BooksScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
   const showNotice = useNotice();
   const activeLanguages = useMemo(
@@ -221,6 +222,7 @@ export default function BooksScreen() {
 }
 
 function FilterChip({ label, selected, onPress }: { label: string; selected: boolean; onPress(): void }) {
+  const styles = useStyles();
   return (
     <Pressable accessibilityRole="radio" accessibilityState={{ selected }} onPress={onPress} style={[styles.filter, selected && styles.filterActive]}>
       <Text style={[styles.filterText, selected && styles.filterTextActive]}>{label}</Text>
@@ -228,7 +230,7 @@ function FilterChip({ label, selected, onPress }: { label: string; selected: boo
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.canvas },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   list: { padding: 16, paddingBottom: 32, backgroundColor: colors.canvas, flexGrow: 1 },
@@ -256,4 +258,4 @@ const styles = StyleSheet.create({
   emptyInline: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyTitle: { color: colors.ink, fontWeight: '600', fontSize: 20 },
   emptyText: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center' },
-});
+}));

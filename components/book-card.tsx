@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { BookCover } from '@/components/book-cover';
-import { colors, fonts, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import type { BookSummary } from '@/src/types';
 
 export function BookCard({
@@ -17,6 +17,8 @@ export function BookCard({
   onLongPress?(): void;
   offline?: boolean;
 }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       onPress={() =>
@@ -78,7 +80,7 @@ export function BookCard({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors, isDark) => ({
   book: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -87,7 +89,7 @@ const styles = StyleSheet.create({
     minHeight: 138,
     borderRadius: 24,
     backgroundColor: colors.surface,
-    ...shadows.media,
+    ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.media),
   },
   pressed: { opacity: 0.8 },
   cover: { width: 78, height: 112, borderRadius: 10, backgroundColor: colors.accentSoft },
@@ -115,4 +117,4 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   progress: { height: 5, borderRadius: 3, backgroundColor: colors.primary },
-});
+}));

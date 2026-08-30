@@ -7,7 +7,6 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
@@ -17,9 +16,11 @@ import { BookCover } from '@/components/book-cover';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
-import { colors, fonts, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 
 export default function HomeScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
   const activeLanguages = useMemo(
     () => profile?.learners.filter((learner) => learner.active).map((learner) => learner.language) ?? [],
@@ -195,7 +196,7 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.canvas },
   content: { padding: 16, paddingBottom: 38, gap: 14 },
   center: { flex: 1, padding: 32, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: colors.canvas },
@@ -230,4 +231,4 @@ const styles = StyleSheet.create({
   reviewLabel: { color: colors.primary, fontSize: 10, letterSpacing: 1 },
   planLine: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingHorizontal: 5 },
   error: { color: colors.danger, fontSize: 12, lineHeight: 18, textAlign: 'center' },
-});
+}));

@@ -8,7 +8,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -27,9 +26,11 @@ import {
   type ReviewSessionResult,
 } from '@/src/review';
 import { configureDailyReminder, dismissReviewReminderOffer, shouldOfferReviewReminder } from '@/src/reminders';
-import { colors, fonts, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 
 export default function ReviewScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { language = '' } = useLocalSearchParams<{ language: string }>();
   const { firebaseUser } = useAuth();
   const queryClient = useQueryClient();
@@ -293,6 +294,8 @@ export default function ReviewScreen() {
 }
 
 function SessionHeader({ completed, position, total, onClose }: { completed: number; position: number; total: number; onClose(): void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.sessionHeader}>
       <View style={styles.planks}>
@@ -316,6 +319,7 @@ function FeedbackState({ feedback, prompt, sourceContext, submitting, mistypeRec
   onMistype(): void;
   onNext(): void;
 }) {
+  const styles = useStyles();
   const confused = feedback.confusedWith;
   return (
     <ScrollView contentContainerStyle={styles.feedbackContent}>
@@ -357,6 +361,8 @@ function FeedbackState({ feedback, prompt, sourceContext, submitting, mistypeRec
 }
 
 function CompleteState({ result, onDone }: { result: ReviewSessionResult; onDone(): void }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [offerReminder, setOfferReminder] = useState(false);
   const [savingReminder, setSavingReminder] = useState(false);
   const [reminderError, setReminderError] = useState('');
@@ -385,7 +391,7 @@ function CompleteState({ result, onDone }: { result: ReviewSessionResult; onDone
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.completeContent}>
-        <View style={styles.completeIcon}><Ionicons name="checkmark" size={38} color={colors.white} /></View>
+        <View style={styles.completeIcon}><Ionicons name="checkmark" size={38} color={colors.onPrimary} /></View>
         <Text style={styles.eyebrow}>SESSION COMPLETE</Text>
         <Text style={styles.overviewTitle}>{result.total} {result.total === 1 ? 'word' : 'words'}</Text>
         <View style={styles.summaryStats}>
@@ -418,10 +424,11 @@ function CompleteState({ result, onDone }: { result: ReviewSessionResult; onDone
 }
 
 function SummaryStat({ value, label }: { value: number; label: string }) {
+  const styles = useStyles();
   return <View style={styles.summaryStat}><Text style={styles.summaryNumber}>{value}</Text><Text style={styles.summaryLabel}>{label.toUpperCase()}</Text></View>;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors, isDark) => ({
   flex: { flex: 1 },
   safe: { flex: 1, backgroundColor: colors.canvas },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 13, padding: 32, backgroundColor: colors.canvas },
@@ -474,7 +481,7 @@ const styles = StyleSheet.create({
   feedbackHeading: { gap: 6, paddingHorizontal: 4 },
   feedbackTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 26, lineHeight: 33 },
   comparisonCard: { overflow: 'hidden', borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
-  comparisonMuted: { gap: 6, padding: 17, backgroundColor: colors.canvas },
+  comparisonMuted: { gap: 6, padding: 17, backgroundColor: colors.nested },
   comparisonAsked: { gap: 6, padding: 17 },
   comparisonLabel: { color: colors.metadata, fontSize: 10.5, letterSpacing: 1.2 },
   comparisonLabelAsked: { color: colors.primary },
@@ -482,17 +489,17 @@ const styles = StyleSheet.create({
   comparisonEntryAsked: { color: colors.primary },
   comparisonMeaning: { color: colors.muted, fontSize: 13.5, lineHeight: 20 },
   comparisonExample: { color: colors.reader, fontFamily: fonts.serifRegular, fontSize: 14, lineHeight: 21 },
-  contrastPanel: { gap: 5, padding: 15, backgroundColor: colors.ink },
+  contrastPanel: { gap: 5, padding: 15, backgroundColor: isDark ? colors.overlay : colors.ink },
   contrastLabel: { color: colors.accentBorder, fontSize: 10.5, letterSpacing: 1.2 },
-  contrastCopy: { color: colors.canvas, fontSize: 13.5, lineHeight: 20 },
+  contrastCopy: { color: isDark ? colors.ink : colors.canvas, fontSize: 13.5, lineHeight: 20 },
   confusionNote: { color: colors.muted, fontSize: 12.5, lineHeight: 18, textAlign: 'center' },
   leechNotice: { padding: 12, borderRadius: 14, backgroundColor: colors.accentSoft, color: colors.primaryDark, fontSize: 12.5, lineHeight: 18 },
   completeContent: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', gap: 14, padding: 24 },
   completeIcon: { width: 72, height: 72, alignItems: 'center', justifyContent: 'center', borderRadius: 26, backgroundColor: colors.primary },
-  dessertCard: { width: '100%', gap: 9, padding: 20, borderRadius: 24, backgroundColor: colors.reader, ...shadows.card },
+  dessertCard: { width: '100%', gap: 9, padding: 20, borderRadius: 24, backgroundColor: isDark ? colors.overlay : colors.reader, ...shadows.card },
   dessertEyebrow: { color: colors.accentBorder, fontSize: 10, letterSpacing: 1.3 },
   dessertTitle: { color: colors.canvas, fontFamily: fonts.serif, fontSize: 21, lineHeight: 27 },
   dessertCopy: { color: colors.canvas, fontFamily: fonts.serifRegular, fontSize: 16, lineHeight: 25, opacity: 0.82 },
   reminderOffer: { width: '100%', alignItems: 'center', gap: 9, borderRadius: 24, padding: 18, backgroundColor: colors.surface, ...shadows.card },
   reminderTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 20 },
-});
+}));

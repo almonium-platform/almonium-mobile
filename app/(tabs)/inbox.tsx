@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { relativeTime } from '@/src/card-utils';
-import { colors, fonts, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import type { AppNotification, NotificationType } from '@/src/types';
 
 const iconForType: Record<NotificationType, keyof typeof Ionicons.glyphMap> = {
@@ -18,6 +18,8 @@ const iconForType: Record<NotificationType, keyof typeof Ionicons.glyphMap> = {
 };
 
 export default function InboxScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { firebaseUser } = useAuth();
   const queryClient = useQueryClient();
   const query = useQuery({
@@ -175,7 +177,7 @@ function calmText(value: string) {
   return value.replace(/!+/g, '').trim();
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   list: { flexGrow: 1, padding: 20, paddingBottom: 36, backgroundColor: colors.canvas },
   header: { gap: 9, paddingBottom: 21 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
@@ -187,7 +189,7 @@ const styles = StyleSheet.create({
   markAllText: { color: colors.primaryDark, fontWeight: '600', fontSize: 12 },
   offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, borderRadius: 10, padding: 10 },
   notification: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 15, borderRadius: 20, backgroundColor: colors.surface, ...shadows.card },
-  unread: { backgroundColor: '#fffafd' },
+  unread: { backgroundColor: colors.accentSoft },
   icon: { width: 43, height: 43, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   iconUnread: { backgroundColor: colors.accentSoft },
   copy: { flex: 1, gap: 5 },
@@ -198,7 +200,7 @@ const styles = StyleSheet.create({
   action: { color: colors.primary, fontSize: 10, fontWeight: '600', paddingTop: 1 },
   friendActions: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingTop: 4 },
   acceptAction: { minHeight: 40, justifyContent: 'center', borderRadius: 20, paddingHorizontal: 13, backgroundColor: colors.primary },
-  acceptText: { color: colors.white, fontSize: 12, fontWeight: '600' },
+  acceptText: { color: colors.onPrimary, fontSize: 12, fontWeight: '600' },
   declineAction: { minHeight: 40, justifyContent: 'center', borderRadius: 20, paddingHorizontal: 13, borderWidth: 1, borderColor: colors.line },
   declineText: { color: colors.ink, fontSize: 12, fontWeight: '600' },
   profileLink: { color: colors.primary, fontSize: 12, fontWeight: '600', paddingHorizontal: 4 },
@@ -207,4 +209,4 @@ const styles = StyleSheet.create({
   empty: { flex: 1, minHeight: 420, alignItems: 'center', justifyContent: 'center', gap: 10 },
   emptyTitle: { color: colors.ink, fontWeight: '600', fontSize: 20 },
   emptyText: { color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: 'center', maxWidth: 300 },
-});
+}));

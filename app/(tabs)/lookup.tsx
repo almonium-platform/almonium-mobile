@@ -8,7 +8,6 @@ import {
   Keyboard,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -23,11 +22,13 @@ import { createCardDraft } from '@/src/card-utils';
 import { normalizedLookupEntry, tokenizeSentence, type DiscoverLookup } from '@/src/discover';
 import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
-import { colors, fonts, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 
 const lookupLanguageKey = 'almonium:lookup-language';
 
 export default function LookupScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const params = useLocalSearchParams<{ text?: string }>();
   const { firebaseUser, profile } = useAuth();
   const queryClient = useQueryClient();
@@ -327,7 +328,7 @@ export default function LookupScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.canvas },
   content: { padding: 16, paddingBottom: 36, gap: 14 },
   intro: { gap: 5 },
@@ -384,4 +385,4 @@ const styles = StyleSheet.create({
   historyChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   historyChip: { minHeight: 38, justifyContent: 'center', paddingHorizontal: 14, borderWidth: 1, borderColor: colors.line, borderRadius: 19, backgroundColor: colors.surface },
   historyText: { color: colors.ink, fontFamily: fonts.serifRegular, fontSize: 14.5 },
-});
+}));

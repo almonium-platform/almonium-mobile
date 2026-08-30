@@ -9,7 +9,6 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -21,7 +20,7 @@ import { BrandMark } from '@/components/brand-mark';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
-import { colors, fonts, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import { intentLabel } from '@/src/review';
 import type { LearningIntent, LearningItem } from '@/src/types';
 
@@ -29,6 +28,8 @@ const cardLanguageKey = 'almonium:card-language';
 const intentFilters: ('ALL' | LearningIntent)[] = ['ALL', 'UNDERSTAND', 'PRODUCE', 'DISAMBIGUATE', 'PRONOUNCE', 'CHUNK'];
 
 export default function CardsScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
   const activeLanguages = useMemo(
     () => profile?.learners.filter((learner) => learner.active).map((learner) => learner.language) ?? [],
@@ -125,7 +126,7 @@ export default function CardsScreen() {
                   <Text style={styles.actionTitle}>Review due items</Text>
                   <Text style={styles.actionCaption}>Your schedule follows you</Text>
                 </View>
-                <Ionicons name="arrow-forward" size={20} color={colors.white} />
+                <Ionicons name="arrow-forward" size={20} color={colors.onPrimary} />
               </View>
             </Pressable>
             <Button
@@ -219,7 +220,7 @@ export default function CardsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.canvas },
   list: { flexGrow: 1, padding: 16, paddingBottom: 32, backgroundColor: colors.canvas },
   header: { gap: 13, paddingBottom: 20 },
@@ -233,10 +234,10 @@ const styles = StyleSheet.create({
   reviewAction: { minHeight: 70, borderRadius: 999, overflow: 'hidden' },
   reviewActionFill: { minHeight: 70, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, backgroundColor: colors.primary },
   reviewCount: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.18)' },
-  reviewCountText: { color: colors.white, fontSize: 19, fontWeight: '600' },
+  reviewCountText: { color: colors.onPrimary, fontSize: 19, fontWeight: '600' },
   actionCopy: { flex: 1, gap: 2 },
-  actionTitle: { color: colors.white, fontSize: 16, fontWeight: '600' },
-  actionCaption: { color: colors.white, fontSize: 12, opacity: 0.84 },
+  actionTitle: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
+  actionCaption: { color: colors.onPrimary, fontSize: 12, opacity: 0.84 },
   search: { minHeight: 50, borderRadius: 999, paddingHorizontal: 16, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, ...shadows.field },
   searchInput: { flex: 1, color: colors.ink, fontSize: 15 },
   filters: { gap: 7, paddingRight: 4 },
@@ -258,4 +259,4 @@ const styles = StyleSheet.create({
   emptyInline: { alignItems: 'center', gap: 10, paddingVertical: 48, paddingHorizontal: 20 },
   emptyTitle: { color: colors.ink, fontWeight: '600', fontSize: 20, textAlign: 'center' },
   emptyText: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center' },
-});
+}));

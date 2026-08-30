@@ -2,15 +2,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
-import { colors, fonts, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 
 export default function PlayScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
   const languages = useMemo(
     () => profile?.learners.filter((learner) => learner.active).map((learner) => learner.language) ?? [],
@@ -96,6 +98,8 @@ export default function PlayScreen() {
 }
 
 function GameRow({ icon, name, intent, description }: { icon: keyof typeof Ionicons.glyphMap; name: string; intent: string; description: string }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.gameRow}>
       <View style={styles.gameIcon}><Ionicons name={icon} size={23} color={colors.primary} /></View>
@@ -109,7 +113,7 @@ function GameRow({ icon, name, intent, description }: { icon: keyof typeof Ionic
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.canvas },
   content: { padding: 20, paddingBottom: 38, gap: 13 },
   heading: { gap: 10, paddingBottom: 7 },
@@ -122,7 +126,7 @@ const styles = StyleSheet.create({
   chip: { minHeight: 38, justifyContent: 'center', paddingHorizontal: 12, borderRadius: 19, borderWidth: 1, borderColor: colors.line },
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { color: colors.ink, fontSize: 12, fontWeight: '600' },
-  chipTextActive: { color: colors.white },
+  chipTextActive: { color: colors.onPrimary },
   featured: { borderRadius: 28, padding: 20, gap: 18, backgroundColor: colors.surface, ...shadows.card },
   crossword: { width: 116, flexDirection: 'row', flexWrap: 'wrap', gap: 5, transform: [{ rotate: '-5deg' }] },
   cell: { width: 32, height: 32, borderRadius: 7, borderWidth: 2, borderColor: colors.ink },
@@ -141,4 +145,4 @@ const styles = StyleSheet.create({
   description: { color: colors.muted, fontSize: 13, lineHeight: 19, paddingTop: 3 },
   soon: { color: colors.muted, fontSize: 11, fontWeight: '600', borderWidth: 1, borderColor: colors.line, borderRadius: 9, paddingHorizontal: 7, paddingVertical: 4 },
   error: { color: colors.danger, fontSize: 12, lineHeight: 18, textAlign: 'center', paddingTop: 5 },
-});
+}));

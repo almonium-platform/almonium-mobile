@@ -1,13 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useQueries } from '@tanstack/react-query';
-import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, ScrollView, Text, View } from 'react-native';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { useNotice } from '@/src/notice-context';
-import { colors, fonts, gradients, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, gradients, shadows, useTheme } from '@/src/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { UserInfo } from '@/src/types';
 
@@ -20,6 +20,8 @@ const premiumFeatures = [
 ];
 
 export default function MembershipScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
   const showNotice = useNotice();
   const [openingPortal, setOpeningPortal] = useState(false);
@@ -72,7 +74,7 @@ export default function MembershipScreen() {
       </View>
 
       {!profile?.premium && (
-        <LinearGradient colors={gradients.premium} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.premiumCard}>
+        <LinearGradient colors={isDark ? gradients.premiumDark : gradients.premium} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.premiumCard}>
           <View style={styles.premiumHeading}>
             <Text style={styles.premiumTitle}>Premium</Text>
             <Ionicons name="star" size={24} color={colors.white} />
@@ -92,6 +94,7 @@ export default function MembershipScreen() {
 }
 
 function Usage({ label, used, limit }: { label: string; used: number; limit: number | null }) {
+  const styles = useStyles();
   const percentage = limit ? Math.min(100, (used / limit) * 100) : 100;
   return (
     <View style={styles.usage}>
@@ -119,14 +122,14 @@ function formatDate(value: string | null | undefined) {
   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors, isDark) => ({
   screen: { flex: 1, backgroundColor: colors.canvas },
   content: { padding: 20, paddingBottom: 38, gap: 16 },
   heading: { gap: 7 },
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
   title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 37, fontWeight: '600' },
   copy: { color: colors.muted, fontSize: 14, lineHeight: 21 },
-  usageCard: { gap: 16, borderRadius: 28, padding: 21, backgroundColor: colors.surface, ...shadows.card },
+  usageCard: { gap: 16, borderRadius: 28, padding: 21, backgroundColor: colors.surface, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },
   sectionTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 21, fontWeight: '600' },
   usage: { gap: 7 },
   usageHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
@@ -147,4 +150,4 @@ const styles = StyleSheet.create({
   storeNote: { gap: 4, borderRadius: 17, padding: 14, backgroundColor: 'rgba(255,255,255,0.14)' },
   storeTitle: { color: colors.white, fontSize: 13, fontWeight: '600' },
   storeCopy: { color: colors.white, fontSize: 12, lineHeight: 18 },
-});
+}));

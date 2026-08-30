@@ -18,7 +18,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/src/auth-context';
 import { persistOptions, queryClient } from '@/src/query-client';
 import { NoticeProvider } from '@/src/notice-context';
-import { colors } from '@/src/theme';
+import { ThemeProvider, useTheme } from '@/src/theme';
 
 void SplashScreen.preventAutoHideAsync();
 if (Platform.OS !== 'web') {
@@ -33,6 +33,15 @@ if (Platform.OS !== 'web') {
 }
 
 export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <ThemedRootLayout />
+    </ThemeProvider>
+  );
+}
+
+function ThemedRootLayout() {
+  const { colors, isDark, ready } = useTheme();
   const [fontsLoaded, fontError] = useFonts({
     IBMPlexSans_400Regular,
     IBMPlexSans_500Medium,
@@ -42,8 +51,8 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded || fontError) void SplashScreen.hideAsync();
-  }, [fontError, fontsLoaded]);
+    if (ready && (fontsLoaded || fontError)) void SplashScreen.hideAsync();
+  }, [fontError, fontsLoaded, ready]);
 
   useEffect(() => {
     if (Platform.OS === 'web') return;
@@ -54,7 +63,7 @@ export default function RootLayout() {
     return () => subscription.remove();
   }, []);
 
-  if (!fontsLoaded && !fontError) return null;
+  if (!ready || (!fontsLoaded && !fontError)) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -63,30 +72,30 @@ export default function RootLayout() {
           <AuthProvider>
             <NoticeProvider>
               <Stack
-              screenOptions={{
-                headerStyle: { backgroundColor: colors.canvas },
-                headerShadowVisible: false,
-                headerTintColor: colors.ink,
-                contentStyle: { backgroundColor: colors.canvas },
-              }}>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-              <Stack.Screen name="book/[bookId]" options={{ title: 'Book' }} />
-              <Stack.Screen
-                name="reader/[bookId]"
-                options={{ title: 'Reader', headerBackTitle: 'Library' }}
-              />
-              <Stack.Screen name="item/new" options={{ title: 'New learning item' }} />
-              <Stack.Screen name="item/[itemId]" options={{ title: 'Learning item' }} />
-              <Stack.Screen name="card/new" options={{ title: 'New learning item' }} />
-              <Stack.Screen name="card/[cardId]" options={{ title: 'Learning item' }} />
-              <Stack.Screen name="review" options={{ headerShown: false }} />
-              <Stack.Screen name="profile/[userId]" options={{ title: 'Reader profile' }} />
-              <Stack.Screen name="membership" options={{ title: 'Membership' }} />
+                screenOptions={{
+                  headerStyle: { backgroundColor: colors.canvas },
+                  headerShadowVisible: false,
+                  headerTintColor: colors.ink,
+                  contentStyle: { backgroundColor: colors.canvas },
+                }}>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+                <Stack.Screen name="book/[bookId]" options={{ title: 'Book' }} />
+                <Stack.Screen
+                  name="reader/[bookId]"
+                  options={{ title: 'Reader', headerBackTitle: 'Library' }}
+                />
+                <Stack.Screen name="item/new" options={{ title: 'New learning item' }} />
+                <Stack.Screen name="item/[itemId]" options={{ title: 'Learning item' }} />
+                <Stack.Screen name="card/new" options={{ title: 'New learning item' }} />
+                <Stack.Screen name="card/[cardId]" options={{ title: 'Learning item' }} />
+                <Stack.Screen name="review" options={{ headerShown: false }} />
+                <Stack.Screen name="profile/[userId]" options={{ title: 'Reader profile' }} />
+                <Stack.Screen name="membership" options={{ title: 'Membership' }} />
               </Stack>
-              <StatusBar style="dark" />
+              <StatusBar style={isDark ? 'light' : 'dark'} />
             </NoticeProvider>
           </AuthProvider>
         </PersistQueryClientProvider>

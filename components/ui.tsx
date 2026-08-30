@@ -1,22 +1,27 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import type { ComponentProps, PropsWithChildren, ReactNode } from 'react';
 
-import { colors, fonts, gradients, radii, shadows } from '@/src/theme';
+import { createThemedStyles, fonts, gradients, radii, shadows, useTheme } from '@/src/theme';
 
 export function Title({ children }: PropsWithChildren) {
+  const styles = useStyles();
   return <Text style={styles.title}>{children}</Text>;
 }
 
 export function Body({ children, muted = false }: PropsWithChildren<{ muted?: boolean }>) {
+  const styles = useStyles();
   return <Text style={[styles.body, muted && styles.muted]}>{children}</Text>;
 }
 
 export function Card({ children }: PropsWithChildren) {
+  const styles = useStyles();
   return <View style={styles.card}>{children}</View>;
 }
 
 export function Field(props: ComponentProps<typeof TextInput>) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <TextInput
       placeholderTextColor={colors.muted}
@@ -37,6 +42,8 @@ export function Button({
   loading?: boolean;
   variant?: 'primary' | 'premium' | 'secondary' | 'danger';
 }) {
+  const { colors, isDark } = useTheme();
+  const styles = useStyles();
   const disabled = Boolean(props.disabled || loading);
   const content = loading ? (
     <ActivityIndicator
@@ -77,7 +84,7 @@ export function Button({
       ]}>
       {variant === 'premium' && !disabled ? (
         <LinearGradient
-          colors={gradients.premium}
+          colors={isDark ? gradients.premiumDark : gradients.premium}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.buttonFill}>
@@ -90,7 +97,7 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors, isDark) => ({
   title: {
     fontFamily: fonts.serif,
     fontSize: 32,
@@ -104,7 +111,7 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 16,
     backgroundColor: colors.surface,
-    ...shadows.card,
+    ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card),
   },
   field: {
     minHeight: 54,
@@ -113,8 +120,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: fonts.sans,
     color: colors.ink,
-    backgroundColor: colors.white,
-    ...shadows.field,
+    borderWidth: isDark ? 1 : 0,
+    borderColor: colors.border,
+    backgroundColor: isDark ? colors.nested : colors.white,
+    ...(isDark ? {} : shadows.field),
   },
   button: {
     minHeight: 54,
@@ -136,18 +145,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderWidth: 1,
     borderColor: colors.ink,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
   },
   buttonDanger: {
     paddingHorizontal: 20,
     borderWidth: 1,
     borderColor: colors.danger,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
   },
-  buttonText: { color: colors.white, fontFamily: fonts.sansSemibold, fontSize: 16 },
+  buttonText: { color: colors.onPrimary, fontFamily: fonts.sansSemibold, fontSize: 16 },
   buttonTextSecondary: { color: colors.ink },
   buttonTextDanger: { color: colors.danger },
   buttonTextDisabled: { color: colors.disabledText },
   pressed: { opacity: 0.75 },
   disabled: { paddingHorizontal: 24, backgroundColor: colors.disabled, borderColor: colors.disabled },
-});
+}));

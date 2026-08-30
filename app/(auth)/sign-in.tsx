@@ -2,15 +2,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 
 import { BrandMark } from '@/components/brand-mark';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { isExpoGo, useAuth } from '@/src/auth-context';
 import { useNotice } from '@/src/notice-context';
-import { colors, gradients } from '@/src/theme';
+import { createThemedStyles, gradients, useTheme } from '@/src/theme';
 
 export default function SignInScreen() {
+  const { isDark } = useTheme();
+  const styles = useStyles();
   const { signIn, signInWithGoogle, signInWithApple } = useAuth();
   const showNotice = useNotice();
   const [email, setEmail] = useState('');
@@ -75,7 +77,7 @@ export default function SignInScreen() {
   }
 
   return (
-    <LinearGradient colors={gradients.auth} style={styles.background}>
+    <LinearGradient colors={isDark ? gradients.authDark : gradients.auth} style={styles.background}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.container}>
@@ -141,7 +143,7 @@ export default function SignInScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   background: { flex: 1 },
   container: { flex: 1, justifyContent: 'center', padding: 24, gap: 26 },
   brand: { gap: 12 },
@@ -150,4 +152,4 @@ const styles = StyleSheet.create({
   link: { color: colors.primary, fontWeight: '600' },
   expoGoHint: { color: colors.muted, fontSize: 13, lineHeight: 18, textAlign: 'center' },
   appleButton: { height: 52, width: '100%' },
-});
+}));
