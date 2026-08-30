@@ -10,18 +10,19 @@ export function BookCard({
   book,
   language,
   onLongPress,
+  offline = false,
 }: {
   book: BookSummary;
   language: string;
   onLongPress?(): void;
+  offline?: boolean;
 }) {
   return (
     <Pressable
       onPress={() =>
-        router.push({
-          pathname: '/book/[bookId]',
-          params: { bookId: String(book.id), language },
-        })
+        router.push(offline
+          ? { pathname: '/reader/[bookId]', params: { bookId: String(book.id), language, title: book.title } }
+          : { pathname: '/book/[bookId]', params: { bookId: String(book.id), language } })
       }
       onLongPress={onLongPress}
       style={({ pressed }) => [styles.book, pressed && styles.pressed]}>
@@ -43,6 +44,12 @@ export function BookCard({
             <View style={styles.parallel}>
               <Ionicons name="git-compare-outline" size={12} color={colors.primary} />
               <Text style={styles.parallelText}>Parallel</Text>
+            </View>
+          )}
+          {offline && (
+            <View style={styles.parallel}>
+              <Ionicons name="cloud-done-outline" size={12} color={colors.success} />
+              <Text style={styles.offlineText}>Offline</Text>
             </View>
           )}
         </View>
@@ -95,6 +102,7 @@ const styles = StyleSheet.create({
   badgeText: { color: colors.primaryDark, fontSize: 11, fontWeight: '600' },
   parallel: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   parallelText: { color: colors.primary, fontSize: 10, fontWeight: '600' },
+  offlineText: { color: colors.success, fontSize: 10, fontWeight: '600' },
   bookTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, lineHeight: 23, fontWeight: '600' },
   author: { color: colors.muted, fontSize: 14 },
   footer: { flexDirection: 'row', gap: 10 },

@@ -20,6 +20,7 @@ import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
+import { downloadedBooks } from '@/src/offline-books';
 import { colors, fonts, shadows } from '@/src/theme';
 import type { BookSummary } from '@/src/types';
 
@@ -59,9 +60,10 @@ export default function BooksScreen() {
     queryFn: () => api.bookshelf(language),
     enabled: Boolean(language && firebaseUser),
   });
+  const downloads = useQuery({ queryKey: ['offline-books'], queryFn: downloadedBooks });
 
   const sections = useMemo(() => {
-    if (!query.data) return [];
+    if (!query.data && !downloads.data?.length) return [];
     const needle = search.trim().toLocaleLowerCase();
     const filter = (books: BookSummary[]) =>
       books.filter(
@@ -71,11 +73,12 @@ export default function BooksScreen() {
           book.author.toLocaleLowerCase().includes(needle),
       );
     return [
-      { title: 'Continue reading', data: filter(query.data.continueReading) },
-      { title: 'Favorites', data: filter(query.data.favorites) },
-      { title: 'Available', data: filter(query.data.available) },
+      { title: 'Downloads', data: filter((downloads.data ?? []).filter((book) => book.language === language)) },
+      { title: 'Continue reading', data: filter(query.data?.continueReading ?? []) },
+      { title: 'Favorites', data: filter(query.data?.favorites ?? []) },
+      { title: 'Available', data: filter(query.data?.available ?? []) },
     ].filter((section) => section.data.length);
-  }, [query.data, search]);
+  }, [downloads.data, language, query.data, search]);
 
   async function resetProgress(book: BookSummary) {
     if (!book.progressPercentage) return;
@@ -106,7 +109,7 @@ export default function BooksScreen() {
     );
   }
 
-  if (query.isLoading) {
+  if (query.isLoading && !downloads.data?.length) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -114,7 +117,7 @@ export default function BooksScreen() {
     );
   }
 
-  if (query.isError && !query.data) {
+  if (query.isError && !query.data && !downloads.data?.length) {
     return (
       <SafeAreaView style={styles.empty}>
         <Ionicons name="cloud-offline-outline" size={42} color={colors.primary} />
@@ -176,8 +179,8 @@ export default function BooksScreen() {
           <Text style={styles.sectionCount}>{section.data.length}</Text>
         </View>
       )}
-      renderItem={({ item }) => (
-        <BookCard book={item} language={language} onLongPress={() => resetProgress(item)} />
+      renderItem={({ item, section }) => (
+        <BookCard book={item} language={language} offline={section.title === 'Downloads'} onLongPress={() => resetProgress(item)} />
       )}
       SectionSeparatorComponent={() => <View style={styles.sectionGap} />}
       ItemSeparatorComponent={() => <View style={styles.itemGap} />}

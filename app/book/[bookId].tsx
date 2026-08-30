@@ -9,6 +9,7 @@ import { Button, Card } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
+import { downloadBook, downloadedBooks, formattedDownloadSize, removeDownloadedBook } from '@/src/offline-books';
 import { colors, fonts } from '@/src/theme';
 import { isUuid } from '@/src/uuid';
 
@@ -40,6 +41,19 @@ export default function BookDetailsScreen() {
         queryClient.invalidateQueries({ queryKey: ['bookshelf', firebaseUser?.uid] }),
       ]);
     },
+  });
+  const downloadsQuery = useQuery({ queryKey: ['offline-books'], queryFn: downloadedBooks });
+  const downloaded = downloadsQuery.data?.find((entry) => entry.id === bookId);
+  const downloadMutation = useMutation({
+    mutationFn: async () => {
+      if (!query.data) return;
+      await downloadBook(query.data, await api.bookText(query.data.id));
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['offline-books'] }),
+  });
+  const removeDownloadMutation = useMutation({
+    mutationFn: () => removeDownloadedBook(bookId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['offline-books'] }),
   });
 
   if (!validBookId || !language) {
@@ -115,6 +129,29 @@ export default function BookDetailsScreen() {
         }>
         {book.progressPercentage ? `Continue at ${book.progressPercentage}%` : 'Start reading'}
       </Button>
+
+      {downloaded ? (
+        <View style={styles.downloadRow}>
+          <View style={styles.downloadCopy}>
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+            <Text style={styles.downloadText}>Available offline · {formattedDownloadSize(downloaded.size)}</Text>
+          </View>
+          <Pressable disabled={removeDownloadMutation.isPending} onPress={() => removeDownloadMutation.mutate()} hitSlop={8}>
+            <Text style={styles.removeDownload}>Remove</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <Button variant="secondary" loading={downloadMutation.isPending} onPress={() => downloadMutation.mutate()}>
+          Download for offline reading
+        </Button>
+      )}
+      {(downloadMutation.isError || removeDownloadMutation.isError) && (
+        <Text accessibilityRole="alert" style={styles.downloadError}>
+          {(downloadMutation.error || removeDownloadMutation.error) instanceof Error
+            ? (downloadMutation.error || removeDownloadMutation.error)?.message
+            : 'The offline copy could not be changed.'}
+        </Text>
+      )}
 
       <Card>
         <View style={styles.stats}>
@@ -210,4 +247,9 @@ const styles = StyleSheet.create({
   parallelNote: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   parallelText: { flex: 1, color: colors.muted, fontSize: 13 },
   translator: { color: colors.primary, fontSize: 14, fontStyle: 'italic' },
+  downloadRow: { minHeight: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderRadius: 20, paddingHorizontal: 15, backgroundColor: colors.successSoft },
+  downloadCopy: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  downloadText: { flex: 1, color: colors.ink, fontSize: 13, fontWeight: '600' },
+  removeDownload: { color: colors.primary, fontSize: 13, fontWeight: '600' },
+  downloadError: { color: colors.danger, fontSize: 12, lineHeight: 18, textAlign: 'center' },
 });

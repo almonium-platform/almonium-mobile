@@ -23,6 +23,7 @@ import { useAuth } from '@/src/auth-context';
 import { ReadingProgressSync } from '@/src/reading-progress';
 import { createCardDraft } from '@/src/card-utils';
 import { normalizedLookupEntry } from '@/src/discover';
+import { downloadedBooks, readDownloadedBook } from '@/src/offline-books';
 import { colors, fonts, shadows } from '@/src/theme';
 import { isUuid } from '@/src/uuid';
 
@@ -136,13 +137,25 @@ export default function ReaderScreen() {
 
   const textQuery = useQuery({
     queryKey: ['book-text', firebaseUser?.uid, bookId],
-    queryFn: () => api.bookText(bookId),
+    queryFn: async () => (await readDownloadedBook(bookId)) ?? api.bookText(bookId),
     enabled: validBookId && Boolean(firebaseUser),
     staleTime: 10 * 60_000,
   });
   const infoQuery = useQuery({
     queryKey: ['book-info', firebaseUser?.uid, bookId],
-    queryFn: () => api.bookInfo(bookId),
+    queryFn: async () => {
+      try {
+        return await api.bookInfo(bookId);
+      } catch (error) {
+        const downloaded = (await downloadedBooks()).find((book) => book.id === bookId);
+        if (!downloaded) throw error;
+        return {
+          progressPercentage: downloaded.progressPercentage ?? 0,
+          language: downloaded.language,
+          languageVariants: [{ id: downloaded.id, language: downloaded.language }],
+        };
+      }
+    },
     enabled: validBookId && Boolean(firebaseUser),
   });
   const parallelLanguage = infoQuery.data?.languageVariants.find(
