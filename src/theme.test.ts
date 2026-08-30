@@ -14,6 +14,7 @@ describe('Almonium visual system', () => {
     expect(colors.surface).toBe('#FFFFFF');
     expect(colors.ink).toBe('#2C2530');
     expect(colors.primary).toBe('#5A1A74');
+    expect(colors).not.toHaveProperty('reading');
     expect(gradients.premium).toEqual(['#8F2356', '#5A1A74']);
     expect(gradients).not.toHaveProperty('primary');
   });

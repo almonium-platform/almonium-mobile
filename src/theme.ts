@@ -3,8 +3,8 @@
  * and shipped CSS variables.
  *
  * Keep color names semantic at call sites. Colour is for hierarchy and state,
- * not decoration: cream ground, white surfaces, plum actions, orange reading
- * progress, and exceptional colours only for status.
+ * not decoration: cream ground, white surfaces, plum actions, and exceptional
+ * colours only for status.
  */
 export const colors = {
   ink: '#2C2530',
@@ -19,7 +19,6 @@ export const colors = {
   premium: '#8F2356',
   accentSoft: '#F8EAF3',
   accentBorder: '#E9CADF',
-  reading: '#FF7F00',
   line: '#EDEBE8',
   border: '#D8CFD6',
   disabled: '#E8E2E6',
@@ -48,10 +47,10 @@ export const fonts = {
 } as const;
 
 export const radii = {
-  inline: 8,
+  inline: 12,
   control: 999,
   panel: 20,
-  card: 30,
+  card: 28,
 } as const;
 
 export const shadows = {

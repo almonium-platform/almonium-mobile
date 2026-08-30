@@ -114,7 +114,7 @@ export interface LearningCard {
   learningIntents?: LearningIntent[];
 }
 
-export type LearningIntent = 'UNDERSTAND' | 'PRODUCE' | 'DISAMBIGUATE' | 'PRONOUNCE';
+export type LearningIntent = 'UNDERSTAND' | 'PRODUCE' | 'DISAMBIGUATE' | 'PRONOUNCE' | 'CHUNK';
 
 export interface CardDraft {
   entry: string;

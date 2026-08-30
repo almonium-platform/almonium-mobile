@@ -106,5 +106,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.line,
     overflow: 'hidden',
   },
-  progress: { height: 5, borderRadius: 3, backgroundColor: colors.reading },
+  progress: { height: 5, borderRadius: 3, backgroundColor: colors.primary },
 });

@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { router } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -20,12 +20,10 @@ import { BrandMark } from '@/components/brand-mark';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
-import { dueCards, type ReviewState } from '@/src/card-utils';
 import { colors, fonts, shadows } from '@/src/theme';
 import type { LearningCard } from '@/src/types';
 
 const cardLanguageKey = 'almonium:card-language';
-const reviewKey = (uid: string, language: string) => `almonium:review:${uid}:${language}`;
 
 export default function CardsScreen() {
   const { firebaseUser, profile } = useAuth();
@@ -35,7 +33,6 @@ export default function CardsScreen() {
   );
   const [language, setLanguage] = useState(activeLanguages[0] ?? '');
   const [search, setSearch] = useState('');
-  const [schedule, setSchedule] = useState<Record<string, ReviewState>>({});
 
   useEffect(() => {
     void AsyncStorage.getItem(cardLanguageKey).then((saved) => {
@@ -43,22 +40,14 @@ export default function CardsScreen() {
     });
   }, [activeLanguages]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!firebaseUser || !language) return;
-      void AsyncStorage.getItem(reviewKey(firebaseUser.uid, language)).then((value) => {
-        try {
-          setSchedule(value ? (JSON.parse(value) as Record<string, ReviewState>) : {});
-        } catch {
-          setSchedule({});
-        }
-      });
-    }, [firebaseUser, language]),
-  );
-
   const query = useQuery({
     queryKey: ['cards', firebaseUser?.uid, language],
     queryFn: () => api.cards(language),
+    enabled: Boolean(firebaseUser && language),
+  });
+  const review = useQuery({
+    queryKey: ['review-summary', firebaseUser?.uid, language],
+    queryFn: () => api.reviewSummary(language),
     enabled: Boolean(firebaseUser && language),
   });
   const filtered = useMemo(() => {
@@ -71,7 +60,7 @@ export default function CardsScreen() {
         card.tags?.some((tag) => tag.text?.toLocaleLowerCase().includes(needle)),
     );
   }, [query.data, search]);
-  const due = dueCards(query.data ?? [], schedule).length;
+  const due = review.data?.dueCount ?? 0;
 
   function chooseLanguage(code: string) {
     setLanguage(code);
@@ -110,19 +99,21 @@ export default function CardsScreen() {
       contentContainerStyle={styles.list}
       refreshControl={
         <RefreshControl
-          refreshing={query.isRefetching}
-          onRefresh={query.refetch}
+          refreshing={query.isRefetching || review.isRefetching}
+          onRefresh={() => Promise.all([query.refetch(), review.refetch()])}
           tintColor={colors.primary}
         />
       }
       ListHeaderComponent={
         <View style={styles.header}>
           <Text style={styles.eyebrow}>REVIEW</Text>
-          <Text style={styles.hero}>{due ? `${due} ${due === 1 ? 'word is' : 'words are'} due` : 'You are clear for now'}</Text>
-          <Text style={styles.subhead}>
-            {due ? `${Math.min(10, due)} make a session. Nothing is lost by stopping.` : 'Reading a page will give Almo more to ask you.'}
+          <Text style={styles.hero}>
+            {review.isLoading ? 'Gathering what is due' : due ? `${due} ${due === 1 ? 'word is' : 'words are'} due` : 'You are clear for now'}
           </Text>
-          {due ? <View style={styles.actions}>
+          <Text style={styles.subhead}>
+            {review.isLoading ? 'Your schedule is kept across every device.' : due ? `${review.data?.sessionSize ?? Math.min(10, due)} make a session. Nothing is lost by stopping.` : 'Reading a page will give Almo more to ask you.'}
+          </Text>
+          {review.isLoading ? <ActivityIndicator style={styles.loader} color={colors.primary} /> : due ? <View style={styles.actions}>
             <Pressable
               style={styles.reviewAction}
               onPress={() => router.push({ pathname: '/review', params: { language } })}>
@@ -132,7 +123,7 @@ export default function CardsScreen() {
                 </View>
                 <View style={styles.actionCopy}>
                   <Text style={styles.actionTitle}>Review due cards</Text>
-                  <Text style={styles.actionCaption}>Spaced practice on this device</Text>
+                  <Text style={styles.actionCaption}>Your schedule follows you</Text>
                 </View>
                 <Ionicons name="arrow-forward" size={20} color={colors.white} />
               </View>
@@ -152,9 +143,9 @@ export default function CardsScreen() {
               <Button
                 variant="secondary"
                 onPress={() => query.data?.length
-                  ? router.push({ pathname: '/review', params: { language, ahead: '1' } })
+                  ? router.push('/(tabs)/books')
                   : router.push({ pathname: '/card/new', params: { language } })}>
-                {query.data?.length ? 'Practise ahead' : 'Keep your first word'}
+                {query.data?.length ? 'Open your shelf' : 'Keep your first word'}
               </Button>
             </View>
           )}
@@ -168,8 +159,8 @@ export default function CardsScreen() {
               style={styles.searchInput}
             />
           </View>
-          {query.isError && query.data && (
-            <Text style={styles.offline}>Showing saved cards. Reconnect to refresh or edit.</Text>
+          {(query.isError || review.isError) && (query.data || review.data) && (
+            <Text style={styles.offline}>Showing available review details. Reconnect to refresh the schedule.</Text>
           )}
         </View>
       }

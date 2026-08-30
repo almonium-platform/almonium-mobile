@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AvatarPicker } from '@/components/avatar-picker';
 import { BrandMark } from '@/components/brand-mark';
@@ -16,7 +16,7 @@ import { languageName, sortLanguages } from '@/src/languages';
 import { colors } from '@/src/theme';
 import type { CefrLevel, SetupStep } from '@/src/types';
 
-const steps: SetupStep[] = ['WELCOME', 'PLAN', 'LANGUAGES', 'PROFILE', 'INTERESTS'];
+const steps: SetupStep[] = ['WELCOME', 'LANGUAGES', 'PROFILE', 'INTERESTS'];
 const levels: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
 const copy: Record<SetupStep, { eyebrow: string; title: string; description: string }> = {
@@ -26,9 +26,9 @@ const copy: Record<SetupStep, { eyebrow: string; title: string; description: str
     description: 'A quick setup will shape your library around what you know and what you want to learn.',
   },
   PLAN: {
-    eyebrow: 'YOUR PLAN',
-    title: 'Start with the essentials.',
-    description: 'The free plan includes one target language, daily reading, flashcards, and basic games.',
+    eyebrow: 'ONE MOMENT',
+    title: 'Opening your setup.',
+    description: 'Your language choices are next.',
   },
   LANGUAGES: {
     eyebrow: 'LANGUAGES',
@@ -83,6 +83,15 @@ export default function OnboardingScreen() {
     if (step === 'COMPLETED') router.replace('/(tabs)/home');
   }, [step]);
 
+  useEffect(() => {
+    if (step !== 'PLAN') return;
+    setBusy(true);
+    void api.completeOnboardingStep('PLAN')
+      .then(refreshProfile)
+      .catch((error) => Alert.alert('Setup could not continue', error instanceof Error ? error.message : 'Try again.'))
+      .finally(() => setBusy(false));
+  }, [refreshProfile, step]);
+
   async function run(action: () => Promise<unknown>) {
     setBusy(true);
     try {
@@ -95,7 +104,7 @@ export default function OnboardingScreen() {
     }
   }
 
-  async function completeSimple(currentStep: 'WELCOME' | 'PLAN' | 'PROFILE') {
+  async function completeSimple(currentStep: 'WELCOME' | 'PROFILE') {
     await run(async () => {
       if (currentStep === 'PROFILE' && username.trim() !== profile?.username) {
         await api.updateUsername(username.trim());
@@ -163,20 +172,7 @@ export default function OnboardingScreen() {
       )}
 
       {step === 'PLAN' && (
-        <Card>
-          {['One target language', 'One story a day', '100 card reviews a day', 'Basic games'].map(
-            (feature) => (
-              <View key={feature} style={styles.checkRow}>
-                <Ionicons name="checkmark-circle" size={21} color={colors.primary} />
-                <Text style={styles.featureTitle}>{feature}</Text>
-              </View>
-            ),
-          )}
-          <Button loading={busy} onPress={() => completeSimple('PLAN')}>
-            Continue with free
-          </Button>
-          <Text style={styles.finePrint}>No card required. Premium can wait until you need it.</Text>
-        </Card>
+        <Card><ActivityIndicator size="large" color={colors.primary} /></Card>
       )}
 
       {step === 'LANGUAGES' && (
@@ -287,7 +283,7 @@ const styles = StyleSheet.create({
   wordmark: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   logo: { color: colors.primary, fontSize: 13, fontWeight: '600', letterSpacing: 2 },
   progressTrack: { height: 5, borderRadius: 3, overflow: 'hidden', backgroundColor: colors.line },
-  progress: { height: 5, borderRadius: 3, backgroundColor: colors.reading },
+  progress: { height: 5, borderRadius: 3, backgroundColor: colors.primary },
   intro: { gap: 10, paddingVertical: 10 },
   eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
   description: { color: colors.muted, fontSize: 16, lineHeight: 24 },

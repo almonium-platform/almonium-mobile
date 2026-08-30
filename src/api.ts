@@ -21,6 +21,12 @@ import type {
 import { config } from '@/src/config';
 import { decodeJsonBody, errorMessageFromBody } from '@/src/http-errors';
 import type { DiscoverLookup } from '@/src/discover';
+import type {
+  ReviewAnswer,
+  ReviewSession,
+  ReviewSessionResult,
+  ReviewSummary,
+} from '@/src/review';
 
 export class ApiError extends Error {
   constructor(
@@ -194,6 +200,24 @@ export const api = {
       method: favorite ? 'POST' : 'DELETE',
     }),
   cards: (language: string) => request<LearningCard[]>(`/cards/lang/${language}`),
+  reviewSummary: (language: string) => request<ReviewSummary>(`/review/summary/${language}`),
+  startReview: (language: string) =>
+    request<ReviewSession>(`/review/sessions/${language}`, { method: 'POST' }),
+  answerReview: (
+    sessionId: string,
+    itemId: string,
+    answer: { promptId: string; answer: string; hintsOpened: string[]; revealed: boolean },
+  ) =>
+    request<ReviewAnswer>(`/review/sessions/${sessionId}/items/${itemId}/answer`, {
+      method: 'POST',
+      body: JSON.stringify(answer),
+    }),
+  reviewResult: (sessionId: string) =>
+    request<ReviewSessionResult>(`/review/sessions/${sessionId}/result`),
+  markReviewMistype: (eventId: string) =>
+    request<void>(`/review/events/${eventId}/mistype`, { method: 'POST' }),
+  reencounterReviewItem: (itemId: string) =>
+    request<void>(`/review/leeches/${itemId}/reencounter`, { method: 'POST' }),
   card: (cardId: string) => request<LearningCard>(`/cards/${cardId}`),
   createCard: (draft: CardDraft) =>
     request<void>('/cards', {

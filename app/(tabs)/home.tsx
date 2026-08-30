@@ -1,8 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { router } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -18,10 +17,7 @@ import { BookCover } from '@/components/book-cover';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
-import { dueCards, type ReviewState } from '@/src/card-utils';
 import { colors, fonts, shadows } from '@/src/theme';
-
-const reviewKey = (uid: string, language: string) => `almonium:review:${uid}:${language}`;
 
 export default function HomeScreen() {
   const { firebaseUser, profile } = useAuth();
@@ -30,26 +26,12 @@ export default function HomeScreen() {
     [profile?.learners],
   );
   const [language, setLanguage] = useState(activeLanguages[0] ?? '');
-  const [schedule, setSchedule] = useState<Record<string, ReviewState>>({});
 
   useEffect(() => {
     if ((!language || !activeLanguages.includes(language)) && activeLanguages[0]) {
       setLanguage(activeLanguages[0]);
     }
   }, [activeLanguages, language]);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!firebaseUser || !language) return;
-      void AsyncStorage.getItem(reviewKey(firebaseUser.uid, language)).then((value) => {
-        try {
-          setSchedule(value ? (JSON.parse(value) as Record<string, ReviewState>) : {});
-        } catch {
-          setSchedule({});
-        }
-      });
-    }, [firebaseUser, language]),
-  );
 
   const shelf = useQuery({
     queryKey: ['bookshelf', firebaseUser?.uid, language],
@@ -61,6 +43,11 @@ export default function HomeScreen() {
     queryFn: () => api.cards(language),
     enabled: Boolean(firebaseUser && language),
   });
+  const review = useQuery({
+    queryKey: ['review-summary', firebaseUser?.uid, language],
+    queryFn: () => api.reviewSummary(language),
+    enabled: Boolean(firebaseUser && language),
+  });
   const recentCards = useMemo(
     () =>
       [...(cards.data ?? [])]
@@ -68,14 +55,14 @@ export default function HomeScreen() {
         .slice(0, 4),
     [cards.data],
   );
-  const due = dueCards(cards.data ?? [], schedule).length;
+  const due = review.data?.dueCount ?? 0;
   const continueBook = shelf.data?.continueReading[0];
   const hasActivity = Boolean(continueBook || cards.data?.length);
-  const loading = shelf.isLoading || cards.isLoading;
-  const refreshing = shelf.isRefetching || cards.isRefetching;
+  const loading = shelf.isLoading || cards.isLoading || review.isLoading;
+  const refreshing = shelf.isRefetching || cards.isRefetching || review.isRefetching;
 
   async function refresh() {
-    await Promise.all([shelf.refetch(), cards.refetch()]);
+    await Promise.all([shelf.refetch(), cards.refetch(), review.refetch()]);
   }
 
   function chooseNextLanguage() {
@@ -159,12 +146,13 @@ export default function HomeScreen() {
               <Text style={styles.eyebrow}>REVIEW</Text>
               <Text style={styles.panelTitle}>{due === 1 ? 'One word is due' : `${due} words are due`}</Text>
               <Text style={styles.meta}>
-                {Math.min(10, due)} make a session, about {Math.max(1, Math.ceil(Math.min(10, due) * 0.7))} minutes.
+                {review.data?.sessionSize ?? Math.min(10, due)} make a session, about {Math.max(1, Math.ceil((review.data?.sessionSize ?? Math.min(10, due)) * 0.7))} minutes.
               </Text>
             </View>
             <View style={styles.reviewStats}>
-              <View><Text style={styles.reviewNumber}>{due}</Text><Text style={styles.reviewLabel}>UNDERSTAND</Text></View>
-              <View><Text style={styles.reviewNumber}>{Math.min(due, recentCards.filter((card) => card.activeLearning).length)}</Text><Text style={styles.reviewLabel}>ACTIVE</Text></View>
+              <View><Text style={styles.reviewNumber}>{review.data?.understandCount ?? 0}</Text><Text style={styles.reviewLabel}>UNDERSTAND</Text></View>
+              <View><Text style={styles.reviewNumber}>{review.data?.produceCount ?? 0}</Text><Text style={styles.reviewLabel}>PRODUCE</Text></View>
+              <View><Text style={styles.reviewNumber}>{review.data?.disambiguateCount ?? 0}</Text><Text style={styles.reviewLabel}>TELL APART</Text></View>
             </View>
             <Button variant="secondary" onPress={() => router.push({ pathname: '/review', params: { language } })}>
               Start a session
@@ -205,7 +193,7 @@ export default function HomeScreen() {
         </>
       )}
 
-      {(shelf.isError || cards.isError) && (
+      {(shelf.isError || cards.isError || review.isError) && (
         <Text style={styles.error}>Some home details could not be refreshed. Available sections are shown.</Text>
       )}
       </ScrollView>
@@ -230,7 +218,7 @@ const styles = StyleSheet.create({
   bookTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 25, lineHeight: 30, fontWeight: '600' },
   meta: { color: colors.muted, fontSize: 13, lineHeight: 19 },
   progressTrack: { height: 5, overflow: 'hidden', borderRadius: 3, backgroundColor: colors.line },
-  progress: { height: 5, borderRadius: 3, backgroundColor: colors.reading },
+  progress: { height: 5, borderRadius: 3, backgroundColor: colors.primary },
   progressLabel: { color: colors.muted, fontSize: 11 },
   panel: { padding: 20, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
   panelHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12, paddingBottom: 8 },

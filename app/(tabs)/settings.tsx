@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -329,13 +328,6 @@ export default function SettingsScreen() {
                       await reauthenticateWithApple();
                     }
                     await api.deleteAccount();
-                    const uid = firebaseUser?.uid;
-                    if (uid) {
-                      const reviewKeys = (await AsyncStorage.getAllKeys()).filter((key) =>
-                        key.startsWith(`almonium:review:${uid}:`),
-                      );
-                      if (reviewKeys.length) await AsyncStorage.multiRemove(reviewKeys);
-                    }
                     setCurrentPassword('');
                     await logOut();
                     router.replace('/(auth)/sign-in');
@@ -587,7 +579,7 @@ export default function SettingsScreen() {
 
       <Card>
         <View style={styles.sectionTitle}>
-          <Ionicons name="sparkles-outline" color={colors.reading} size={20} />
+          <Ionicons name="sparkles-outline" color={colors.ink} size={20} />
           <Text style={styles.sectionTitleText}>Account</Text>
         </View>
         <View style={styles.statRow}>

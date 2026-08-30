@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { cardUpdate, createCardDraft, dueCards, nextReview, relativeTime } from './card-utils';
+import { cardUpdate, createCardDraft, relativeTime } from './card-utils';
 import type { LearningCard } from './types';
 
 const card: LearningCard = {
@@ -27,25 +27,6 @@ describe('card form payloads', () => {
       translations: [{ id: 'one', translation: 'hi' }],
       deletedTranslationsIds: ['two'],
     });
-  });
-});
-
-describe('review scheduling', () => {
-  const now = new Date('2026-07-26T10:00:00Z');
-
-  it('sends an easy new card four days ahead', () => {
-    expect(nextReview(undefined, 'easy', now)).toMatchObject({
-      intervalDays: 4,
-      repetitions: 1,
-      dueAt: '2026-07-30T10:00:00.000Z',
-    });
-  });
-
-  it('returns a missed card in ten minutes and makes it due-aware', () => {
-    const next = nextReview(undefined, 'again', now);
-    expect(next.dueAt).toBe('2026-07-26T10:10:00.000Z');
-    expect(dueCards([card], { [card.id]: next }, now)).toEqual([]);
-    expect(dueCards([card], { [card.id]: next }, new Date(next.dueAt))).toEqual([card]);
   });
 });
 
