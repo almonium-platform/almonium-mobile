@@ -77,11 +77,19 @@ export function channelTitle(channel: ChannelLike, currentUserId: string, fallba
   return channel.data?.name?.trim() || fallback;
 }
 
-/** "Almonium — Deutsch" -> "Deutsch"; falls back to the whole name. */
-export function broadcastTopic(channel: ChannelLike) {
-  const name = channel.data?.name ?? '';
-  const parts = name.split(/\s[—–-]\s/);
-  return (parts.at(-1) ?? name).trim();
+/**
+ * The mono emblem a broadcast room carries: `almonium-de` -> `DE`, the product-wide `almonium`
+ * -> `ALM`. Derived from the id the backend owns, so it needs no hosted artwork.
+ */
+export function broadcastCode(channelId: string) {
+  const language = broadcastLanguage(channelId);
+  return language ?? 'ALM';
+}
+
+/** The language a broadcast room is about, or null for the product-wide room. */
+export function broadcastLanguage(channelId: string): string | null {
+  const [, language] = channelId.split('-');
+  return language ? language.toUpperCase() : null;
 }
 
 /**
@@ -95,23 +103,38 @@ export function canSendMessages(channel: ChannelLike) {
   return channel.type !== channelTypes.broadcast;
 }
 
-/** The self chat carries no image; its emblem is drawn locally rather than fetched or lettered. */
+/**
+ * Only a DM has artwork worth fetching - the other person's. Saved Messages and the channels
+ * draw their own emblems, so nothing on those rows depends on a hosted asset being reachable.
+ */
 export function channelImage(channel: ChannelLike, currentUserId: string): string | undefined {
-  if (channel.type === channelTypes.self) return undefined;
   if (channel.type === channelTypes.private) return interlocutor(channel, currentUserId)?.image;
-  return channel.data?.image;
+  return undefined;
 }
 
-export function lastMessagePreview(
+/**
+ * The second line of a channel row. Each type says its own thing when nothing has been said in
+ * it yet, rather than sharing one placeholder.
+ */
+export function channelPreview(
+  channel: ChannelLike,
   messages: readonly MessageLike[],
   currentUserId: string,
-  empty = 'No messages yet',
 ) {
   const last = messages.at(-1);
-  if (!last) return empty;
-  const text = last.type === 'deleted' ? 'Message deleted' : last.text?.replace(/\s+/g, ' ').trim();
-  if (!text) return empty;
-  return last.user?.id === currentUserId ? `You: ${text}` : text;
+  const text = !last
+    ? ''
+    : last.type === 'deleted'
+      ? 'Message deleted'
+      : (last.text?.replace(/\s+/g, ' ').trim() ?? '');
+
+  if (!text) {
+    if (channel.type === channelTypes.self) return 'Only you can see this';
+    if (channel.type === channelTypes.broadcast) return 'No updates yet';
+    return 'No messages yet';
+  }
+  if (channel.type === channelTypes.self) return text;
+  return last?.user?.id === currentUserId ? `You: ${text}` : text;
 }
 
 export interface ChatMessage {
@@ -119,6 +142,7 @@ export interface ChatMessage {
   text: string;
   authorId?: string;
   authorName?: string;
+  authorImage?: string;
   createdAt: Date;
   own: boolean;
   deleted: boolean;
@@ -130,6 +154,7 @@ export function toChatMessage(message: MessageLike, currentUserId: string): Chat
     text: message.type === 'deleted' ? 'Message deleted' : message.text ?? '',
     authorId: message.user?.id,
     authorName: message.user?.name,
+    authorImage: message.user?.image,
     createdAt: new Date(message.created_at),
     own: message.user?.id === currentUserId,
     deleted: message.type === 'deleted',
@@ -138,17 +163,20 @@ export function toChatMessage(message: MessageLike, currentUserId: string): Chat
 
 export type ChatRow =
   | { kind: 'day'; key: string; label: string }
-  | { kind: 'message'; key: string; message: ChatMessage; startsBlock: boolean; endsBlock: boolean };
+  | { kind: 'message'; key: string; message: ChatMessage; startsRun: boolean };
+
+/** Consecutive messages from one sender group into a run while they stay this close together. */
+export const runWindowMs = 5 * 60 * 1000;
 
 /**
- * Chronological rows for the transcript: a dated divider whenever the day turns, plus flags for
- * the first and last message of a run by one author, so only the first carries a name and only
- * the last carries a timestamp.
+ * Chronological rows for the transcript: a dated divider whenever the day turns, and a flag for
+ * the first message of a run. The divider owns the date and every bubble owns its own time, so
+ * no author line or per-message date is ever needed.
  */
 export function transcriptRows(messages: readonly ChatMessage[], now = new Date()): ChatRow[] {
   const rows: ChatRow[] = [];
   let day: string | null = null;
-  let author: string | undefined;
+  let previous: ChatMessage | undefined;
 
   for (const message of messages) {
     const messageDay = dayKey(message.createdAt);
@@ -156,22 +184,14 @@ export function transcriptRows(messages: readonly ChatMessage[], now = new Date(
     if (turned) {
       rows.push({ kind: 'day', key: `day-${messageDay}`, label: dayLabel(message.createdAt, now) });
       day = messageDay;
-      author = undefined;
+      previous = undefined;
     }
-    rows.push({
-      kind: 'message',
-      key: message.id,
-      message,
-      startsBlock: turned || message.authorId !== author,
-      endsBlock: true,
-    });
-    author = message.authorId;
-  }
-
-  for (let index = 0; index < rows.length; index += 1) {
-    const row = rows[index];
-    const next = rows[index + 1];
-    if (row.kind === 'message' && next?.kind === 'message') row.endsBlock = next.startsBlock;
+    const continues =
+      !!previous &&
+      previous.authorId === message.authorId &&
+      message.createdAt.getTime() - previous.createdAt.getTime() <= runWindowMs;
+    rows.push({ kind: 'message', key: message.id, message, startsRun: !continues });
+    previous = message;
   }
 
   return rows;

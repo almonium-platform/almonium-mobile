@@ -11,386 +11,685 @@
 <meta name="design_doc_mode" content="canvas">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   body { margin: 0; background: #efe9e6; color: #2C2530; }
   a { color: #872657; text-decoration: none; }
   a:hover { color: #5A1A74; }
-  @keyframes almo-spin { to { transform: rotate(360deg); } }
-  @keyframes almo-spin-out { 0%, 34% { opacity: 1; } 42%, 100% { opacity: 0; } }
-  @keyframes almo-bell-in { 0%, 34% { opacity: 0; } 42%, 100% { opacity: 1; } }
-  @keyframes almo-swing {
-    0%, 42% { transform: rotate(0deg); }
-    50% { transform: rotate(13deg); }
-    58% { transform: rotate(-10deg); }
-    66% { transform: rotate(7deg); }
-    74% { transform: rotate(-4deg); }
-    82% { transform: rotate(2deg); }
-    90%, 100% { transform: rotate(0deg); }
-  }
 </style>
 </helmet>
 
 <div style="padding:48px 40px 90px; font-family:'IBM Plex Sans',sans-serif;">
-<div style="max-width:1420px; margin:0 auto; display:flex; flex-direction:column; gap:34px;">
+<div style="max-width:1460px; margin:0 auto; display:flex; flex-direction:column; gap:44px;">
 
   <div style="display:flex; flex-direction:column; gap:10px;">
-    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Almonium · social &amp; chat review</div>
-    <h1 style="margin:0; font-family:'Literata',serif; font-size:40px; font-weight:600; line-height:1.15;">The one segment nobody had looked at</h1>
-    <p style="margin:0; font-size:15px; line-height:1.65; color:#5f5560; max-width:80ch; text-wrap:pretty;">Friends, requests, chats and notifications. The structure is right — the panel model, the request lifecycle, saved messages and the hidden-chats idea all work. What is wrong is almost entirely surface: a saturated wallpaper on the surface holding the most reading outside the reader, a cyan avatar, tooltips in the wrong ink, icon-only actions with no labels, and a dark mode that stops at the page ground. The bell in <a href="#1a">1a</a> is the best-made thing in here. It only needs a dark counterpart.</p>
+    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Almonium &middot; social &amp; chat</div>
+    <h1 style="margin:0; font-family:'Literata',serif; font-size:38px; font-weight:600; line-height:1.15;">Build reference</h1>
+    <p style="margin:0; font-size:15px; line-height:1.65; color:#5f5560; max-width:82ch; text-wrap:pretty;">Every frame below is the target state. Text inside a frame is real product copy and ships verbatim; everything in mono under a frame is a note for the implementer and never renders. Palette: ink <code style="font-family:'IBM Plex Mono',monospace; font-size:12.5px;">#2C2530</code>, plum <code style="font-family:'IBM Plex Mono',monospace; font-size:12.5px;">#872657</code>, ground <code style="font-family:'IBM Plex Mono',monospace; font-size:12.5px;">#F9F6F5</code>, hairline <code style="font-family:'IBM Plex Mono',monospace; font-size:12.5px;">#EDE6EA</code>, muted ink <code style="font-family:'IBM Plex Mono',monospace; font-size:12.5px;">#8B8189</code>. Literata for names and headings, IBM Plex Sans for everything else.</p>
   </div>
 
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-    <div style="background:#fff4f6; border-radius:18px; padding:20px 24px; display:flex; flex-direction:column; gap:9px;">
-      <div style="display:flex; align-items:center; gap:9px;"><span style="font-size:10.5px; letter-spacing:1.2px; font-weight:600; color:#fff; background:#fa4666; padding:3px 8px; border-radius:6px;">P0</span><span style="font-family:'Literata',serif; font-size:18px; font-weight:600;">Breaks a law</span></div>
-      <div style="display:flex; flex-direction:column; gap:7px; font-size:13.5px; line-height:1.55;">
-        <div><strong>The Saved Messages avatar is cyan.</strong> A blue gradient disc with a white bookmark, sitting in a rail of plum emblems. It is the brightest object in the chat list and the last cyan in the product.</div>
-        <div><strong>The chat wallpaper is a saturated raspberry field.</strong> Roughly <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">#B0637E</code> in light, deep maroon in dark, behind continuous reading. Law 3: surfaces holding content are quiet. Ground and hairline, nothing else — <a href="#1c">1c</a>.</div>
-        <div><strong>Tooltips are filled plum.</strong> "Your friends, requests, and more", "Switch to visible chats". The action list already carries the fix for the blue tooltip: ink ground, cream text, tail clear of the card below. Plum is worse than blue here, because plum means primary action.</div>
-        <div><strong>Exclamation marks in every notification.</strong> "@wowsie wants to be friends with you!", "accepted your friendship request!", "Nothing here… yet!". Register rule: no exclamation marks, and this audience chose the product for not being cheerful at them.</div>
-        <div><strong>The eye icon is state drawn as action.</strong> Open eye, closed eye, tooltip reading "Switch to visible chats" — the user cannot tell whether they are looking at hidden chats or about to. Labelled switch, or a Hidden tab.</div>
-      </div>
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="display:flex; align-items:baseline; gap:12px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">01</span>
+      <h2 style="margin:0; font-family:'Literata',serif; font-size:24px; font-weight:600;">Chat list</h2>
     </div>
-    <div style="background:#fff; border-radius:18px; padding:20px 24px; display:flex; flex-direction:column; gap:9px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-      <div style="display:flex; align-items:center; gap:9px;"><span style="font-size:10.5px; letter-spacing:1.2px; font-weight:600; color:#fff; background:#ea6644; padding:3px 8px; border-radius:6px;">P1</span><span style="font-family:'Literata',serif; font-size:18px; font-weight:600;">Visible quality</span></div>
-      <div style="display:flex; flex-direction:column; gap:7px; font-size:13.5px; line-height:1.55;">
-        <div><strong>Every row action is a bare icon.</strong> Add-person, X, chat bubble, bell — accept, decline, cancel, message and notify all rendered as unlabelled glyphs, and the same person-plus glyph means both "send request" and "accept request".</div>
-        <div><strong>Four identical unread notifications from one user.</strong> Same request, four rows, three timestamps. Collapse by actor and event type, keep the newest time — <a href="#1b">1b</a>.</div>
-        <div><strong>The social menu spends a full panel on four links.</strong> Four stacked pill cards, one of them in an unexplained grey. Search is not a sibling of Friends, Requests and Blocked — it is the action you take from Friends.</div>
-        <div><strong>The search field spell-checks the username.</strong> Red squiggle under "kuzan". <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">spellcheck="false"</code> and <code style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">autocapitalize="none"</code> on every handle field.</div>
-        <div><strong>"We notified user about your request."</strong> Missing article, and it reports the system's work rather than the user's. "Request sent to @kuzanorest."</div>
-        <div><strong>Language chips in the profile card are a rainbow.</strong> AM pink, HY green, AZ violet, ET orange, ES yellow, ID blue, each with a CEFR badge in a second hue. The multicolour palette belongs to interests only. Learning data takes plum and mono.</div>
-        <div><strong>Chat list selection is a heavy filled block.</strong> Near-black maroon behind the row, dimming its own text. Selected is a plum tint plus a 3px edge, at normal text weight.</div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:330px; background:#fff; border-right:1px solid #EDE6EA; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; flex-direction:column;">
+          <div style="display:flex; align-items:center; gap:12px; padding:16px 16px 12px;">
+            <div style="width:20px; display:flex; flex-direction:column; gap:4px;">
+              <div style="height:1.6px; background:#5f5560;"></div>
+              <div style="height:1.6px; background:#5f5560;"></div>
+              <div style="height:1.6px; background:#5f5560;"></div>
+            </div>
+            <div style="font-family:'Literata',serif; font-size:19px; font-weight:500; letter-spacing:.1px;">Chats</div>
+            <div style="margin-left:auto; width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+              <div style="width:15px; height:15px; border:1.6px solid #5f5560; border-radius:4px;"></div>
+            </div>
+          </div>
+          <div style="padding:0 16px 12px;">
+            <div style="display:flex; align-items:center; gap:9px; border:1px solid #DCD3D9; background:#fff; border-radius:10px; padding:8px 11px;">
+              <div style="width:13px; height:13px; border:1.5px solid #a99aa8; border-radius:50%;"></div>
+              <div style="font-size:13px; color:#8B8189;">Search</div>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; padding:0 8px 10px;">
+            <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px;">
+              <div style="width:38px; height:38px; flex:0 0 38px; border-radius:11px; background:#F3EDF6; display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#872657" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V18l-8-4-8 4z"></path></svg>
+              </div>
+              <div style="flex:1; font-size:14px; font-weight:500;">Archived</div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#8B8189;">3</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px; background:#F3EDF6; box-shadow:inset 3px 0 0 #872657;">
+              <div style="width:38px; height:38px; flex:0 0 38px; border-radius:50%; background:#d8cfd6;"></div>
+              <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;">
+                <div style="display:flex; align-items:baseline; gap:8px;">
+                  <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500; flex:1;">familsubs</div>
+                  <div style="font-size:11px; color:#8B8189;">8:10 PM</div>
+                </div>
+                <div style="font-size:12.5px; color:#8B8189; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Visca Catalunya</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px;">
+              <div style="width:38px; height:38px; flex:0 0 38px; border-radius:50%; background:#6E2A5E; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#F1EAEF;">EN</div>
+              <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;">
+                <div style="display:flex; align-items:baseline; gap:8px;">
+                  <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500; flex:1;">Almonium &mdash; English</div>
+                  <div style="font-size:11px; color:#8B8189;">Tue</div>
+                </div>
+                <div style="font-size:12.5px; color:#8B8189; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Der Vorleser is now a graded reader</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px;">
+              <div style="width:38px; height:38px; flex:0 0 38px; border-radius:50%; background:#872657; display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#FFF8F5" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.6A1.6 1.6 0 0 1 7.6 3h8.8A1.6 1.6 0 0 1 18 4.6V21l-6-4.4L6 21z"></path></svg>
+              </div>
+              <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;">
+                <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500;">Saved Messages</div>
+                <div style="font-size:12.5px; color:#8B8189;">Only you can see this</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px;">
+              <div style="width:38px; height:38px; flex:0 0 38px; border-radius:50%; background:#6E2A5E; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#F1EAEF;">ALM</div>
+              <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;">
+                <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500;">Almonium</div>
+                <div style="font-size:12.5px; color:#8B8189;">No updates yet</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="width:330px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Title: Literata 19px/500, never bold sans. Search: 1px #DCD3D9 outline on white, radius 10, plum 2px focus ring, clear &times; only once typed. Right of the title is New chat. Row: 38px avatar, Literata 14.5/500 name, 12.5px muted preview, one line each.</div>
       </div>
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:330px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; flex-direction:column;">
+          <div style="display:flex; align-items:center; gap:12px; padding:16px;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5f5560" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5l-7 7 7 7"></path></svg>
+            <div style="font-family:'Literata',serif; font-size:19px; font-weight:500;">Archived</div>
+          </div>
+          <div style="display:flex; flex-direction:column; padding:0 8px 12px;">
+            <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px;">
+              <div style="width:38px; height:38px; flex:0 0 38px; border-radius:50%; background:#d8cfd6;"></div>
+              <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;">
+                <div style="display:flex; align-items:baseline; gap:8px;">
+                  <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500; flex:1;">kuzanorest</div>
+                  <div style="font-size:11px; color:#8B8189;">Mar 4</div>
+                </div>
+                <div style="font-size:12.5px; color:#8B8189;">Thanks for the pack</div>
+              </div>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#a99aa8" stroke-width="1.8" stroke-linecap="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V18l-8-4-8 4z"></path><path d="M3 3l18 18"></path></svg>
+            </div>
+            <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px;">
+              <div style="width:38px; height:38px; flex:0 0 38px; border-radius:50%; background:#6E2A5E; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#F1EAEF;">IT</div>
+              <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;">
+                <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500;">Almonium &mdash; Italiano</div>
+                <div style="font-size:12.5px; color:#8B8189;">No updates yet</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="width:330px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Archive replaces the Hidden switch entirely. The Archived row sits at the top of the list and is absent when the archive is empty &mdash; no switch, no second tab, no eye icon. Entering it swaps the list contents in place; back chevron returns. An archived chat with a new message stays archived and shows an unread dot on the Archived row; it does not jump back to the main list. Unarchive is the icon at the row&rsquo;s right on hover, and is also in the row menu.</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:330px; background:#fff; border-radius:16px; padding:14px 8px; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; flex-direction:column; gap:10px;">
+          <div style="position:relative; display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px; background:#F9F6F5;">
+            <div style="width:38px; height:38px; flex:0 0 38px; border-radius:50%; background:#d8cfd6;"></div>
+            <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;">
+              <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500;">familsubs</div>
+              <div style="font-size:12.5px; color:#8B8189;">Visca Catalunya</div>
+            </div>
+            <div style="width:24px; height:24px; border-radius:7px; background:#fff; border:1px solid #E4DBE1; display:flex; align-items:center; justify-content:center; gap:2px;">
+              <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
+              <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
+              <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
+            </div>
+          </div>
+          <div style="align-self:flex-end; width:196px; background:#fff; border:1px solid #EDE6EA; border-radius:14px; padding:6px; box-shadow:0 12px 30px rgba(44,37,48,.16); display:flex; flex-direction:column;">
+            <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:9px; font-size:13px;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#5f5560" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V18l-8-4-8 4z"></path></svg>Archive</div>
+            <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:9px; font-size:13px;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#5f5560" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v10H8l-4 4z"></path></svg>Mark as unread</div>
+            <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:9px; font-size:13px;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#5f5560" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9v6h4l5 4V5l-5 4z"></path><path d="M3 3l18 18"></path></svg>Mute</div>
+            <div style="height:1px; background:#EDE6EA; margin:5px 8px;"></div>
+            <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:9px; font-size:13px;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#5f5560" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><path d="M9 12h6"></path></svg>Clear history</div>
+            <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:9px; font-size:13px; color:#D8324B;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#D8324B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14"></path><path d="M9 7V5h6v2"></path><path d="M7 7l1 13h8l1-13"></path></svg>Delete chat</div>
+          </div>
+        </div>
+        <div style="width:330px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. The menu opens from the &hellip; button that fades in on row hover and focus &mdash; right-click on the row is an accelerator for the same menu, never the only way in. Menu is anchored to the button, opens downward, flips up near the viewport bottom, closes on Escape and outside click. Delete is the only red item. Channels get Archive / Mute / Leave channel instead.</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:330px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; flex-direction:column;">
+          <div style="padding:16px 16px 12px; display:flex; flex-direction:column; gap:12px;">
+            <div style="font-family:'Literata',serif; font-size:19px; font-weight:500;">Chats</div>
+            <div style="display:flex; align-items:center; gap:9px; border:1px solid #872657; box-shadow:0 0 0 2px rgba(135,38,87,.14); background:#fff; border-radius:10px; padding:8px 11px;">
+              <div style="width:13px; height:13px; border:1.5px solid #872657; border-radius:50%;"></div>
+              <div style="font-size:13px; color:#2c2530; flex:1;">almonium</div>
+              <div style="font-size:14px; color:#8B8189;">&times;</div>
+            </div>
+          </div>
+          <div style="padding:0 8px 12px; display:flex; flex-direction:column;">
+            <div style="padding:4px 12px 8px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#a99aa8;">Channels you can join</div>
+            <div style="display:flex; align-items:center; gap:11px; padding:8px 10px; border-radius:12px;">
+              <div style="width:34px; height:34px; flex:0 0 34px; border-radius:50%; background:#6E2A5E; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#F1EAEF;">IT</div>
+              <div style="flex:1; font-family:'Literata',serif; font-size:14px; font-weight:500;">Almonium &mdash; Italiano</div>
+              <div style="font-size:12px; font-weight:500; color:#872657; border:1px solid #E0CFD9; border-radius:9999px; padding:5px 13px;">Join</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:11px; padding:8px 10px; border-radius:12px;">
+              <div style="width:34px; height:34px; flex:0 0 34px; border-radius:50%; background:#6E2A5E; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#F1EAEF;">DE</div>
+              <div style="flex:1; font-family:'Literata',serif; font-size:14px; font-weight:500;">Almonium &mdash; Deutsch</div>
+              <div style="font-size:12px; font-weight:500; color:#872657; border:1px solid #E0CFD9; border-radius:9999px; padding:5px 13px;">Join</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:11px; padding:8px 10px; border-radius:12px;">
+              <div style="width:34px; height:34px; flex:0 0 34px; border-radius:50%; background:#6E2A5E; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#F1EAEF;">EN</div>
+              <div style="flex:1; font-family:'Literata',serif; font-size:14px; font-weight:500;">Almonium &mdash; English</div>
+              <div style="font-size:12px; color:#8B8189;">Joined</div>
+            </div>
+          </div>
+        </div>
+        <div style="width:330px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Join is a button on the row, never a floating popover over the list. Sections in search results: Chats, then Channels you can join, then Messages. Empty result reads &ldquo;No chats match &lsquo;dsafsdf&rsquo;.&rdquo; in 13px muted ink, centred, with no illustration and no &ldquo;Oops&rdquo;.</div>
+      </div>
+
     </div>
   </div>
 
-  <section style="display:flex; flex-direction:column; gap:26px;">
-
-    <div id="1a" style="display:flex; flex-direction:column; gap:10px;">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1a</span>
-        <span style="font-size:13px; font-weight:600;">The notify bell — dark counterpart, same motion</span>
-      </div>
-      <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;">
-
-        <div style="width:420px; background:#F9F6F5; border-radius:24px; padding:22px 24px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-          <div style="font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#a99aa8;">Light — unchanged</div>
-          <div style="background:#fff; border-radius:9999px; padding:12px 18px; display:flex; align-items:center; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-            <div style="width:34px; height:34px; border-radius:50%; background:#d8cfd6; flex:0 0 34px;"></div>
-            <div style="flex:1; font-size:14.5px; font-weight:600; color:#2C2530;">kuzanorest</div>
-            <div style="position:relative; width:24px; height:24px; flex:0 0 24px;">
-              <div style="position:absolute; inset:2px; border-radius:50%; border:2px solid #d8cfd6; border-top-color:#5A1A74; animation:almo-spin .8s linear infinite, almo-spin-out 3.6s ease-in-out infinite;"></div>
-              <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; animation:almo-bell-in 3.6s ease-in-out infinite;">
-                <svg width="22" height="22" viewBox="0 0 20 20" fill="none" style="transform-origin:50% 15%; animation:almo-swing 3.6s ease-in-out infinite;"><path d="M6 8.6a4 4 0 0 1 8 0c0 3.2 1 4.3 1.6 5H4.4C5 12.9 6 11.8 6 8.6Z" stroke="#5A1A74" stroke-width="1.5" stroke-linejoin="round"></path><path d="M8.4 16a1.9 1.9 0 0 0 3.2 0" stroke="#5A1A74" stroke-width="1.5" stroke-linecap="round"></path></svg>
-              </div>
-            </div>
-          </div>
-          <p style="margin:0; font-size:12.5px; line-height:1.55; color:#5f5560;">Spinner track <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">#d8cfd6</code>, head <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">#5A1A74</code>, bell stroke <code style="font-family:'IBM Plex Mono',monospace; font-size:11px;">#5A1A74</code>.</p>
-        </div>
-
-        <div style="width:420px; background:#14111A; border-radius:24px; padding:22px 24px; display:flex; flex-direction:column; gap:14px; border:1px solid #332C3C;">
-          <div style="font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#8D8298;">Dark — proposed</div>
-          <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:9999px; padding:12px 18px; display:flex; align-items:center; gap:14px;">
-            <div style="width:34px; height:34px; border-radius:50%; background:#453D51; flex:0 0 34px;"></div>
-            <div style="flex:1; font-size:14.5px; font-weight:600; color:#F1EAEF;">kuzanorest</div>
-            <div style="position:relative; width:24px; height:24px; flex:0 0 24px;">
-              <div style="position:absolute; inset:2px; border-radius:50%; border:2px solid #332C3C; border-top-color:#CBA3E0; animation:almo-spin .8s linear infinite, almo-spin-out 3.6s ease-in-out infinite;"></div>
-              <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; animation:almo-bell-in 3.6s ease-in-out infinite;">
-                <svg width="22" height="22" viewBox="0 0 20 20" fill="none" style="transform-origin:50% 15%; animation:almo-swing 3.6s ease-in-out infinite;"><path d="M6 8.6a4 4 0 0 1 8 0c0 3.2 1 4.3 1.6 5H4.4C5 12.9 6 11.8 6 8.6Z" stroke="#CBA3E0" stroke-width="1.5" stroke-linejoin="round"></path><path d="M8.4 16a1.9 1.9 0 0 0 3.2 0" stroke="#CBA3E0" stroke-width="1.5" stroke-linecap="round"></path></svg>
-              </div>
-            </div>
-          </div>
-          <p style="margin:0; font-size:12.5px; line-height:1.55; color:#BEB2C2;">Track moves to the hairline <code style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#CBA3E0;">#332C3C</code>, spinner head and bell stroke to the tint <code style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#CBA3E0;">#CBA3E0</code>. The row itself is card plus hairline, not white.</p>
-        </div>
-
-        <div style="width:360px; background:#fff; border-radius:24px; padding:22px 24px; display:flex; flex-direction:column; gap:9px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-          <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Why it went wrong</div>
-          <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; line-height:1.55; color:#2C2530;">
-            <div>The whole search panel keeps light-mode surfaces in dark — white rows floating on the dark app. The icon looked fine and the panel around it burned.</div>
-            <div>Where the panel did darken, the plum stroke ran at about 2:1 against it. Plum is a ground colour in dark, never an ink one.</div>
-            <div>The spinner track was a light grey that outshone its own moving head, so the loading phase read as a static ring rather than a rotation.</div>
-            <div style="color:#5f5560;">Timing, easing and the swing curve are untouched. Two hexes and a surface.</div>
-          </div>
-        </div>
-
-      </div>
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="display:flex; align-items:baseline; gap:12px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">02</span>
+      <h2 style="margin:0; font-family:'Literata',serif; font-size:24px; font-weight:600;">Conversation</h2>
     </div>
 
-    <div id="1b" style="display:flex; flex-direction:column; gap:10px;">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1b</span>
-        <span style="font-size:13px; font-weight:600;">Notifications — the panel, and what I think of it</span>
-      </div>
-      <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;">
+    <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">
 
-        <div style="width:390px; background:#fff; border-radius:24px; padding:22px 24px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-          <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Opinion</div>
-          <div style="display:flex; flex-direction:column; gap:7px; font-size:13.5px; line-height:1.55;">
-            <div><strong>It is a log, and it should be an inbox.</strong> Every row tells you something happened, then sends you elsewhere to act. A friend request has exactly two answers and both fit in the row.</div>
-            <div><strong>Four rows for one event.</strong> Whatever fires them, the panel is where the user meets the bug. Collapse on actor plus type regardless.</div>
-            <div><strong>The count pill does nothing.</strong> Four unread, four red dots, and a pink "4" beside the title saying it a third time.</div>
-            <div><strong>"Mark all as read" outweighs the heading.</strong> Plum 600 against ink 600 at almost the same size. It is a maintenance action — make it a quiet link.</div>
-            <div><strong>Titles wrap to two lines</strong> and then the body repeats the same fact. One line: actor, verb, object.</div>
-            <div><strong>Nothing ever gets old.</strong> No visible read state, no day grouping, no end. Grey the read rows and cap the list with "Older".</div>
-          </div>
-        </div>
-
-        <div style="width:400px; background:#F9F6F5; border-radius:24px; padding:20px; display:flex; flex-direction:column; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-          <div style="font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#a99aa8;">Light</div>
-          <div style="background:#fff; border-radius:20px; padding:16px 18px; display:flex; flex-direction:column; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-            <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
-              <div style="font-family:'Literata',serif; font-size:19px; font-weight:600; color:#2C2530;">Notifications</div>
-              <a href="#1b" style="font-size:12.5px; color:#872657;">Mark all read</a>
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:620px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; flex-direction:column;">
+          <div style="display:flex; align-items:center; gap:12px; padding:12px 18px; border-bottom:1px solid #EDE6EA;">
+            <div style="width:36px; height:36px; border-radius:50%; background:#d8cfd6; flex:0 0 36px;"></div>
+            <div style="flex:1; display:flex; align-items:center; gap:9px;">
+              <div style="font-family:'Literata',serif; font-size:16px; font-weight:500;">familsubs</div>
+              <div style="width:6px; height:6px; border-radius:50%; background:#16BA7F;"></div>
+              <div style="font-size:12px; color:#8B8189;">online</div>
             </div>
-            <div style="display:flex; flex-direction:column; gap:2px;">
-              <div style="display:flex; gap:12px; padding:12px; border-radius:14px; background:#F6F0F4;">
-                <div style="width:36px; height:36px; border-radius:50%; background:#d8cfd6; flex:0 0 36px;"></div>
-                <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-                  <div style="display:flex; gap:8px; align-items:baseline;"><div style="flex:1; font-size:13.5px; line-height:1.45; color:#2C2530;"><strong>@wowsie</strong> wants to be friends</div><div style="display:flex; align-items:center; gap:6px;"><div style="font-size:11px; color:#a99aa8; white-space:nowrap;">2 min</div><div style="width:6px; height:6px; border-radius:50%; background:#5A1A74; flex:0 0 6px;"></div></div></div>
-                  <div style="display:flex; gap:8px;">
-                    <div style="background:#5A1A74; color:#fff; font-size:12.5px; font-weight:600; padding:6px 16px; border-radius:9999px;">Accept</div>
-                    <div style="border:1px solid #d8cfd6; color:#5f5560; font-size:12.5px; font-weight:500; padding:6px 14px; border-radius:9999px;">Decline</div>
-                  </div>
+            <div style="display:flex; align-items:center; gap:3px;">
+              <div style="width:3px; height:3px; border-radius:50%; background:#5f5560;"></div>
+              <div style="width:3px; height:3px; border-radius:50%; background:#5f5560;"></div>
+              <div style="width:3px; height:3px; border-radius:50%; background:#5f5560;"></div>
+            </div>
+          </div>
+          <div style="background:#F9F6F5; padding:22px 22px 18px; display:flex; flex-direction:column; gap:14px;">
+            <div style="display:flex; align-items:center; gap:12px;"><div style="height:1px; background:#E6DDE3; flex:1;"></div><div style="font-size:11px; color:#8B8189;">Yesterday</div><div style="height:1px; background:#E6DDE3; flex:1;"></div></div>
+            <div style="display:flex; justify-content:flex-end;">
+              <div style="max-width:62%; background:#872657; color:#FFF8F5; border-radius:16px 16px 4px 16px; padding:9px 13px 7px; display:flex; align-items:flex-end; gap:10px;">
+                <div style="font-size:14px; line-height:1.5;">Hello!</div>
+                <div style="display:flex; align-items:center; gap:4px; padding-bottom:1px;">
+                  <span style="font-size:10.5px; color:rgba(255,248,245,.66);">9:12 PM</span>
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="rgba(255,248,245,.66)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13l4 4 8-9"></path><path d="M10 15l1.5 1.5L20 8"></path></svg>
                 </div>
               </div>
-              <div style="display:flex; gap:12px; padding:12px; border-radius:14px; background:#F6F0F4;">
-                <div style="width:36px; height:36px; border-radius:50%; background:#d8cfd6; flex:0 0 36px;"></div>
-                <div style="flex:1; display:flex; gap:8px; align-items:baseline;"><div style="flex:1; font-size:13.5px; line-height:1.45; color:#2C2530;"><strong>@kuzanorest</strong> accepted your request</div><div style="display:flex; align-items:center; gap:6px;"><div style="font-size:11px; color:#a99aa8; white-space:nowrap;">1 min</div><div style="width:6px; height:6px; border-radius:50%; background:#5A1A74; flex:0 0 6px;"></div></div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;"><div style="height:1px; background:#E6DDE3; flex:1;"></div><div style="font-size:11px; color:#8B8189;">Today</div><div style="height:1px; background:#E6DDE3; flex:1;"></div></div>
+            <div style="display:flex; gap:10px; align-items:flex-end;">
+              <div style="width:30px; height:30px; border-radius:50%; background:#d8cfd6; flex:0 0 30px;"></div>
+              <div style="max-width:62%; background:#fff; border:1px solid #EDE6EA; border-radius:16px 16px 16px 4px; padding:9px 13px 7px; display:flex; align-items:flex-end; gap:10px;">
+                <div style="font-size:14px; line-height:1.5;">Visca Catalunya</div>
+                <div style="font-size:10.5px; color:#a99aa8; padding-bottom:1px;">8:10 PM</div>
               </div>
-              <div style="height:1px; background:#edebe8; margin:8px 10px;"></div>
-              <div style="display:flex; gap:12px; padding:12px;">
-                <div style="width:36px; height:36px; border-radius:50%; background:#e8e2e6; flex:0 0 36px;"></div>
-                <div style="flex:1; display:flex; gap:8px; align-items:baseline;"><div style="flex:1; font-size:13.5px; line-height:1.45; color:#5f5560;"><strong style="font-weight:600;">@wowsie</strong> sent you a message</div><div style="display:flex; align-items:center; gap:6px;"><div style="font-size:11px; color:#a99aa8; white-space:nowrap;">Tue</div><div style="width:6px; flex:0 0 6px;"></div></div></div>
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-end;">
+              <div style="width:30px; flex:0 0 30px;"></div>
+              <div style="max-width:62%; background:#fff; border:1px solid #EDE6EA; border-radius:4px 16px 16px 16px; padding:9px 13px 7px; display:flex; align-items:flex-end; gap:10px;">
+                <div style="font-size:14px; line-height:1.5;">Are you watching tonight?</div>
+                <div style="font-size:10.5px; color:#a99aa8; padding-bottom:1px;">8:11 PM</div>
               </div>
             </div>
           </div>
+          <div style="padding:12px 18px; display:flex; align-items:center; gap:12px; border-top:1px solid #EDE6EA;">
+            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#872657" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v8M8 12h8"></path></svg>
+            <div style="flex:1; font-size:13.5px; color:#8B8189;">Write a message</div>
+            <svg viewBox="0 0 24 24" width="21" height="21" fill="#872657"><path d="M3 20l18-8L3 4l4 8z"></path></svg>
+          </div>
+        </div>
+        <div style="width:620px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. No author line and no date under a bubble: the day divider owns the date, the bubble owns the time. In a 1:1 the name is already in the header, so it never repeats per message. Consecutive messages from the same sender within 5 minutes share one avatar &mdash; only the last one in the run carries it, the rest indent by 40px and take the square top corner. Composer placeholder loses its ellipsis.</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+
+        <div style="display:flex; flex-direction:column; gap:11px;">
+          <div style="width:390px; background:#F9F6F5; border-radius:16px; padding:22px; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; gap:10px; align-items:flex-end;">
+              <div style="width:30px; height:30px; border-radius:50%; background:#d8cfd6; flex:0 0 30px;"></div>
+              <div style="background:#fff; border:1px solid #EDE6EA; border-radius:16px 16px 16px 4px; padding:9px 13px 7px; display:flex; align-items:flex-end; gap:10px;">
+                <div style="font-size:14px;">Visca Catalunya</div>
+                <div style="font-size:10.5px; color:#a99aa8; padding-bottom:1px;">8:10 PM</div>
+              </div>
+              <div style="width:24px; height:24px; border-radius:7px; background:#fff; border:1px solid #E4DBE1; display:flex; align-items:center; justify-content:center; gap:2px; align-self:center;">
+                <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
+                <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
+                <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
+              </div>
+            </div>
+            <div style="margin-left:40px; width:230px; background:#fff; border:1px solid #EDE6EA; border-radius:14px; box-shadow:0 12px 30px rgba(44,37,48,.16); overflow:hidden;">
+              <div style="display:flex; gap:6px; padding:9px 11px; border-bottom:1px solid #EDE6EA; font-size:17px;">
+                <span>&#128514;</span><span>&#128077;</span><span>&#10084;&#65039;</span><span>&#128533;</span><span>&#128558;</span>
+                <span style="margin-left:auto; color:#a99aa8; font-size:15px;">+</span>
+              </div>
+              <div style="padding:6px; display:flex; flex-direction:column;">
+                <div style="padding:8px 10px; font-size:13px; border-radius:9px;">Reply</div>
+                <div style="padding:8px 10px; font-size:13px; border-radius:9px;">Save to Saved Messages</div>
+                <div style="padding:8px 10px; font-size:13px; border-radius:9px;">Copy text</div>
+                <div style="padding:8px 10px; font-size:13px; border-radius:9px;">Mark as unread from here</div>
+              </div>
+            </div>
+          </div>
+          <div style="width:390px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Same trigger rule as the row menu: &hellip; on hover, right-click as accelerator. Reactions strip sits above the items. Saving a message here is the only way into Saved Messages besides writing there.</div>
         </div>
 
-        <div style="width:400px; background:#14111A; border-radius:24px; padding:20px; display:flex; flex-direction:column; gap:12px; border:1px solid #332C3C;">
-          <div style="font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#8D8298;">Dark</div>
-          <div style="background:#2E2736; border:1px solid #332C3C; border-radius:20px; padding:16px 18px; display:flex; flex-direction:column; gap:12px; box-shadow:0 16px 40px rgba(0,0,0,.55);">
-            <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
-              <div style="font-family:'Literata',serif; font-size:19px; font-weight:600; color:#F1EAEF;">Notifications</div>
-              <a href="#1b" style="font-size:12.5px; color:#D98BA8;">Mark all read</a>
+        <div style="display:flex; flex-direction:column; gap:11px;">
+          <div style="width:390px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+            <div style="display:flex; align-items:center; gap:11px; padding:12px 16px; border-bottom:1px solid #EDE6EA;">
+              <div style="width:32px; height:32px; border-radius:50%; background:#872657; display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#FFF8F5" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.6A1.6 1.6 0 0 1 7.6 3h8.8A1.6 1.6 0 0 1 18 4.6V21l-6-4.4L6 21z"></path></svg>
+              </div>
+              <div style="font-family:'Literata',serif; font-size:15px; font-weight:500;">Saved Messages</div>
             </div>
-            <div style="display:flex; flex-direction:column; gap:2px;">
-              <div style="display:flex; gap:12px; padding:12px; border-radius:14px; background:#3A3145;">
-                <div style="width:36px; height:36px; border-radius:50%; background:#453D51; flex:0 0 36px;"></div>
-                <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-                  <div style="display:flex; gap:8px; align-items:baseline;"><div style="flex:1; font-size:13.5px; line-height:1.45; color:#F1EAEF;"><strong>@wowsie</strong> wants to be friends</div><div style="display:flex; align-items:center; gap:6px;"><div style="font-size:11px; color:#8D8298; white-space:nowrap;">2 min</div><div style="width:6px; height:6px; border-radius:50%; background:#B07BD0; flex:0 0 6px;"></div></div></div>
-                  <div style="display:flex; gap:8px;">
-                    <div style="background:#B07BD0; color:#14111A; font-size:12.5px; font-weight:600; padding:6px 16px; border-radius:9999px;">Accept</div>
-                    <div style="border:1px solid #453D51; color:#BEB2C2; font-size:12.5px; font-weight:500; padding:6px 14px; border-radius:9999px;">Decline</div>
-                  </div>
+            <div style="background:#F9F6F5; padding:34px 26px; display:flex; flex-direction:column; align-items:center; gap:7px; text-align:center;">
+              <div style="font-family:'Literata',serif; font-size:15px; color:#2c2530;">Your own notebook</div>
+              <div style="font-size:13px; line-height:1.55; color:#8B8189; max-width:34ch;">Forward messages here, or write to yourself. Nobody else can see this chat.</div>
+            </div>
+          </div>
+          <div style="width:390px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Saved Messages never says &ldquo;Say hello&rdquo; &mdash; there is nobody to greet. Header carries no presence line and no &hellip; menu beyond Clear history. Emblem is the flat plum disc with the cream bookmark; the gradient stays reserved for premium avatars.</div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="display:flex; align-items:baseline; gap:12px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">03</span>
+      <h2 style="margin:0; font-family:'Literata',serif; font-size:24px; font-weight:600;">Channels</h2>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:560px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; flex-direction:column;">
+          <div style="display:flex; align-items:center; gap:12px; padding:12px 18px; border-bottom:1px solid #EDE6EA;">
+            <div style="width:36px; height:36px; border-radius:50%; background:#6E2A5E; flex:0 0 36px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#F1EAEF;">EN</div>
+            <div style="flex:1; display:flex; flex-direction:column;">
+              <div style="font-family:'Literata',serif; font-size:16px; font-weight:500;">Almonium &mdash; English</div>
+              <div style="font-size:12px; color:#8B8189;">Channel &middot; updates about English</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:3px;">
+              <div style="width:3px; height:3px; border-radius:50%; background:#5f5560;"></div>
+              <div style="width:3px; height:3px; border-radius:50%; background:#5f5560;"></div>
+              <div style="width:3px; height:3px; border-radius:50%; background:#5f5560;"></div>
+            </div>
+          </div>
+          <div style="background:#F9F6F5; padding:22px; display:flex; flex-direction:column; gap:14px;">
+            <div style="display:flex; align-items:center; gap:12px;"><div style="height:1px; background:#E6DDE3; flex:1;"></div><div style="font-size:11px; color:#8B8189;">Tuesday</div><div style="height:1px; background:#E6DDE3; flex:1;"></div></div>
+            <div style="max-width:76%; background:#fff; border:1px solid #EDE6EA; border-radius:16px; overflow:hidden;">
+              <div style="padding:13px 15px 11px; display:flex; flex-direction:column; gap:5px;">
+                <div style="font-size:14px; line-height:1.5;">Der Vorleser is now available as a graded reader. 1,240 words, B1.</div>
+                <div style="font-size:10.5px; color:#a99aa8;">9:12 PM</div>
+              </div>
+              <div style="border-top:1px solid #EDE6EA; padding:10px 15px; font-size:13px; font-weight:500; color:#872657;">Open book</div>
+            </div>
+          </div>
+          <div style="padding:13px 18px; border-top:1px solid #EDE6EA; display:flex; align-items:center; gap:10px;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#a99aa8" stroke-width="1.7" stroke-linecap="round"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+            <div style="font-size:12.5px; color:#8B8189;">Only Almonium posts in this channel</div>
+          </div>
+        </div>
+        <div style="width:560px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. No composer at all &mdash; a read-only surface must not show a field it will reject. One channel per language the user studies, joined on language add, plus the product-wide Almonium channel. Leave moves to the &hellip; menu; it is not a permanent header button. Every post carries the thing it announces as a footer action.</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+
+        <div style="display:flex; flex-direction:column; gap:11px;">
+          <div style="width:420px; background:#F9F6F5; border-radius:16px; padding:26px; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; align-items:center; justify-content:center;">
+            <div style="width:340px; background:#fff; border-radius:18px; padding:22px 24px; box-shadow:0 18px 44px rgba(44,37,48,.22); display:flex; flex-direction:column; gap:11px;">
+              <div style="font-family:'Literata',serif; font-size:18px; font-weight:600;">Leave Almonium &mdash; English?</div>
+              <div style="font-size:13.5px; line-height:1.55; color:#5f5560;">You will stop receiving English updates here. You can rejoin from search at any time.</div>
+              <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:4px;">
+                <div style="font-size:13px; font-weight:500; color:#5f5560; padding:8px 14px;">Cancel</div>
+                <div style="font-size:13px; font-weight:500; color:#fff; background:#872657; border-radius:9999px; padding:8px 18px;">Leave</div>
+              </div>
+            </div>
+          </div>
+          <div style="width:420px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Leaving is reversible, so the confirm button is plum, not red, and there is no alert icon. Title names the channel instead of asking &ldquo;Are you sure?&rdquo;. Cancel is text, not an underlined link.</div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:11px;">
+          <div style="width:420px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+            <div style="display:flex; align-items:center; gap:11px; padding:12px 16px; border-bottom:1px solid #EDE6EA;">
+              <div style="width:32px; height:32px; border-radius:50%; background:#6E2A5E; flex:0 0 32px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#F1EAEF;">DE</div>
+              <div style="display:flex; flex-direction:column;">
+                <div style="font-family:'Literata',serif; font-size:15px; font-weight:500;">Almonium &mdash; Deutsch</div>
+                <div style="font-size:11.5px; color:#8B8189;">Channel &middot; updates about German</div>
+              </div>
+            </div>
+            <div style="background:#F9F6F5; padding:34px 26px; display:flex; flex-direction:column; align-items:center; gap:7px; text-align:center;">
+              <div style="font-family:'Literata',serif; font-size:15px; color:#2c2530;">Nothing posted yet</div>
+              <div style="font-size:13px; line-height:1.55; color:#8B8189; max-width:36ch;">New books, packs and features for German will land here.</div>
+            </div>
+          </div>
+          <div style="width:420px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Empty states are vertically centred in the message area, never pinned to the top edge. No exclamation marks anywhere in this segment.</div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="display:flex; align-items:baseline; gap:12px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">04</span>
+      <h2 style="margin:0; font-family:'Literata',serif; font-size:24px; font-weight:600;">People</h2>
+      <span style="font-size:13px; color:#8B8189;">Overlays the chat list, does not displace it</span>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:700px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; position:relative; min-height:400px;">
+          <div style="width:300px; flex:0 0 300px; border-right:1px solid #EDE6EA; padding:16px 8px; display:flex; flex-direction:column; gap:10px; filter:blur(.4px); opacity:.5;">
+            <div style="font-family:'Literata',serif; font-size:19px; font-weight:500; padding:0 8px;">Chats</div>
+            <div style="border:1px solid #DCD3D9; border-radius:10px; padding:8px 11px; margin:0 8px; font-size:13px; color:#8B8189;">Search</div>
+            <div style="display:flex; align-items:center; gap:11px; padding:9px 10px;"><div style="width:34px; height:34px; border-radius:50%; background:#d8cfd6;"></div><div style="font-family:'Literata',serif; font-size:14px;">familsubs</div></div>
+            <div style="display:flex; align-items:center; gap:11px; padding:9px 10px;"><div style="width:34px; height:34px; border-radius:50%; background:#6E2A5E;"></div><div style="font-family:'Literata',serif; font-size:14px;">Almonium &mdash; English</div></div>
+          </div>
+          <div style="flex:1; background:#F9F6F5; display:flex; flex-direction:column;">
+            <div style="padding:12px 18px; background:#fff; border-bottom:1px solid #EDE6EA; display:flex; align-items:center; gap:11px;">
+              <div style="width:32px; height:32px; border-radius:50%; background:#d8cfd6;"></div>
+              <div style="display:flex; align-items:center; gap:8px;"><div style="font-family:'Literata',serif; font-size:15px; font-weight:500;">familsubs</div><div style="width:6px; height:6px; border-radius:50%; background:#16BA7F;"></div><div style="font-size:11.5px; color:#8B8189;">online</div></div>
+            </div>
+            <div style="flex:1; display:flex; align-items:center; justify-content:center; font-size:12.5px; color:#a99aa8;">stays live and clickable</div>
+          </div>
+          <div style="position:absolute; top:0; left:0; bottom:0; width:330px; background:#fff; border-right:1px solid #E4DBE1; box-shadow:14px 0 40px rgba(44,37,48,.16); display:flex; flex-direction:column;">
+            <div style="display:flex; align-items:center; gap:12px; padding:16px 16px 12px;">
+              <div style="font-family:'Literata',serif; font-size:19px; font-weight:500; flex:1;">People</div>
+              <div style="width:26px; height:26px; border-radius:8px; background:#F3EEF1; display:flex; align-items:center; justify-content:center; font-size:14px; color:#5f5560;">&times;</div>
+            </div>
+            <div style="padding:0 16px 12px; display:flex; gap:3px; background:#F3EEF1; margin:0 16px 12px; border-radius:9999px; padding:3px;">
+              <div style="flex:1; text-align:center; font-size:12.5px; font-weight:500; background:#fff; border-radius:9999px; padding:6px 0; box-shadow:0 1px 2px rgba(0,0,0,.07);">Friends</div>
+              <div style="flex:1; text-align:center; font-size:12.5px; color:#5f5560; padding:6px 0; display:flex; align-items:center; justify-content:center; gap:5px;">Requests <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#fff; background:#872657; border-radius:9999px; padding:1px 5px;">2</span></div>
+              <div style="flex:1; text-align:center; font-size:12.5px; color:#5f5560; padding:6px 0;">Blocked</div>
+            </div>
+            <div style="padding:0 16px 12px;">
+              <div style="display:flex; align-items:center; gap:8px; border:1px solid #DCD3D9; border-radius:10px; padding:8px 11px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a99aa8" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.5-4.5"></path></svg>
+                <div style="font-size:13px; color:#8B8189;">Find anyone by @handle</div>
+              </div>
+            </div>
+            <div style="padding:0 8px; display:flex; flex-direction:column;">
+              <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px;">
+                <div style="width:36px; height:36px; flex:0 0 36px; border-radius:50%; background:#d8cfd6;"></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:1px;">
+                  <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500;">familsubs</div>
+                  <div style="font-size:12px; color:#8B8189;">Learning English</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:3px;">
+                  <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
+                  <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
+                  <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
                 </div>
               </div>
-              <div style="display:flex; gap:12px; padding:12px; border-radius:14px; background:#3A3145;">
-                <div style="width:36px; height:36px; border-radius:50%; background:#453D51; flex:0 0 36px;"></div>
-                <div style="flex:1; display:flex; gap:8px; align-items:baseline;"><div style="flex:1; font-size:13.5px; line-height:1.45; color:#F1EAEF;"><strong>@kuzanorest</strong> accepted your request</div><div style="display:flex; align-items:center; gap:6px;"><div style="font-size:11px; color:#8D8298; white-space:nowrap;">1 min</div><div style="width:6px; height:6px; border-radius:50%; background:#B07BD0; flex:0 0 6px;"></div></div></div>
-              </div>
-              <div style="height:1px; background:#332C3C; margin:8px 10px;"></div>
-              <div style="display:flex; gap:12px; padding:12px;">
-                <div style="width:36px; height:36px; border-radius:50%; background:#332C3C; flex:0 0 36px;"></div>
-                <div style="flex:1; display:flex; gap:8px; align-items:baseline;"><div style="flex:1; font-size:13.5px; line-height:1.45; color:#BEB2C2;"><strong style="font-weight:600;">@wowsie</strong> sent you a message</div><div style="display:flex; align-items:center; gap:6px;"><div style="font-size:11px; color:#8D8298; white-space:nowrap;">Tue</div><div style="width:6px; flex:0 0 6px;"></div></div></div>
+              <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px;">
+                <div style="width:36px; height:36px; flex:0 0 36px; border-radius:50%; background:#cfc6cd;"></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:1px;">
+                  <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500;">kuzanorest</div>
+                  <div style="font-size:12px; color:#8B8189;">Learning Spanish, German</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:3px;">
+                  <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
+                  <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
+                  <div style="width:2.5px; height:2.5px; border-radius:50%; background:#5f5560;"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        <div style="width:700px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. The panel is absolutely positioned over the chat-list column at a fixed 330px, anchored to the left edge of the chat area &mdash; nothing reflows, the list keeps its own width, and no page-wide scrim appears. If the list is narrower than 330px (rail or a dragged-down width) the panel simply overhangs the conversation by the difference; the conversation stays interactive throughout. Enter: 160ms slide from &minus;16px with opacity; Escape and &times; dismiss. The blur on the covered list here is the mock showing what is underneath, not a backdrop filter to implement.</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+
+        <div style="display:flex; flex-direction:column; gap:11px;">
+          <div style="width:360px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; flex-direction:column;">
+            <div style="display:flex; align-items:center; gap:12px; padding:16px 16px 12px;">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#5f5560" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5l-7 7 7 7"></path></svg>
+              <div style="font-family:'Literata',serif; font-size:19px; font-weight:500; flex:1;">Find people</div>
+              <div style="width:26px; height:26px; border-radius:8px; background:#F3EEF1; display:flex; align-items:center; justify-content:center; font-size:14px; color:#5f5560;">&times;</div>
+            </div>
+            <div style="padding:0 16px 14px;">
+              <div style="display:flex; align-items:center; gap:8px; border:1px solid #872657; box-shadow:0 0 0 2px rgba(135,38,87,.14); border-radius:10px; padding:8px 11px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#872657" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.5-4.5"></path></svg>
+                <div style="font-size:13px; flex:1;">fami</div>
+                <div style="font-size:14px; color:#8B8189;">&times;</div>
+              </div>
+            </div>
+            <div style="padding:0 8px 14px; display:flex; flex-direction:column; gap:2px;">
+              <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px;">
+                <div style="width:36px; height:36px; flex:0 0 36px; border-radius:50%; background:#d8cfd6;"></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:1px;">
+                  <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500;">familsubs</div>
+                  <div style="font-size:12px; color:#8B8189;">Friend</div>
+                </div>
+                <div style="font-size:12px; font-weight:500; color:#872657; border:1px solid #E0CFD9; border-radius:9999px; padding:5px 13px;">Message</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px;">
+                <div style="width:36px; height:36px; flex:0 0 36px; border-radius:50%; background:#cfc6cd;"></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:1px;">
+                  <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500;">familybird</div>
+                  <div style="font-size:12px; color:#8B8189;">Learning Italian</div>
+                </div>
+                <div style="font-size:12px; font-weight:500; color:#fff; background:#872657; border-radius:9999px; padding:6px 14px;">Add</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:12px;">
+                <div style="width:36px; height:36px; flex:0 0 36px; border-radius:50%; background:#dcd4da;"></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:1px;">
+                  <div style="font-family:'Literata',serif; font-size:14.5px; font-weight:500;">famigo</div>
+                  <div style="font-size:12px; color:#8B8189;">Learning French</div>
+                </div>
+                <div style="font-size:12px; color:#8B8189; border:1px solid #E4DBE1; border-radius:9999px; padding:5px 13px;">Requested</div>
+              </div>
+            </div>
+          </div>
+          <div style="width:360px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Find people searches every account, friends included &mdash; a search that hides people you already know looks broken. The right-hand control states the relationship: Add / Requested (inert) / Message for a friend / Blocked. &ldquo;No account with that handle.&rdquo; renders only when the result set is empty, never above results. Debounce 250ms, minimum 2 characters, no browser spellcheck on the field.</div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:11px;">
+          <div style="width:360px; background:#fff; border-radius:16px; padding:16px; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; flex-direction:column; gap:14px;">
+            <div style="display:flex; flex-direction:column; gap:9px;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#a99aa8;">Received</div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:34px; height:34px; border-radius:50%; background:#d8cfd6; flex:0 0 34px;"></div>
+                <div style="flex:1; font-family:'Literata',serif; font-size:14px; font-weight:500;">familsubs</div>
+                <div style="font-size:12px; font-weight:500; color:#fff; background:#872657; border-radius:9999px; padding:6px 13px;">Accept</div>
+                <div style="font-size:12px; color:#5f5560; background:#F3EEF1; border-radius:9999px; padding:6px 13px;">Decline</div>
+              </div>
+            </div>
+            <div style="height:1px; background:#EDE6EA;"></div>
+            <div style="display:flex; flex-direction:column; gap:9px;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#a99aa8;">Sent</div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:34px; height:34px; border-radius:50%; background:#cfc6cd; flex:0 0 34px;"></div>
+                <div style="flex:1; font-family:'Literata',serif; font-size:14px; font-weight:500;">famigo</div>
+                <div style="font-size:12px; color:#5f5560; background:#F3EEF1; border-radius:9999px; padding:6px 13px;">Cancel</div>
+              </div>
+            </div>
+          </div>
+          <div style="width:360px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Requests is one scroll with two headers, not a second tab strip inside the first. The count on the Requests tab counts received only.</div>
+        </div>
 
       </div>
+
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="display:flex; align-items:baseline; gap:12px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">05</span>
+      <h2 style="margin:0; font-family:'Literata',serif; font-size:24px; font-weight:600;">Profile card, notifications, empty states</h2>
     </div>
 
-    <div id="1c" style="display:flex; flex-direction:column; gap:10px;">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1c</span>
-        <span style="font-size:13px; font-weight:600;">The chat surface — wallpaper out, authorship carried by the bubble</span>
+    <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:340px; background:#F9F6F5; border-radius:16px; padding:22px; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; justify-content:center;">
+          <div style="width:280px; background:#fff; border-radius:16px; padding:17px; box-shadow:0 14px 36px rgba(44,37,48,.16); display:flex; flex-direction:column; gap:13px;">
+            <div style="display:flex; align-items:flex-start; gap:11px;">
+              <div style="width:44px; height:44px; border-radius:50%; background:#d8cfd6; flex:0 0 44px;"></div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:1px;">
+                <div style="font-family:'Literata',serif; font-size:17px; font-weight:600;">familsubs</div>
+                <div style="font-size:12px; color:#8B8189;">Joined August 2026</div>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:7px;">
+              <div style="display:flex; gap:12px; align-items:baseline;">
+                <div style="width:66px; flex:0 0 66px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.8px; text-transform:uppercase; color:#a99aa8; white-space:nowrap;">Speaks</div>
+                <div style="font-size:13px;">English</div>
+              </div>
+              <div style="display:flex; gap:12px; align-items:baseline;">
+                <div style="width:66px; flex:0 0 66px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.8px; text-transform:uppercase; color:#a99aa8; white-space:nowrap;">Learning</div>
+                <div style="font-size:13px;">Spanish <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#872657;">A2</span></div>
+              </div>
+              <div style="display:flex; gap:12px; align-items:baseline;">
+                <div style="width:66px; flex:0 0 66px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.8px; text-transform:uppercase; color:#a99aa8; white-space:nowrap;">Likes</div>
+                <div style="font-size:13px;">Arts &amp; Culture</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; border-top:1px solid #EDE6EA; padding-top:12px;">
+              <div style="font-size:12.5px; font-weight:500; color:#fff; background:#872657; border-radius:9999px; padding:7px 15px;">Message</div>
+              <div style="margin-left:auto; font-size:12.5px; color:#5f5560; background:#F3EEF1; border-radius:9999px; padding:7px 13px;">More</div>
+            </div>
+          </div>
+        </div>
+        <div style="width:340px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Opens on hover after 120ms, on click, and on keyboard focus of any avatar. Anchored to the avatar, flipped to whichever side has room, never covering the message column. Only one popover at a time &mdash; opening this closes notifications. Label column is fixed 66px with nowrap so no word ever breaks. One primary button by relationship: Add friend / Requested / Accept request / Message. More holds View profile, Mute, Unfriend, Block; Block is the only red item.</div>
       </div>
-      <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;">
 
-        <div style="width:340px; background:#fff; border-radius:24px; padding:20px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-          <div style="font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#a99aa8;">Now</div>
-          <div style="border-radius:16px; overflow:hidden; background:#B0637E; padding:18px 14px; display:flex; flex-direction:column; gap:10px; min-height:150px;">
-            <div style="display:flex; align-items:center; gap:8px;"><div style="flex:1; height:1px; background:rgba(44,37,48,.5);"></div><div style="font-size:11px; color:#2C2530;">Today</div><div style="flex:1; height:1px; background:rgba(44,37,48,.5);"></div></div>
-            <div style="align-self:flex-end; background:#F6CEDD; color:#2C2530; font-size:13.5px; padding:8px 14px; border-radius:14px;">hello!</div>
-            <div style="align-self:flex-end; font-size:10.5px; color:#3d2a33;">Today at 10:16 PM</div>
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:360px; background:#F9F6F5; border-radius:16px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; align-items:center; justify-content:flex-end; gap:18px; padding-right:4px;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5560" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="13" r="7"></circle><path d="M12 10v3.5l2 1.5M9 3h6"></path></svg>
+            <div style="position:relative;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5560" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5v7a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z"></path></svg>
+              <div style="position:absolute; top:-2px; right:-3px; width:9px; height:9px; border-radius:50%; background:#D8324B; border:2px solid #F9F6F5;"></div>
+            </div>
+            <div style="position:relative;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5560" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 1.5 5.5h-15S6 14 6 10z"></path><path d="M10 19a2 2 0 0 0 4 0"></path></svg>
+              <div style="position:absolute; top:-4px; right:-6px; min-width:15px; height:15px; border-radius:9999px; background:#872657; color:#fff; font-size:9.5px; font-weight:600; display:flex; align-items:center; justify-content:center; padding:0 4px; border:2px solid #F9F6F5;">2</div>
+            </div>
+            <div style="width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,#8F2356,#5A1A74);"></div>
           </div>
-          <p style="margin:0; font-size:12.5px; line-height:1.55; color:#5f5560;">The largest saturated field in the product, and the timestamp on it runs at about 2.6:1.</p>
-        </div>
-
-        <div style="width:340px; background:#F9F6F5; border-radius:24px; padding:20px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-          <div style="font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#a99aa8;">Light — proposed</div>
-          <div style="border-radius:16px; overflow:hidden; background:#F9F6F5; border:1px solid #edebe8; padding:18px 14px; display:flex; flex-direction:column; gap:10px; min-height:150px;">
-            <div style="display:flex; align-items:center; gap:8px;"><div style="flex:1; height:1px; background:#e3dcdf;"></div><div style="font-size:11px; color:#a99aa8;">Today</div><div style="flex:1; height:1px; background:#e3dcdf;"></div></div>
-            <div style="align-self:flex-start; background:#fff; border:1px solid #edebe8; color:#2C2530; font-size:13.5px; padding:8px 14px; border-radius:14px 14px 14px 4px;">hello brooo</div>
-            <div style="align-self:flex-end; background:#5A1A74; color:#F9F6F5; font-size:13.5px; padding:8px 14px; border-radius:14px 14px 4px 14px;">woww hello</div>
-            <div style="align-self:flex-end; font-size:10.5px; color:#a99aa8;">10:16 PM · Read</div>
+          <div style="background:#fff; border-radius:16px; padding:15px 16px; box-shadow:0 12px 30px rgba(44,37,48,.14); display:flex; flex-direction:column; gap:13px;">
+            <div style="display:flex; align-items:baseline; justify-content:space-between;">
+              <div style="font-family:'Literata',serif; font-size:16px; font-weight:600;">Notifications</div>
+              <div style="font-size:12px; color:#872657;">Mark all read</div>
+            </div>
+            <div style="display:flex; gap:11px; align-items:flex-start;">
+              <div style="width:32px; height:32px; border-radius:50%; background:#d8cfd6; flex:0 0 32px;"></div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+                <div style="font-size:13px; line-height:1.5;"><strong style="font-weight:600;">@familsubs</strong> wants to be friends.</div>
+                <div style="display:flex; gap:7px;">
+                  <div style="font-size:12px; font-weight:500; color:#fff; background:#872657; border-radius:9999px; padding:5px 13px;">Accept</div>
+                  <div style="font-size:12px; color:#5f5560; background:#F3EEF1; border-radius:9999px; padding:5px 13px;">Decline</div>
+                </div>
+              </div>
+              <div style="font-size:10.5px; color:#a99aa8;">1d</div>
+            </div>
+            <div style="height:1px; background:#EDE6EA;"></div>
+            <div style="display:flex; gap:11px; align-items:flex-start;">
+              <div style="width:32px; height:32px; border-radius:50%; background:#cfc6cd; flex:0 0 32px;"></div>
+              <div style="flex:1; font-size:13px; line-height:1.5;"><strong style="font-weight:600;">@kuzanorest</strong> accepted your request.</div>
+              <div style="font-size:10.5px; color:#a99aa8;">3d</div>
+            </div>
           </div>
-          <p style="margin:0; font-size:12.5px; line-height:1.55; color:#5f5560;">Cream ground, same as every other panel. Mine is plum, theirs is a white card, and "Today at" drops from the timestamp.</p>
         </div>
-
-        <div style="width:340px; background:#14111A; border-radius:24px; padding:20px; display:flex; flex-direction:column; gap:10px; border:1px solid #332C3C;">
-          <div style="font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#8D8298;">Dark — proposed</div>
-          <div style="border-radius:16px; overflow:hidden; background:#14111A; border:1px solid #332C3C; padding:18px 14px; display:flex; flex-direction:column; gap:10px; min-height:150px;">
-            <div style="display:flex; align-items:center; gap:8px;"><div style="flex:1; height:1px; background:#332C3C;"></div><div style="font-size:11px; color:#8D8298;">Today</div><div style="flex:1; height:1px; background:#332C3C;"></div></div>
-            <div style="align-self:flex-start; background:#272130; border:1px solid #332C3C; color:#F1EAEF; font-size:13.5px; padding:8px 14px; border-radius:14px 14px 14px 4px;">hello brooo</div>
-            <div style="align-self:flex-end; background:#9059BC; color:#F1EAEF; font-size:13.5px; padding:8px 14px; border-radius:14px 14px 4px 14px;">woww hello</div>
-            <div style="align-self:flex-end; font-size:10.5px; color:#8D8298;">10:16 PM · Read</div>
-          </div>
-          <p style="margin:0; font-size:12.5px; line-height:1.55; color:#BEB2C2;">Today both bubbles are the same grey, so authorship rests on alignment alone. Mine takes the pressed tint, theirs the nested step.</p>
-        </div>
-
+        <div style="width:360px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Routing rule: anything with a thread to open goes to the chat icon as a bare red dot, cleared by opening the thread. Anything about your account or relationships goes to the bell as a plum count, cleared by reading the panel. Nothing appears in both. Today only friendship events reach the bell; a shared pack is a message and belongs to the chat dot. Collapse repeats by actor and event, keeping the newest time.</div>
       </div>
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:360px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; flex-direction:column;">
+          <div style="background:#F9F6F5; padding:40px 28px; display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center;">
+            <div style="width:76px; height:76px; border-radius:50%; background:#F1EAEF; display:flex; align-items:center; justify-content:center; font-size:34px;">&#129425;</div>
+            <div style="font-family:'Literata',serif; font-size:16px;">No chat open</div>
+            <div style="font-size:13px; line-height:1.55; color:#8B8189; max-width:32ch;">Pick someone on the left, or write to yourself in Saved Messages.</div>
+          </div>
+          <div style="border-top:1px solid #EDE6EA; padding:26px 28px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center;">
+            <div style="font-size:13px; color:#8B8189;">No chats match &ldquo;dsafsdf&rdquo;.</div>
+          </div>
+          <div style="border-top:1px solid #EDE6EA; padding:26px 28px; display:flex; flex-direction:column; align-items:center; gap:9px; text-align:center;">
+            <div style="font-size:13px; line-height:1.55; color:#8B8189; max-width:30ch;">You have not added anyone yet.</div>
+            <div style="font-size:12.5px; font-weight:500; color:#fff; background:#872657; border-radius:9999px; padding:7px 16px;">Find people</div>
+          </div>
+        </div>
+        <div style="width:360px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Three separate states stacked here for comparison; each renders alone, vertically centred in its own area. One illustration only &mdash; Almo sits inside a 76px tinted disc and nothing is layered behind him. The list-level empty states carry no illustration at all. Almo never appears twice on one screen.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="display:flex; align-items:baseline; gap:12px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a99aa8;">06</span>
+      <h2 style="margin:0; font-family:'Literata',serif; font-size:24px; font-weight:600;">Column widths</h2>
     </div>
 
-    <div id="1d" style="display:flex; flex-direction:column; gap:10px;">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1d</span>
-        <span style="font-size:13px; font-weight:600;">People — one panel, labelled verbs, no Received/Sent switch</span>
+    <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">
+
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:560px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; min-height:210px;">
+          <div style="width:250px; flex:0 0 250px; padding:14px 8px; display:flex; flex-direction:column; gap:10px;">
+            <div style="font-family:'Literata',serif; font-size:17px; font-weight:500; padding:0 8px;">Chats</div>
+            <div style="border:1px solid #DCD3D9; border-radius:10px; padding:7px 11px; margin:0 8px; font-size:12.5px; color:#8B8189;">Search</div>
+            <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:12px; background:#F3EDF6; box-shadow:inset 3px 0 0 #872657;"><div style="width:32px; height:32px; border-radius:50%; background:#d8cfd6;"></div><div style="font-family:'Literata',serif; font-size:13.5px;">familsubs</div></div>
+            <div style="display:flex; align-items:center; gap:10px; padding:8px 10px;"><div style="width:32px; height:32px; border-radius:50%; background:#872657;"></div><div style="font-family:'Literata',serif; font-size:13.5px;">Saved Messages</div></div>
+          </div>
+          <div style="width:9px; flex:0 0 9px; background:#F3EEF1; display:flex; align-items:center; justify-content:center;">
+            <div style="width:3px; height:34px; border-radius:9999px; background:#C9BCC6;"></div>
+          </div>
+          <div style="flex:1; background:#F9F6F5;">
+            <div style="padding:12px 16px; background:#fff; border-bottom:1px solid #EDE6EA; display:flex; align-items:center; gap:10px;">
+              <div style="width:30px; height:30px; border-radius:50%; background:#d8cfd6;"></div>
+              <div style="font-family:'Literata',serif; font-size:14px; font-weight:500;">familsubs</div>
+            </div>
+          </div>
+        </div>
+        <div style="width:560px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. Drag handle: 9px hit area, 1px #EDE6EA hairline at rest, 3px #C9BCC6 grip on hover, plum while dragging. Snaps at 72 / 280 / 420. Width persists per user. Double-click the handle toggles rail and default.</div>
       </div>
-      <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;">
 
-        <div style="width:400px; background:#F9F6F5; border-radius:24px; padding:20px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="font-size:20px; color:#5f5560;">&#8249;</div>
-            <div style="font-family:'Literata',serif; font-size:20px; font-weight:600;">People</div>
-          </div>
-          <div style="display:flex; gap:4px; background:#e8e2e6; border-radius:9999px; padding:3px;">
-            <div style="flex:1; text-align:center; font-size:12.5px; font-weight:600; color:#2C2530; background:#fff; border-radius:9999px; padding:7px 0;">Friends</div>
-            <div style="flex:1; text-align:center; font-size:12.5px; font-weight:500; color:#5f5560; padding:7px 0;">Requests <span style="color:#872657;">2</span></div>
-            <div style="flex:1; text-align:center; font-size:12.5px; font-weight:500; color:#5f5560; padding:7px 0;">Blocked</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:10px; background:#fff; border:1px solid #d8cfd6; border-radius:9999px; padding:9px 16px;">
-            <div style="width:14px; height:14px; border:1.5px solid #a99aa8; border-radius:50%;"></div>
-            <div style="flex:1; font-size:13.5px; color:#a99aa8;">Find someone by @handle</div>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:8px;">
-            <div style="background:#fff; border-radius:18px; padding:11px 12px 11px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-              <div style="width:34px; height:34px; border-radius:50%; background:#d8cfd6; flex:0 0 34px;"></div>
-              <div style="flex:1; display:flex; flex-direction:column;"><div style="font-size:14px; font-weight:600; color:#2C2530;">wowsie</div><div style="font-size:11.5px; color:#a99aa8;">wants to be friends · 2 min</div></div>
-              <div style="display:flex; gap:7px;">
-                <div style="background:#5A1A74; color:#fff; font-size:12px; font-weight:600; padding:6px 14px; border-radius:9999px;">Accept</div>
-                <div style="border:1px solid #d8cfd6; color:#5f5560; font-size:12px; font-weight:500; padding:6px 12px; border-radius:9999px;">Decline</div>
-              </div>
+      <div style="display:flex; flex-direction:column; gap:11px;">
+        <div style="width:300px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.1); display:flex; min-height:210px;">
+          <div style="width:72px; flex:0 0 72px; border-right:1px solid #EDE6EA; padding:14px 0; display:flex; flex-direction:column; align-items:center; gap:12px;">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#5f5560" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.5-4.5"></path></svg>
+            <div style="width:36px; height:36px; border-radius:50%; background:#d8cfd6; box-shadow:0 0 0 2px #872657;"></div>
+            <div style="width:36px; height:36px; border-radius:50%; background:#872657; display:flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FFF8F5" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.6A1.6 1.6 0 0 1 7.6 3h8.8A1.6 1.6 0 0 1 18 4.6V21l-6-4.4L6 21z"></path></svg>
             </div>
-            <div style="background:#fff; border-radius:18px; padding:11px 12px 11px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-              <div style="width:34px; height:34px; border-radius:50%; background:#d8cfd6; flex:0 0 34px;"></div>
-              <div style="flex:1; display:flex; flex-direction:column;"><div style="font-size:14px; font-weight:600; color:#2C2530;">kuzanorest</div><div style="font-size:11.5px; color:#a99aa8;">You asked · 11 min</div></div>
-              <div style="border:1px solid #d8cfd6; color:#5f5560; font-size:12px; font-weight:500; padding:6px 12px; border-radius:9999px;">Cancel</div>
-            </div>
+            <div style="width:36px; height:36px; border-radius:50%; background:#6E2A5E; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#F1EAEF;">EN</div>
           </div>
-          <p style="margin:0; font-size:12.5px; line-height:1.55; color:#5f5560;">Received and sent share one list, separated by the line under the name, so the segmented switch inside Requests disappears. Search becomes a field on the panel rather than a fourth destination.</p>
+          <div style="flex:1; background:#F9F6F5;"></div>
         </div>
-
-        <div style="width:400px; background:#14111A; border-radius:24px; padding:20px; display:flex; flex-direction:column; gap:14px; border:1px solid #332C3C;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="font-size:20px; color:#BEB2C2;">&#8249;</div>
-            <div style="font-family:'Literata',serif; font-size:20px; font-weight:600; color:#F1EAEF;">People</div>
-          </div>
-          <div style="display:flex; gap:4px; background:#272130; border-radius:9999px; padding:3px;">
-            <div style="flex:1; text-align:center; font-size:12.5px; font-weight:600; color:#F1EAEF; background:#453D51; border-radius:9999px; padding:7px 0;">Friends</div>
-            <div style="flex:1; text-align:center; font-size:12.5px; font-weight:500; color:#BEB2C2; padding:7px 0;">Requests <span style="color:#D98BA8;">2</span></div>
-            <div style="flex:1; text-align:center; font-size:12.5px; font-weight:500; color:#BEB2C2; padding:7px 0;">Blocked</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:10px; background:#1E1A26; border:1px solid #453D51; border-radius:9999px; padding:9px 16px;">
-            <div style="width:14px; height:14px; border:1.5px solid #8D8298; border-radius:50%;"></div>
-            <div style="flex:1; font-size:13.5px; color:#8D8298;">Find someone by @handle</div>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:8px;">
-            <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:18px; padding:11px 12px 11px 14px; display:flex; align-items:center; gap:12px;">
-              <div style="width:34px; height:34px; border-radius:50%; background:#453D51; flex:0 0 34px;"></div>
-              <div style="flex:1; display:flex; flex-direction:column;"><div style="font-size:14px; font-weight:600; color:#F1EAEF;">wowsie</div><div style="font-size:11.5px; color:#8D8298;">wants to be friends · 2 min</div></div>
-              <div style="display:flex; gap:7px;">
-                <div style="background:#B07BD0; color:#14111A; font-size:12px; font-weight:600; padding:6px 14px; border-radius:9999px;">Accept</div>
-                <div style="border:1px solid #453D51; color:#BEB2C2; font-size:12px; font-weight:500; padding:6px 12px; border-radius:9999px;">Decline</div>
-              </div>
-            </div>
-            <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:18px; padding:11px 12px 11px 14px; display:flex; align-items:center; gap:12px;">
-              <div style="width:34px; height:34px; border-radius:50%; background:#453D51; flex:0 0 34px;"></div>
-              <div style="flex:1; display:flex; flex-direction:column;"><div style="font-size:14px; font-weight:600; color:#F1EAEF;">kuzanorest</div><div style="font-size:11.5px; color:#8D8298;">You asked · 11 min</div></div>
-              <div style="border:1px solid #453D51; color:#BEB2C2; font-size:12px; font-weight:500; padding:6px 12px; border-radius:9999px;">Cancel</div>
-            </div>
-          </div>
-          <p style="margin:0; font-size:12.5px; line-height:1.55; color:#BEB2C2;">Same panel in dark tokens. Rows are card plus hairline, and the selected segment goes one step up rather than to white.</p>
-        </div>
-
-        <div style="width:360px; background:#fff; border-radius:24px; padding:22px 24px; display:flex; flex-direction:column; gap:9px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-          <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Also in this panel</div>
-          <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; line-height:1.55;">
-            <div>Empty Friends reads "You don't have any friends yet." It is a contentless surface, so it belongs to Almo: "Almo hasn't found anyone here yet", with the one Find friends button it already has.</div>
-            <div>Blocked has no empty state at all — today it is an unexplained fourth item that may well open onto nothing.</div>
-            <div>The grey on the Search row was never defined as anything. Selection in a list is the plum tint plus the left edge, hover is the nested step.</div>
-            <div>Chats and People are two panels behind the same hamburger with different row shapes, avatar sizes and action placement. One row spec for both.</div>
-          </div>
-        </div>
-
+        <div style="width:300px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.65; color:#a99aa8;">&#8627; Annotation, not UI copy &mdash; do not render. At the 72px rail the header collapses to a single search icon rather than clipping &mdash; no half-cut title, no half-cut control. Avatars keep the plum selection ring; names arrive as tooltips on hover. Unread shows as a dot on the avatar.</div>
       </div>
+
     </div>
-
-    <div id="1e" style="display:flex; flex-direction:column; gap:10px;">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">1e</span>
-        <span style="font-size:13px; font-weight:600;">Saved Messages, hidden chats, and the empty room</span>
-      </div>
-      <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;">
-
-        <div style="width:400px; background:#F9F6F5; border-radius:24px; padding:20px; display:flex; flex-direction:column; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-          <div style="font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#a99aa8;">Chat list — light</div>
-          <div style="background:#fff; border-radius:20px; padding:14px; display:flex; flex-direction:column; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <div style="font-family:'Literata',serif; font-size:19px; font-weight:600; flex:1;">Chats</div>
-              <div style="display:flex; align-items:center; gap:7px; background:#F9F6F5; border-radius:9999px; padding:4px 12px 4px 6px;">
-                <div style="width:26px; height:15px; border-radius:9999px; background:#d8cfd6; position:relative;"><div style="position:absolute; top:2px; left:2px; width:11px; height:11px; border-radius:50%; background:#fff;"></div></div>
-                <div style="font-size:11.5px; color:#5f5560;">Hidden</div>
-              </div>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:2px;">
-              <div style="display:flex; align-items:center; gap:12px; padding:9px 10px; border-radius:14px;">
-                <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#8F2356,#5A1A74); flex:0 0 38px; box-shadow:inset 0 1px 0 rgba(255,240,250,.45), inset 0 -1px 0 rgba(20,6,30,.3);"></div>
-                <div style="flex:1; display:flex; flex-direction:column;"><div style="font-size:14px; font-weight:600; color:#2C2530;">Saved Messages</div><div style="font-size:12px; color:#a99aa8;">hello</div></div>
-                <div style="font-size:11px; color:#a99aa8;">10:16 PM</div>
-              </div>
-              <div style="display:flex; align-items:center; gap:12px; padding:9px 10px; border-radius:14px; background:#F3EDF6;">
-                <div style="width:38px; height:38px; border-radius:50%; background:#d8cfd6; flex:0 0 38px;"></div>
-                <div style="flex:1; display:flex; flex-direction:column;"><div style="font-size:14px; font-weight:600; color:#2C2530;">Almonium</div><div style="font-size:12px; color:#a99aa8;">Almo hasn't found anything here yet</div></div>
-              </div>
-              <div style="display:flex; align-items:center; gap:12px; padding:9px 10px; border-radius:14px;">
-                <div style="width:38px; height:38px; border-radius:50%; background:#d8cfd6; flex:0 0 38px;"></div>
-                <div style="flex:1; display:flex; flex-direction:column;"><div style="font-size:14px; font-weight:600; color:#2C2530;">Almonium — Deutsch</div><div style="font-size:12px; color:#a99aa8;">Almo hasn't found anything here yet</div></div>
-              </div>
-            </div>
-          </div>
-          <p style="margin:0; font-size:12.5px; line-height:1.55; color:#5f5560;">Saved Messages takes the premium disc — the one gradient in the list, and it is yours. The eye becomes a labelled Hidden switch, so the state is readable without hovering for a tooltip.</p>
-        </div>
-
-        <div style="width:400px; background:#14111A; border-radius:24px; padding:20px; display:flex; flex-direction:column; gap:12px; border:1px solid #332C3C;">
-          <div style="font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#8D8298;">Empty room — dark</div>
-          <div style="background:#1E1A26; border:1px solid #332C3C; border-radius:20px; min-height:218px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:24px;">
-            <div style="width:78px; height:78px; border-radius:50%; background:#272130; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#6E637A; text-align:center; line-height:1.35;">Almo<br>waiting</div>
-            <div style="font-family:'Literata',serif; font-size:17px; color:#F1EAEF;">No chat open</div>
-            <div style="font-size:12.5px; color:#8D8298; text-align:center; max-width:30ch; line-height:1.5;">Pick someone on the left, or write to yourself in Saved Messages.</div>
-          </div>
-          <p style="margin:0; font-size:12.5px; line-height:1.55; color:#BEB2C2;">A contentless surface, so the mascot is allowed here and a 100px plum speech balloon is not. The copy offers the two things you can do instead of restating that nothing is selected.</p>
-        </div>
-
-        <div style="width:360px; background:#fff; border-radius:24px; padding:22px 24px; display:flex; flex-direction:column; gap:9px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
-          <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Questions I could not answer from the screens</div>
-          <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; line-height:1.55;">
-            <div>Are the four Almonium language rooms broadcast channels or open group chats? They are the only chats a new account has, all four are empty, and nothing on the row says which.</div>
-            <div>Should hidden chats be a switch or a tab? A switch reads as a filter, a tab as a place. Switch if hiding is rare, tab if it is a real folder.</div>
-            <div>Does anything other than friend requests produce a notification today? If not, the panel and the Requests tab are the same list twice.</div>
-            <div>Is the date on the profile popover a join date? Unlabelled and next to the handle, it reads as a birthday.</div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-  </section>
+  </div>
 
 </div>
 </div>
+
 </x-dc>
 </body>
 </html>

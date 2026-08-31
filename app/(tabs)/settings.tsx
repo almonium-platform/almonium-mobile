@@ -405,7 +405,9 @@ export default function SettingsScreen() {
         </Pressable>
         <Pressable onPress={() => router.push('/chat')} style={styles.destinationRow}>
           <Ionicons name="chatbubbles-outline" color={colors.primary} size={21} />
-          <View style={styles.settingCopy}><Text style={styles.settingLabel}>Chats</Text><Text style={styles.caption}>{unreadChats ? `${unreadChats} unread` : 'Friends, rooms, and Saved Messages'}</Text></View>
+          <View style={styles.settingCopy}><Text style={styles.settingLabel}>Chats</Text><Text style={styles.caption}>Friends, rooms, and Saved Messages</Text></View>
+          {/* A thread to open is a dot, not a count; counts belong to the bell. */}
+          {unreadChats > 0 && <View accessibilityLabel="Unread messages" style={styles.unreadDot} />}
           <Ionicons name="chevron-forward" color={colors.muted} size={19} />
         </Pressable>
         <Pressable onPress={() => router.push('/(tabs)/people')} style={styles.destinationRow}>
@@ -748,6 +750,7 @@ const useStyles = createThemedStyles((colors) => ({
   sectionTitleText: { color: colors.ink, fontWeight: '600', fontSize: 18 },
   settingRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 4 },
   destinationRow: { minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: 11, borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 8 },
+  unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.chatMine },
   settingCopy: { flex: 1, gap: 2 },
   usernameRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   usernameCopy: { flex: 1, gap: 2 },

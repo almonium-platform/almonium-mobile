@@ -19,6 +19,12 @@ describe('Almonium visual system', () => {
     expect(gradients).not.toHaveProperty('primary');
   });
 
+  it('carries the chat emblem plums centrally rather than per screen', () => {
+    expect(colors.chatMine).toBe('#872657');
+    expect(colors.chatChannel).toBe('#6E2A5E');
+    expect(darkColors.chatMine).not.toBe(colors.chatMine);
+  });
+
   it('reserves green for success rather than the brand accent', () => {
     expect(colors.success).toBe('#16BA7F');
     expect(colors.primary).not.toBe(colors.success);

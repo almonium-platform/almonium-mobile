@@ -3,20 +3,22 @@ import { Image } from 'expo-image';
 import { Text, View } from 'react-native';
 
 import { AvatarMark } from '@/components/avatar-mark';
-import { channelTypes, type ChannelType } from '@/src/chat';
+import { broadcastCode, channelTypes, type ChannelType } from '@/src/chat';
 import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 
 /**
- * The emblem for a channel row. Which one is drawn follows the channel type, never its name.
- * Saved Messages carries no image of its own, so its bookmark is drawn locally rather than
- * fetched or reduced to a letter avatar; broadcast rooms carry real hosted artwork.
+ * The emblem for a channel row, chosen by type and never by name. Saved Messages carries the
+ * bookmark on its plum disc and a broadcast room carries its own mono code, so neither depends
+ * on artwork being fetched; only a DM has a hosted image worth showing.
  */
 export function ChatAvatar({
   type,
+  channelId,
   image,
-  size = 46,
+  size = 38,
 }: {
   type: ChannelType;
+  channelId?: string;
   image?: string;
   size?: number;
 }) {
@@ -27,7 +29,16 @@ export function ChatAvatar({
   if (type === channelTypes.self) {
     return (
       <View accessibilityLabel="Saved Messages" style={[styles.frame, styles.saved, frame]}>
-        <Ionicons name="bookmark" size={size * 0.44} color={colors.white} />
+        <Ionicons name="bookmark" size={size * 0.45} color={colors.white} />
+      </View>
+    );
+  }
+
+  if (type === channelTypes.broadcast) {
+    const code = broadcastCode(channelId ?? '');
+    return (
+      <View style={[styles.frame, styles.channel, frame]}>
+        <Text style={[styles.code, { fontSize: code.length > 2 ? size * 0.26 : size * 0.29 }]}>{code}</Text>
       </View>
     );
   }
@@ -43,21 +54,13 @@ export function ChatAvatar({
     );
   }
 
-  if (type === channelTypes.broadcast) {
-    return (
-      <View style={[styles.frame, styles.broadcast, frame]}>
-        <Text style={[styles.brandMark, { fontSize: size * 0.46 }]}>∞</Text>
-      </View>
-    );
-  }
-
   return <AvatarMark size={size} />;
 }
 
 const useStyles = createThemedStyles((colors) => ({
   frame: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  // The solid plum-raspberry, not the gradient: that one stays reserved for premium.
-  saved: { backgroundColor: colors.premium },
-  broadcast: { backgroundColor: colors.accentSoft },
-  brandMark: { color: colors.primaryDark, fontFamily: fonts.serif },
+  // The solid plum, not the gradient: that one stays reserved for premium.
+  saved: { backgroundColor: colors.chatMine },
+  channel: { backgroundColor: colors.chatChannel },
+  code: { color: colors.white, fontFamily: fonts.sansMedium, letterSpacing: 0.5 },
 }));

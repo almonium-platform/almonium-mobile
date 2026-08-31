@@ -9,9 +9,21 @@ The mobile client implements them in `src/chat.ts` (the conventions, unit
 tested), `src/chat-client.tsx` (the single connected client) and `app/chat/`
 (the list and the room). Chat is reached from Settings and from a friend, never
 from a tab: the mobile brief keeps it as transport between two people rather
-than a destination. Threads, quoted replies, reactions, polls, attachments and
-hidden chats are deliberately not built here yet - the flags for most of them
-are off, and nothing renders the rest on web either.
+than a destination.
+
+`docs/Almonium Social and Chat.dc.html` is the build reference for what these
+screens should look like, and mobile is behind it. Not built yet: the archive
+(which replaces the hidden-chats idea entirely), search over the chat list,
+the row menu (archive, mark unread, mute, clear history, delete, leave
+channel), the message menu (reply, save to Saved Messages, copy, mark unread
+from here), reactions, and the footer action an announcement carries. Threads
+are off in the dashboard and quoted replies have no panel on web either.
+
+Two places where this file and the build reference disagree, and mobile follows
+the reference: a broadcast room draws a mono code emblem (`DE`, `ALM`) rather
+than fetching the hosted `{web-domain}/chat/logo-de.png`, and the header
+subtitle names the language in English ("updates about German") rather than
+splitting the channel's own name.
 
 ## Getting a connected client
 

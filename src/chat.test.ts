@@ -1,15 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  broadcastTopic,
+  broadcastCode,
+  broadcastLanguage,
   canSendMessages,
   channelImage,
   channelTitle,
   clockTime,
   dayLabel,
+  channelPreview,
   interlocutor,
   isChannelType,
-  lastMessagePreview,
   privateChannelCid,
   privateChannelId,
   seenByOthers,
@@ -69,17 +70,16 @@ describe('channel identity', () => {
     );
   });
 
-  it('reads the subject out of a broadcast name', () => {
-    expect(broadcastTopic({ type: 'broadcast', data: { name: 'Almonium — Deutsch' } })).toBe('Deutsch');
-    expect(broadcastTopic({ type: 'broadcast', data: { name: 'Almonium - Deutsch' } })).toBe('Deutsch');
-    expect(broadcastTopic({ type: 'broadcast', data: { name: 'Almonium' } })).toBe('Almonium');
+  it('reads a broadcast emblem out of the id the backend owns', () => {
+    expect(broadcastCode('almonium-de')).toBe('DE');
+    expect(broadcastCode('almonium')).toBe('ALM');
+    expect(broadcastLanguage('almonium-it')).toBe('IT');
+    expect(broadcastLanguage('almonium')).toBeNull();
   });
 
-  it('draws the self emblem locally and renders the hosted broadcast artwork', () => {
+  it('draws the self and channel emblems locally rather than fetching artwork', () => {
     expect(channelImage({ type: 'self', data: { image: 'https://example.test/x.png' } }, me)).toBeUndefined();
-    expect(channelImage({ type: 'broadcast', data: { image: 'https://a.test/logo-de.png' } }, me)).toBe(
-      'https://a.test/logo-de.png',
-    );
+    expect(channelImage({ type: 'broadcast', data: { image: 'https://a.test/logo-de.png' } }, me)).toBeUndefined();
   });
 });
 
@@ -101,14 +101,20 @@ describe('transcript', () => {
   const at = (month: number, date: number, hour: number, minute = 0) =>
     new Date(2026, month, date, hour, minute);
 
-  it('previews the last message and marks your own', () => {
-    expect(lastMessagePreview([], me)).toBe('No messages yet');
+  it('previews the last message, marks your own, and lets each type speak when empty', () => {
+    expect(channelPreview({ type: 'private' }, [], me)).toBe('No messages yet');
+    expect(channelPreview({ type: 'self' }, [], me)).toBe('Only you can see this');
+    expect(channelPreview({ type: 'broadcast' }, [], me)).toBe('No updates yet');
     expect(
-      lastMessagePreview([{ id: '1', text: 'hello  brooo', created_at: at(7, 31, 10), user: { id: friend } }], me),
+      channelPreview({ type: 'private' }, [{ id: '1', text: 'hello  brooo', created_at: at(7, 31, 10), user: { id: friend } }], me),
     ).toBe('hello brooo');
     expect(
-      lastMessagePreview([{ id: '1', text: 'woww', created_at: at(7, 31, 10), user: { id: me } }], me),
+      channelPreview({ type: 'private' }, [{ id: '1', text: 'woww', created_at: at(7, 31, 10), user: { id: me } }], me),
     ).toBe('You: woww');
+    // Everything in Saved Messages is yours, so prefixing every line with "You:" says nothing.
+    expect(
+      channelPreview({ type: 'self' }, [{ id: '1', text: 'a note', created_at: at(7, 31, 10), user: { id: me } }], me),
+    ).toBe('a note');
   });
 
   it('maps a Stream message onto what the bubble needs', () => {
@@ -123,30 +129,28 @@ describe('transcript', () => {
     );
   });
 
-  it('divides on the day and opens a block when the author changes', () => {
+  it('divides on the day and opens a run when the sender or the 5-minute window changes', () => {
     const now = at(7, 31, 12);
     const rows = transcriptRows(
       [
         { id: '1', text: 'a', createdAt: at(7, 30, 9), authorId: friend, own: false, deleted: false },
         { id: '2', text: 'b', createdAt: at(7, 31, 9), authorId: friend, own: false, deleted: false },
         { id: '3', text: 'c', createdAt: at(7, 31, 9, 1), authorId: friend, own: false, deleted: false },
-        { id: '4', text: 'd', createdAt: at(7, 31, 9, 2), authorId: me, own: true, deleted: false },
+        { id: '4', text: 'd', createdAt: at(7, 31, 9, 9), authorId: friend, own: false, deleted: false },
+        { id: '5', text: 'e', createdAt: at(7, 31, 9, 10), authorId: me, own: true, deleted: false },
       ],
       now,
     );
-    expect(rows.map((row) => row.kind)).toEqual(['day', 'message', 'day', 'message', 'message', 'message']);
-    expect(rows.filter((row) => row.kind === 'day').map((row) => row.label)).toEqual(['Yesterday', 'Today']);
-    expect(rows.filter((row) => row.kind === 'message').map((row) => row.startsBlock)).toEqual([
-      true,
-      true,
-      false,
-      true,
+    expect(rows.map((row) => row.kind)).toEqual([
+      'day', 'message', 'day', 'message', 'message', 'message', 'message',
     ]);
-    expect(rows.filter((row) => row.kind === 'message').map((row) => row.endsBlock)).toEqual([
-      true,
-      false,
-      true,
-      true,
+    expect(rows.filter((row) => row.kind === 'day').map((row) => row.label)).toEqual(['Yesterday', 'Today']);
+    expect(rows.filter((row) => row.kind === 'message').map((row) => row.startsRun)).toEqual([
+      true, // first of the day
+      true, // first of the day
+      false, // same sender, one minute later
+      true, // same sender, but eight minutes on
+      true, // different sender
     ]);
   });
 

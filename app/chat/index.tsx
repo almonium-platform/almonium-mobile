@@ -8,12 +8,12 @@ import { ChatAvatar } from '@/components/chat-avatar';
 import { chatUnavailableCopy, useChat } from '@/src/chat-client';
 import {
   channelImage,
+  channelPreview,
   channelTitle,
   channelTypes,
   clockTime,
   dayLabel,
   isChannelType,
-  lastMessagePreview,
   type ChannelType,
 } from '@/src/chat';
 import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
@@ -126,7 +126,7 @@ export default function ChatListScreen() {
             })
           }
           style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
-          <ChatAvatar type={item.type} image={item.image} />
+          <ChatAvatar type={item.type} channelId={item.id} image={item.image} size={38} />
           <View style={styles.rowCopy}>
             <Text numberOfLines={1} style={styles.rowTitle}>
               {item.title}
@@ -138,9 +138,7 @@ export default function ChatListScreen() {
           <View style={styles.rowMeta}>
             {!!item.stamp && <Text style={styles.stamp}>{item.stamp}</Text>}
             {item.unread > 0 && (
-              <View style={styles.unread}>
-                <Text style={styles.unreadText}>{item.unread > 99 ? '99+' : item.unread}</Text>
-              </View>
+              <View accessibilityLabel={`${item.unread} unread`} style={styles.unread} />
             )}
           </View>
         </Pressable>
@@ -175,7 +173,7 @@ function toRow(channel: Channel, userId: string): ChannelRow {
     type,
     id: channel.id ?? '',
     title: channelTitle(channel, userId),
-    preview: lastMessagePreview(channel.state.messages, userId),
+    preview: channelPreview(channel, channel.state.messages, userId),
     image: channelImage(channel, userId),
     stamp: activity ? stampFor(new Date(activity)) : '',
     unread: channel.countUnread(),
@@ -199,16 +197,15 @@ const useStyles = createThemedStyles((colors) => ({
   titleCopy: { flex: 1 },
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
   title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, fontWeight: '600' },
-  row: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: 11, borderRadius: 22, padding: 13, backgroundColor: colors.surface, ...shadows.card },
+  row: { minHeight: 62, flexDirection: 'row', alignItems: 'center', gap: 11, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 9 },
   pressed: { opacity: 0.75 },
-  rowCopy: { flex: 1, gap: 3 },
-  rowTitle: { color: colors.ink, fontSize: 15, fontWeight: '600' },
-  rowPreview: { color: colors.muted, fontSize: 12 },
+  rowCopy: { flex: 1, minWidth: 0, gap: 2 },
+  rowTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 14.5, fontWeight: '500' },
+  rowPreview: { color: colors.muted, fontSize: 12.5 },
   rowMeta: { alignItems: 'flex-end', gap: 6 },
-  stamp: { color: colors.metadata, fontSize: 11 },
-  unread: { minWidth: 22, height: 22, alignItems: 'center', justifyContent: 'center', borderRadius: 11, paddingHorizontal: 6, backgroundColor: colors.primary },
-  unreadText: { color: colors.onPrimary, fontFamily: fonts.sansSemibold, fontSize: 11 },
-  separator: { height: 10 },
+  stamp: { color: colors.muted, fontSize: 11 },
+  unread: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.chatMine },
+  separator: { height: 2 },
   loader: { marginTop: 50 },
   empty: { minHeight: 310, alignItems: 'center', justifyContent: 'center', gap: 9, padding: 24 },
   emptyTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 22, fontWeight: '600', textAlign: 'center' },

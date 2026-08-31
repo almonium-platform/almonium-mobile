@@ -33,6 +33,10 @@ export const colors = {
   primaryPressed: '#3A1462',
   raspberry: '#A1264C',
   premium: '#8F2356',
+  // Chat surfaces, from the social build reference: your own bubble and the Saved Messages
+  // emblem share one plum; channel emblems take the deeper, quieter one.
+  chatMine: '#872657',
+  chatChannel: '#6E2A5E',
   accentSoft: '#F8EAF3',
   accentBorder: '#E9CADF',
   line: '#EDEBE8',
@@ -68,6 +72,8 @@ export const darkColors: ThemeColors = {
   primaryPressed: '#9059BC',
   raspberry: '#D98BA8',
   premium: '#B24A76',
+  chatMine: '#7A2350',
+  chatChannel: '#6E2A5E',
   accentSoft: '#30243A',
   accentBorder: '#60456F',
   line: '#332C3C',

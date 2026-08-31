@@ -38,6 +38,241 @@
 <section style="display:flex; flex-direction:column; gap:30px;">
 
   <div style="max-width:1000px; display:flex; flex-direction:column; gap:11px;">
+    <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Turn 2 &middot; triangulation</div>
+    <h1 style="margin:0; font-family:'Literata',serif; font-size:38px; font-weight:600; line-height:1.15;">Triangulation is a ranking problem, not a feature. Ship the order; ration the explanation.</h1>
+    <p style="margin:0; font-size:15px; line-height:1.65; color:#5f5560; max-width:84ch; text-wrap:pretty;">The mechanism is a round trip. Translate the word into each fluent language, then translate each gloss back into the target language and see where it lands. <strong>блакитний</strong> comes back as <strong>голубой</strong>. <strong>blue</strong> comes back as <strong>синий</strong> first &mdash; голубой is a second sense down the funnel. So блакитний is doing the work and blue is only nearly right, and the system knows it without knowing anything about colour.</p>
+    <p style="margin:0; font-size:14.5px; line-height:1.65; color:#5f5560; max-width:84ch; text-wrap:pretty;">Almost all of that is backend, and the payoff is silent: the gloss that ends up on the card is the exact one. But the UI does have a job, and it is one clause long &mdash; <em>blue, also синий</em>. That clause is the whole feature. A reader who has never heard the word triangulation reads it and instantly knows why the other gloss came first. The explanation panel below it exists for the first three words a user ever looks up, and then it goes away forever.</p>
+    <p style="margin:0; font-size:14.5px; line-height:1.65; color:#5f5560; max-width:84ch; text-wrap:pretty;">Worth pursuing, with one condition: it must never be marketed as intelligence. Showing your reasoning invites the reader to check it, and a wrong call on a word they know well costs more trust than fifty right calls earn. Everything below is stated as an observation the reader can verify at a glance, never as a verdict the system hands down.</p>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start;">
+
+    <div id="2a" style="display:flex; flex-direction:column; gap:10px; width:560px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">2a</span>
+        <span style="font-size:13px; color:#5f5560;">The default &mdash; what almost every lookup looks like</span>
+      </div>
+
+      <div style="background:#F9F6F5; border-radius:20px; padding:22px; display:flex; flex-direction:column; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1);" data-screen-label="Gloss row default">
+        <div style="background:#fff; border-radius:22px; padding:24px 26px; display:flex; flex-direction:column; gap:16px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+          <div style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Russian &middot; adjective</span>
+            <div style="display:flex; align-items:baseline; gap:12px;">
+              <span style="font-family:'Literata',serif; font-size:38px; font-weight:600; line-height:1;">голубой</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#5f5560;">[ɡəlʊˈboj]</span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:16px; border-top:1px solid #edebe8; padding-top:15px;">
+            <span style="flex:0 0 20px; font-family:'Literata',serif; font-size:18px; font-weight:600; color:#a99aa8;">1</span>
+            <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
+              <span style="font-family:'Literata',serif; font-size:19px; font-weight:600;">Pale blue, the blue of a clear sky</span>
+
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <div style="display:flex; align-items:baseline; gap:10px; border-left:2px solid #5A1A74; padding:5px 0 5px 13px;">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8; flex:0 0 20px;">UA</span>
+                  <span style="font-family:'Literata',serif; font-size:20px; font-weight:600; color:#2C2530;">блакитний</span>
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.6px; text-transform:uppercase; color:#5A1A74; background:#f4eef6; padding:3px 7px; border-radius:5px;">exact</span>
+                </div>
+                <div style="display:flex; align-items:baseline; gap:10px; border-left:2px solid #e8e2e6; padding:5px 0 5px 13px;">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8; flex:0 0 20px;">EN</span>
+                  <span style="font-family:'Literata',serif; font-size:18px; color:#5f5560;">blue</span>
+                  <span style="font-size:13px; color:#5f5560;">&mdash; also синий</span>
+                </div>
+              </div>
+
+              <span style="font-size:13px; color:#872657;">Why блакитний first</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.6; color:#a99aa8;"><span style="color:#c4b8c2;">&#8627;</span> Annotation, not UI copy &mdash; do not render. Order is the feature. <code>exact</code> and the &ldquo;also синий&rdquo; clause are the only rendered tells; both are one lookup away from being checked by the reader. The plum rule is 2px, the demoted rule is #e8e2e6 &mdash; same geometry, so nothing is scolded.</div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.6; color:#a99aa8;"><span style="color:#c4b8c2;">&#8627;</span> &ldquo;Why блакитний first&rdquo; is a text link, not a chip or an info icon. It opens 2b in place.</div>
+    </div>
+
+    <div id="2b" style="display:flex; flex-direction:column; gap:10px; width:560px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">2b</span>
+        <span style="font-size:13px; color:#5f5560;">The round trip, opened &mdash; evidence, not a claim</span>
+      </div>
+
+      <div style="background:#F9F6F5; border-radius:20px; padding:22px; display:flex; flex-direction:column; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.1);" data-screen-label="Round trip open">
+        <div style="background:#fff; border-radius:22px; padding:22px 26px; display:flex; flex-direction:column; gap:16px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+          <div style="display:flex; align-items:baseline; gap:10px;">
+            <span style="font-family:'Literata',serif; font-size:19px; font-weight:600;">Why блакитний first</span>
+            <span style="margin-left:auto; font-size:12.5px; color:#a99aa8;">Close</span>
+          </div>
+
+          <p style="margin:0; font-size:14px; line-height:1.6; color:#5f5560; text-wrap:pretty;">Each translation was sent back the other way to see where it lands.</p>
+
+          <div style="display:flex; flex-direction:column; gap:9px;">
+            <div style="background:#F9F6F5; border-radius:14px; padding:13px 16px; display:flex; flex-direction:column; gap:7px;">
+              <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;">
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">UA</span>
+                <span style="font-family:'Literata',serif; font-size:17px; font-weight:600;">блакитний</span>
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:14px; color:#c4b8c2;">&rarr;</span>
+                <span style="font-family:'Literata',serif; font-size:17px; font-weight:600; color:#5A1A74;">голубой</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.6px; text-transform:uppercase; color:#5A1A74; background:#f4eef6; padding:3px 7px; border-radius:5px;">back to the word</span>
+              </div>
+              <span style="font-size:13px; line-height:1.5; color:#5f5560;">One word each way. Ukrainian keeps sky blue and deep blue apart, the way Russian does.</span>
+            </div>
+
+            <div style="background:#F9F6F5; border-radius:14px; padding:13px 16px; display:flex; flex-direction:column; gap:7px;">
+              <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;">
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">EN</span>
+                <span style="font-family:'Literata',serif; font-size:17px;">blue</span>
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:14px; color:#c4b8c2;">&rarr;</span>
+                <span style="font-family:'Literata',serif; font-size:17px; color:#5f5560;">синий</span>
+                <span style="font-size:13px; color:#a99aa8;">, then голубой</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.6px; text-transform:uppercase; color:#5f5560; background:#efeae7; padding:3px 7px; border-radius:5px;">lands elsewhere first</span>
+              </div>
+              <span style="font-size:13px; line-height:1.5; color:#5f5560;">English uses one word for both. Coming back, it picks the other one.</span>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid #edebe8; padding-top:13px; display:flex; align-items:baseline; gap:10px;">
+            <span style="font-size:13px; line-height:1.55; color:#5f5560;">Both are saved with the word. Reviews will ask you with блакитний.</span>
+            <span style="margin-left:auto; font-size:12.5px; color:#872657; white-space:nowrap;">Ask with blue instead</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.6; color:#a99aa8;"><span style="color:#c4b8c2;">&#8627;</span> Annotation, not UI copy &mdash; do not render. Open by default for the first three lookups of a new account, then collapsed for the rest of its life. The insight lands once; after that this panel is furniture.</div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.6; color:#a99aa8;"><span style="color:#c4b8c2;">&#8627;</span> No percentages, no confidence score, no &ldquo;our model determined&rdquo;. Two arrows the reader can check in a second. The override link matters more than the explanation: it is what makes a wrong call survivable.</div>
+    </div>
+
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start;">
+
+    <div id="2c" style="display:flex; flex-direction:column; gap:10px; width:772px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">2c</span>
+        <span style="font-size:13px; color:#5f5560;">Per word, not per language &mdash; three lookups by the same reader</span>
+      </div>
+
+      <div style="background:#fff; border-radius:24px; padding:26px 28px; display:flex; flex-direction:column; gap:18px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+        <p style="margin:0; font-size:14px; line-height:1.6; color:#5f5560; max-width:78ch; text-wrap:pretty;">This is what stops it feeling like a setting. One reader, learning German, fluent in English and Ukrainian, three words in a row &mdash; and the promoted language changes each time. Nobody decided Ukrainian is better. The word decided.</p>
+
+        <div style="display:grid; grid-template-columns:150px 1fr 1fr; gap:0; font-size:13.5px;">
+          <div style="padding:9px 12px 9px 0; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#872657;">German word</div>
+          <div style="padding:9px 12px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#872657;">Promoted</div>
+          <div style="padding:9px 12px; border-bottom:1.5px solid #2C2530; font-size:10px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600; color:#872657;">Demoted, and why</div>
+
+          <div style="padding:13px 12px 13px 0; border-bottom:1px solid #edebe8; font-family:'Literata',serif; font-size:19px; font-weight:600;">die Uhr</div>
+          <div style="padding:13px 12px; border-bottom:1px solid #edebe8; display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">UA</span><span style="font-family:'Literata',serif; font-size:17px; font-weight:600; color:#5A1A74;">годинник</span></div>
+          <div style="padding:13px 12px; border-bottom:1px solid #edebe8; display:flex; flex-direction:column; gap:3px;"><div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">RU</span><span style="font-family:'Literata',serif; font-size:16px; color:#5f5560;">часы</span></div><span style="font-size:12.5px; line-height:1.5; color:#5f5560;">Also the plural of час. Sent back, it can return as hours.</span></div>
+
+          <div style="padding:13px 12px 13px 0; border-bottom:1px solid #edebe8; font-family:'Literata',serif; font-size:19px; font-weight:600;">der Termin</div>
+          <div style="padding:13px 12px; border-bottom:1px solid #edebe8; display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">EN</span><span style="font-family:'Literata',serif; font-size:17px; font-weight:600; color:#5A1A74;">appointment</span></div>
+          <div style="padding:13px 12px; border-bottom:1px solid #edebe8; display:flex; flex-direction:column; gap:3px;"><div style="display:flex; align-items:baseline; gap:9px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">UA</span><span style="font-family:'Literata',serif; font-size:16px; color:#5f5560;">зустріч</span></div><span style="font-size:12.5px; line-height:1.5; color:#5f5560;">Comes back as Treffen. And термін, which the eye reaches for, is a deadline.</span></div>
+
+          <div style="padding:13px 12px 13px 0; border-bottom:1px solid #edebe8; font-family:'Literata',serif; font-size:19px; font-weight:600;">die Ausgabe</div>
+          <div style="padding:13px 12px; border-bottom:1px solid #edebe8; display:flex; flex-direction:column; gap:3px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.6px; text-transform:uppercase; color:#5f5560; background:#efeae7; padding:3px 7px; border-radius:5px; align-self:flex-start;">nothing promoted</span></div>
+          <div style="padding:13px 12px; border-bottom:1px solid #edebe8; display:flex; flex-direction:column; gap:3px;"><div style="display:flex; align-items:baseline; gap:9px; flex-wrap:wrap;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">UA</span><span style="font-family:'Literata',serif; font-size:16px; color:#5f5560;">видання</span><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8; padding-left:6px;">EN</span><span style="font-family:'Literata',serif; font-size:16px; color:#5f5560;">edition</span></div><span style="font-size:12.5px; line-height:1.5; color:#5f5560;">Both round-trip cleanly. There is nothing to point out, so the sheet points out nothing.</span></div>
+        </div>
+
+        <div style="background:#F9F6F5; border-radius:14px; padding:13px 16px; font-size:13.5px; line-height:1.6; color:#5f5560;"><strong style="color:#2C2530;">The third row is the design.</strong> On most words all the fluent languages agree and no mark appears at all. If the tell shows up on every lookup it stops meaning anything, and the sheet turns into a linguistics lecture. Expect it on well under a fifth of words &mdash; that rarity is what makes the reader look when it does appear.</div>
+      </div>
+    </div>
+
+    <div id="2d" style="display:flex; flex-direction:column; gap:10px; width:548px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">2d</span>
+        <span style="font-size:13px; color:#5f5560;">When no language is clean &mdash; the case that earns the trust</span>
+      </div>
+
+      <div style="background:#F9F6F5; border-radius:20px; padding:22px; box-shadow:0 1px 3px rgba(0,0,0,.1);" data-screen-label="No clean gloss">
+        <div style="background:#fff; border-radius:22px; padding:24px 26px; display:flex; flex-direction:column; gap:15px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+          <div style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">German &middot; particle</span>
+            <span style="font-family:'Literata',serif; font-size:34px; font-weight:600; line-height:1;">doch</span>
+          </div>
+
+          <div style="background:#F9F6F5; border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:8px;">
+            <span style="font-size:13.5px; line-height:1.55; color:#2C2530;">Neither of your languages has one word for this. A sentence will do more than a translation here.</span>
+            <div style="display:flex; align-items:baseline; gap:14px;">
+              <div style="display:flex; align-items:baseline; gap:8px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">UA</span><span style="font-family:'Literata',serif; font-size:16px; color:#5f5560;">все ж, таки, ну</span></div>
+              <div style="display:flex; align-items:baseline; gap:8px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#a99aa8;">EN</span><span style="font-family:'Literata',serif; font-size:16px; color:#5f5560;">but, though, do</span></div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:9px; border-left:2px solid #5A1A74; padding-left:14px;">
+            <p style="margin:0; font-family:'Literata',serif; font-size:18px; line-height:1.6; color:#33292E;">&bdquo;Komm <strong style="font-weight:600; color:#5A1A74;">doch</strong> her!&ldquo;</p>
+            <span style="font-size:13px; line-height:1.5; color:#5f5560;">Softens an order into an invitation. Nothing in the translation carries this; the tone does.</span>
+          </div>
+
+          <div style="border-top:1px solid #edebe8; padding-top:12px; display:flex; align-items:center; gap:12px;">
+            <span style="background:#5A1A74; color:#fff; font-size:14px; font-weight:600; padding:11px 22px; border-radius:9999px;">Keep with the sentence</span>
+            <span style="font-size:12.5px; color:#5f5560;">Reviews will ask you with the sentence, not a word</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; line-height:1.6; color:#a99aa8;"><span style="color:#c4b8c2;">&#8627;</span> Annotation, not UI copy &mdash; do not render. Same signal, opposite outcome: when every round trip fails, the sheet demotes glosses instead of promoting one, and the example is the answer. Admitting the gloss is not there reads as competence, and it changes what the review card asks.</div>
+    </div>
+
+  </div>
+
+  <div id="2e" style="display:flex; flex-direction:column; gap:10px; width:1120px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; background:#2c2530; color:#fff; padding:3px 8px; border-radius:6px;">2e</span>
+      <span style="font-size:13px; color:#5f5560;">Where the work sits, and what it is actually for</span>
+    </div>
+
+    <div style="background:#fff; border-radius:24px; padding:26px 28px; display:flex; flex-direction:column; gap:20px; box-shadow:0 1px 3px rgba(0,0,0,.1);">
+
+      <div style="display:flex; gap:18px;">
+        <div style="flex:1; background:#F9F6F5; border-radius:18px; padding:20px 22px; display:flex; flex-direction:column; gap:11px;">
+          <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Backend, ninety per cent of it</span>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px; line-height:1.55; color:#5f5560;">
+            <div><strong style="color:#2C2530;">The round trip and its rank.</strong> For each fluent gloss, translate back and record which sense of the target word it returns to, and in what position. Position is the whole score.</div>
+            <div><strong style="color:#2C2530;">One-to-many detection.</strong> If a gloss maps back onto two target words, it is broader, and the second word is named. That name is what the UI prints.</div>
+            <div><strong style="color:#2C2530;">Caching.</strong> Word plus sense plus language pair. Written once, served to everyone with that pair. The cost does not scale with users.</div>
+            <div><strong style="color:#2C2530;">A floor.</strong> Below a threshold, promote nothing. Rarity is a backend decision, not a UI one.</div>
+          </div>
+        </div>
+        <div style="flex:1; background:#F9F6F5; border-radius:18px; padding:20px 22px; display:flex; flex-direction:column; gap:11px;">
+          <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Interface, and it is small</span>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px; line-height:1.55; color:#5f5560;">
+            <div><strong style="color:#2C2530;">Order.</strong> The exact gloss is first and larger. On its own this delivers most of the value, to readers who never notice why.</div>
+            <div><strong style="color:#2C2530;">One clause of caveat.</strong> &ldquo;also синий&rdquo;. Named collision, no jargon, verifiable in one look.</div>
+            <div><strong style="color:#2C2530;">One link, opened three times ever.</strong> The round trip, then gone.</div>
+            <div><strong style="color:#2C2530;">An override.</strong> &ldquo;Ask with blue instead&rdquo;. The reader stays the authority on their own languages, which is the only thing that makes being wrong survivable.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <span style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">The part that is not on this page</span>
+        <p style="margin:0; font-size:14px; line-height:1.65; color:#5f5560; max-width:88ch; text-wrap:pretty;">Discover is where the reasoning is shown, but the value is collected downstream, silently, three times over. Which is the argument for building it: it is not one feature, it is an input to three that already exist.</p>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;">
+          <div style="background:#F9F6F5; border-radius:16px; padding:17px 19px; display:flex; flex-direction:column; gap:6px;">
+            <span style="font-family:'Literata',serif; font-size:16px; font-weight:600;">The review card</span>
+            <span style="font-size:13px; line-height:1.55; color:#5f5560;">The card back asks with блакитний, not blue. A card that tests you against an ambiguous gloss teaches the ambiguity along with the word.</span>
+          </div>
+          <div style="background:#F9F6F5; border-radius:16px; padding:17px 19px; display:flex; flex-direction:column; gap:6px;">
+            <span style="font-family:'Literata',serif; font-size:16px; font-weight:600;">Confusion-aware wrong answers</span>
+            <span style="font-size:13px; line-height:1.55; color:#5f5560;">The collision the round trip found &mdash; синий &mdash; is a ready-made distractor, and the &ldquo;that means B&rdquo; reply writes itself. This is where the two best ideas in the product meet.</span>
+          </div>
+          <div style="background:#F9F6F5; border-radius:16px; padding:17px 19px; display:flex; flex-direction:column; gap:6px;">
+            <span style="font-family:'Literata',serif; font-size:16px; font-weight:600;">The sense picker</span>
+            <span style="font-size:13px; line-height:1.55; color:#5f5560;">Where two senses of a word take different glosses in the same fluent language, the spread is itself the fastest way to tell them apart. No definitions to read.</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#2C2530; border-radius:20px; padding:22px 26px; display:flex; flex-direction:column; gap:9px;">
+        <span style="font-family:'Literata',serif; font-size:19px; font-weight:600; color:#F9F6F5;">The verdict</span>
+        <p style="margin:0; font-size:13.5px; line-height:1.65; color:rgba(249,246,245,.78); max-width:96ch; text-wrap:pretty;">Build it, in this order: the ranking first, because it improves every card for every multilingual user whether or not they ever see an explanation; the one-clause caveat second; the round-trip panel last, and only if the caveat turns out not to be enough on its own. Do not put it on the landing page. It cannot be explained to a monolingual visitor in one line, and the readers it does land on &mdash; a Ukrainian who also reads Russian and English, which is a large share of who Almonium is for &mdash; will find it on their third lookup and tell someone.</p>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<section style="display:flex; flex-direction:column; gap:30px;">
+
+  <div style="max-width:1000px; display:flex; flex-direction:column; gap:11px;">
     <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; color:#872657;">Almonium &middot; /discover</div>
     <h1 style="margin:0; font-family:'Literata',serif; font-size:40px; font-weight:600; line-height:1.15;">Discover is the front door, the dictionary, and the only page a stranger sees first</h1>
     <p style="margin:0; font-size:15px; line-height:1.65; color:#5f5560; max-width:84ch; text-wrap:pretty;">One surface does three jobs: it is the public no-signup demo the brief calls the conversion mechanic, it is the word sheet the reader opens mid-paragraph, and it is where a word gets kept. Everything downstream &mdash; intent, confusion edges, encounter history &mdash; is decided here, at the moment of saving. The sheet is the same object for all three audiences; what changes is how much of it is filled in.</p>

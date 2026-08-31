@@ -19,7 +19,7 @@ import { relativeTime } from '@/src/card-utils';
 import { chatUnavailableCopy, useChat } from '@/src/chat-client';
 import {
   broadcastFooter,
-  broadcastTopic,
+  broadcastLanguage,
   canSendMessages,
   channelImage,
   channelTitle,
@@ -30,9 +30,14 @@ import {
   seenByOthers,
   toChatMessage,
   transcriptRows,
+  type ChatMessage,
   type ChatRow,
 } from '@/src/chat';
-import { createThemedStyles, fonts, radii, shadows, useTheme } from '@/src/theme';
+import { languageName } from '@/src/languages';
+import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+
+/** How many older messages one scroll back asks for. */
+const pageSize = 30;
 
 export default function ChatRoomScreen() {
   const { colors } = useTheme();
@@ -49,7 +54,9 @@ export default function ChatRoomScreen() {
   const recipientId = params.recipientId;
 
   const channelRef = useRef<Channel | null>(null);
+  const loadingOlder = useRef(false);
   const [ready, setReady] = useState(false);
+  const [hasOlder, setHasOlder] = useState(true);
   const [roomError, setRoomError] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
@@ -92,8 +99,9 @@ export default function ChatRoomScreen() {
     void (async () => {
       try {
         if (recipientId && type === channelTypes.private) await channel.create();
-        await channel.watch();
+        const response = await channel.watch({ messages: { limit: pageSize } });
         if (!active) return;
+        setHasOlder(response.messages.length >= pageSize);
         setReady(true);
         capture();
         await channel.markRead().catch(() => undefined);
@@ -109,9 +117,33 @@ export default function ChatRoomScreen() {
     };
   }, [capture, channelId, client, recipientId, type, userId]);
 
+  /**
+   * Scrolling back asks Stream for the page before the oldest message held. The list is
+   * inverted, so its end is the top of the transcript.
+   */
+  const loadOlder = useCallback(async () => {
+    const channel = channelRef.current;
+    const oldest = channel?.state.messages[0];
+    if (!channel || !oldest || !hasOlder || loadingOlder.current) return;
+    loadingOlder.current = true;
+    try {
+      const response = await channel.query(
+        { messages: { limit: pageSize, id_lt: oldest.id } },
+        'current',
+      );
+      setHasOlder(response.messages.length >= pageSize);
+      capture();
+    } catch {
+      setHasOlder(false);
+    } finally {
+      loadingOlder.current = false;
+    }
+  }, [capture, hasOlder]);
+
   const rows = useMemo(() => [...transcriptRows(snapshot.messages)].reverse(), [snapshot.messages]);
   const title = snapshot.title || params.title || 'Chat';
   const unavailable = status !== 'ready' ? chatUnavailableCopy(status, error) : roomError;
+  const empty = emptyCopy(type, channelId);
 
   async function send() {
     const channel = channelRef.current;
@@ -134,7 +166,7 @@ export default function ChatRoomScreen() {
         <Pressable onPress={() => router.back()} accessibilityLabel="Go back" hitSlop={8} style={styles.back}>
           <Ionicons name="chevron-back" size={24} color={colors.ink} />
         </Pressable>
-        <ChatAvatar type={type} image={snapshot.image} size={40} />
+        <ChatAvatar type={type} channelId={channelId} image={snapshot.image} size={38} />
         <View style={styles.headerCopy}>
           <Text numberOfLines={1} style={styles.headerTitle}>
             {title}
@@ -157,26 +189,21 @@ export default function ChatRoomScreen() {
           keyExtractor={(item) => item.key}
           contentContainerStyle={styles.transcript}
           keyboardDismissMode="on-drag"
-          renderItem={({ item }) => <TranscriptRow row={item} showAuthor={type !== channelTypes.private} seen={snapshot.seenMessageId} />}
+          onEndReached={() => void loadOlder()}
+          onEndReachedThreshold={0.4}
+          ListFooterComponent={
+            hasOlder && rows.length > 0 ? (
+              <ActivityIndicator style={styles.olderLoader} color={colors.metadata} />
+            ) : null
+          }
+          renderItem={({ item }) => <TranscriptRow row={item} seen={snapshot.seenMessageId} />}
           ListEmptyComponent={
             !ready && !unavailable ? (
               <ActivityIndicator style={styles.loader} color={colors.primary} />
             ) : (
               <View style={styles.empty}>
-                <Ionicons
-                  name={unavailable ? 'cloud-offline-outline' : type === channelTypes.self ? 'bookmark-outline' : 'chatbubble-ellipses-outline'}
-                  size={36}
-                  color={colors.primary}
-                />
-                <Text style={styles.emptyTitle}>{unavailable ? 'This chat is not available' : 'Nothing here yet'}</Text>
-                <Text style={styles.emptyCopy}>
-                  {unavailable ??
-                    (type === channelTypes.self
-                      ? 'Keep a note, a phrase, or anything worth coming back to.'
-                      : type === channelTypes.broadcast
-                        ? 'Almonium has not posted in this room yet.'
-                        : 'Write the first message.')}
-                </Text>
+                <Text style={styles.emptyTitle}>{unavailable ? 'This chat is not available' : empty.title}</Text>
+                <Text style={styles.emptyCopy}>{unavailable ?? empty.copy}</Text>
               </View>
             )
           }
@@ -202,21 +229,16 @@ export default function ChatRoomScreen() {
               accessibilityLabel="Send message"
               disabled={!draft.trim() || sending || !ready}
               onPress={() => void send()}
-              style={({ pressed }) => [
-                styles.send,
-                (!draft.trim() || sending || !ready) && styles.sendDisabled,
-                pressed && styles.pressed,
-              ]}>
+              style={({ pressed }) => [styles.send, pressed && styles.pressed]}>
               <Ionicons
-                name="arrow-up"
-                size={20}
-                color={draft.trim() && ready ? colors.onPrimary : colors.disabledText}
+                name="send"
+                size={21}
+                color={draft.trim() && ready ? colors.chatMine : colors.disabledText}
               />
             </Pressable>
           </View>
         ) : (
           <View style={styles.readOnly}>
-            <Ionicons name="megaphone-outline" size={17} color={colors.muted} />
             <Text style={styles.readOnlyText}>{broadcastFooter}</Text>
           </View>
         )}
@@ -225,52 +247,61 @@ export default function ChatRoomScreen() {
   );
 }
 
-function TranscriptRow({
-  row,
-  showAuthor,
-  seen,
-}: {
-  row: ChatRow;
-  showAuthor: boolean;
-  seen: string | null;
-}) {
+/**
+ * The day divider owns the date and the bubble owns the time, so nothing here carries an author
+ * line. Within a run the first bubble takes the avatar and squares off the corner it meets the
+ * next one at; the rest indent past the avatar column.
+ */
+function TranscriptRow({ row, seen }: { row: ChatRow; seen: string | null }) {
   const styles = useStyles();
+  const { colors } = useTheme();
+
   if (row.kind === 'day') {
     return (
       <View style={styles.day}>
+        <View style={styles.dayRule} />
         <Text style={styles.dayText}>{row.label}</Text>
+        <View style={styles.dayRule} />
       </View>
     );
   }
 
-  const { message } = row;
+  const { message, startsRun } = row;
+  const read = message.own && message.id === seen;
+
   return (
     <View style={[styles.messageRow, message.own ? styles.messageRowOwn : styles.messageRowOther]}>
-      <View style={styles.messageColumn}>
-        {showAuthor && !message.own && row.startsBlock && !!message.authorName && (
-          <Text style={styles.author}>{message.authorName}</Text>
-        )}
-        <View
+      {!message.own &&
+        (startsRun ? (
+          <ChatAvatar type={channelTypes.private} image={message.authorImage} size={30} />
+        ) : (
+          <View style={styles.avatarSpacer} />
+        ))}
+      <View
+        style={[
+          styles.bubble,
+          message.own ? styles.bubbleOwn : styles.bubbleOther,
+          message.own
+            ? startsRun
+              ? styles.tailOwn
+              : styles.continuesOwn
+            : startsRun
+              ? styles.tailOther
+              : styles.continuesOther,
+          message.deleted && styles.bubbleDeleted,
+        ]}>
+        <Text
           style={[
-            styles.bubble,
-            message.own ? styles.bubbleOwn : styles.bubbleOther,
-            message.deleted && styles.bubbleDeleted,
+            styles.messageText,
+            message.own && styles.messageTextOwn,
+            message.deleted && styles.messageTextDeleted,
           ]}>
-          <Text
-            style={[
-              styles.messageText,
-              message.own && styles.messageTextOwn,
-              message.deleted && styles.messageTextDeleted,
-            ]}>
-            {message.text}
-          </Text>
+          {message.text}
+        </Text>
+        <View style={styles.meta}>
+          <Text style={[styles.stamp, message.own && styles.stampOwn]}>{clockTime(message.createdAt)}</Text>
+          {read && <Ionicons name="checkmark-done" size={13} color={colors.white} style={styles.readMark} />}
         </View>
-        {row.endsBlock && (
-          <Text style={[styles.stamp, message.own && styles.stampOwn]}>
-            {clockTime(message.createdAt)}
-            {message.own && message.id === seen ? ' · Read' : ''}
-          </Text>
-        )}
       </View>
     </View>
   );
@@ -282,7 +313,7 @@ interface Snapshot {
   image?: string;
   online: boolean;
   canSend: boolean;
-  messages: ReturnType<typeof toChatMessage>[];
+  messages: ChatMessage[];
   seenMessageId: string | null;
 }
 
@@ -319,49 +350,76 @@ function subtitleFor(
   other: ReturnType<typeof interlocutor>,
 ) {
   if (channel.type === channelTypes.broadcast) {
-    return `Channel · updates about ${broadcastTopic(channel)}`;
+    const language = broadcastLanguage(channel.id ?? '');
+    return language ? `Channel · updates about ${languageName(language)}` : 'Channel · product updates';
   }
-  if (channel.type === channelTypes.self) return 'Only you';
+  // Saved Messages has nobody to be present, so its header carries no presence line.
+  if (channel.type === channelTypes.self) return '';
   if (someoneTyping) return 'typing…';
   if (other?.online) return 'online';
   return other?.last_active ? `last seen ${relativeTime(other.last_active)}` : 'offline';
 }
 
+function emptyCopy(type: string, channelId: string) {
+  if (type === channelTypes.self) {
+    return {
+      title: 'Your own notebook',
+      copy: 'Forward messages here, or write to yourself. Nobody else can see this chat.',
+    };
+  }
+  if (type === channelTypes.broadcast) {
+    const language = broadcastLanguage(channelId);
+    return {
+      title: 'Nothing posted yet',
+      copy: language
+        ? `New books, packs and features for ${languageName(language)} will land here.`
+        : 'New books, packs and features will land here.',
+    };
+  }
+  return { title: 'Nothing here yet', copy: 'Write the first message.' };
+}
+
 const useStyles = createThemedStyles((colors, isDark) => ({
   safe: { flex: 1, backgroundColor: colors.canvas },
-  header: { minHeight: 62, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: colors.line },
+  header: { minHeight: 60, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: colors.line },
   back: { width: 40, height: 44, alignItems: 'center', justifyContent: 'center' },
   headerCopy: { flex: 1, gap: 2 },
-  headerTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 18, fontWeight: '600' },
+  headerTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 17, fontWeight: '500' },
   headerSubtitle: { color: colors.muted, fontSize: 11 },
-  headerOnline: { color: colors.primary },
+  headerOnline: { color: colors.chatMine },
   body: { flex: 1 },
-  transcript: { flexGrow: 1, justifyContent: 'flex-end', paddingHorizontal: 16, paddingVertical: 14, gap: 4 },
-  day: { alignItems: 'center', paddingVertical: 10 },
-  dayText: { color: colors.metadata, fontFamily: fonts.sansMedium, fontSize: 11 },
-  messageRow: { flexDirection: 'row' },
+  transcript: { flexGrow: 1, justifyContent: 'flex-end', paddingHorizontal: 16, paddingVertical: 14, gap: 8 },
+  day: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 6 },
+  dayRule: { flex: 1, height: 1, backgroundColor: colors.line },
+  dayText: { color: colors.muted, fontSize: 11 },
+  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
   messageRowOwn: { justifyContent: 'flex-end' },
   messageRowOther: { justifyContent: 'flex-start' },
-  messageColumn: { maxWidth: '82%', gap: 3 },
-  author: { color: colors.muted, fontFamily: fonts.sansMedium, fontSize: 11, paddingHorizontal: 4 },
-  bubble: { borderRadius: radii.panel, paddingHorizontal: 14, paddingVertical: 10 },
-  bubbleOwn: { backgroundColor: colors.primary, borderBottomRightRadius: 6 },
-  bubbleOther: { backgroundColor: colors.surface, borderBottomLeftRadius: 6, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },
+  avatarSpacer: { width: 30 },
+  bubble: { maxWidth: '76%', flexDirection: 'row', alignItems: 'flex-end', gap: 10, borderRadius: 16, paddingHorizontal: 13, paddingTop: 9, paddingBottom: 7 },
+  bubbleOwn: { backgroundColor: colors.chatMine },
+  bubbleOther: { borderWidth: 1, borderColor: colors.line, backgroundColor: isDark ? colors.nested : colors.surface },
+  tailOwn: { borderBottomRightRadius: 4 },
+  continuesOwn: { borderTopRightRadius: 4 },
+  tailOther: { borderBottomLeftRadius: 4 },
+  continuesOther: { borderTopLeftRadius: 4 },
   bubbleDeleted: { backgroundColor: colors.nested, borderWidth: 1, borderColor: colors.line },
-  messageText: { color: colors.ink, fontFamily: fonts.sans, fontSize: 15, lineHeight: 21 },
-  messageTextOwn: { color: colors.onPrimary },
+  messageText: { flexShrink: 1, color: colors.ink, fontFamily: fonts.sans, fontSize: 14, lineHeight: 21 },
+  messageTextOwn: { color: colors.white },
   messageTextDeleted: { color: colors.metadata, fontStyle: 'italic' },
-  stamp: { color: colors.metadata, fontSize: 10, paddingHorizontal: 4, paddingBottom: 4 },
-  stampOwn: { textAlign: 'right' },
+  meta: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingBottom: 1 },
+  stamp: { color: colors.metadata, fontSize: 10.5 },
+  stampOwn: { color: colors.white, opacity: 0.66 },
+  readMark: { opacity: 0.66 },
+  olderLoader: { paddingVertical: 14 },
   loader: { marginTop: 60 },
-  empty: { flexGrow: 1, minHeight: 240, alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24 },
-  emptyTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 20, fontWeight: '600', textAlign: 'center' },
-  emptyCopy: { color: colors.muted, fontSize: 13, lineHeight: 19, textAlign: 'center' },
-  composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 9, borderTopWidth: 1, borderTopColor: colors.line, paddingHorizontal: 14, paddingTop: 10, paddingBottom: 10, backgroundColor: colors.canvas },
-  input: { flex: 1, minHeight: 46, maxHeight: 128, borderWidth: 1, borderColor: colors.border, borderRadius: radii.control, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, color: colors.ink, fontFamily: fonts.sans, fontSize: 15, backgroundColor: colors.surface },
-  send: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 23, backgroundColor: colors.primary },
-  sendDisabled: { backgroundColor: colors.disabled },
-  pressed: { opacity: 0.75 },
-  readOnly: { minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderTopWidth: 1, borderTopColor: colors.line, paddingHorizontal: 16, paddingVertical: 14 },
+  empty: { flexGrow: 1, minHeight: 240, alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 32 },
+  emptyTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, fontWeight: '500', textAlign: 'center' },
+  emptyCopy: { color: colors.muted, fontSize: 13, lineHeight: 20, textAlign: 'center' },
+  composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, borderTopWidth: 1, borderTopColor: colors.line, paddingHorizontal: 16, paddingVertical: 8 },
+  input: { flex: 1, minHeight: 44, maxHeight: 128, paddingVertical: 12, color: colors.ink, fontFamily: fonts.sans, fontSize: 13.5 },
+  send: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  pressed: { opacity: 0.6 },
+  readOnly: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderTopWidth: 1, borderTopColor: colors.line, paddingHorizontal: 16, paddingVertical: 14 },
   readOnlyText: { color: colors.muted, fontSize: 12 },
 }));
