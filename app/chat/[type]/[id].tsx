@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -15,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Channel } from 'stream-chat';
 
 import { ChatAvatar } from '@/components/chat-avatar';
+import { MessageActionsSheet, type MessageAction } from '@/components/message-actions';
 import { relativeTime } from '@/src/card-utils';
 import { chatUnavailableCopy, useChat } from '@/src/chat-client';
 import {
@@ -25,6 +27,7 @@ import {
   channelTitle,
   channelTypes,
   clockTime,
+  firstUnreadMessageId,
   interlocutor,
   isChannelType,
   seenByOthers,
@@ -34,14 +37,18 @@ import {
   type ChatRow,
 } from '@/src/chat';
 import { languageName } from '@/src/languages';
+import { useNotice } from '@/src/notice-context';
 import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 
-/** How many older messages one scroll back asks for. */
+/** How many older messages one page asks for. */
 const pageSize = 30;
+/** A bound on paging back to reach the unread divider, so a very old mark cannot spin forever. */
+const maxPagesToDivider = 8;
 
 export default function ChatRoomScreen() {
   const { colors } = useTheme();
   const styles = useStyles();
+  const showNotice = useNotice();
   const { client, status, error, userId } = useChat();
   const params = useLocalSearchParams<{
     type: string;
@@ -53,12 +60,19 @@ export default function ChatRoomScreen() {
   const channelId = params.id ?? '';
   const recipientId = params.recipientId;
 
+  const list = useRef<FlatList<ChatRow>>(null);
   const channelRef = useRef<Channel | null>(null);
   const loadingOlder = useRef(false);
+  // Taken once when the room opens and then held, so marking the channel read does not pull the
+  // divider out from under the person reading.
+  const unreadAnchor = useRef<string | null>(null);
+  const landed = useRef(false);
   const [ready, setReady] = useState(false);
   const [hasOlder, setHasOlder] = useState(true);
   const [roomError, setRoomError] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
+  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
+  const [acting, setActing] = useState<ChatMessage | null>(null);
   const [sending, setSending] = useState(false);
   // Until the channel answers, assume a broadcast room is read only, the way canSendMessages does.
   const [snapshot, setSnapshot] = useState<Snapshot>(() => ({
@@ -71,7 +85,8 @@ export default function ChatRoomScreen() {
   const capture = useCallback(() => {
     const channel = channelRef.current;
     if (!channel || !userId) return;
-    setSnapshot(snapshotOf(channel, userId));
+    setSnapshot(snapshotOf(channel, userId, unreadAnchor.current));
+    setHasOlder(channel.state.messagePagination.hasPrev);
   }, [userId]);
 
   useEffect(() => {
@@ -99,9 +114,37 @@ export default function ChatRoomScreen() {
     void (async () => {
       try {
         if (recipientId && type === channelTypes.private) await channel.create();
-        const response = await channel.watch({ messages: { limit: pageSize } });
+        await channel.watch({ messages: { limit: pageSize } });
         if (!active) return;
-        setHasOlder(response.messages.length >= pageSize);
+
+        // Where reading stopped, before anything marks the channel read.
+        unreadAnchor.current = firstUnreadMessageId(
+          channel.state.read,
+          userId,
+          channel.state.messages,
+        );
+
+        // Opening lands on the divider, not on the newest message, so page back until the
+        // boundary is loaded rather than painting a tail the mark is invisible in. Knowing the
+        // id is not enough - the message it points at has to be on screen to divide anything.
+        let pages = 0;
+        while (
+          active &&
+          channel.countUnread() > 0 &&
+          !isLoaded(channel, unreadAnchor.current) &&
+          channel.state.messagePagination.hasPrev &&
+          pages < maxPagesToDivider
+        ) {
+          await olderPage(channel);
+          pages += 1;
+          unreadAnchor.current = firstUnreadMessageId(
+            channel.state.read,
+            userId,
+            channel.state.messages,
+          );
+        }
+        if (!active) return;
+
         setReady(true);
         capture();
         await channel.markRead().catch(() => undefined);
@@ -118,29 +161,40 @@ export default function ChatRoomScreen() {
   }, [capture, channelId, client, recipientId, type, userId]);
 
   /**
-   * Scrolling back asks Stream for the page before the oldest message held. The list is
-   * inverted, so its end is the top of the transcript.
+   * Scrolling back asks Stream for the page before the oldest message held. Whether more remains
+   * comes from the SDK's own pagination terminator, not from counting the page that arrived - an
+   * exactly-full page is not the end of the channel.
    */
   const loadOlder = useCallback(async () => {
     const channel = channelRef.current;
-    const oldest = channel?.state.messages[0];
-    if (!channel || !oldest || !hasOlder || loadingOlder.current) return;
+    if (!channel || !hasOlder || loadingOlder.current || !ready) return;
     loadingOlder.current = true;
     try {
-      const response = await channel.query(
-        { messages: { limit: pageSize, id_lt: oldest.id } },
-        'current',
-      );
-      setHasOlder(response.messages.length >= pageSize);
+      await olderPage(channel);
       capture();
     } catch {
       setHasOlder(false);
     } finally {
       loadingOlder.current = false;
     }
-  }, [capture, hasOlder]);
+  }, [capture, hasOlder, ready]);
 
-  const rows = useMemo(() => [...transcriptRows(snapshot.messages)].reverse(), [snapshot.messages]);
+  const rows = useMemo(
+    () => [...transcriptRows(snapshot.messages, { firstUnreadId: snapshot.firstUnreadId })].reverse(),
+    [snapshot.firstUnreadId, snapshot.messages],
+  );
+  const dividerIndex = rows.findIndex((row) => row.kind === 'unread');
+
+  // The list is inverted, so a larger viewPosition sits the divider higher up the screen and
+  // leaves a screen of already-read context above it.
+  useEffect(() => {
+    if (landed.current || !ready || dividerIndex < 0) return;
+    landed.current = true;
+    requestAnimationFrame(() => {
+      list.current?.scrollToIndex({ index: dividerIndex, viewPosition: 0.7, animated: false });
+    });
+  }, [dividerIndex, ready]);
+
   const title = snapshot.title || params.title || 'Chat';
   const unavailable = status !== 'ready' ? chatUnavailableCopy(status, error) : roomError;
   const empty = emptyCopy(type, channelId);
@@ -151,12 +205,67 @@ export default function ChatRoomScreen() {
     if (!channel || !text || sending) return;
     setSending(true);
     try {
-      await channel.sendMessage({ text });
+      await channel.sendMessage({ text, ...(replyTo ? { quoted_message_id: replyTo.id } : {}) });
       setDraft('');
+      setReplyTo(null);
     } catch (reason) {
       setRoomError(reason instanceof Error ? reason.message : 'That message was not sent.');
     } finally {
       setSending(false);
+    }
+  }
+
+  function actionsFor(message: ChatMessage): MessageAction[] {
+    const actions: MessageAction[] = [];
+    if (snapshot.canSend && snapshot.canQuote) {
+      actions.push({ key: 'reply', label: 'Reply', icon: 'arrow-undo-outline', run: () => setReplyTo(message) });
+    }
+    if (type !== channelTypes.self && !!message.text) {
+      actions.push({
+        key: 'save',
+        label: 'Save to Saved Messages',
+        icon: 'bookmark-outline',
+        run: () => void saveToSelf(message),
+      });
+    }
+    if (message.text) {
+      actions.push({
+        key: 'copy',
+        label: 'Copy text',
+        icon: 'copy-outline',
+        run: () => void Clipboard.setStringAsync(message.text),
+      });
+    }
+    if (snapshot.canMarkUnread) {
+      actions.push({
+        key: 'unread',
+        label: 'Mark as unread from here',
+        icon: 'chatbox-outline',
+        run: () => void markUnreadFrom(message),
+      });
+    }
+    return actions;
+  }
+
+  async function saveToSelf(message: ChatMessage) {
+    if (!client || !userId) return;
+    try {
+      // The self chat's id is the user's own UUID; the backend created it at signup.
+      await client.channel(channelTypes.self, userId).sendMessage({ text: message.text });
+      showNotice({ title: 'Saved to Saved Messages', tone: 'success' });
+    } catch {
+      showNotice({ title: 'Could not save that message', message: 'Try again.', tone: 'error' });
+    }
+  }
+
+  async function markUnreadFrom(message: ChatMessage) {
+    const channel = channelRef.current;
+    if (!channel) return;
+    try {
+      await channel.markUnread({ message_id: message.id });
+      router.back();
+    } catch {
+      showNotice({ title: 'Could not mark as unread', message: 'Try again.', tone: 'error' });
     }
   }
 
@@ -184,6 +293,7 @@ export default function ChatRoomScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}
         style={styles.body}>
         <FlatList
+          ref={list}
           inverted
           data={rows}
           keyExtractor={(item) => item.key}
@@ -191,12 +301,26 @@ export default function ChatRoomScreen() {
           keyboardDismissMode="on-drag"
           onEndReached={() => void loadOlder()}
           onEndReachedThreshold={0.4}
+          // Index 0 is the newest message, so anchoring from index 1 keeps an arriving message
+          // from shoving the read position.
+          maintainVisibleContentPosition={{ minIndexForVisible: 1 }}
+          onScrollToIndexFailed={({ index }) => {
+            requestAnimationFrame(() =>
+              list.current?.scrollToIndex({ index, viewPosition: 0.7, animated: false }),
+            );
+          }}
           ListFooterComponent={
             hasOlder && rows.length > 0 ? (
               <ActivityIndicator style={styles.olderLoader} color={colors.metadata} />
             ) : null
           }
-          renderItem={({ item }) => <TranscriptRow row={item} seen={snapshot.seenMessageId} />}
+          renderItem={({ item }) => (
+            <TranscriptRow
+              row={item}
+              seen={snapshot.seenMessageId}
+              onLongPress={(message) => setActing(message)}
+            />
+          )}
           ListEmptyComponent={
             !ready && !unavailable ? (
               <ActivityIndicator style={styles.loader} color={colors.primary} />
@@ -210,32 +334,48 @@ export default function ChatRoomScreen() {
         />
 
         {snapshot.canSend ? (
-          <View style={styles.composer}>
-            <TextInput
-              value={draft}
-              onChangeText={(value) => {
-                setDraft(value);
-                void channelRef.current?.keystroke().catch(() => undefined);
-              }}
-              placeholder="Write a message"
-              placeholderTextColor={colors.muted}
-              multiline
-              autoCapitalize="sentences"
-              editable={ready}
-              style={styles.input}
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Send message"
-              disabled={!draft.trim() || sending || !ready}
-              onPress={() => void send()}
-              style={({ pressed }) => [styles.send, pressed && styles.pressed]}>
-              <Ionicons
-                name="send"
-                size={21}
-                color={draft.trim() && ready ? colors.chatMine : colors.disabledText}
+          <View>
+            {!!replyTo && (
+              <View style={styles.replyBar}>
+                <View style={styles.replyEdge} />
+                <View style={styles.replyCopy}>
+                  <Text style={styles.replyName}>{replyTo.own ? 'You' : replyTo.authorName ?? 'Reply'}</Text>
+                  <Text numberOfLines={1} style={styles.replyText}>
+                    {replyTo.text}
+                  </Text>
+                </View>
+                <Pressable accessibilityLabel="Cancel reply" hitSlop={8} onPress={() => setReplyTo(null)}>
+                  <Ionicons name="close" size={19} color={colors.muted} />
+                </Pressable>
+              </View>
+            )}
+            <View style={styles.composer}>
+              <TextInput
+                value={draft}
+                onChangeText={(value) => {
+                  setDraft(value);
+                  void channelRef.current?.keystroke().catch(() => undefined);
+                }}
+                placeholder="Write a message"
+                placeholderTextColor={colors.muted}
+                multiline
+                autoCapitalize="sentences"
+                editable={ready}
+                style={styles.input}
               />
-            </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Send message"
+                disabled={!draft.trim() || sending || !ready}
+                onPress={() => void send()}
+                style={({ pressed }) => [styles.send, pressed && styles.pressed]}>
+                <Ionicons
+                  name="send"
+                  size={21}
+                  color={draft.trim() && ready ? colors.chatMine : colors.disabledText}
+                />
+              </Pressable>
+            </View>
           </View>
         ) : (
           <View style={styles.readOnly}>
@@ -243,53 +383,113 @@ export default function ChatRoomScreen() {
           </View>
         )}
       </KeyboardAvoidingView>
+
+      <MessageActionsSheet
+        visible={!!acting}
+        actions={acting ? actionsFor(acting) : []}
+        onClose={() => setActing(null)}>
+        {!!acting && (
+          <View style={[styles.messageRow, acting.own ? styles.messageRowOwn : styles.messageRowOther]}>
+            <Bubble message={acting} startsRun lifted />
+          </View>
+        )}
+      </MessageActionsSheet>
     </SafeAreaView>
   );
 }
 
 /**
  * The day divider owns the date and the bubble owns the time, so nothing here carries an author
- * line. Within a run the first bubble takes the avatar and squares off the corner it meets the
- * next one at; the rest indent past the avatar column.
+ * line. Within a run the first bubble takes the avatar and squares the corner it meets the next
+ * one at; the rest indent past the avatar column.
  */
-function TranscriptRow({ row, seen }: { row: ChatRow; seen: string | null }) {
+function TranscriptRow({
+  row,
+  seen,
+  onLongPress,
+}: {
+  row: ChatRow;
+  seen: string | null;
+  onLongPress(message: ChatMessage): void;
+}) {
   const styles = useStyles();
-  const { colors } = useTheme();
 
-  if (row.kind === 'day') {
+  if (row.kind === 'day' || row.kind === 'unread') {
+    const unread = row.kind === 'unread';
     return (
       <View style={styles.day}>
-        <View style={styles.dayRule} />
-        <Text style={styles.dayText}>{row.label}</Text>
-        <View style={styles.dayRule} />
+        <View style={[styles.dayRule, unread && styles.unreadRule]} />
+        <Text style={[styles.dayText, unread && styles.unreadText]}>{row.label}</Text>
+        <View style={[styles.dayRule, unread && styles.unreadRule]} />
       </View>
     );
   }
 
   const { message, startsRun } = row;
-  const read = message.own && message.id === seen;
-
   return (
     <View style={[styles.messageRow, message.own ? styles.messageRowOwn : styles.messageRowOther]}>
       {!message.own &&
         (startsRun ? (
-          <ChatAvatar type={channelTypes.private} image={message.authorImage} size={30} />
+          <ChatAvatar type={channelTypes.private} image={message.authorImage} size={28} />
         ) : (
           <View style={styles.avatarSpacer} />
         ))}
-      <View
-        style={[
-          styles.bubble,
-          message.own ? styles.bubbleOwn : styles.bubbleOther,
-          message.own
-            ? startsRun
-              ? styles.tailOwn
-              : styles.continuesOwn
-            : startsRun
-              ? styles.tailOther
-              : styles.continuesOther,
-          message.deleted && styles.bubbleDeleted,
-        ]}>
+      <Bubble
+        message={message}
+        startsRun={startsRun}
+        read={message.own && message.id === seen}
+        onLongPress={() => onLongPress(message)}
+      />
+    </View>
+  );
+}
+
+function Bubble({
+  message,
+  startsRun,
+  read = false,
+  lifted = false,
+  onLongPress,
+}: {
+  message: ChatMessage;
+  startsRun: boolean;
+  read?: boolean;
+  lifted?: boolean;
+  onLongPress?(): void;
+}) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+
+  return (
+    <Pressable
+      disabled={!onLongPress}
+      onLongPress={onLongPress}
+      delayLongPress={300}
+      style={({ pressed }) => [
+        styles.bubble,
+        message.own ? styles.bubbleOwn : styles.bubbleOther,
+        message.own
+          ? startsRun
+            ? styles.tailOwn
+            : styles.continuesOwn
+          : startsRun
+            ? styles.tailOther
+            : styles.continuesOther,
+        message.deleted && styles.bubbleDeleted,
+        lifted && styles.bubbleLifted,
+        pressed && !!onLongPress && styles.bubblePressed,
+      ]}>
+      {!!message.quoted && (
+        <View style={[styles.quote, message.own && styles.quoteOwn]}>
+          <Text numberOfLines={1} style={[styles.quoteName, message.own && styles.quoteTextOwn]}>
+            {message.quoted.authorName ?? 'Reply'}
+          </Text>
+          <Text numberOfLines={2} style={[styles.quoteText, message.own && styles.quoteTextOwn]}>
+            {message.quoted.text}
+          </Text>
+        </View>
+      )}
+      <View style={styles.bubbleLine}>
         <Text
           style={[
             styles.messageText,
@@ -303,7 +503,7 @@ function TranscriptRow({ row, seen }: { row: ChatRow; seen: string | null }) {
           {read && <Ionicons name="checkmark-done" size={13} color={colors.white} style={styles.readMark} />}
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -313,7 +513,10 @@ interface Snapshot {
   image?: string;
   online: boolean;
   canSend: boolean;
+  canQuote: boolean;
+  canMarkUnread: boolean;
   messages: ChatMessage[];
+  firstUnreadId: string | null;
   seenMessageId: string | null;
 }
 
@@ -322,15 +525,19 @@ const emptySnapshot: Snapshot = {
   subtitle: '',
   online: false,
   canSend: true,
+  canQuote: false,
+  canMarkUnread: false,
   messages: [],
+  firstUnreadId: null,
   seenMessageId: null,
 };
 
-function snapshotOf(channel: Channel, userId: string): Snapshot {
+function snapshotOf(channel: Channel, userId: string, firstUnreadId: string | null): Snapshot {
   const messages = channel.state.messages.map((message) => toChatMessage(message, userId));
   const other = interlocutor(channel, userId);
   const typing = Object.keys(channel.state.typing).filter((id) => id !== userId);
   const lastOwn = [...messages].reverse().find((message) => message.own);
+  const capabilities = channel.data?.own_capabilities;
 
   return {
     title: channelTitle(channel, userId),
@@ -338,10 +545,29 @@ function snapshotOf(channel: Channel, userId: string): Snapshot {
     image: channelImage(channel, userId),
     online: Boolean(other?.online),
     canSend: canSendMessages(channel),
+    // Quotes and read events are per-type toggles in the Stream dashboard, so the actions they
+    // drive only appear where the API will actually accept them.
+    canQuote: capable(capabilities, 'quote-message'),
+    canMarkUnread: capable(capabilities, 'read-events'),
     messages,
+    firstUnreadId,
     seenMessageId:
       lastOwn && seenByOthers(channel.state.read, userId, lastOwn.createdAt) ? lastOwn.id : null,
   };
+}
+
+function capable(capabilities: string[] | undefined, capability: string) {
+  return Array.isArray(capabilities) && capabilities.includes(capability);
+}
+
+function isLoaded(channel: Channel, messageId: string | null) {
+  return !!messageId && channel.state.messages.some((message) => message.id === messageId);
+}
+
+async function olderPage(channel: Channel) {
+  const oldest = channel.state.messages[0];
+  if (!oldest) return;
+  await channel.query({ messages: { limit: pageSize, id_lt: oldest.id } }, 'current');
 }
 
 function subtitleFor(
@@ -389,14 +615,17 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   headerOnline: { color: colors.chatMine },
   body: { flex: 1 },
   transcript: { flexGrow: 1, justifyContent: 'flex-end', paddingHorizontal: 16, paddingVertical: 14, gap: 8 },
-  day: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 6 },
+  day: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
   dayRule: { flex: 1, height: 1, backgroundColor: colors.line },
   dayText: { color: colors.muted, fontSize: 11 },
-  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
+  unreadRule: { backgroundColor: colors.accentBorder },
+  unreadText: { color: colors.chatMine, fontFamily: fonts.sansMedium },
+  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 9 },
   messageRowOwn: { justifyContent: 'flex-end' },
   messageRowOther: { justifyContent: 'flex-start' },
-  avatarSpacer: { width: 30 },
-  bubble: { maxWidth: '76%', flexDirection: 'row', alignItems: 'flex-end', gap: 10, borderRadius: 16, paddingHorizontal: 13, paddingTop: 9, paddingBottom: 7 },
+  avatarSpacer: { width: 28 },
+  bubble: { maxWidth: '74%', gap: 5, borderRadius: 16, paddingHorizontal: 12, paddingTop: 8, paddingBottom: 6 },
+  bubbleLine: { flexDirection: 'row', alignItems: 'flex-end', gap: 9 },
   bubbleOwn: { backgroundColor: colors.chatMine },
   bubbleOther: { borderWidth: 1, borderColor: colors.line, backgroundColor: isDark ? colors.nested : colors.surface },
   tailOwn: { borderBottomRightRadius: 4 },
@@ -404,6 +633,13 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   tailOther: { borderBottomLeftRadius: 4 },
   continuesOther: { borderTopLeftRadius: 4 },
   bubbleDeleted: { backgroundColor: colors.nested, borderWidth: 1, borderColor: colors.line },
+  bubbleLifted: { borderWidth: 2, borderColor: colors.accentBorder },
+  bubblePressed: { opacity: 0.85 },
+  quote: { borderLeftWidth: 2, borderLeftColor: colors.chatMine, paddingLeft: 8, paddingVertical: 1, gap: 1 },
+  quoteOwn: { borderLeftColor: colors.white },
+  quoteName: { color: colors.chatMine, fontFamily: fonts.sansMedium, fontSize: 11 },
+  quoteText: { color: colors.muted, fontSize: 12, lineHeight: 17 },
+  quoteTextOwn: { color: colors.white, opacity: 0.8 },
   messageText: { flexShrink: 1, color: colors.ink, fontFamily: fonts.sans, fontSize: 14, lineHeight: 21 },
   messageTextOwn: { color: colors.white },
   messageTextDeleted: { color: colors.metadata, fontStyle: 'italic' },
@@ -416,6 +652,11 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   empty: { flexGrow: 1, minHeight: 240, alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 32 },
   emptyTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, fontWeight: '500', textAlign: 'center' },
   emptyCopy: { color: colors.muted, fontSize: 13, lineHeight: 20, textAlign: 'center' },
+  replyBar: { flexDirection: 'row', alignItems: 'center', gap: 10, borderTopWidth: 1, borderTopColor: colors.line, paddingHorizontal: 16, paddingVertical: 8 },
+  replyEdge: { width: 2, alignSelf: 'stretch', borderRadius: 1, backgroundColor: colors.chatMine },
+  replyCopy: { flex: 1, gap: 1 },
+  replyName: { color: colors.chatMine, fontFamily: fonts.sansMedium, fontSize: 11 },
+  replyText: { color: colors.muted, fontSize: 12 },
   composer: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, borderTopWidth: 1, borderTopColor: colors.line, paddingHorizontal: 16, paddingVertical: 8 },
   input: { flex: 1, minHeight: 44, maxHeight: 128, paddingVertical: 12, color: colors.ink, fontFamily: fonts.sans, fontSize: 13.5 },
   send: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },

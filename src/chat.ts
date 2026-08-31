@@ -41,6 +41,7 @@ interface MessageLike {
   type?: string;
   created_at: Date | string;
   user?: UserLike | null;
+  quoted_message?: { id: string; text?: string; user?: UserLike | null } | null;
 }
 
 export function isChannelType(value: string): value is ChannelType {
@@ -146,6 +147,8 @@ export interface ChatMessage {
   createdAt: Date;
   own: boolean;
   deleted: boolean;
+  /** Quotes are the "Reply" action, on for `private`. Threads are a different feature, and off. */
+  quoted?: { id: string; text: string; authorName?: string };
 }
 
 export function toChatMessage(message: MessageLike, currentUserId: string): ChatMessage {
@@ -158,12 +161,23 @@ export function toChatMessage(message: MessageLike, currentUserId: string): Chat
     createdAt: new Date(message.created_at),
     own: message.user?.id === currentUserId,
     deleted: message.type === 'deleted',
+    quoted: message.quoted_message
+      ? {
+          id: message.quoted_message.id,
+          text: message.quoted_message.text ?? '',
+          authorName: message.quoted_message.user?.name,
+        }
+      : undefined,
   };
 }
 
 export type ChatRow =
   | { kind: 'day'; key: string; label: string }
+  | { kind: 'unread'; key: string; label: string }
   | { kind: 'message'; key: string; message: ChatMessage; startsRun: boolean };
+
+/** The divider that marks where reading stopped. Held still while the room is open. */
+export const unreadDividerLabel = 'Unread messages';
 
 /** Consecutive messages from one sender group into a run while they stay this close together. */
 export const runWindowMs = 5 * 60 * 1000;
@@ -173,7 +187,10 @@ export const runWindowMs = 5 * 60 * 1000;
  * the first message of a run. The divider owns the date and every bubble owns its own time, so
  * no author line or per-message date is ever needed.
  */
-export function transcriptRows(messages: readonly ChatMessage[], now = new Date()): ChatRow[] {
+export function transcriptRows(
+  messages: readonly ChatMessage[],
+  { now = new Date(), firstUnreadId = null }: { now?: Date; firstUnreadId?: string | null } = {},
+): ChatRow[] {
   const rows: ChatRow[] = [];
   let day: string | null = null;
   let previous: ChatMessage | undefined;
@@ -186,7 +203,14 @@ export function transcriptRows(messages: readonly ChatMessage[], now = new Date(
       day = messageDay;
       previous = undefined;
     }
+    // A divider breaks the run: the message under it opens a new one, avatar and corner included.
+    const boundary = message.id === firstUnreadId;
+    if (boundary) {
+      rows.push({ kind: 'unread', key: 'unread-divider', label: unreadDividerLabel });
+      previous = undefined;
+    }
     const continues =
+      !boundary &&
       !!previous &&
       previous.authorId === message.authorId &&
       message.createdAt.getTime() - previous.createdAt.getTime() <= runWindowMs;
@@ -195,6 +219,24 @@ export function transcriptRows(messages: readonly ChatMessage[], now = new Date(
   }
 
   return rows;
+}
+
+/**
+ * Where reading stopped, taken once when the room opens and then held: marking the channel read
+ * immediately afterwards must not move the divider out from under the person reading.
+ */
+export function firstUnreadMessageId(
+  read: Record<string, { first_unread_message_id?: string; last_read_message_id?: string; unread_messages?: number }>,
+  currentUserId: string,
+  messages: readonly { id: string }[],
+): string | null {
+  const own = read[currentUserId];
+  if (!own || !own.unread_messages) return null;
+  if (own.first_unread_message_id) return own.first_unread_message_id;
+  // Older read state names the last read message instead; the divider goes after it.
+  if (!own.last_read_message_id) return messages[0]?.id ?? null;
+  const index = messages.findIndex((message) => message.id === own.last_read_message_id);
+  return index >= 0 ? (messages[index + 1]?.id ?? null) : null;
 }
 
 function dayKey(date: Date) {

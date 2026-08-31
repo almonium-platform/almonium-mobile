@@ -65,7 +65,6 @@ export interface BookSummary {
 export interface BookDetails extends BookSummary {
   favorite: boolean;
   languageVariants: { id: string; language: string }[];
-  orderLanguage?: string;
   originalLanguage?: string;
   originalId?: string;
   translator?: string;

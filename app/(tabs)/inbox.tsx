@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { useChat } from '@/src/chat-client';
 import { relativeTime } from '@/src/card-utils';
 import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import type { AppNotification, NotificationType } from '@/src/types';
@@ -50,6 +51,7 @@ export default function InboxScreen() {
     },
   });
   const unread = query.data?.filter((item) => !item.readAt).length ?? 0;
+  const { unreadCount: unreadChats } = useChat();
 
   function toggleRead(notification: AppNotification) {
     readMutation.mutate({ id: notification.id, read: !notification.readAt });
@@ -97,6 +99,24 @@ export default function InboxScreen() {
           <Text style={styles.caption}>
             Friend activity and completed book translations appear here.
           </Text>
+          {/* The bell counts waiting messages, so its destination has to lead to them. */}
+          {unreadChats > 0 && (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push('/chat')}
+              style={({ pressed }) => [styles.messagesRow, pressed && styles.pressed]}>
+              <View style={styles.messagesIcon}>
+                <Ionicons name="chatbubbles" size={19} color={colors.white} />
+              </View>
+              <View style={styles.copy}>
+                <Text style={styles.title}>Messages</Text>
+                <Text style={styles.message}>
+                  {unreadChats === 1 ? '1 unread in Chats' : `${unreadChats} unread in Chats`}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={19} color={colors.muted} />
+            </Pressable>
+          )}
           {query.isError && query.data && (
             <Text style={styles.offline}>Showing saved notifications. Reconnect to refresh.</Text>
           )}
@@ -189,6 +209,8 @@ const useStyles = createThemedStyles((colors) => ({
   markAllText: { color: colors.primaryDark, fontWeight: '600', fontSize: 12 },
   offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, borderRadius: 10, padding: 10 },
   notification: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 15, borderRadius: 20, backgroundColor: colors.surface, ...shadows.card },
+  messagesRow: { minHeight: 66, flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4, padding: 15, borderRadius: 20, backgroundColor: colors.surface, ...shadows.card },
+  messagesIcon: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 19, backgroundColor: colors.chatMine },
   unread: { backgroundColor: colors.accentSoft },
   icon: { width: 43, height: 43, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
   iconUnread: { backgroundColor: colors.accentSoft },

@@ -7,23 +7,52 @@ at them will look correct in isolation and wrong next to the web app.
 
 The mobile client implements them in `src/chat.ts` (the conventions, unit
 tested), `src/chat-client.tsx` (the single connected client) and `app/chat/`
-(the list and the room). Chat is reached from Settings and from a friend, never
-from a tab: the mobile brief keeps it as transport between two people rather
-than a destination.
+(the list and the room).
+
+## Chat is not a tab
+
+It is a pushed screen off Settings, and off a friend in People or on their
+profile. Almonium Mobile rule 1 and section 07 of the build reference agree on
+this. The reason is that the room is empty: a Chats tab on a new account opens
+onto nothing, every session, in the most valuable space on the screen, and that
+reads as an abandoned product rather than a discoverable feature. Broadcast
+rooms do not change it - an announcement is what a bell is for.
+
+**Promote chat to a tab when a fifth of weekly actives send or read a message
+in a week.** That is the threshold; until the number arrives, this is settled.
+
+Because chat is not a tab, the bell is the entire discovery path, so it carries
+one count for everything waiting - unread notifications plus unread messages -
+and the inbox it opens leads to Chats whenever messages are among them. On
+desktop those are two indicators and nothing appears in both; on mobile there
+is no chat icon for the second one to live on.
 
 `docs/Almonium Social and Chat.dc.html` is the build reference for what these
-screens should look like, and mobile is behind it. Not built yet: the archive
-(which replaces the hidden-chats idea entirely), search over the chat list,
-the row menu (archive, mark unread, mute, clear history, delete, leave
-channel), the message menu (reply, save to Saved Messages, copy, mark unread
-from here), reactions, and the footer action an announcement carries. Threads
-are off in the dashboard and quoted replies have no panel on web either.
+screens should look like; its section 07 is the mobile one, and section 06
+(column widths) is desktop only. Built here: the list and room frames, the
+long-press sheet with its four actions, the unread divider and the landing
+rule that goes with it.
+
+Not built yet, all of it from the desktop sections: the archive (which
+replaces the hidden-chats idea entirely, and on mobile lives in the header
+overflow), search over the chat list, the row menu (archive, mark unread,
+mute, clear history, delete, leave channel) and its leave confirmation, and
+the footer action an announcement carries. The desktop message menu also
+carries a reactions strip above its items; section 07 does not draw one on the
+long-press sheet, so mobile has none until that is settled.
 
 Two places where this file and the build reference disagree, and mobile follows
 the reference: a broadcast room draws a mono code emblem (`DE`, `ALM`) rather
 than fetching the hosted `{web-domain}/chat/logo-de.png`, and the header
 subtitle names the language in English ("updates about German") rather than
 splitting the channel's own name.
+
+The reference says nothing about pagination, so the room fills that in: one
+page of 30, `id_lt` from the oldest message held, and the SDK's own
+`messagePagination.hasPrev` as the terminator rather than counting the page
+that arrived. Opening a room lands on the unread divider rather than the
+newest message, paging back until the boundary is loaded first, and the list
+holds a scroll anchor so an arriving message cannot shove the read position.
 
 ## Getting a connected client
 

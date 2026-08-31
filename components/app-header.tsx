@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useState } from 'react';
@@ -6,7 +7,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandMark } from '@/components/brand-mark';
 import { AvatarMark } from '@/components/avatar-mark';
+import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { useChat } from '@/src/chat-client';
 import { languageName } from '@/src/languages';
 import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 
@@ -19,7 +22,16 @@ export function AppHeader({
 }) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const { profile } = useAuth();
+  const { firebaseUser, profile } = useAuth();
+  const { unreadCount: unreadChats } = useChat();
+  const notifications = useQuery({
+    queryKey: ['notifications', firebaseUser?.uid],
+    queryFn: api.notifications,
+    enabled: Boolean(firebaseUser),
+  });
+  // The bell is the whole discovery path on mobile: chat is not a tab, so a first incoming
+  // message has nowhere else to announce itself. One count for everything waiting.
+  const waiting = (notifications.data?.filter((item) => !item.readAt).length ?? 0) + unreadChats;
   const [languagesVisible, setLanguagesVisible] = useState(false);
   const languages = profile?.learners.filter((learner) => learner.active).map((learner) => learner.language) ?? [];
   return (
@@ -38,10 +50,19 @@ export function AppHeader({
         <View style={styles.spacer} />
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Notifications"
+          accessibilityLabel={waiting > 0 ? `Notifications, ${waiting} waiting` : 'Notifications'}
           onPress={() => router.push('/(tabs)/inbox')}
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
-          <Ionicons name="notifications-outline" size={23} color={colors.muted} />
+          <Ionicons
+            name={waiting > 0 ? 'notifications' : 'notifications-outline'}
+            size={23}
+            color={waiting > 0 ? colors.chatMine : colors.muted}
+          />
+          {waiting > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{waiting > 99 ? '99+' : waiting}</Text>
+            </View>
+          )}
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -111,6 +132,8 @@ const useStyles = createThemedStyles((colors) => ({
   },
   spacer: { flex: 1 },
   iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  badge: { position: 'absolute', top: 6, right: 5, minWidth: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: colors.surface, borderRadius: 999, paddingHorizontal: 5, paddingVertical: 1, backgroundColor: colors.chatMine },
+  badgeText: { color: colors.white, fontFamily: fonts.sansMedium, fontSize: 10 },
   avatar: {
     width: 36,
     height: 36,

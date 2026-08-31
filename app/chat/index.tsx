@@ -16,7 +16,7 @@ import {
   isChannelType,
   type ChannelType,
 } from '@/src/chat';
-import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 
 interface ChannelRow {
   key: string;
@@ -107,13 +107,10 @@ export default function ChatListScreen() {
       }
       ListHeaderComponent={
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} accessibilityLabel="Go back" hitSlop={8} style={styles.back}>
-            <Ionicons name="chevron-back" size={24} color={colors.ink} />
+          <Pressable onPress={() => router.back()} accessibilityLabel="Go back" hitSlop={10} style={styles.back}>
+            <Ionicons name="chevron-back" size={22} color={colors.muted} />
           </Pressable>
-          <View style={styles.titleCopy}>
-            <Text style={styles.eyebrow}>SOCIAL</Text>
-            <Text style={styles.title}>Chats</Text>
-          </View>
+          <Text style={styles.title}>Chats</Text>
         </View>
       }
       renderItem={({ item }) => (
@@ -126,20 +123,25 @@ export default function ChatListScreen() {
             })
           }
           style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
-          <ChatAvatar type={item.type} channelId={item.id} image={item.image} size={38} />
+          <ChatAvatar type={item.type} channelId={item.id} image={item.image} size={44} />
           <View style={styles.rowCopy}>
-            <Text numberOfLines={1} style={styles.rowTitle}>
-              {item.title}
-            </Text>
-            <Text numberOfLines={1} style={styles.rowPreview}>
-              {item.preview}
-            </Text>
-          </View>
-          <View style={styles.rowMeta}>
-            {!!item.stamp && <Text style={styles.stamp}>{item.stamp}</Text>}
-            {item.unread > 0 && (
-              <View accessibilityLabel={`${item.unread} unread`} style={styles.unread} />
-            )}
+            <View style={styles.rowTop}>
+              <Text numberOfLines={1} style={styles.rowTitle}>
+                {item.title}
+              </Text>
+              {!!item.stamp && <Text style={styles.stamp}>{item.stamp}</Text>}
+            </View>
+            <View style={styles.rowBottom}>
+              <Text numberOfLines={1} style={styles.rowPreview}>
+                {item.preview}
+              </Text>
+              {/* A count here rather than a dot: there is no second column saying which chat is open. */}
+              {item.unread > 0 && (
+                <View accessibilityLabel={`${item.unread} unread`} style={styles.unread}>
+                  <Text style={styles.unreadText}>{item.unread > 99 ? '99+' : item.unread}</Text>
+                </View>
+              )}
+            </View>
           </View>
         </Pressable>
       )}
@@ -192,19 +194,19 @@ function stampFor(date: Date, now = new Date()) {
 
 const useStyles = createThemedStyles((colors) => ({
   list: { flexGrow: 1, padding: 20, paddingBottom: 36, backgroundColor: colors.canvas },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 18 },
-  back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 22, backgroundColor: colors.surface, ...shadows.field },
-  titleCopy: { flex: 1 },
-  eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, fontWeight: '600' },
-  row: { minHeight: 62, flexDirection: 'row', alignItems: 'center', gap: 11, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 9 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingBottom: 10 },
+  back: { width: 44, height: 44, marginLeft: -11, alignItems: 'center', justifyContent: 'center' },
+  title: { flex: 1, color: colors.ink, fontFamily: fonts.serif, fontSize: 21, fontWeight: '500' },
+  row: { minHeight: 66, flexDirection: 'row', alignItems: 'center', gap: 11, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 11 },
   pressed: { opacity: 0.75 },
   rowCopy: { flex: 1, minWidth: 0, gap: 2 },
-  rowTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 14.5, fontWeight: '500' },
-  rowPreview: { color: colors.muted, fontSize: 12.5 },
-  rowMeta: { alignItems: 'flex-end', gap: 6 },
+  rowTop: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  rowBottom: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  rowTitle: { flex: 1, color: colors.ink, fontFamily: fonts.serif, fontSize: 15, fontWeight: '500' },
+  rowPreview: { flex: 1, color: colors.muted, fontSize: 13 },
   stamp: { color: colors.muted, fontSize: 11 },
-  unread: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.chatMine },
+  unread: { minWidth: 19, alignItems: 'center', justifyContent: 'center', borderRadius: 999, paddingHorizontal: 7, paddingVertical: 1, backgroundColor: colors.chatMine },
+  unreadText: { color: colors.white, fontFamily: fonts.sansMedium, fontSize: 11 },
   separator: { height: 2 },
   loader: { marginTop: 50 },
   empty: { minHeight: 310, alignItems: 'center', justifyContent: 'center', gap: 9, padding: 24 },

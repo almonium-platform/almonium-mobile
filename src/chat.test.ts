@@ -8,6 +8,7 @@ import {
   channelTitle,
   clockTime,
   dayLabel,
+  firstUnreadMessageId,
   channelPreview,
   interlocutor,
   isChannelType,
@@ -139,7 +140,7 @@ describe('transcript', () => {
         { id: '4', text: 'd', createdAt: at(7, 31, 9, 9), authorId: friend, own: false, deleted: false },
         { id: '5', text: 'e', createdAt: at(7, 31, 9, 10), authorId: me, own: true, deleted: false },
       ],
-      now,
+      { now },
     );
     expect(rows.map((row) => row.kind)).toEqual([
       'day', 'message', 'day', 'message', 'message', 'message', 'message',
@@ -152,6 +153,41 @@ describe('transcript', () => {
       true, // same sender, but eight minutes on
       true, // different sender
     ]);
+  });
+
+  it('breaks the run at the unread divider and puts it before the first unread message', () => {
+    const now = at(7, 31, 12);
+    const messages = [
+      { id: '1', text: 'a', createdAt: at(7, 31, 9), authorId: friend, own: false, deleted: false },
+      { id: '2', text: 'b', createdAt: at(7, 31, 9, 1), authorId: friend, own: false, deleted: false },
+      { id: '3', text: 'c', createdAt: at(7, 31, 9, 2), authorId: friend, own: false, deleted: false },
+    ];
+    const rows = transcriptRows(messages, { now, firstUnreadId: '2' });
+    expect(rows.map((row) => row.kind)).toEqual(['day', 'message', 'unread', 'message', 'message']);
+    // The message under the divider opens a run, so it keeps its avatar and squared corner.
+    expect(rows.filter((row) => row.kind === 'message').map((row) => row.startsRun)).toEqual([
+      true,
+      true,
+      false,
+    ]);
+    expect(transcriptRows(messages, { now }).some((row) => row.kind === 'unread')).toBe(false);
+  });
+
+  it('finds where reading stopped, and says nothing when everything is read', () => {
+    const messages = [{ id: '1' }, { id: '2' }, { id: '3' }];
+    expect(firstUnreadMessageId({ [me]: { unread_messages: 0 } }, me, messages)).toBeNull();
+    expect(
+      firstUnreadMessageId({ [me]: { unread_messages: 2, first_unread_message_id: '2' } }, me, messages),
+    ).toBe('2');
+    // Read state that only names the last read message puts the divider after it.
+    expect(
+      firstUnreadMessageId({ [me]: { unread_messages: 2, last_read_message_id: '1' } }, me, messages),
+    ).toBe('2');
+    // The boundary is older than anything loaded, so there is nothing to draw yet.
+    expect(
+      firstUnreadMessageId({ [me]: { unread_messages: 2, last_read_message_id: 'x' } }, me, messages),
+    ).toBeNull();
+    expect(firstUnreadMessageId({}, me, messages)).toBeNull();
   });
 
   it('names the day relative to now', () => {
