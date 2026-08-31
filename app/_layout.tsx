@@ -16,6 +16,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider } from '@/src/auth-context';
+import { ChatProvider } from '@/src/chat-client';
 import { persistOptions, queryClient } from '@/src/query-client';
 import { NoticeProvider } from '@/src/notice-context';
 import { ThemeProvider, useTheme } from '@/src/theme';
@@ -70,33 +71,37 @@ function ThemedRootLayout() {
       <SafeAreaProvider>
         <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
           <AuthProvider>
-            <NoticeProvider>
-              <Stack
-                screenOptions={{
-                  headerStyle: { backgroundColor: colors.canvas },
-                  headerShadowVisible: false,
-                  headerTintColor: colors.ink,
-                  contentStyle: { backgroundColor: colors.canvas },
-                }}>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-                <Stack.Screen name="book/[bookId]" options={{ title: 'Book' }} />
-                <Stack.Screen
-                  name="reader/[bookId]"
-                  options={{ title: 'Reader', headerBackTitle: 'Library' }}
-                />
-                <Stack.Screen name="item/new" options={{ title: 'New learning item' }} />
-                <Stack.Screen name="item/[itemId]" options={{ title: 'Learning item' }} />
-                <Stack.Screen name="card/new" options={{ title: 'New learning item' }} />
-                <Stack.Screen name="card/[cardId]" options={{ title: 'Learning item' }} />
-                <Stack.Screen name="review" options={{ headerShown: false }} />
-                <Stack.Screen name="profile/[userId]" options={{ title: 'Reader profile' }} />
-                <Stack.Screen name="membership" options={{ title: 'Membership' }} />
-              </Stack>
-              <StatusBar style={isDark ? 'light' : 'dark'} />
-            </NoticeProvider>
+            <ChatProvider>
+              <NoticeProvider>
+                <Stack
+                  screenOptions={{
+                    headerStyle: { backgroundColor: colors.canvas },
+                    headerShadowVisible: false,
+                    headerTintColor: colors.ink,
+                    contentStyle: { backgroundColor: colors.canvas },
+                  }}>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+                  <Stack.Screen name="book/[bookId]" options={{ title: 'Book' }} />
+                  <Stack.Screen
+                    name="reader/[bookId]"
+                    options={{ title: 'Reader', headerBackTitle: 'Library' }}
+                  />
+                  <Stack.Screen name="item/new" options={{ title: 'New learning item' }} />
+                  <Stack.Screen name="item/[itemId]" options={{ title: 'Learning item' }} />
+                  <Stack.Screen name="card/new" options={{ title: 'New learning item' }} />
+                  <Stack.Screen name="card/[cardId]" options={{ title: 'Learning item' }} />
+                  <Stack.Screen name="review" options={{ headerShown: false }} />
+                  <Stack.Screen name="profile/[userId]" options={{ title: 'Reader profile' }} />
+                  <Stack.Screen name="membership" options={{ title: 'Membership' }} />
+                  <Stack.Screen name="chat/index" options={{ headerShown: false }} />
+                  <Stack.Screen name="chat/[type]/[id]" options={{ headerShown: false }} />
+                </Stack>
+                <StatusBar style={isDark ? 'light' : 'dark'} />
+              </NoticeProvider>
+            </ChatProvider>
           </AuthProvider>
         </PersistQueryClientProvider>
       </SafeAreaProvider>

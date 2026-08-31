@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Alert, Pressable, ScrollView, Share, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui';
 import { AvatarMark } from '@/components/avatar-mark';
 import { api } from '@/src/api';
+import { channelTypes, privateChannelId } from '@/src/chat';
 import { config } from '@/src/config';
 import { useNotice } from '@/src/notice-context';
 import { languageName } from '@/src/languages';
@@ -44,6 +45,8 @@ export default function UserProfileScreen() {
   );
 
   const user = profile.data;
+  // A DM is addressed by the friendship, so it only exists once the two of you are friends.
+  const friendshipId = user.relationshipStatus === 'FRIENDS' ? user.relationshipId : null;
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.card}>
@@ -79,6 +82,22 @@ export default function UserProfileScreen() {
           {user.relationshipStatus === 'STRANGER' && user.acceptsRequests !== false && <Button loading={request.isPending} onPress={() => request.mutate()}>Add friend</Button>}
           {user.relationshipStatus === 'PENDING_INCOMING' && <><Button loading={relationship.isPending} onPress={() => manage('ACCEPT')}>Accept request</Button><Button variant="secondary" onPress={() => manage('REJECT')}>Decline</Button></>}
           {user.relationshipStatus === 'PENDING_OUTGOING' && <Button variant="secondary" onPress={() => manage('CANCEL')}>Cancel request</Button>}
+          {!!friendshipId && (
+            <Button
+              onPress={() =>
+                router.push({
+                  pathname: '/chat/[type]/[id]',
+                  params: {
+                    type: channelTypes.private,
+                    id: privateChannelId(friendshipId),
+                    recipientId: user.id,
+                    title: user.username,
+                  },
+                })
+              }>
+              Message
+            </Button>
+          )}
           {user.relationshipStatus === 'FRIENDS' && <Button variant="secondary" onPress={() => manage('UNFRIEND')}>Remove friend</Button>}
           <Pressable
             accessibilityRole="button"

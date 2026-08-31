@@ -1,10 +1,17 @@
 # Chat integration
 
-This app has no chat yet. `../almonium-fe` does, and it learned most of what
-follows the hard way. Read this before adding Stream Chat here, because the
-conventions below are shared state: they live in the Stream application both
-clients talk to, and a client that guesses at them will look correct in
-isolation and wrong next to the web app.
+`../almonium-fe` learned most of what follows the hard way. Read this before
+touching Stream Chat here, because the conventions below are shared state: they
+live in the Stream application both clients talk to, and a client that guesses
+at them will look correct in isolation and wrong next to the web app.
+
+The mobile client implements them in `src/chat.ts` (the conventions, unit
+tested), `src/chat-client.tsx` (the single connected client) and `app/chat/`
+(the list and the room). Chat is reached from Settings and from a friend, never
+from a tab: the mobile brief keeps it as transport between two people rather
+than a destination. Threads, quoted replies, reactions, polls, attachments and
+hidden chats are deliberately not built here yet - the flags for most of them
+are off, and nothing renders the rest on web either.
 
 ## Getting a connected client
 

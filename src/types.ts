@@ -14,6 +14,8 @@ export interface UserInfo {
   emailVerified: boolean;
   hidden: boolean;
   avatarUrl: string | null;
+  /** Stream Chat credential. In memory only - it is never written to the offline profile cache. */
+  streamChatToken?: string;
   streak: number | null;
   fluentLangs: string[];
   learners: Learner[];

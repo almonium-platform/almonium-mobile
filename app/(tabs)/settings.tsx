@@ -19,6 +19,7 @@ import { PaywallModal } from '@/components/paywall-modal';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { useChat } from '@/src/chat-client';
 import { config } from '@/src/config';
 import { languageName, sortLanguages } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
@@ -121,6 +122,7 @@ export default function SettingsScreen() {
   } = useAuth();
   const showNotice = useNotice();
   const queryClient = useQueryClient();
+  const { unreadCount: unreadChats } = useChat();
   const [username, setUsername] = useState(profile?.username || '');
   const [editingUsername, setEditingUsername] = useState(false);
   const [savingName, setSavingName] = useState(false);
@@ -399,6 +401,11 @@ export default function SettingsScreen() {
         <Pressable onPress={() => router.push('/(tabs)/inbox')} style={styles.destinationRow}>
           <Ionicons name="notifications-outline" color={colors.primary} size={21} />
           <View style={styles.settingCopy}><Text style={styles.settingLabel}>Inbox</Text><Text style={styles.caption}>Requests and book updates</Text></View>
+          <Ionicons name="chevron-forward" color={colors.muted} size={19} />
+        </Pressable>
+        <Pressable onPress={() => router.push('/chat')} style={styles.destinationRow}>
+          <Ionicons name="chatbubbles-outline" color={colors.primary} size={21} />
+          <View style={styles.settingCopy}><Text style={styles.settingLabel}>Chats</Text><Text style={styles.caption}>{unreadChats ? `${unreadChats} unread` : 'Friends, rooms, and Saved Messages'}</Text></View>
           <Ionicons name="chevron-forward" color={colors.muted} size={19} />
         </Pressable>
         <Pressable onPress={() => router.push('/(tabs)/people')} style={styles.destinationRow}>

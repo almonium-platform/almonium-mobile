@@ -8,6 +8,7 @@ import { Button } from '@/components/ui';
 import { AvatarMark } from '@/components/avatar-mark';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { channelTypes, privateChannelId } from '@/src/chat';
 import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import type { PublicUserSummary, RelatedUserSummary, RelationshipAction } from '@/src/types';
 
@@ -113,7 +114,7 @@ export default function PeopleScreen() {
           <View style={styles.actions}>
             {item.relationshipStatus === 'PENDING_INCOMING' && <><SmallAction label="Accept" primary onPress={() => action(item, 'ACCEPT')} /><SmallAction label="Decline" onPress={() => action(item, 'REJECT')} /></>}
             {item.relationshipStatus === 'PENDING_OUTGOING' && <SmallAction label="Cancel" onPress={() => action(item, 'CANCEL')} />}
-            {item.relationshipStatus === 'FRIENDS' && <SmallAction label="Remove" onPress={() => action(item, 'UNFRIEND')} />}
+            {item.relationshipStatus === 'FRIENDS' && <><SmallAction label="Message" primary onPress={() => openPrivateChat(item)} /><SmallAction label="Remove" onPress={() => action(item, 'UNFRIEND')} /></>}
             {item.relationshipStatus === 'BLOCKED' && <SmallAction label="Unblock" onPress={() => action(item, 'UNBLOCK')} />}
           </View>
         </View>
@@ -155,6 +156,22 @@ function Avatar({ user }: { user: PublicUserSummary }) {
 function SmallAction({ label, primary = false, onPress }: { label: string; primary?: boolean; onPress(): void }) {
   const styles = useStyles();
   return <Pressable onPress={onPress} style={[styles.smallAction, primary && styles.smallActionPrimary]}><Text style={[styles.smallActionText, primary && styles.smallActionTextPrimary]}>{label}</Text></Pressable>;
+}
+
+/**
+ * A DM is addressed by the friendship it belongs to, so both sides open the same room. The
+ * recipient rides along because opening the chat is also what creates it the first time.
+ */
+function openPrivateChat(user: RelatedUserSummary) {
+  router.push({
+    pathname: '/chat/[type]/[id]',
+    params: {
+      type: channelTypes.private,
+      id: privateChannelId(user.relationshipId),
+      recipientId: user.id,
+      title: user.username,
+    },
+  });
 }
 
 function relationshipCopy(user: RelatedUserSummary) {

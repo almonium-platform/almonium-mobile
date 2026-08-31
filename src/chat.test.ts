@@ -1,0 +1,184 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  broadcastTopic,
+  canSendMessages,
+  channelImage,
+  channelTitle,
+  clockTime,
+  dayLabel,
+  interlocutor,
+  isChannelType,
+  lastMessagePreview,
+  privateChannelCid,
+  privateChannelId,
+  seenByOthers,
+  toChatMessage,
+  transcriptRows,
+  withoutStreamToken,
+} from './chat';
+
+const me = 'a3f1c0de-0000-0000-0000-000000000001';
+const friend = 'a3f1c0de-0000-0000-0000-000000000002';
+
+function dm(overrides: { name?: string; friendName?: string } = {}) {
+  return {
+    type: 'private',
+    data: overrides.name === undefined ? {} : { name: overrides.name },
+    state: {
+      members: {
+        [me]: { user: { id: me, name: 'kuzanorest' } },
+        [friend]: { user: { id: friend, name: overrides.friendName ?? 'wowsie' } },
+      },
+    },
+  };
+}
+
+describe('channel addressing', () => {
+  it('derives a DM id from the friendship so both sides land in the same room', () => {
+    expect(privateChannelId('f00d')).toBe('private_f00d');
+    expect(privateChannelCid('f00d')).toBe('private:private_f00d');
+  });
+
+  it('recognises only the three types the Stream application defines', () => {
+    expect(isChannelType('private')).toBe(true);
+    expect(isChannelType('self')).toBe(true);
+    expect(isChannelType('broadcast')).toBe(true);
+    expect(isChannelType('messaging')).toBe(false);
+  });
+});
+
+describe('channel identity', () => {
+  it('titles a DM by its interlocutor', () => {
+    expect(interlocutor(dm(), me)?.id).toBe(friend);
+    expect(channelTitle(dm(), me)).toBe('wowsie');
+  });
+
+  it('never lets the leftover Private Chat name reach the screen', () => {
+    expect(channelTitle(dm({ name: 'Private Chat' }), me)).toBe('wowsie');
+  });
+
+  it('falls back when a DM has no readable interlocutor', () => {
+    expect(channelTitle({ type: 'private', state: { members: {} } }, me, 'Chat')).toBe('Chat');
+  });
+
+  it('titles every other type by its name', () => {
+    expect(channelTitle({ type: 'self', data: { name: 'Saved Messages' } }, me)).toBe('Saved Messages');
+    expect(channelTitle({ type: 'broadcast', data: { name: 'Almonium - Deutsch' } }, me)).toBe(
+      'Almonium - Deutsch',
+    );
+  });
+
+  it('reads the subject out of a broadcast name', () => {
+    expect(broadcastTopic({ type: 'broadcast', data: { name: 'Almonium — Deutsch' } })).toBe('Deutsch');
+    expect(broadcastTopic({ type: 'broadcast', data: { name: 'Almonium - Deutsch' } })).toBe('Deutsch');
+    expect(broadcastTopic({ type: 'broadcast', data: { name: 'Almonium' } })).toBe('Almonium');
+  });
+
+  it('draws the self emblem locally and renders the hosted broadcast artwork', () => {
+    expect(channelImage({ type: 'self', data: { image: 'https://example.test/x.png' } }, me)).toBeUndefined();
+    expect(channelImage({ type: 'broadcast', data: { image: 'https://a.test/logo-de.png' } }, me)).toBe(
+      'https://a.test/logo-de.png',
+    );
+  });
+});
+
+describe('who may post', () => {
+  it('trusts the capabilities Stream sent back', () => {
+    expect(canSendMessages({ type: 'broadcast', data: { own_capabilities: ['read-events'] } })).toBe(false);
+    expect(canSendMessages({ type: 'private', data: { own_capabilities: ['send-message'] } })).toBe(true);
+  });
+
+  it('assumes a broadcast room is read only until capabilities arrive', () => {
+    expect(canSendMessages({ type: 'broadcast' })).toBe(false);
+    expect(canSendMessages({ type: 'self' })).toBe(true);
+  });
+});
+
+describe('transcript', () => {
+  const day = (iso: string) => new Date(iso);
+  /** Local wall-clock, so day boundaries do not move with the machine's timezone. */
+  const at = (month: number, date: number, hour: number, minute = 0) =>
+    new Date(2026, month, date, hour, minute);
+
+  it('previews the last message and marks your own', () => {
+    expect(lastMessagePreview([], me)).toBe('No messages yet');
+    expect(
+      lastMessagePreview([{ id: '1', text: 'hello  brooo', created_at: at(7, 31, 10), user: { id: friend } }], me),
+    ).toBe('hello brooo');
+    expect(
+      lastMessagePreview([{ id: '1', text: 'woww', created_at: at(7, 31, 10), user: { id: me } }], me),
+    ).toBe('You: woww');
+  });
+
+  it('maps a Stream message onto what the bubble needs', () => {
+    const message = toChatMessage(
+      { id: '1', text: 'hi', created_at: '2026-08-31T10:00:00Z', user: { id: friend, name: 'wowsie' } },
+      me,
+    );
+    expect(message).toMatchObject({ id: '1', text: 'hi', own: false, authorName: 'wowsie', deleted: false });
+    expect(message.createdAt.toISOString()).toBe('2026-08-31T10:00:00.000Z');
+    expect(toChatMessage({ id: '2', type: 'deleted', created_at: '2026-08-31T10:00:00Z' }, me).text).toBe(
+      'Message deleted',
+    );
+  });
+
+  it('divides on the day and opens a block when the author changes', () => {
+    const now = at(7, 31, 12);
+    const rows = transcriptRows(
+      [
+        { id: '1', text: 'a', createdAt: at(7, 30, 9), authorId: friend, own: false, deleted: false },
+        { id: '2', text: 'b', createdAt: at(7, 31, 9), authorId: friend, own: false, deleted: false },
+        { id: '3', text: 'c', createdAt: at(7, 31, 9, 1), authorId: friend, own: false, deleted: false },
+        { id: '4', text: 'd', createdAt: at(7, 31, 9, 2), authorId: me, own: true, deleted: false },
+      ],
+      now,
+    );
+    expect(rows.map((row) => row.kind)).toEqual(['day', 'message', 'day', 'message', 'message', 'message']);
+    expect(rows.filter((row) => row.kind === 'day').map((row) => row.label)).toEqual(['Yesterday', 'Today']);
+    expect(rows.filter((row) => row.kind === 'message').map((row) => row.startsBlock)).toEqual([
+      true,
+      true,
+      false,
+      true,
+    ]);
+    expect(rows.filter((row) => row.kind === 'message').map((row) => row.endsBlock)).toEqual([
+      true,
+      false,
+      true,
+      true,
+    ]);
+  });
+
+  it('names the day relative to now', () => {
+    const now = at(7, 31, 12);
+    expect(dayLabel(now, now)).toBe('Today');
+    expect(dayLabel(at(7, 30, 23), now)).toBe('Yesterday');
+    expect(dayLabel(at(7, 20, 12), now)).not.toBe('Today');
+  });
+
+  it('shows a clock time without the date', () => {
+    expect(clockTime(at(7, 31, 22, 16))).toMatch(/16/);
+  });
+
+  it('reads a receipt only from someone else', () => {
+    const createdAt = day('2026-08-31T10:00:00Z');
+    expect(
+      seenByOthers({ [me]: { last_read: day('2026-08-31T11:00:00Z') } }, me, createdAt),
+    ).toBe(false);
+    expect(
+      seenByOthers({ [friend]: { last_read: day('2026-08-31T09:00:00Z') } }, me, createdAt),
+    ).toBe(false);
+    expect(
+      seenByOthers({ [friend]: { last_read: day('2026-08-31T11:00:00Z') } }, me, createdAt),
+    ).toBe(true);
+  });
+});
+
+describe('the Stream token', () => {
+  it('is stripped from anything written to storage', () => {
+    const cached = withoutStreamToken({ id: me, username: 'kuzanorest', streamChatToken: 'ey.secret' });
+    expect(cached).toEqual({ id: me, username: 'kuzanorest' });
+    expect(cached).not.toHaveProperty('streamChatToken');
+  });
+});

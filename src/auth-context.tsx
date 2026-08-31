@@ -28,6 +28,7 @@ import {
 } from 'react';
 
 import { api } from '@/src/api';
+import { withoutStreamToken } from '@/src/chat';
 import { config } from '@/src/config';
 import { auth } from '@/src/firebase';
 import { queryClient } from '@/src/query-client';
@@ -119,9 +120,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
       return;
     }
     const nextProfile = await api.me();
-    await AsyncStorage.setItem(profileCacheKey(user.uid), JSON.stringify(nextProfile)).catch(
-      () => undefined,
-    );
+    // The Stream token is a credential and lives only in memory; it comes back with /users/me.
+    await AsyncStorage.setItem(
+      profileCacheKey(user.uid),
+      JSON.stringify(withoutStreamToken(nextProfile)),
+    ).catch(() => undefined);
     setProfile(nextProfile);
   }, []);
 

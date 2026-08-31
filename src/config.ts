@@ -5,6 +5,10 @@ const localApiHost = Platform.OS === 'android' ? 'http://10.0.2.2:9998' : 'http:
 export const config = {
   apiBaseUrl: `${process.env.EXPO_PUBLIC_API_URL || localApiHost}/api/v1`,
   webBaseUrl: process.env.EXPO_PUBLIC_WEB_URL || 'https://almonium.com',
+  // Public Stream application key, the counterpart of the token the backend mints on /users/me.
+  // It must belong to the same Stream application as the API this build talks to, so the default
+  // is the staging key that pairs with the default local backend.
+  streamApiKey: process.env.EXPO_PUBLIC_STREAM_API_KEY || 'zjh3fpuaexy2',
   firebase: {
     apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCotfh0KzDpP3HniEfxyxoAw9HUFAA8gFs',
     authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || 'almonium.firebaseapp.com',
