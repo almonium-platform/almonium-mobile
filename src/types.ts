@@ -16,7 +16,6 @@ export interface UserInfo {
   avatarUrl: string | null;
   /** Stream Chat credential. In memory only - it is never written to the offline profile cache. */
   streamChatToken?: string;
-  streak: number | null;
   fluentLangs: string[];
   learners: Learner[];
   premium: boolean;
@@ -183,7 +182,6 @@ export interface UserProfile extends PublicUserSummary {
   registeredAt: string;
   hidden: boolean;
   interests?: string[];
-  loginStreak?: number;
   fluentLangs?: string[];
   targetLangs?: { language: string; cefrLevel: CefrLevel }[];
   relationshipId: string | null;
