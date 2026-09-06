@@ -135,10 +135,35 @@ current:
   private topic name and subscribe the [ntfy](https://ntfy.sh) app on the phone
   to that topic. Each new build and update then pings the phone with its link.
 
-The preview build talks to `https://staging.api.almonium.com` with the staging
-Stream key. Those values come from the project's `preview` EAS environment
-(`eas env:list --environment preview`), not from `.env`; change them with
-`eas env:set`. The `production` EAS environment holds the production values.
+### Where the configuration comes from
+
+All client configuration is public `EXPO_PUBLIC_*` values that get inlined into
+the JavaScript bundle when it is built. There are no client secrets, so there
+are no secret sets to manage, only three value sets:
+
+| Where the bundle is built | Values used | Set in |
+| --- | --- | --- |
+| your machine (`expo start`, `expo run:*`) | `.env` (gitignored) | edit `.env`, see `.env.example` |
+| EAS build or `eas update` for the `preview` profile | `preview` EAS environment | `eas env:set preview --name … --value …` |
+| EAS build or `eas update` for the `production` profile | `production` EAS environment | `eas env:set production --name … --value …` |
+
+EAS never sees `.env`: the project upload respects `.gitignore`, and the
+`environment` field of each `eas.json` profile picks the server-side variable
+set instead. List a set with `eas env:list --environment preview`, or write it
+into a local `.env.local` with `eas env:pull --environment preview` when you
+want to run against staging on your machine.
+
+The `preview` environment is the **staging app**: `staging.api.almonium.com`,
+the staging Stream key, and the `almonium-dev` Firebase project. The Firebase
+project matters: the staging backend verifies tokens against `almonium-dev`,
+so a build with production Firebase values cannot sign in to staging. The
+`production` environment holds the `almonium` Firebase project and
+`api.almonium.com`. The Google OAuth client IDs are shared by both, they live in
+the production Google Cloud project and the staging Firebase project trusts
+them.
+
+Do not rely on the fallback values in `src/config.ts` for a deployed build;
+every environment sets the full list explicitly.
 
 Run `Develop to phone` from the Actions tab to trigger it manually; tick
 **force build** to rebuild the binaries without a native change. Locally,
@@ -147,9 +172,15 @@ Run `Develop to phone` from the Actions tab to trigger it manually; tick
 
 Caveats:
 
-- The preview build uses the production identifier `com.almonium.mobile`, so it
-  replaces a Play-installed Almonium and cannot be installed over one that was
-  signed with a different key; uninstall first.
+- The preview build still uses the production identifier `com.almonium.mobile`,
+  so it replaces a Play-installed Almonium and cannot be installed over one that
+  was signed with a different key. Before the first production build is
+  installed anywhere, give the staging app its own identity
+  (`com.almonium.mobile.staging`, "Almonium Staging") through an
+  `APP_VARIANT` switch in an `app.config.js`; see "When to add staging" below.
+- Google Sign-In only works when the SHA-1 of the signing keystore is
+  registered on the Android app in the `almonium` Firebase project. Read it
+  from a build with `apksigner verify --print-certs app.apk`.
 - Preview builds keep the remote Android version code, so installing a new
   preview build over the previous one is a plain reinstall.
 - iOS ad hoc builds only install on devices registered with
@@ -183,7 +214,7 @@ For the current early-testing phase, use only two lanes:
 | Source | App/API | Distribution |
 | --- | --- | --- |
 | local work | local backend | development build / Expo Go where supported |
-| `develop` | preview build and `https://staging.api.almonium.com` | EAS Update plus EAS internal distribution, for your own phone |
+| `develop` | staging app: preview build, `https://staging.api.almonium.com`, `almonium-dev` Firebase | EAS Update plus EAS internal distribution, for your own phone |
 | `main` | production app and `https://api.almonium.com` | Google Play Internal Testing and TestFlight |
 
 This lets trusted friends test the real production configuration without making
