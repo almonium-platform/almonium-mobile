@@ -89,9 +89,11 @@ jobs:
           FORCE_BUILD: ${{ github.event.inputs.force_build || 'false' }}
         run: |
           set -euo pipefail
-          current="$(eas fingerprint:generate --platform "${{ matrix.platform }}" --build-profile "$EAS_PROFILE" --json | jq -r '.hash')"
-          latest="$(eas build:list --platform "${{ matrix.platform }}" --build-profile "$EAS_PROFILE" --channel "$EAS_CHANNEL" \
-            --status finished --limit 1 --json --non-interactive | jq -r '.[0].fingerprint.hash // empty')"
+          eas fingerprint:generate --platform "${{ matrix.platform }}" --build-profile "$EAS_PROFILE" --json > fingerprint.json
+          eas build:list --platform "${{ matrix.platform }}" --build-profile "$EAS_PROFILE" --channel "$EAS_CHANNEL" \
+            --status finished --limit 1 --json --non-interactive > builds.json
+          current="$(jq -r '.hash' fingerprint.json)"
+          latest="$(jq -r '.[0].fingerprint.hash // empty' builds.json)"
           echo "current fingerprint: $current"
           echo "latest build fingerprint: ${latest:-<none>}"
           if [ "$FORCE_BUILD" = "true" ] || [ "$current" != "$latest" ]; then
