@@ -1,18 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandMark } from '@/components/brand-mark';
 import { AvatarMark } from '@/components/avatar-mark';
+import { Sheet } from '@/components/sheet';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { useChat } from '@/src/chat-client';
+import { crestTint } from '@/src/crest';
+import { useCrest } from '@/src/crest-context';
 import { languageName } from '@/src/languages';
 import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 
+/**
+ * Emblem, crest, bell, avatar; the 3px rail beneath carries the active language's own hue and is
+ * the only chrome that carries language colour. The crest is a stack, not a caret: with two or
+ * more active languages two hairline edges peek out below it in the next languages' hues.
+ */
 export function AppHeader({
   language,
   onLanguageChange,
@@ -20,9 +28,10 @@ export function AppHeader({
   language: string;
   onLanguageChange?: (language: string) => void;
 }) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
+  const { crestFor } = useCrest();
   const { unreadCount: unreadChats } = useChat();
   const notifications = useQuery({
     queryKey: ['notifications', firebaseUser?.uid],
@@ -33,20 +42,34 @@ export function AppHeader({
   // message has nowhere else to announce itself. One count for everything waiting.
   const waiting = (notifications.data?.filter((item) => !item.readAt).length ?? 0) + unreadChats;
   const [languagesVisible, setLanguagesVisible] = useState(false);
-  const languages = profile?.learners.filter((learner) => learner.active).map((learner) => learner.language) ?? [];
+  // Active only: the switcher answers what you are doing now. Set-aside languages live on the profile.
+  const learners = profile?.learners.filter((learner) => learner.active) ?? [];
+  const others = learners.filter((learner) => learner.language !== language).slice(0, 2);
+  const crest = crestFor(language);
+  const tint = crestTint(crest, isDark ? colors.surface : colors.canvas);
+  const canSwitch = Boolean(onLanguageChange && learners.length > 1);
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       <View style={styles.row}>
         <BrandMark size={30} />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Current language ${language}`}
-          disabled={!onLanguageChange}
-          onPress={() => setLanguagesVisible(true)}
-          style={({ pressed }) => [styles.language, pressed && styles.pressed]}>
-          <Text style={styles.languageText}>{language.toUpperCase()}</Text>
-          {onLanguageChange && <Ionicons name="chevron-down" size={12} color={colors.languageRail} />}
-        </Pressable>
+        <View style={styles.crestSlot}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Current language ${languageName(language)}${canSwitch ? ', switch' : ''}`}
+            disabled={!canSwitch}
+            onPress={() => setLanguagesVisible(true)}
+            style={({ pressed }) => [styles.crest, { borderColor: crest, backgroundColor: tint }, pressed && styles.pressed]}>
+            <Text style={[styles.crestText, { color: crest }]}>{language.toUpperCase()}</Text>
+          </Pressable>
+          {canSwitch &&
+            others.map((learner, index) => (
+              <View
+                key={learner.language}
+                pointerEvents="none"
+                style={[styles.deckEdge, { top: 30 + index * 3, marginHorizontal: 4 + index * 4, borderColor: crestFor(learner.language) }]}
+              />
+            ))}
+        </View>
         <View style={styles.spacer} />
         <Pressable
           accessibilityRole="button"
@@ -69,35 +92,46 @@ export function AppHeader({
           accessibilityLabel="Open settings"
           onPress={() => router.push('/(tabs)/settings')}
           style={({ pressed }) => [styles.avatar, pressed && styles.pressed]}>
-          <AvatarMark premium={profile?.premium} size={36} />
+          <AvatarMark avatarUrl={profile?.avatarUrl} username={profile?.username} premium={profile?.premium} size={36} />
         </Pressable>
       </View>
-      <View style={styles.rail} />
-      <Modal transparent animationType="slide" visible={languagesVisible} onRequestClose={() => setLanguagesVisible(false)}>
-        <Pressable style={styles.scrim} onPress={() => setLanguagesVisible(false)} />
-        <SafeAreaView edges={['bottom']} style={styles.sheet}>
-          <View style={styles.grabber} />
-          <Text style={styles.sheetEyebrow}>READING LANGUAGE</Text>
-          <Text style={styles.sheetTitle}>Choose a shelf</Text>
-          <View style={styles.languageList}>
-            {languages.map((code) => (
+      <View style={[styles.rail, { backgroundColor: crest }]} />
+      <Sheet visible={languagesVisible} onClose={() => setLanguagesVisible(false)}>
+        <Text style={styles.sheetEyebrow}>NOW STUDYING</Text>
+        <View style={styles.languageList}>
+          {learners.map((learner) => {
+            const code = learner.language;
+            const hue = crestFor(code);
+            const selected = code === language;
+            return (
               <Pressable
                 accessibilityRole="radio"
-                accessibilityState={{ selected: code === language }}
+                accessibilityState={{ selected }}
                 key={code}
-                onPress={() => { onLanguageChange?.(code); setLanguagesVisible(false); }}
-                style={[styles.languageRow, code === language && styles.languageRowActive]}>
-                <View style={styles.languageCode}><Text style={styles.languageCodeText}>{code}</Text></View>
+                onPress={() => {
+                  onLanguageChange?.(code);
+                  setLanguagesVisible(false);
+                }}
+                style={[styles.languageRow, selected && { borderColor: hue, backgroundColor: crestTint(hue, isDark ? colors.overlay : colors.canvas) }]}>
+                <View style={[styles.languageCode, { borderColor: hue }]}>
+                  <Text style={[styles.languageCodeText, { color: hue }]}>{code}</Text>
+                </View>
                 <Text style={styles.languageName}>{languageName(code)}</Text>
-                {code === language && <Ionicons name="checkmark-circle" size={21} color={colors.primary} />}
+                <Text style={styles.languageLevel}>{learner.selfReportedLevel}</Text>
               </Pressable>
-            ))}
-          </View>
-          <Pressable onPress={() => { setLanguagesVisible(false); router.push('/(tabs)/settings'); }} style={styles.manageLanguages}>
-            <Text style={styles.manageLanguagesText}>Manage languages</Text>
-          </Pressable>
-        </SafeAreaView>
-      </Modal>
+            );
+          })}
+        </View>
+        <Pressable
+          onPress={() => {
+            setLanguagesVisible(false);
+            router.push('/(tabs)/settings');
+          }}
+          style={styles.manageLanguages}>
+          <Ionicons name="add" size={18} color={colors.primary} />
+          <Text style={styles.manageLanguagesText}>Add a language</Text>
+        </Pressable>
+      </Sheet>
     </SafeAreaView>
   );
 }
@@ -112,24 +146,18 @@ const useStyles = createThemedStyles((colors) => ({
     paddingHorizontal: 16,
     paddingVertical: 5,
   },
-  language: {
+  crestSlot: { minWidth: 48, paddingBottom: 6 },
+  crest: {
     minWidth: 48,
-    minHeight: 36,
-    flexDirection: 'row',
+    minHeight: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
-    paddingHorizontal: 9,
+    paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: colors.languageRailSoft,
-    borderRadius: 9,
+    borderRadius: 999,
   },
-  languageText: {
-    color: colors.languageRail,
-    fontFamily: fonts.sansMedium,
-    fontSize: 11,
-    letterSpacing: 0.5,
-  },
+  crestText: { fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 0.8 },
+  deckEdge: { position: 'absolute', left: 0, right: 0, height: 4, borderTopWidth: 1, borderLeftWidth: 1, borderRightWidth: 1, borderBottomLeftRadius: 999, borderBottomRightRadius: 999 },
   spacer: { flex: 1 },
   iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   badge: { position: 'absolute', top: 6, right: 5, minWidth: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: colors.surface, borderRadius: 999, paddingHorizontal: 5, paddingVertical: 1, backgroundColor: colors.chatMine },
@@ -141,19 +169,15 @@ const useStyles = createThemedStyles((colors) => ({
     justifyContent: 'center',
     borderRadius: 18,
   },
-  rail: { height: 3, backgroundColor: colors.languageRail },
+  rail: { height: 3 },
   pressed: { opacity: 0.72 },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.scrim },
-  sheet: { position: 'absolute', right: 0, bottom: 0, left: 0, gap: 10, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 20, backgroundColor: colors.canvas },
-  grabber: { width: 38, height: 4, alignSelf: 'center', borderRadius: 2, backgroundColor: colors.border },
-  sheetEyebrow: { marginTop: 5, color: colors.raspberry, fontFamily: fonts.sansSemibold, fontSize: 10, letterSpacing: 1.5 },
-  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 26 },
-  languageList: { gap: 7, paddingTop: 5 },
-  languageRow: { minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: 11, borderWidth: 1, borderColor: colors.line, borderRadius: 20, paddingHorizontal: 13, backgroundColor: colors.surface },
-  languageRowActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
-  languageCode: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: colors.surface },
-  languageCodeText: { color: colors.languageRail, fontFamily: fonts.sansSemibold, fontSize: 10 },
+  sheetEyebrow: { color: colors.primary, fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 1.5 },
+  languageList: { gap: 7 },
+  languageRow: { minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: colors.line, borderRadius: 20, paddingHorizontal: 13, backgroundColor: colors.surface },
+  languageCode: { minWidth: 40, height: 28, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8, borderWidth: 1, borderRadius: 999 },
+  languageCodeText: { fontFamily: fonts.sansSemibold, fontSize: 10.5, letterSpacing: 0.8 },
   languageName: { flex: 1, color: colors.ink, fontSize: 15, fontWeight: '600' },
-  manageLanguages: { minHeight: 46, alignItems: 'center', justifyContent: 'center' },
+  languageLevel: { color: colors.metadata, fontSize: 12 },
+  manageLanguages: { minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   manageLanguagesText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
 }));

@@ -123,7 +123,7 @@ export default function ChatListScreen() {
             })
           }
           style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
-          <ChatAvatar type={item.type} channelId={item.id} image={item.image} size={44} />
+          <ChatAvatar type={item.type} channelId={item.id} image={item.image} name={item.title} size={44} />
           <View style={styles.rowCopy}>
             <View style={styles.rowTop}>
               <Text numberOfLines={1} style={styles.rowTitle}>

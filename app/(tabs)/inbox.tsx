@@ -16,6 +16,8 @@ const iconForType: Record<NotificationType, keyof typeof Ionicons.glyphMap> = {
   FRIENDSHIP_REQUESTED: 'person-add-outline',
   FRIENDSHIP_ACCEPTED: 'people-outline',
   TRANSLATION_ORDER_COMPLETED: 'book-outline',
+  BOOK_IMPORT_READY: 'document-text-outline',
+  BOOK_IMPORT_FAILED: 'document-text-outline',
 };
 
 export default function InboxScreen() {

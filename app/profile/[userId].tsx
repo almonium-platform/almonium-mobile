@@ -141,7 +141,7 @@ export default function UserProfileScreen() {
 }
 
 function Avatar({ profile }: { profile: UserProfile }) {
-  return <AvatarMark premium={profile.premium} size={92} />;
+  return <AvatarMark avatarUrl={profile.avatarUrl} username={profile.username} premium={profile.premium} size={92} />;
 }
 
 function ProfileSection({ label, children }: { label: string; children: React.ReactNode }) {

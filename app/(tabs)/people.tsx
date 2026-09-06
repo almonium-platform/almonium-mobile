@@ -150,7 +150,8 @@ function SearchResult({ user }: { user: PublicUserSummary }) {
 }
 
 function Avatar({ user }: { user: PublicUserSummary }) {
-  return <AvatarMark premium={user.premium} size={46} />;
+  // Ring, not star, beside other people: the tier shows where someone else is looking.
+  return <AvatarMark avatarUrl={user.avatarUrl} username={user.username} premium={user.premium} size={46} ring={user.premium ? 'member' : undefined} />;
 }
 
 function SmallAction({ label, primary = false, onPress }: { label: string; primary?: boolean; onPress(): void }) {

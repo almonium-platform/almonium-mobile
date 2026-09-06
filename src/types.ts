@@ -7,6 +7,28 @@ export interface Learner {
   active: boolean;
 }
 
+export type PlanType = 'MONTHLY' | 'YEARLY' | 'LIFETIME';
+
+export type PlanFeature =
+  | 'MAX_TARGET_LANGS'
+  | 'MAX_ACTIVE_LANGS'
+  | 'MAX_FLUENT_LANGS'
+  | 'MAX_BOOK_IMPORTS_PER_MONTH'
+  | 'MAX_TRANSLATION_REQUESTS_PER_MONTH';
+
+export interface SubscriptionInfo {
+  name: string;
+  limits: Partial<Record<PlanFeature, number>>;
+  type: PlanType;
+  autoRenewal: boolean;
+  startDate: string | null;
+  endDate: string | null;
+  /** A founding-member place: the price is locked while the subscription runs. */
+  founder?: boolean;
+  /** Present only while a cadence change is pending. */
+  scheduledChange?: { type: PlanType; effectiveAt: string } | null;
+}
+
 export interface UserInfo {
   id: string;
   username: string;
@@ -20,15 +42,10 @@ export interface UserInfo {
   learners: Learner[];
   premium: boolean;
   setupStep: SetupStep;
-  subscription: {
-    name: string;
-    limits: Record<string, number>;
-    type: 'MONTHLY' | 'YEARLY' | 'LIFETIME';
-    autoRenewal: boolean;
-    startDate: string | null;
-    endDate: string | null;
-  };
+  subscription: SubscriptionInfo;
   interests: Interest[];
+  uiPreferences?: Record<string, unknown> | null;
+  notifications?: { socialEmails: boolean } | null;
 }
 
 export type SetupStep =
@@ -79,6 +96,26 @@ export interface Bookshelf {
   continueReading: BookSummary[];
   available: BookSummary[];
   favorites: BookSummary[];
+}
+
+/** One request for a missing alignment. `fulfilledBookId` is set only once it is READY. */
+export interface TranslationOrder {
+  id: string;
+  userId: string;
+  bookId: string;
+  bookTitle: string;
+  bookAuthor: string;
+  language: string;
+  status: 'ASKED' | 'READY' | 'DECLINED';
+  fulfilledBookId: string | null;
+  createdAt: string;
+}
+
+export interface TranslationRequestQuota {
+  limit: number;
+  used: number;
+  periodStartsAt: string;
+  periodEndsAt: string;
 }
 
 export interface CardTranslation {
@@ -143,7 +180,9 @@ export interface CardDraft {
 export type NotificationType =
   | 'FRIENDSHIP_REQUESTED'
   | 'FRIENDSHIP_ACCEPTED'
-  | 'TRANSLATION_ORDER_COMPLETED';
+  | 'TRANSLATION_ORDER_COMPLETED'
+  | 'BOOK_IMPORT_READY'
+  | 'BOOK_IMPORT_FAILED';
 
 export interface AppNotification {
   id: string;
@@ -187,4 +226,96 @@ export interface UserProfile extends PublicUserSummary {
   relationshipId: string | null;
   relationshipStatus: RelationshipStatus;
   acceptsRequests: boolean | null;
+}
+
+/** The numbers on a profile that only move by reading. */
+export interface LearningStats {
+  wordsKept: number;
+  booksFinished: number;
+}
+
+/**
+ * What the account may do with its languages: how many may be active, when the once-a-month
+ * switch comes back, and what there is to choose between.
+ */
+export interface ActiveLanguagePolicy {
+  /** How many languages may be active now, or -1 for unlimited. */
+  allowance: number;
+  allowanceWithoutPlan: number;
+  nextSwitchAllowedAt: string | null;
+  /** Every language on the account, most recently read first. */
+  languages: LanguageChoice[];
+}
+
+export interface LanguageChoice {
+  language: string;
+  cefrLevel: CefrLevel;
+  wordsKept: number;
+  lastReadOn: string | null;
+  active: boolean;
+  recommended: boolean;
+}
+
+/** A purchasable plan as the pricing card states it, limits included. */
+export interface PlanOffer {
+  id: number;
+  name: string;
+  type: PlanType;
+  description: string | null;
+  price: number;
+  founderPrice: number | null;
+  limits: Partial<Record<PlanFeature, number>>;
+}
+
+export interface FoundingMemberStatus {
+  capacity: number;
+  claimed: number;
+}
+
+export type SharedLinkStatus = 'ACTIVE' | 'REVOKED' | 'DELETED';
+
+/** A word as a stranger sees it: entry and senses, none of the owner's progress. */
+export interface SharedWord {
+  id: string;
+  entry: string;
+  partOfSpeech: string | null;
+  selectedSense: string | null;
+  translations: string[];
+  examples: { example: string; translation: string | null }[];
+  sourceContext: string | null;
+}
+
+export interface Sharer {
+  username: string;
+  avatarUrl: string | null;
+  premium: boolean;
+}
+
+export interface SharedCardView {
+  language: string;
+  word: SharedWord;
+  sharer: Sharer;
+}
+
+export interface SharedDeckView {
+  status: SharedLinkStatus;
+  shareId: string | null;
+  title: string | null;
+  language: string | null;
+  words: SharedWord[];
+  sharer: Sharer | null;
+}
+
+/** What a signed-in viewer already holds of a shared object. */
+export interface SharedLinkViewerStatus {
+  owner: boolean;
+  hasLearner: boolean;
+  heldWordIds: string[];
+  dueAmongHeld: number;
+}
+
+export interface AddedWordsResult {
+  added: number;
+  alreadyHeld: number;
+  firstDueAt: string | null;
 }

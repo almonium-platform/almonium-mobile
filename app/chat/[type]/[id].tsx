@@ -275,7 +275,7 @@ export default function ChatRoomScreen() {
         <Pressable onPress={() => router.back()} accessibilityLabel="Go back" hitSlop={8} style={styles.back}>
           <Ionicons name="chevron-back" size={24} color={colors.ink} />
         </Pressable>
-        <ChatAvatar type={type} channelId={channelId} image={snapshot.image} size={38} />
+        <ChatAvatar type={type} channelId={channelId} image={snapshot.image} name={snapshot.title} size={38} />
         <View style={styles.headerCopy}>
           <Text numberOfLines={1} style={styles.headerTitle}>
             {title}
@@ -430,7 +430,7 @@ function TranscriptRow({
     <View style={[styles.messageRow, message.own ? styles.messageRowOwn : styles.messageRowOther]}>
       {!message.own &&
         (startsRun ? (
-          <ChatAvatar type={channelTypes.private} image={message.authorImage} size={28} />
+          <ChatAvatar type={channelTypes.private} image={message.authorImage} name={message.authorName} size={28} />
         ) : (
           <View style={styles.avatarSpacer} />
         ))}

@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { Text, View } from 'react-native';
 
 import { AvatarMark } from '@/components/avatar-mark';
+import { animalFromUrl } from '@/src/avatars';
 import { broadcastCode, channelTypes, type ChannelType } from '@/src/chat';
 import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 
@@ -15,11 +16,13 @@ export function ChatAvatar({
   type,
   channelId,
   image,
+  name,
   size = 38,
 }: {
   type: ChannelType;
   channelId?: string;
   image?: string;
+  name?: string;
   size?: number;
 }) {
   const { colors } = useTheme();
@@ -43,7 +46,9 @@ export function ChatAvatar({
     );
   }
 
-  if (image) {
+  // The other person's image is their avatar URL, so a bundled animal draws its schematic
+  // here rather than fetching the engraving at a size where it would smudge.
+  if (image && !animalFromUrl(image)) {
     return (
       <Image
         accessibilityIgnoresInvertColors
@@ -54,7 +59,7 @@ export function ChatAvatar({
     );
   }
 
-  return <AvatarMark size={size} />;
+  return <AvatarMark avatarUrl={image} username={name} size={size} />;
 }
 
 const useStyles = createThemedStyles((colors) => ({

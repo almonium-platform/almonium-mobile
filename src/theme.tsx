@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
+  AccessibilityInfo,
   Appearance,
   Platform,
   StyleSheet,
@@ -93,16 +94,23 @@ export const darkColors: ThemeColors = {
 };
 
 export type AppearancePreference = 'light' | 'dark' | 'system';
+/** Reduce motion follows the OS by default; the App tab can override it in either direction. */
+export type MotionPreference = 'system' | 'reduced' | 'full';
 type NamedStyles<T> = { [Property in keyof T]: ViewStyle | TextStyle | ImageStyle };
 
 const APPEARANCE_STORAGE_KEY = 'almonium.appearance';
+const MOTION_STORAGE_KEY = 'almonium.motion';
 
 type ThemeContextValue = {
   appearance: AppearancePreference;
   colors: ThemeColors;
   isDark: boolean;
   ready: boolean;
+  motion: MotionPreference;
+  /** True when anything that moves an object across the screen should render its final frame instead. */
+  reduceMotion: boolean;
   setAppearance(appearance: AppearancePreference): Promise<void>;
+  setMotion(motion: MotionPreference): Promise<void>;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -111,16 +119,34 @@ function isAppearancePreference(value: string | null): value is AppearancePrefer
   return value === 'light' || value === 'dark' || value === 'system';
 }
 
+function isMotionPreference(value: string | null): value is MotionPreference {
+  return value === 'system' || value === 'reduced' || value === 'full';
+}
+
 export function ThemeProvider({ children }: PropsWithChildren) {
   const systemScheme = useColorScheme();
   const [appearance, setAppearanceState] = useState<AppearancePreference>('system');
+  const [motion, setMotionState] = useState<MotionPreference>('system');
+  const [systemReducesMotion, setSystemReducesMotion] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (Platform.OS === 'web') return;
+    void AccessibilityInfo.isReduceMotionEnabled().then(setSystemReducesMotion).catch(() => undefined);
+    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setSystemReducesMotion);
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => {
     let active = true;
-    void AsyncStorage.getItem(APPEARANCE_STORAGE_KEY)
-      .then((stored) => {
-        if (active && isAppearancePreference(stored)) setAppearanceState(stored);
+    void Promise.all([
+      AsyncStorage.getItem(APPEARANCE_STORAGE_KEY),
+      AsyncStorage.getItem(MOTION_STORAGE_KEY),
+    ])
+      .then(([storedAppearance, storedMotion]) => {
+        if (!active) return;
+        if (isAppearancePreference(storedAppearance)) setAppearanceState(storedAppearance);
+        if (isMotionPreference(storedMotion)) setMotionState(storedMotion);
       })
       .catch(() => undefined)
       .finally(() => {
@@ -145,10 +171,29 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     }
   }, []);
 
+  const setMotion = useCallback(async (next: MotionPreference) => {
+    setMotionState(next);
+    try {
+      await AsyncStorage.setItem(MOTION_STORAGE_KEY, next);
+    } catch {
+      // The in-memory selection still applies for this session.
+    }
+  }, []);
+
   const isDark = appearance === 'dark' || (appearance === 'system' && systemScheme === 'dark');
+  const reduceMotion = motion === 'reduced' || (motion === 'system' && systemReducesMotion);
   const value = useMemo<ThemeContextValue>(
-    () => ({ appearance, colors: isDark ? darkColors : colors, isDark, ready, setAppearance }),
-    [appearance, isDark, ready, setAppearance],
+    () => ({
+      appearance,
+      colors: isDark ? darkColors : colors,
+      isDark,
+      ready,
+      motion,
+      reduceMotion,
+      setAppearance,
+      setMotion,
+    }),
+    [appearance, isDark, ready, motion, reduceMotion, setAppearance, setMotion],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

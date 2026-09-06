@@ -1,5 +1,7 @@
 import { auth } from '@/src/firebase';
 import type {
+  ActiveLanguagePolicy,
+  AddedWordsResult,
   BookDetails,
   BookMiniDetails,
   BookSummary,
@@ -7,19 +9,28 @@ import type {
   AppNotification,
   CardDraft,
   CefrLevel,
+  FoundingMemberStatus,
   Interest,
   LearningCard,
+  LearningStats,
   Learner,
+  PlanOffer,
   PublicUserSummary,
   RelatedUserSummary,
   RelationshipAction,
   SetupStep,
+  SharedCardView,
+  SharedDeckView,
+  SharedLinkViewerStatus,
+  TranslationOrder,
+  TranslationRequestQuota,
   UserProfile,
   UserInfo,
 } from '@/src/types';
 import { config } from '@/src/config';
 import { decodeJsonBody, errorMessageFromBody } from '@/src/http-errors';
 import type { DiscoverLookup } from '@/src/discover';
+import type { LearningActivity, Rhythm, WeeklyTarget } from '@/src/rhythm';
 import type {
   ReviewAnswer,
   ReviewSession,
@@ -106,6 +117,9 @@ export const api = {
     return publicPost<void>('/public/auth/email-verification', {idToken: await user.getIdToken(true)});
   },
   requestPasswordReset: (email: string) => publicPost<{message: string}>('/public/auth/password-resets', {email}),
+  /** Sends the verification link to the new address. The backend requires a recent sign-in. */
+  requestEmailChange: (email: string) =>
+    request<void>('/auth/email-changes', { method: 'POST', body: JSON.stringify({ email }) }),
   me: () => request<UserInfo>('/users/me'),
   completeOnboardingStep: (step: SetupStep) =>
     request<void>(`/onboarding/step/${step}`, { method: 'PATCH' }),
@@ -129,6 +143,8 @@ export const api = {
     }),
   supportedLanguages: () => publicRequest<string[]>('/public/info/languages/supported'),
   interests: () => publicRequest<Interest[]>('/public/info/interests'),
+  plans: () => publicRequest<PlanOffer[]>('/public/plans'),
+  foundingMembers: () => publicRequest<FoundingMemberStatus>('/public/founding-members'),
   discover: (entry: string, language: string, translationLanguage: string, context?: string) => {
     const query = new URLSearchParams({ entry });
     if (context) query.set('context', context);
@@ -146,11 +162,28 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify({ hidden }),
     }),
+  updateSocialEmails: (socialEmails: boolean) =>
+    request<void>('/profile/notifications', {
+      method: 'PATCH',
+      body: JSON.stringify({ socialEmails }),
+    }),
   updateInterests: (ids: number[]) =>
     request<void>('/users/me/interests', {
       method: 'PATCH',
       body: JSON.stringify({ ids }),
     }),
+  updateFluentLanguages: (langCodes: string[]) =>
+    request<void>('/users/me/langs/fluent', {
+      method: 'PUT',
+      body: JSON.stringify({ langCodes }),
+    }),
+  /** One of the pictures the clients ship. Nothing is uploaded anywhere. */
+  chooseAvatar: (avatarUrl: string) =>
+    request<void>('/profiles/me/avatars/default', {
+      method: 'PATCH',
+      body: JSON.stringify({ avatarUrl }),
+    }),
+  resetAvatar: () => request<void>('/profiles/me/avatars/current', { method: 'PATCH' }),
   updateLearner: (language: string, updates: { active?: boolean; level?: CefrLevel }) =>
     request<Learner>(`/learners/${language}`, {
       method: 'PATCH',
@@ -163,6 +196,21 @@ export const api = {
     }),
   deleteLearner: (language: string) =>
     request<void>(`/learners/${language}`, { method: 'DELETE' }),
+  activeLanguagePolicy: () => request<ActiveLanguagePolicy>('/learners/active-language-policy'),
+  keepOnDowngrade: (language: string) =>
+    request<ActiveLanguagePolicy>('/learners/keep-on-downgrade', {
+      method: 'PUT',
+      body: JSON.stringify({ language }),
+    }),
+  rhythm: (today: string) => request<Rhythm>(`/learning/rhythm?today=${today}`),
+  setRhythmTarget: (language: string, target: WeeklyTarget) =>
+    request<void>('/learning/rhythm/target', {
+      method: 'PUT',
+      body: JSON.stringify({ language, target }),
+    }),
+  recordActivity: (activity: LearningActivity) =>
+    request<void>('/learning/activity', { method: 'POST', body: JSON.stringify(activity) }),
+  learningStats: (language: string) => request<LearningStats>(`/learning/stats/${language}`),
   bookshelf: (language: string) =>
     request<Bookshelf>(`/books/language/${language}?includeTranslations=true`),
   publicBooks: () =>
@@ -190,6 +238,12 @@ export const api = {
     request<void>(`/books/${bookId}/language/${language}/favorite`, {
       method: favorite ? 'POST' : 'DELETE',
     }),
+  translationOrders: () => request<TranslationOrder[]>('/books/orders'),
+  translationQuota: () => request<TranslationRequestQuota>('/books/orders/quota'),
+  requestTranslation: (bookId: string, language: string) =>
+    request<TranslationOrder>(`/books/${bookId}/language/${language}/orders`, { method: 'POST' }),
+  withdrawTranslation: (bookId: string, language: string) =>
+    request<void>(`/books/${bookId}/language/${language}/orders`, { method: 'DELETE' }),
   cards: (language: string) => request<LearningCard[]>(`/cards/lang/${language}`),
   reviewSummary: (language: string) => request<ReviewSummary>(`/review/summary/${language}`),
   startReview: (language: string) =>
@@ -228,6 +282,20 @@ export const api = {
       body: JSON.stringify({ id: cardId, language, ...updates }),
     }),
   deleteCard: (cardId: string) => request<void>(`/cards/${cardId}`, { method: 'DELETE' }),
+  publicSharedCard: (publicId: string) => publicRequest<SharedCardView>(`/public/shares/cards/${publicId}`),
+  publicSharedDeck: (shareId: string) =>
+    publicRequest<SharedDeckView>(`/public/shares/decks/${encodeURIComponent(shareId)}`),
+  sharedCardViewer: (publicId: string) =>
+    request<SharedLinkViewerStatus>(`/shares/cards/${publicId}/viewer`),
+  sharedDeckViewer: (shareId: string) =>
+    request<SharedLinkViewerStatus>(`/shares/decks/${encodeURIComponent(shareId)}/viewer`),
+  addSharedCard: (publicId: string) =>
+    request<AddedWordsResult>(`/shares/cards/${publicId}/words`, { method: 'POST' }),
+  addFromSharedDeck: (shareId: string, wordIds: string[]) =>
+    request<AddedWordsResult>(`/shares/decks/${encodeURIComponent(shareId)}/words`, {
+      method: 'POST',
+      body: JSON.stringify({ wordIds }),
+    }),
   notifications: () => request<AppNotification[]>('/notifications'),
   markAllNotificationsRead: () =>
     request<void>('/notifications/read', { method: 'PATCH' }),
