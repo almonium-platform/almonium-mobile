@@ -13,8 +13,6 @@ export const config = {
     apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCotfh0KzDpP3HniEfxyxoAw9HUFAA8gFs',
     authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || 'almonium.firebaseapp.com',
     projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || 'almonium',
-    storageBucket:
-      process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || 'almonium.firebasestorage.app',
     messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '33380019461',
     appId:
       process.env.EXPO_PUBLIC_FIREBASE_APP_ID || '1:33380019461:web:6b4381869fdf5ec21ddb6c',
