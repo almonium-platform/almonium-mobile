@@ -112,9 +112,50 @@ npm run web
 Use a development build for native Google and Apple auth. Expo Go remains
 useful for the email/password, library, settings, and reader flows.
 
-`eas.json` includes development, internal-preview, and production build
+`eas.json` includes development, preview, and production build
 profiles. The app config is linked to the `almonium-app` Expo account and its
 Almonium EAS project.
+
+## Every push to `develop` lands on your phone
+
+Pushing to `develop` triggers [`.github/workflows/develop-to-phone.yml`](.github/workflows/develop-to-phone.yml).
+It runs the checks and then keeps the internal **preview** build on your phone
+current:
+
+- **JS-only changes** are published with EAS Update to the `develop` channel.
+  An installed preview build downloads the update in the background on its
+  next launch and runs it on the launch after that. No reinstall is needed.
+- **Native changes** (a new native module, app config, an SDK upgrade, anything
+  that changes the `@expo/fingerprint` hash) rebuild the binary on EAS: an APK
+  for Android and an ad hoc IPA for iOS. The workflow waits for the build and
+  prints the install link in the job summary; the build also appears on the
+  project's expo.dev builds page. Open the link on the phone and install it
+  over the previous build. The first install on a phone always needs this step.
+- **Optional push notification:** add an `NTFY_TOPIC` repository secret with a
+  private topic name and subscribe the [ntfy](https://ntfy.sh) app on the phone
+  to that topic. Each new build and update then pings the phone with its link.
+
+The preview build talks to `https://staging.api.almonium.com` with the staging
+Stream key. Those values come from the project's `preview` EAS environment
+(`eas env:list --environment preview`), not from `.env`; change them with
+`eas env:set`. The `production` EAS environment holds the production values.
+
+Run `Develop to phone` from the Actions tab to trigger it manually; tick
+**force build** to rebuild the binaries without a native change. Locally,
+`eas build -p android --profile preview` and
+`eas update --channel develop --environment preview` do the same thing.
+
+Caveats:
+
+- The preview build uses the production identifier `com.almonium.mobile`, so it
+  replaces a Play-installed Almonium and cannot be installed over one that was
+  signed with a different key; uninstall first.
+- Preview builds keep the remote Android version code, so installing a new
+  preview build over the previous one is a plain reinstall.
+- iOS ad hoc builds only install on devices registered with
+  `eas device:create`; register the device, then trigger a forced build.
+- EAS builds are quota-limited on the free plan, updates effectively are not,
+  which is why binaries are only rebuilt when the fingerprint changes.
 
 ## Phone releases from `main`
 
@@ -142,11 +183,13 @@ For the current early-testing phase, use only two lanes:
 | Source | App/API | Distribution |
 | --- | --- | --- |
 | local work | local backend | development build / Expo Go where supported |
+| `develop` | preview build and `https://staging.api.almonium.com` | EAS Update plus EAS internal distribution, for your own phone |
 | `main` | production app and `https://api.almonium.com` | Google Play Internal Testing and TestFlight |
 
 This lets trusted friends test the real production configuration without making
-the app public. Do not create a `develop` branch or staging variant merely for
-this purpose.
+the app public. The `develop` lane is a personal "see today's work on the
+phone" lane, not a tester distribution; do not create a staging variant merely
+for that purpose.
 
 Add staging later when changes need to be tested against
 `https://staging.api.almonium.com` without affecting the real product. That
@@ -170,12 +213,13 @@ when the device list changes.
 Before the production-candidate workflow is enabled, complete these account-side steps. Keep all
 credentials in EAS or GitHub; do not commit them to this repository.
 
-1. In the Almonium EAS project, add a project-scoped production environment
-   variable named `EXPO_PUBLIC_API_URL` with the value
-   `https://api.almonium.com` and **Plain text** visibility. Do not append
-   `/api/v1`: the mobile client adds that path itself. The other tracked public
-   Firebase values may use their defaults; do not add Firebase Admin keys or
-   provider secrets to EAS environment variables.
+1. The public `EXPO_PUBLIC_*` values (API URL, Stream key, web URL, Google
+   client IDs) are set as **Plain text** project variables in the `preview`
+   and `production` EAS environments; check them with
+   `eas env:list --environment production`. Do not append `/api/v1` to the API
+   URL: the mobile client adds that path itself. The tracked public Firebase
+   values use their defaults; do not add Firebase Admin keys or provider
+   secrets to EAS environment variables.
 2. Create the `com.almonium.mobile` app in Google Play Console and App Store
    Connect. Both require their respective paid developer accounts.
 3. In Google Play Console, upload the first Android App Bundle manually, then
@@ -198,8 +242,9 @@ credentials in EAS or GitHub; do not commit them to this repository.
    }
    ```
 
-5. Create an Expo robot-user token with access to this EAS project and add it
-   to this GitHub repository as the `EXPO_TOKEN` Actions secret.
+5. Create an Expo access token with access to this EAS project and add it to
+   this GitHub repository as the `EXPO_TOKEN` Actions secret. Both workflows
+   use it.
 
 The Android submit profile already targets the internal track. EAS increments
 the Android version code and iOS build number remotely for every production
