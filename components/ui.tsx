@@ -40,7 +40,7 @@ export function Button({
 }: Omit<ComponentProps<typeof Pressable>, 'children'> & {
   children: ReactNode;
   loading?: boolean;
-  variant?: 'primary' | 'premium' | 'secondary' | 'danger';
+  variant?: 'primary' | 'premium' | 'secondary' | 'danger' | 'destructive';
 }) {
   const { colors, isDark } = useTheme();
   const styles = useStyles();
@@ -50,7 +50,7 @@ export function Button({
       color={
         disabled
           ? colors.disabledText
-          : variant === 'primary' || variant === 'premium'
+          : variant === 'primary' || variant === 'premium' || variant === 'destructive'
           ? colors.white
           : variant === 'danger'
             ? colors.danger
@@ -78,6 +78,7 @@ export function Button({
         variant === 'primary' && styles.buttonPrimary,
         variant === 'secondary' && styles.buttonSecondary,
         variant === 'danger' && styles.buttonDanger,
+        variant === 'destructive' && styles.buttonDestructive,
         pressed && variant === 'primary' && styles.buttonPrimaryPressed,
         pressed && variant !== 'primary' && styles.pressed,
         disabled && styles.disabled,
@@ -147,6 +148,8 @@ const useStyles = createThemedStyles((colors, isDark) => ({
     borderColor: colors.ink,
     backgroundColor: colors.surface,
   },
+  // The only filled red in the product: the commit button of an irreversible loss.
+  buttonDestructive: { paddingHorizontal: 24, backgroundColor: colors.dangerFill },
   buttonDanger: {
     paddingHorizontal: 20,
     borderWidth: 1,

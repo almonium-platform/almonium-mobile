@@ -1,47 +1,67 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, Text, View } from 'react-native';
 
+import { Sheet } from '@/components/sheet';
 import { Button } from '@/components/ui';
-import { createThemedStyles, fonts, gradients, radii, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 
-export type PaywallContext = 'second-language' | 'item-cap' | 'audio' | 'private-import' | 'general';
+/** One sheet, five bodies. Each names the boundary reached, never a restriction. */
+export type PaywallContext =
+  | 'second-language'
+  | 'item-cap'
+  | 'audio'
+  | 'private-import'
+  | 'alignment-request'
+  | 'general';
 
-const wallCopy: Record<PaywallContext, { eyebrow: string; title: string; body: string; benefit: string }> = {
+const wallCopy: Record<PaywallContext, { eyebrow: string; title: string; body: string }> = {
   'second-language': {
-    eyebrow: 'ANOTHER SHELF',
-    title: 'Keep more than one language moving.',
-    body: 'Free includes one target language. Premium keeps every language active without replacing the shelf you already built.',
-    benefit: 'All target and fluent languages',
+    eyebrow: 'ANOTHER LANGUAGE',
+    title: 'Free covers one language at a time.',
+    body: 'Premium runs three at once. A language you set aside stays open to read — every word, every review — and comes back exactly as you left it. The downgrade never takes the record, only the second seat.',
   },
   'item-cap': {
     eyebrow: '100 WORDS KEPT',
-    title: 'Your saved-item shelf is full.',
-    body: 'Nothing you saved will disappear. Premium removes the cap so the next word can join the same review schedule.',
-    benefit: 'Unlimited saved learning items',
+    title: 'Free covers a hundred words at a time.',
+    body: 'Nothing you saved will disappear. Premium removes the cap so the next word joins the same review schedule as the rest.',
   },
   audio: {
-    eyebrow: 'HEAR THE WORD',
-    title: 'Add pronunciation when you need it.',
-    body: 'Audio has a real per-use cost, so it belongs to Premium. Reading, lookup, and the words you have already kept remain available.',
-    benefit: 'Metered pronunciation audio',
+    eyebrow: 'HEAR IT READ',
+    title: 'Narrated books are part of Premium.',
+    body: 'Audio costs something every time it plays, so it belongs to the plan that covers it. Reading, lookups and the words you have already kept stay as they are.',
   },
   'private-import': {
     eyebrow: 'YOUR OWN BOOK',
-    title: 'Bring a private book to your shelf.',
-    body: 'Premium includes private imports. The text stays attached to your account and is never added to the public library.',
-    benefit: 'Private book imports',
+    title: 'Importing a book of your own is part of Premium.',
+    body: 'Three a month, private to your account and never added to the public library. Everything on your shelf today stays.',
+  },
+  'alignment-request': {
+    eyebrow: 'ASK FOR A LANGUAGE',
+    title: 'You have used this month’s request.',
+    body: 'Free covers one translation request a month; Premium covers three, and they are read first. A withdrawn request refunds the count, so you can spend it elsewhere.',
   },
   general: {
-    eyebrow: 'ALMONIUM +',
-    title: 'Keep more of your reading life together.',
-    body: 'Premium expands languages, saved items, audio, and private imports. Your existing learning data stays exactly where it is.',
-    benefit: 'Every premium capability',
+    eyebrow: 'PREMIUM',
+    title: 'Reading is free, and stays free.',
+    body: 'Paying covers the parts that cost something every time you use them. Your learning data stays exactly where it is either way.',
   },
 };
 
+/** The paid lines from the pricing page. Nothing enters before the backend models it. */
+export const premiumLines = [
+  'Unlimited saved words, and three languages at once',
+  'Every book at your level — B1, B2 and C1 editions',
+  'Narrated audiobooks',
+  'Import your own books, 3 a month',
+  'Ask for a missing alignment, 3 a month',
+  'Share word packs with friends',
+];
+
+/**
+ * The wall is an interception, not a page: the person did not come to shop. Grey body, plum
+ * link, no raspberry. It explains the boundary and the downgrade rules; it never transacts.
+ */
 export function PaywallModal({
   visible,
   onClose,
@@ -51,129 +71,46 @@ export function PaywallModal({
   onClose(): void;
   context?: PaywallContext;
 }) {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const styles = useStyles();
-  const insets = useSafeAreaInsets();
   const copy = wallCopy[context];
 
   return (
-    <Modal
-      animationType="slide"
-      presentationStyle="pageSheet"
-      visible={visible}
-      onRequestClose={onClose}>
-      <View style={[styles.screen, { paddingTop: Math.max(insets.top, 16) }]}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.eyebrow}>{copy.eyebrow}</Text>
-            <Text style={styles.title}>{copy.title}</Text>
+    <Sheet visible={visible} onClose={onClose}>
+      <Text style={styles.eyebrow}>{copy.eyebrow}</Text>
+      <Text style={styles.title}>{copy.title}</Text>
+      <Text style={styles.body}>{copy.body}</Text>
+      <View style={styles.list}>
+        <Text style={styles.listLabel}>WHAT PREMIUM ADDS</Text>
+        {premiumLines.map((line) => (
+          <View key={line} style={styles.line}>
+            <Ionicons name="checkmark" size={16} color={colors.primary} />
+            <Text style={styles.lineText}>{line}</Text>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Close membership details"
-            hitSlop={8}
-            onPress={onClose}
-            style={({ pressed }) => [styles.close, pressed && styles.pressed]}>
-            <Ionicons name="close" size={24} color={colors.ink} />
-          </Pressable>
-        </View>
-
-        <ScrollView
-          contentContainerStyle={[
-            styles.content,
-            { paddingBottom: Math.max(insets.bottom, 20) + 12 },
-          ]}>
-          <LinearGradient
-            colors={isDark ? gradients.premiumDark : gradients.premium}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.premiumCard}>
-            <View style={styles.planHeading}>
-              <Text style={styles.premiumTitle}>Premium +</Text>
-              <Ionicons name="sparkles" size={24} color={colors.white} />
-            </View>
-            <Text style={styles.premiumCopy}>{copy.body}</Text>
-            <View style={styles.feature}>
-              <Ionicons name="add-circle" size={20} color={colors.white} />
-              <Text style={styles.premiumFeatureText}>{copy.benefit}</Text>
-            </View>
-            <Button variant="secondary" onPress={() => { onClose(); router.push('/membership'); }}>
-              View membership
-            </Button>
-          </LinearGradient>
-
-          <View style={styles.freeCard}>
-            <Text style={styles.freeTitle}>Nothing is taken away</Text>
-            <Text style={styles.freeFeatureText}>Close this sheet and carry on with everything already on your Free account.</Text>
-          </View>
-        </ScrollView>
+        ))}
       </View>
-    </Modal>
+      <Button
+        onPress={() => {
+          onClose();
+          router.push('/membership');
+        }}>
+        See membership
+      </Button>
+      <Pressable accessibilityRole="button" onPress={onClose} style={styles.dismiss}>
+        <Text style={styles.dismissText}>Not now</Text>
+      </Pressable>
+    </Sheet>
   );
 }
 
-const useStyles = createThemedStyles((colors, isDark) => ({
-  screen: { flex: 1, backgroundColor: colors.canvas },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingBottom: 14,
-  },
-  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '700', letterSpacing: 1.2 },
-  title: {
-    color: colors.ink,
-    fontFamily: fonts.serif,
-    fontSize: 31,
-    lineHeight: 38,
-    fontWeight: '600',
-  },
-  close: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.field),
-  },
-  pressed: { opacity: 0.72 },
-  content: { paddingHorizontal: 20, gap: 16 },
-  premiumCard: {
-    borderRadius: radii.card,
-    padding: 22,
-    gap: 16,
-    overflow: 'hidden',
-    ...shadows.media,
-  },
-  freeCard: {
-    borderRadius: radii.card,
-    padding: 22,
-    gap: 16,
-    backgroundColor: colors.surface,
-    ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card),
-  },
-  planHeading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  premiumTitle: {
-    color: colors.white,
-    fontFamily: fonts.serif,
-    fontSize: 29,
-    fontWeight: '600',
-  },
-  freeTitle: {
-    color: colors.ink,
-    fontFamily: fonts.serif,
-    fontSize: 27,
-    fontWeight: '600',
-  },
-  premiumCopy: { color: colors.white, fontSize: 15, lineHeight: 21 },
-  feature: { flexDirection: 'row', alignItems: 'center', gap: 9 },
-  premiumFeatureText: { flex: 1, color: colors.white, fontSize: 15, lineHeight: 21 },
-  freeFeatureText: { flex: 1, color: colors.ink, fontSize: 15, lineHeight: 21 },
+const useStyles = createThemedStyles((colors) => ({
+  eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 25, lineHeight: 31 },
+  body: { color: colors.muted, fontSize: 14.5, lineHeight: 22 },
+  list: { gap: 8, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 14 },
+  listLabel: { color: colors.metadata, fontSize: 10.5, fontWeight: '600', letterSpacing: 1.3, paddingBottom: 2 },
+  line: { flexDirection: 'row', alignItems: 'flex-start', gap: 9 },
+  lineText: { flex: 1, color: colors.ink, fontSize: 14, lineHeight: 20 },
+  dismiss: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  dismissText: { color: colors.primary, fontSize: 14, fontWeight: '600' },
 }));

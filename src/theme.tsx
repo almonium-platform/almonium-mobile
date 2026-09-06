@@ -45,6 +45,8 @@ export const colors = {
   disabled: '#E8E2E6',
   disabledText: '#8B8290',
   danger: '#FA4666',
+  // #FA4666 is an error ink: it only reaches 3.4:1 as a fill, so destructive fills take the darkened step.
+  dangerFill: '#C4213C',
   dangerSoft: '#FFE3E9',
   success: '#16BA7F',
   successSoft: '#E7F8F2',
@@ -82,6 +84,7 @@ export const darkColors: ThemeColors = {
   disabled: '#2A2433',
   disabledText: '#6E637A',
   danger: '#FF8FA3',
+  dangerFill: '#C4213C',
   dangerSoft: '#2A1A22',
   success: '#3DD69B',
   successSoft: '#12332A',

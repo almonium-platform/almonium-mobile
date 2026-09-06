@@ -82,6 +82,12 @@
         "projectId": "db1f6412-0a43-442d-bdc6-b3de66f929c7"
       }
     },
-    "owner": "almonium"
+    "owner": "almonium",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/db1f6412-0a43-442d-bdc6-b3de66f929c7"
+    }
   }
 }

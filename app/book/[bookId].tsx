@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
+import { AlignmentRow } from '@/components/alignment-request';
 import { BookCover } from '@/components/book-cover';
 import { Screen } from '@/components/screen';
 import { Button, Card } from '@/components/ui';
@@ -176,41 +177,47 @@ export default function BookDetailsScreen() {
         </View>
       </Card>
 
-      {book.languageVariants.length > 1 && (
-        <Card>
-          <Text style={styles.sectionTitle}>Available versions</Text>
-          <View style={styles.variants}>
-            {book.languageVariants.map((variant) => (
-              <Pressable
-                key={`${variant.id}-${variant.language}`}
-                onPress={() =>
-                  router.replace({
-                    pathname: '/book/[bookId]',
-                    params: { bookId: String(variant.id), language },
-                  })
-                }
-                style={[
-                  styles.variant,
-                  variant.id === book.id && styles.variantActive,
-                ]}>
-                <Text
+      <Card>
+        <AlignmentRow
+          book={book}
+          language={language}
+          onOpenParallel={(parallel) =>
+            router.push({
+              pathname: '/reader/[bookId]',
+              params: { bookId: String(book.id), language, title: book.title, parallel },
+            })
+          }
+        />
+        {book.languageVariants.length > 1 && (
+          <>
+            <Text style={styles.sectionTitle}>Read it in</Text>
+            <View style={styles.variants}>
+              {book.languageVariants.map((variant) => (
+                <Pressable
+                  key={`${variant.id}-${variant.language}`}
+                  onPress={() =>
+                    router.replace({
+                      pathname: '/book/[bookId]',
+                      params: { bookId: String(variant.id), language },
+                    })
+                  }
                   style={[
-                    styles.variantText,
-                    variant.id === book.id && styles.variantTextActive,
+                    styles.variant,
+                    variant.id === book.id && styles.variantActive,
                   ]}>
-                  {languageName(variant.language)}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-          {book.hasParallelTranslation && (
-            <View style={styles.parallelNote}>
-              <Ionicons name="git-compare-outline" size={18} color={colors.primary} />
-              <Text style={styles.parallelText}>Parallel reading is available for this title.</Text>
+                  <Text
+                    style={[
+                      styles.variantText,
+                      variant.id === book.id && styles.variantTextActive,
+                    ]}>
+                    {languageName(variant.language)}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
-          )}
-        </Card>
-      )}
+          </>
+        )}
+      </Card>
 
       {book.translator && (
         <Card>
@@ -246,8 +253,6 @@ const useStyles = createThemedStyles((colors) => ({
   variantActive: { backgroundColor: colors.primary },
   variantText: { color: colors.ink, fontSize: 13, fontWeight: '600' },
   variantTextActive: { color: colors.onPrimary },
-  parallelNote: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  parallelText: { flex: 1, color: colors.muted, fontSize: 13 },
   translator: { color: colors.primary, fontSize: 14, fontStyle: 'italic' },
   downloadRow: { minHeight: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderRadius: 20, paddingHorizontal: 15, backgroundColor: colors.successSoft },
   downloadCopy: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },

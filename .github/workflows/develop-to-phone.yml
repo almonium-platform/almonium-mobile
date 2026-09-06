@@ -1,0 +1,194 @@
+name: Develop to phone
+
+# Every push to `develop` lands on the phones that run the internal "preview" build:
+#   1. `verify`  – lint, typecheck, tests.
+#   2. `native`  – compares the native fingerprint with the latest finished develop build
+#                  per platform and only builds a new binary (Android APK / iOS ad hoc IPA)
+#                  when native code or config changed.
+#   3. `update`  – publishes the JS bundle as an EAS Update on the `develop` channel so
+#                  an already-installed build picks it up on its next launch.
+# Install links land in the job summary, on expo.dev, and (optionally) as an ntfy push.
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: Build new binaries even if the native fingerprint is unchanged
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: develop-to-phone
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 22
+  EXPO_ACCOUNT: almonium
+  EXPO_PROJECT: almonium
+  EAS_CHANNEL: develop
+  EAS_PROFILE: preview
+
+jobs:
+  verify:
+    name: Verify the app
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify the app
+        run: npm run check
+
+  native:
+    name: Native build (${{ matrix.platform }})
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [android, ios]
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Set up Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compare the native fingerprint with the latest develop build
+        id: fingerprint
+        env:
+          FORCE_BUILD: ${{ github.event.inputs.force_build || 'false' }}
+        run: |
+          set -euo pipefail
+          current="$(eas fingerprint:generate --platform "${{ matrix.platform }}" --build-profile "$EAS_PROFILE" --json | jq -r '.hash')"
+          latest="$(eas build:list --platform "${{ matrix.platform }}" --build-profile "$EAS_PROFILE" --channel "$EAS_CHANNEL" \
+            --status finished --limit 1 --json --non-interactive | jq -r '.[0].fingerprint.hash // empty')"
+          echo "current fingerprint: $current"
+          echo "latest build fingerprint: ${latest:-<none>}"
+          if [ "$FORCE_BUILD" = "true" ] || [ "$current" != "$latest" ]; then
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+            echo "### ${{ matrix.platform }}: no native changes, the installed build stays valid" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Build on EAS
+        id: build
+        if: steps.fingerprint.outputs.needed == 'true'
+        run: |
+          set -euo pipefail
+          eas build --platform "${{ matrix.platform }}" --profile "$EAS_PROFILE" --non-interactive --wait --json > build.json
+          id="$(jq -r '.[0].id' build.json)"
+          url="$(jq -r '.[0].artifacts.applicationArchiveUrl // .[0].artifacts.buildUrl' build.json)"
+          page="https://expo.dev/accounts/$EXPO_ACCOUNT/projects/$EXPO_PROJECT/builds/$id"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "page=$page" >> "$GITHUB_OUTPUT"
+          {
+            echo "### ${{ matrix.platform }}: new build ready"
+            echo
+            echo "- Install: $url"
+            echo "- Build page: $page"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Push the install link to the phone (ntfy)
+        if: steps.build.outcome == 'success' && secrets.NTFY_TOPIC != ''
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          INSTALL_URL: ${{ steps.build.outputs.url }}
+          BUILD_PAGE: ${{ steps.build.outputs.page }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'manual run' }}
+        run: |
+          curl -fsS \
+            -H "Title: Almonium ${{ matrix.platform }} build ready" \
+            -H "Click: $INSTALL_URL" \
+            -H "Tags: package" \
+            -H "Actions: view, Build page, $BUILD_PAGE" \
+            -d "$(printf '%s\n' "$COMMIT_MESSAGE" | head -n 1)" \
+            "https://ntfy.sh/$NTFY_TOPIC" > /dev/null
+
+  update:
+    name: Publish JS update
+    needs: [verify, native]
+    if: always() && needs.verify.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Set up Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Publish the update to the develop channel
+        id: update
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'manual run' }}
+        run: |
+          set -euo pipefail
+          message="$(printf '%s\n' "$COMMIT_MESSAGE" | head -n 1 | cut -c1-120)"
+          eas update --channel "$EAS_CHANNEL" --environment "$EAS_PROFILE" --message "$message" --non-interactive --json > update.json
+          group="$(jq -r '.[0].group' update.json)"
+          page="https://expo.dev/accounts/$EXPO_ACCOUNT/projects/$EXPO_PROJECT/updates/$group"
+          echo "page=$page" >> "$GITHUB_OUTPUT"
+          {
+            echo "### JS update published to the \`$EAS_CHANNEL\` channel"
+            echo
+            echo "- $message"
+            echo "- Runtime versions: $(jq -r '[.[] | .platform + \" \" + .runtimeVersion] | join(\", \")' update.json)"
+            echo "- Update page: $page"
+            echo
+            echo "Installed builds download it in the background on the next launch and run it on the launch after that."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Tell the phone an update is waiting (ntfy)
+        if: secrets.NTFY_TOPIC != ''
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          UPDATE_PAGE: ${{ steps.update.outputs.page }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'manual run' }}
+        run: |
+          curl -fsS \
+            -H "Title: Almonium develop update published" \
+            -H "Priority: low" \
+            -H "Tags: arrow_down" \
+            -H "Click: $UPDATE_PAGE" \
+            -d "$(printf '%s\n' "$COMMIT_MESSAGE" | head -n 1). Open the app twice to run it." \
+            "https://ntfy.sh/$NTFY_TOPIC" > /dev/null

@@ -60,7 +60,7 @@ class ProviderSignInCancelledError extends Error {
   readonly code = 'ERR_REQUEST_CANCELED';
 }
 
-async function googleFirebaseCredential(): Promise<AuthCredential> {
+export async function googleFirebaseCredential(): Promise<AuthCredential> {
   if (isExpoGo) {
     throw new Error('Google sign-in is unavailable in Expo Go. Use email and password, or open a development build.');
   }
@@ -87,7 +87,7 @@ async function googleFirebaseCredential(): Promise<AuthCredential> {
   return GoogleAuthProvider.credential(response.data.idToken);
 }
 
-async function appleFirebaseCredential(): Promise<AuthCredential> {
+export async function appleFirebaseCredential(): Promise<AuthCredential> {
   const rawNonce = Crypto.randomUUID();
   const nonce = await Crypto.digestStringAsync(
     Crypto.CryptoDigestAlgorithm.SHA256,
