@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { BrandMark } from '@/components/brand-mark';
+import { Image } from 'expo-image';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
@@ -25,7 +25,9 @@ import {
   type ReviewSession,
   type ReviewSessionResult,
 } from '@/src/review';
+import { lightImpact, successHaptic } from '@/src/haptics';
 import { configureDailyReminder, dismissReviewReminderOffer, shouldOfferReviewReminder } from '@/src/reminders';
+import { useLearningActivity } from '@/src/use-activity';
 import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 
 export default function ReviewScreen() {
@@ -49,6 +51,7 @@ export default function ReviewScreen() {
     enabled: Boolean(firebaseUser && language),
   });
   const current = session?.items[currentIndex] ?? null;
+  const activity = useLearningActivity('REVIEW', language || null);
 
   async function startSession() {
     if (submitting || !summary.data?.sessionSize) return;
@@ -81,6 +84,9 @@ export default function ReviewScreen() {
         revealed,
       });
       setFeedback(next);
+      // Light impact when a grade commits: the one haptic a card is allowed.
+      lightImpact();
+      activity.tick();
       await queryClient.invalidateQueries({
         queryKey: ['review-summary', firebaseUser?.uid, language],
       });
@@ -106,6 +112,9 @@ export default function ReviewScreen() {
     setError('');
     try {
       setResult(await api.reviewResult(session.sessionId));
+      // Session complete is one of the two earned events on the phone.
+      successHaptic();
+      void activity.complete();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not load the session record.');
     } finally {
@@ -179,12 +188,18 @@ export default function ReviewScreen() {
               <Text style={styles.overviewTitle}>{due} {due === 1 ? 'word is' : 'words are'} due</Text>
               <Text style={styles.overviewCopy}>Ten or fewer make a session. Leaving early never reschedules what you did not answer.</Text>
               <View style={styles.summaryCard}>
-                <View style={styles.summaryStats}>
-                  <SummaryStat value={summary.data?.understandCount ?? 0} label="Understand" />
-                  <SummaryStat value={summary.data?.produceCount ?? 0} label="Produce" />
-                  <SummaryStat value={summary.data?.disambiguateCount ?? 0} label="Tell apart" />
-                </View>
-                <Text style={styles.sessionCopy}>{summary.data?.sessionSize ?? 0} in this session · about {Math.max(1, Math.ceil((summary.data?.sessionSize ?? 0) * 0.7))} minutes</Text>
+                {/* Three stacked groups, not columns: a phone reads down. */}
+                {[
+                  { label: 'Understand', value: summary.data?.understandCount ?? 0 },
+                  { label: 'Produce', value: summary.data?.produceCount ?? 0 },
+                  { label: 'Tell apart', value: summary.data?.disambiguateCount ?? 0 },
+                ].map((group) => (
+                  <View key={group.label} style={styles.groupRow}>
+                    <Text style={styles.groupCount}>{group.value}</Text>
+                    <Text style={styles.groupLabel}>{group.label}</Text>
+                  </View>
+                ))}
+                <Text style={[styles.sessionCopy, styles.sessionCopySpaced]}>{summary.data?.sessionSize ?? 0} in this session · about {Math.max(1, Math.ceil((summary.data?.sessionSize ?? 0) * 0.7))} minutes</Text>
               </View>
               {!!summary.data?.leeches.length && (
                 <View style={styles.leechPanel}>
@@ -210,7 +225,7 @@ export default function ReviewScreen() {
             </>
           ) : (
             <>
-              <BrandMark size={118} />
+              <Image source={require('../assets/images/almo-asleep.png')} contentFit="contain" style={styles.almo} />
               <Text style={styles.eyebrow}>NOTHING DUE</Text>
               <Text style={styles.overviewTitle}>You are clear for now</Text>
               <Text style={styles.stateCopy}>Almo has nothing to ask you today. Reading a page will add more.</Text>
@@ -435,16 +450,21 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   stateTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 26, textAlign: 'center' },
   stateCopy: { maxWidth: 330, color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: 'center' },
   overview: { flexGrow: 1, justifyContent: 'center', gap: 14, padding: 20 },
+  almo: { width: 120, height: 126, alignSelf: 'center' },
   closeOverview: { position: 'absolute', top: 8, right: 12, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   eyebrow: { color: colors.raspberry, fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 1.5 },
   overviewTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 37, textAlign: 'center' },
   overviewCopy: { color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: 'center' },
-  summaryCard: { gap: 14, padding: 18, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
+  summaryCard: { gap: 6, padding: 18, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
+  groupRow: { flexDirection: 'row', alignItems: 'baseline', gap: 12, borderBottomWidth: 1, borderBottomColor: colors.line, paddingVertical: 8 },
+  groupCount: { width: 32, color: colors.primaryDark, fontFamily: fonts.serif, fontSize: 24 },
+  groupLabel: { color: colors.ink, fontSize: 15 },
   summaryStats: { width: '100%', flexDirection: 'row', justifyContent: 'space-around', gap: 8 },
   summaryStat: { flex: 1, alignItems: 'center', gap: 3 },
   summaryNumber: { color: colors.ink, fontFamily: fonts.serif, fontSize: 25 },
   summaryLabel: { color: colors.primary, fontSize: 9, letterSpacing: 0.7, textAlign: 'center' },
   sessionCopy: { color: colors.muted, fontSize: 12.5, textAlign: 'center' },
+  sessionCopySpaced: { paddingTop: 10 },
   leechPanel: { gap: 8, padding: 16, borderRadius: 20, backgroundColor: colors.surface, ...shadows.card },
   leechCopy: { color: colors.muted, fontSize: 13, lineHeight: 19 },
   leechRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingTop: 9, borderTopWidth: 1, borderTopColor: colors.line },

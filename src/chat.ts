@@ -42,6 +42,7 @@ interface MessageLike {
   created_at: Date | string;
   user?: UserLike | null;
   quoted_message?: { id: string; text?: string; user?: UserLike | null } | null;
+  attachments?: { title?: string; title_link?: string; og_scrape_url?: string; asset_url?: string }[];
 }
 
 export function isChannelType(value: string): value is ChannelType {
@@ -149,6 +150,8 @@ export interface ChatMessage {
   deleted: boolean;
   /** Quotes are the "Reply" action, on for `private`. Threads are a different feature, and off. */
   quoted?: { id: string; text: string; authorName?: string };
+  /** A channel post carries the thing it announces as a footer action: the first link it holds. */
+  link?: { label: string; url: string };
 }
 
 export function toChatMessage(message: MessageLike, currentUserId: string): ChatMessage {
@@ -168,7 +171,23 @@ export function toChatMessage(message: MessageLike, currentUserId: string): Chat
           authorName: message.quoted_message.user?.name,
         }
       : undefined,
+    link: messageLink(message),
   };
+}
+
+/** The first link a post carries, from its attachments or the text itself. */
+export function messageLink(message: Pick<MessageLike, 'text' | 'attachments'>): ChatMessage['link'] {
+  const attachment = message.attachments?.find((entry) => entry.title_link || entry.og_scrape_url || entry.asset_url);
+  if (attachment) {
+    const url = attachment.title_link || attachment.og_scrape_url || attachment.asset_url!;
+    return { label: attachment.title?.trim() || linkLabel(url), url };
+  }
+  const url = message.text?.match(/https?:\/\/[^\s)]+/)?.[0];
+  return url ? { label: linkLabel(url), url } : undefined;
+}
+
+function linkLabel(url: string) {
+  return /\/books?\//.test(url) || /\/reader\//.test(url) ? 'Open book' : /\/(c|d)\//.test(url) ? 'Open pack' : 'Open';
 }
 
 export type ChatRow =

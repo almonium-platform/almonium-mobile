@@ -9,6 +9,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { useChat } from '@/src/chat-client';
 import { relativeTime } from '@/src/card-utils';
+import { languageName } from '@/src/languages';
 import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import type { AppNotification, NotificationType } from '@/src/types';
 
@@ -54,6 +55,15 @@ export default function InboxScreen() {
   });
   const unread = query.data?.filter((item) => !item.readAt).length ?? 0;
   const { unreadCount: unreadChats } = useChat();
+  const orders = useQuery({ queryKey: ['translation-orders', firebaseUser?.uid], queryFn: api.translationOrders, enabled: Boolean(firebaseUser) });
+  const openOrders = (orders.data ?? []).filter((order) => order.status !== 'DECLINED');
+  const withdrawMutation = useMutation({
+    mutationFn: ({ bookId, language }: { bookId: string; language: string }) => api.withdrawTranslation(bookId, language),
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['translation-orders'] }),
+      queryClient.invalidateQueries({ queryKey: ['translation-quota'] }),
+    ]),
+  });
 
   function toggleRead(notification: AppNotification) {
     readMutation.mutate({ id: notification.id, read: !notification.readAt });
@@ -99,7 +109,7 @@ export default function InboxScreen() {
             )}
           </View>
           <Text style={styles.caption}>
-            Friend activity and completed book translations appear here.
+            Friend activity, finished imports and the translations you asked for appear here.
           </Text>
           {/* The bell counts waiting messages, so its destination has to lead to them. */}
           {unreadChats > 0 && (
@@ -118,6 +128,33 @@ export default function InboxScreen() {
               </View>
               <Ionicons name="chevron-forward" size={19} color={colors.muted} />
             </Pressable>
+          )}
+          {/* The list carries two states only: asked and ready. A declined request disappears quietly. */}
+          {openOrders.length > 0 && (
+            <View style={styles.requests}>
+              <Text style={styles.requestsLabel}>YOUR REQUESTS</Text>
+              {openOrders.map((order) => (
+                <View key={order.id} style={styles.requestRow}>
+                  <View style={styles.copy}>
+                    <Text style={styles.title}>{order.bookTitle} → {languageName(order.language)}</Text>
+                    <Text style={styles.message}>
+                      {order.status === 'READY' ? 'Ready' : `Asked ${new Date(order.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`}
+                    </Text>
+                  </View>
+                  {order.status === 'READY' && order.fulfilledBookId ? (
+                    <Pressable
+                      onPress={() => router.push({ pathname: '/reader/[bookId]', params: { bookId: order.fulfilledBookId!, title: order.bookTitle, parallel: order.language } })}
+                      style={styles.acceptAction}>
+                      <Text style={styles.acceptText}>Read</Text>
+                    </Pressable>
+                  ) : (
+                    <Pressable disabled={withdrawMutation.isPending} onPress={() => withdrawMutation.mutate({ bookId: order.bookId, language: order.language })} hitSlop={8}>
+                      <Text style={styles.profileLink}>Withdraw</Text>
+                    </Pressable>
+                  )}
+                </View>
+              ))}
+            </View>
           )}
           {query.isError && query.data && (
             <Text style={styles.offline}>Showing saved notifications. Reconnect to refresh.</Text>
@@ -209,6 +246,9 @@ const useStyles = createThemedStyles((colors) => ({
   caption: { color: colors.muted, fontSize: 14, lineHeight: 20 },
   markAll: { paddingVertical: 8, paddingHorizontal: 11, borderRadius: 11, backgroundColor: colors.accentSoft },
   markAllText: { color: colors.primaryDark, fontWeight: '600', fontSize: 12 },
+  requests: { gap: 4, borderRadius: 20, paddingHorizontal: 15, paddingVertical: 12, backgroundColor: colors.surface, ...shadows.card },
+  requestsLabel: { color: colors.primary, fontSize: 10.5, fontWeight: '600', letterSpacing: 1.3, paddingBottom: 4 },
+  requestRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 10 },
   offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, borderRadius: 10, padding: 10 },
   notification: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 15, borderRadius: 20, backgroundColor: colors.surface, ...shadows.card },
   messagesRow: { minHeight: 66, flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4, padding: 15, borderRadius: 20, backgroundColor: colors.surface, ...shadows.card },

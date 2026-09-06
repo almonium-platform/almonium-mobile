@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint-env node */
+/* global __dirname */
 // Regenerates .expo/types/router.d.ts without a running dev server, so `tsc` sees new routes.
 const path = require('node:path');
 process.env.EXPO_ROUTER_APP_ROOT = path.resolve(__dirname, '../app');

@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   Text,
@@ -318,6 +319,7 @@ export default function ChatRoomScreen() {
             <TranscriptRow
               row={item}
               seen={snapshot.seenMessageId}
+              broadcast={type === channelTypes.broadcast}
               onLongPress={(message) => setActing(message)}
             />
           )}
@@ -406,10 +408,12 @@ export default function ChatRoomScreen() {
 function TranscriptRow({
   row,
   seen,
+  broadcast = false,
   onLongPress,
 }: {
   row: ChatRow;
   seen: string | null;
+  broadcast?: boolean;
   onLongPress(message: ChatMessage): void;
 }) {
   const styles = useStyles();
@@ -426,6 +430,23 @@ function TranscriptRow({
   }
 
   const { message, startsRun } = row;
+  // A channel post is an announcement, not a turn in a conversation: no avatar, no bubble, and
+  // the thing it announces as a footer action.
+  if (broadcast) {
+    return (
+      <Pressable onLongPress={() => onLongPress(message)} delayLongPress={300} style={styles.post}>
+        <Text style={styles.postText}>{message.text}</Text>
+        <View style={styles.postFoot}>
+          <Text style={styles.postTime}>{clockTime(message.createdAt)}</Text>
+          {!!message.link && (
+            <Pressable accessibilityRole="link" onPress={() => void Linking.openURL(message.link!.url)} style={styles.postAction}>
+              <Text style={styles.postActionText}>{message.link.label}</Text>
+            </Pressable>
+          )}
+        </View>
+      </Pressable>
+    );
+  }
   return (
     <View style={[styles.messageRow, message.own ? styles.messageRowOwn : styles.messageRowOther]}>
       {!message.own &&
@@ -621,6 +642,12 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   unreadRule: { backgroundColor: colors.accentBorder },
   unreadText: { color: colors.chatMine, fontFamily: fonts.sansMedium },
   messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 9 },
+  post: { gap: 8, paddingVertical: 6 },
+  postText: { color: colors.ink, fontSize: 15, lineHeight: 22 },
+  postFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  postTime: { color: colors.metadata, fontSize: 11 },
+  postAction: { minHeight: 36, justifyContent: 'center', paddingHorizontal: 14, borderWidth: 1, borderColor: colors.primary, borderRadius: 999 },
+  postActionText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
   messageRowOwn: { justifyContent: 'flex-end' },
   messageRowOther: { justifyContent: 'flex-start' },
   avatarSpacer: { width: 28 },

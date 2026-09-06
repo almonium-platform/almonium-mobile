@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader } from '@/components/app-header';
-import { BrandMark } from '@/components/brand-mark';
+import { Image } from 'expo-image';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
@@ -115,6 +115,21 @@ export default function CardsScreen() {
             {review.isLoading ? 'Your schedule is kept across every device.' : due ? `${review.data?.sessionSize ?? Math.min(10, due)} make a session. Nothing is lost by stopping.` : 'Reading a page will give Almo more to ask you.'}
           </Text>
           {review.isLoading ? <ActivityIndicator style={styles.loader} color={colors.primary} /> : due ? <View style={styles.actions}>
+            {/* Three stacked groups, not columns. */}
+            <View style={styles.groups}>
+              {[
+                { label: intentLabel('UNDERSTAND'), value: review.data?.understandCount ?? 0 },
+                { label: intentLabel('PRODUCE'), value: review.data?.produceCount ?? 0 },
+                { label: intentLabel('DISAMBIGUATE'), value: review.data?.disambiguateCount ?? 0 },
+              ]
+                .filter((group) => group.value > 0)
+                .map((group) => (
+                  <View key={group.label} style={styles.groupRow}>
+                    <Text style={styles.groupCount}>{group.value}</Text>
+                    <Text style={styles.groupLabel}>{group.label}</Text>
+                  </View>
+                ))}
+            </View>
             <Pressable
               style={styles.reviewAction}
               onPress={() => router.push({ pathname: '/review', params: { language } })}>
@@ -136,7 +151,7 @@ export default function CardsScreen() {
             </Button>
           </View> : (
             <View style={styles.caughtUp}>
-              <BrandMark size={72} />
+              <Image source={require('../../assets/images/almo-asleep.png')} contentFit="contain" style={styles.almo} />
               <View style={styles.caughtUpCopy}>
                 <Text style={styles.caughtUpTitle}>Nothing due</Text>
                 <Text style={styles.subhead}>Come back when the next word is ready, or meet another one in a book.</Text>
@@ -228,8 +243,13 @@ const useStyles = createThemedStyles((colors) => ({
   hero: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 36, fontWeight: '600' },
   subhead: { color: colors.muted, fontSize: 13.5, lineHeight: 20 },
   actions: { gap: 9 },
+  groups: { paddingBottom: 4 },
+  groupRow: { flexDirection: 'row', alignItems: 'baseline', gap: 12, paddingVertical: 4 },
+  groupCount: { width: 32, color: colors.primaryDark, fontFamily: fonts.serif, fontSize: 22 },
+  groupLabel: { color: colors.ink, fontSize: 14 },
   caughtUp: { alignItems: 'center', gap: 11, padding: 18, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
   caughtUpCopy: { alignItems: 'center', gap: 3 },
+  almo: { width: 88, height: 92 },
   caughtUpTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 22 },
   reviewAction: { minHeight: 70, borderRadius: 999, overflow: 'hidden' },
   reviewActionFill: { minHeight: 70, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, backgroundColor: colors.primary },

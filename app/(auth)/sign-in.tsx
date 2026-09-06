@@ -2,11 +2,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Platform, Text, View } from 'react-native';
 
 import { BrandMark } from '@/components/brand-mark';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { isExpoGo, useAuth } from '@/src/auth-context';
+import { config } from '@/src/config';
 import { useNotice } from '@/src/notice-context';
 import { createThemedStyles, gradients, useTheme } from '@/src/theme';
 
@@ -110,6 +111,21 @@ export default function SignInScreen() {
             onPress={submit}>
             Sign in
           </Button>
+          <View style={styles.divider}>
+            <View style={styles.dividerRule} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerRule} />
+          </View>
+          {/* Apple above Google on iOS: store review reads the order. */}
+          {appleAvailable && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={isDark ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={27}
+              style={styles.appleButton}
+              onPress={appleSignIn}
+            />
+          )}
           {Platform.OS !== 'web' && !isExpoGo && (
             <Button variant="secondary" disabled={loading} onPress={googleSignIn}>
               Continue with Google
@@ -120,15 +136,6 @@ export default function SignInScreen() {
               Google sign-in is available in the development build. Use email and password in Expo Go.
             </Text>
           )}
-          {appleAvailable && (
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-              cornerRadius={27}
-              style={styles.appleButton}
-              onPress={appleSignIn}
-            />
-          )}
           <View style={styles.links}>
             <Link href="/(auth)/forgot-password" style={styles.link}>
               Forgot password?
@@ -137,6 +144,11 @@ export default function SignInScreen() {
               Create account
             </Link>
           </View>
+          <Text style={styles.legal}>
+            By continuing you agree to the{' '}
+            <Text onPress={() => void Linking.openURL(`${config.webBaseUrl}/terms-of-use`)} style={styles.legalLink}>Terms</Text> and{' '}
+            <Text onPress={() => void Linking.openURL(`${config.webBaseUrl}/privacy-policy`)} style={styles.legalLink}>Privacy Policy</Text>.
+          </Text>
         </Card>
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -151,5 +163,10 @@ const useStyles = createThemedStyles((colors) => ({
   links: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 2 },
   link: { color: colors.primary, fontWeight: '600' },
   expoGoHint: { color: colors.muted, fontSize: 13, lineHeight: 18, textAlign: 'center' },
-  appleButton: { height: 52, width: '100%' },
+  appleButton: { height: 54, width: '100%' },
+  divider: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  dividerRule: { flex: 1, height: 1, backgroundColor: colors.line },
+  dividerText: { color: colors.metadata, fontSize: 12 },
+  legal: { color: colors.metadata, fontSize: 12, lineHeight: 17, textAlign: 'center' },
+  legalLink: { color: colors.primary },
 }));

@@ -29,6 +29,8 @@ concurrency:
 
 env:
   NODE_VERSION: 22
+  # Optional: a private ntfy.sh topic; when set, each build/update pings the phone.
+  NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
   EXPO_ACCOUNT: almonium
   EXPO_PROJECT: almonium
   EAS_CHANNEL: develop
@@ -118,9 +120,8 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Push the install link to the phone (ntfy)
-        if: steps.build.outcome == 'success' && secrets.NTFY_TOPIC != ''
+        if: steps.build.outcome == 'success' && env.NTFY_TOPIC != ''
         env:
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           INSTALL_URL: ${{ steps.build.outputs.url }}
           BUILD_PAGE: ${{ steps.build.outputs.page }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'manual run' }}
@@ -179,9 +180,8 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Tell the phone an update is waiting (ntfy)
-        if: secrets.NTFY_TOPIC != ''
+        if: env.NTFY_TOPIC != ''
         env:
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           UPDATE_PAGE: ${{ steps.update.outputs.page }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'manual run' }}
         run: |

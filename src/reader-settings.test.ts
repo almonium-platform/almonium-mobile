@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: vi.fn(), setItem: vi.fn() } }));
-
 import { defaultReaderSettings, normalizeReaderSettings } from './reader-settings';
+
+vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: vi.fn(), setItem: vi.fn() } }));
 
 describe('reader settings', () => {
   it('defaults to Literata, 19pt, on-demand translation', () => {

@@ -66,7 +66,7 @@ export function LearningTab() {
     queryFn: api.activeLanguagePolicy,
     enabled: Boolean(firebaseUser),
   });
-  const learners = profile?.learners ?? [];
+  const learners = useMemo(() => profile?.learners ?? [], [profile?.learners]);
   const activeCount = learners.filter((learner) => learner.active).length;
   const allowance = policy.data?.allowance ?? profile?.subscription.limits.MAX_ACTIVE_LANGS ?? 1;
   const unlimited = allowance === -1;
