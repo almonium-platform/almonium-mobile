@@ -128,9 +128,11 @@ jobs:
           BUILD_PAGE: ${{ steps.build.outputs.page }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'manual run' }}
         run: |
+          # Android installs straight from the APK; iOS can only install through the build page.
+          if [ "${{ matrix.platform }}" = "ios" ]; then click="$BUILD_PAGE"; else click="$INSTALL_URL"; fi
           curl -fsS \
             -H "Title: Almonium ${{ matrix.platform }} build ready" \
-            -H "Click: $INSTALL_URL" \
+            -H "Click: $click" \
             -H "Tags: package" \
             -H "Actions: view, Build page, $BUILD_PAGE" \
             -d "$(printf '%s\n' "$COMMIT_MESSAGE" | head -n 1)" \
