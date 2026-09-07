@@ -1,16 +1,18 @@
 name: Internal mobile release
 
+# Store-bound builds are a deliberate release decision, not a side effect of every push to main:
+# push a version tag (v1.0.0) or run the workflow manually.
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: internal-mobile-release-main
+  group: internal-mobile-release
   cancel-in-progress: false
 
 jobs:

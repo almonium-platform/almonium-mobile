@@ -190,9 +190,11 @@ Caveats:
 
 ## Phone releases from `main`
 
-Pushing to `main` triggers [`.github/workflows/internal-release.yml`](.github/workflows/internal-release.yml).
-It runs the checks, creates store-ready Android and iOS builds on EAS, and
-submits the finished binaries automatically:
+Pushing a version tag such as `v1.0.0` to `main` (or running the workflow
+manually from the Actions tab) triggers [`.github/workflows/internal-release.yml`](.github/workflows/internal-release.yml).
+Ordinary pushes to `main` do not build anything, so store submissions stay a
+deliberate act. The workflow runs the checks, creates store-ready Android and
+iOS builds on EAS, and submits the finished binaries automatically:
 
 - Android goes to the Google Play **Internal testing** track. Testers join the
   internal-test link once, then install and update Almonium through Google Play.
