@@ -14,7 +14,7 @@ import { Button, Card, Field, Title } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName, sortLanguages } from '@/src/languages';
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import type { CefrLevel, SetupStep } from '@/src/types';
 
 const steps: SetupStep[] = ['WELCOME', 'LANGUAGES', 'LEVEL', 'INTERESTS', 'PROFILE', 'GREETING'];
@@ -420,7 +420,7 @@ const useStyles = createThemedStyles((colors) => ({
   levelOptionDashed: { borderStyle: 'dashed', borderColor: colors.border },
   levelCode: { width: 28, color: colors.metadata, fontSize: 12, fontWeight: '600' },
   levelCodeActive: { color: colors.primary },
-  levelDescription: { flex: 1, color: colors.ink, fontFamily: fonts.serifRegular, fontSize: 15, lineHeight: 21 },
+  levelDescription: { flex: 1, color: colors.ink, fontFamily: fonts.serifRegular, fontSize: 15, lineHeight: serifLineHeight(15) },
   greetingMark: { alignItems: 'center', paddingVertical: 8 },
   almo: { width: 124, height: 130 },
   greetingCopy: { color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: 'center' },
@@ -431,7 +431,7 @@ const useStyles = createThemedStyles((colors) => ({
   chipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { color: colors.ink, fontSize: 14, fontWeight: '600' },
   chipTextSelected: { color: colors.onPrimary },
-  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: 30 },
+  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: serifLineHeight(24) },
   search: { minHeight: 48, borderRadius: 999, paddingHorizontal: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, color: colors.ink, fontSize: 15 },
   pickList: { gap: 2 },
   pickRow: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 10 },

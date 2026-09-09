@@ -13,7 +13,7 @@ import { useCrest } from '@/src/crest-context';
 import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { bandWeeks, formatDay, rhythmSummary } from '@/src/rhythm';
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import { rhythmFor, useLearningStats, useRhythm } from '@/src/use-rhythm';
 
 /**
@@ -153,12 +153,12 @@ const useStyles = createThemedStyles((colors) => ({
   heading: { gap: 8, paddingHorizontal: 2 },
   crest: { alignSelf: 'flex-start', minWidth: 44, height: 28, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 9, borderWidth: 1, borderRadius: 999 },
   crestText: { fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 0.8 },
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 36, fontWeight: '600' },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30), fontWeight: '600' },
   copy: { color: colors.muted, fontSize: 14, lineHeight: 21 },
   activate: { gap: 10, paddingTop: 6 },
   section: { gap: 10, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 16, paddingHorizontal: 2 },
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
-  sectionTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 21, lineHeight: 27, fontWeight: '600' },
+  sectionTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 21, lineHeight: serifLineHeight(21), fontWeight: '600' },
   wordRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 10 },
   word: { color: colors.ink, fontFamily: fonts.serif, fontSize: 17 },
   wordMeta: { color: colors.metadata, fontSize: 12 },

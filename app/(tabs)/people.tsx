@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui';
 import { AvatarMark } from '@/components/avatar-mark';
@@ -50,84 +51,86 @@ export default function PeopleScreen() {
   }
 
   return (
-    <FlatList
-      data={data}
-      keyExtractor={(item) => `${item.relationshipId}-${item.id}`}
-      contentContainerStyle={styles.list}
-      ListHeaderComponent={
-        <View style={styles.header}>
-          <View style={styles.titleRow}>
-            <Pressable onPress={() => router.back()} accessibilityLabel="Go back" hitSlop={8} style={styles.back}>
-              <Ionicons name="chevron-back" size={24} color={colors.ink} />
-            </Pressable>
-            <View style={styles.titleCopy}><Text style={styles.eyebrow}>SOCIAL</Text><Text style={styles.title}>People</Text></View>
-          </View>
-          <View style={styles.tabs}>
-            {(['friends', 'requests', 'blocked'] as const).map((item) => (
-              <Pressable key={item} onPress={() => setSection(item)} style={[styles.tab, section === item && styles.tabActive]}>
-                <Text style={[styles.tabText, section === item && styles.tabTextActive]}>
-                  {item[0].toUpperCase() + item.slice(1)}{item === 'requests' && requestCount ? ` ${requestCount}` : ''}
-                </Text>
+    <SafeAreaView edges={['top']} style={styles.safe}>
+      <FlatList
+        data={data}
+        keyExtractor={(item) => `${item.relationshipId}-${item.id}`}
+        contentContainerStyle={styles.list}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <View style={styles.titleRow}>
+              <Pressable onPress={() => router.back()} accessibilityLabel="Go back" hitSlop={8} style={styles.back}>
+                <Ionicons name="chevron-back" size={24} color={colors.ink} />
               </Pressable>
-            ))}
-          </View>
-          {section === 'friends' && (
-            <View style={styles.searchBlock}>
-              <View style={styles.searchRow}>
-                <Ionicons name="search" size={19} color={colors.muted} />
-                <TextInput
-                  value={search}
-                  onChangeText={setSearch}
-                  onSubmitEditing={() => setSubmittedSearch(search.trim())}
-                  placeholder="Find someone by @handle"
-                  placeholderTextColor={colors.muted}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  spellCheck={false}
-                  returnKeyType="search"
-                  style={styles.searchInput}
-                />
-                <Pressable onPress={() => setSubmittedSearch(search.trim())} disabled={search.trim().length < 3}>
-                  <Text style={[styles.searchAction, search.trim().length < 3 && styles.searchDisabled]}>Search</Text>
+              <View style={styles.titleCopy}><Text style={styles.eyebrow}>SOCIAL</Text><Text style={styles.title}>People</Text></View>
+            </View>
+            <View style={styles.tabs}>
+              {(['friends', 'requests', 'blocked'] as const).map((item) => (
+                <Pressable key={item} onPress={() => setSection(item)} style={[styles.tab, section === item && styles.tabActive]}>
+                  <Text style={[styles.tabText, section === item && styles.tabTextActive]}>
+                    {item[0].toUpperCase() + item.slice(1)}{item === 'requests' && requestCount ? ` ${requestCount}` : ''}
+                  </Text>
                 </Pressable>
-              </View>
-              {submittedSearch.length >= 3 && (
-                <View style={styles.results}>
-                  {results.isLoading ? <ActivityIndicator color={colors.primary} /> :
-                    results.data?.length ? results.data.map((user) => <SearchResult key={user.id} user={user} />) :
-                      <Text style={styles.emptyCopy}>No reader matched @{submittedSearch}.</Text>}
+              ))}
+            </View>
+            {section === 'friends' && (
+              <View style={styles.searchBlock}>
+                <View style={styles.searchRow}>
+                  <Ionicons name="search" size={19} color={colors.muted} />
+                  <TextInput
+                    value={search}
+                    onChangeText={setSearch}
+                    onSubmitEditing={() => setSubmittedSearch(search.trim())}
+                    placeholder="Find someone by @handle"
+                    placeholderTextColor={colors.muted}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    spellCheck={false}
+                    returnKeyType="search"
+                    style={styles.searchInput}
+                  />
+                  <Pressable onPress={() => setSubmittedSearch(search.trim())} disabled={search.trim().length < 3}>
+                    <Text style={[styles.searchAction, search.trim().length < 3 && styles.searchDisabled]}>Search</Text>
+                  </Pressable>
                 </View>
-              )}
-            </View>
-          )}
-        </View>
-      }
-      renderItem={({ item }) => (
-        <View style={styles.personRow}>
-          <Pressable style={styles.identity} onPress={() => router.push({ pathname: '/profile/[userId]', params: { userId: item.id } })}>
-            <Avatar user={item} />
-            <View style={styles.personCopy}>
-              <Text style={styles.username}>@{item.username}</Text>
-              <Text style={styles.relationship}>{relationshipCopy(item)}</Text>
-            </View>
-          </Pressable>
-          <View style={styles.actions}>
-            {item.relationshipStatus === 'PENDING_INCOMING' && <><SmallAction label="Accept" primary onPress={() => action(item, 'ACCEPT')} /><SmallAction label="Decline" onPress={() => action(item, 'REJECT')} /></>}
-            {item.relationshipStatus === 'PENDING_OUTGOING' && <SmallAction label="Cancel" onPress={() => action(item, 'CANCEL')} />}
-            {item.relationshipStatus === 'FRIENDS' && <><SmallAction label="Message" primary onPress={() => openPrivateChat(item)} /><SmallAction label="Remove" onPress={() => action(item, 'UNFRIEND')} /></>}
-            {item.relationshipStatus === 'BLOCKED' && <SmallAction label="Unblock" onPress={() => action(item, 'UNBLOCK')} />}
+                {submittedSearch.length >= 3 && (
+                  <View style={styles.results}>
+                    {results.isLoading ? <ActivityIndicator color={colors.primary} /> :
+                      results.data?.length ? results.data.map((user) => <SearchResult key={user.id} user={user} />) :
+                        <Text style={styles.emptyCopy}>No reader matched @{submittedSearch}.</Text>}
+                  </View>
+                )}
+              </View>
+            )}
           </View>
-        </View>
-      )}
-      ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-      ListEmptyComponent={activeQuery.isLoading ? <ActivityIndicator style={styles.loader} color={colors.primary} /> : (
-        <View style={styles.empty}>
-          <Ionicons name={section === 'blocked' ? 'shield-outline' : 'people-outline'} size={40} color={colors.primary} />
-          <Text style={styles.emptyTitle}>{section === 'friends' ? 'No friends here yet' : section === 'requests' ? 'No open requests' : 'Nobody is blocked'}</Text>
-          <Text style={styles.emptyCopy}>{section === 'friends' ? 'Search by handle to find another reader.' : 'This list will update when something changes.'}</Text>
-        </View>
-      )}
-    />
+        }
+        renderItem={({ item }) => (
+          <View style={styles.personRow}>
+            <Pressable style={styles.identity} onPress={() => router.push({ pathname: '/profile/[userId]', params: { userId: item.id } })}>
+              <Avatar user={item} />
+              <View style={styles.personCopy}>
+                <Text style={styles.username}>@{item.username}</Text>
+                <Text style={styles.relationship}>{relationshipCopy(item)}</Text>
+              </View>
+            </Pressable>
+            <View style={styles.actions}>
+              {item.relationshipStatus === 'PENDING_INCOMING' && <><SmallAction label="Accept" primary onPress={() => action(item, 'ACCEPT')} /><SmallAction label="Decline" onPress={() => action(item, 'REJECT')} /></>}
+              {item.relationshipStatus === 'PENDING_OUTGOING' && <SmallAction label="Cancel" onPress={() => action(item, 'CANCEL')} />}
+              {item.relationshipStatus === 'FRIENDS' && <><SmallAction label="Message" primary onPress={() => openPrivateChat(item)} /><SmallAction label="Remove" onPress={() => action(item, 'UNFRIEND')} /></>}
+              {item.relationshipStatus === 'BLOCKED' && <SmallAction label="Unblock" onPress={() => action(item, 'UNBLOCK')} />}
+            </View>
+          </View>
+        )}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        ListEmptyComponent={activeQuery.isLoading ? <ActivityIndicator style={styles.loader} color={colors.primary} /> : (
+          <View style={styles.empty}>
+            <Ionicons name={section === 'blocked' ? 'shield-outline' : 'people-outline'} size={40} color={colors.primary} />
+            <Text style={styles.emptyTitle}>{section === 'friends' ? 'No friends here yet' : section === 'requests' ? 'No open requests' : 'Nobody is blocked'}</Text>
+            <Text style={styles.emptyCopy}>{section === 'friends' ? 'Search by handle to find another reader.' : 'This list will update when something changes.'}</Text>
+          </View>
+        )}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -184,6 +187,7 @@ function relationshipCopy(user: RelatedUserSummary) {
 }
 
 const useStyles = createThemedStyles((colors) => ({
+  safe: { flex: 1, backgroundColor: colors.canvas },
   list: { flexGrow: 1, padding: 20, paddingBottom: 36, backgroundColor: colors.canvas },
   header: { gap: 13, paddingBottom: 18 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },

@@ -13,7 +13,7 @@ import { config } from '@/src/config';
 import { lightImpact } from '@/src/haptics';
 import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
-import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import type { SharedWord, Sharer } from '@/src/types';
 
 /**
@@ -193,7 +193,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginLeft: -10 },
   heading: { gap: 8 },
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 36, fontWeight: '600' },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30), fontWeight: '600' },
   sharer: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   copy: { color: colors.muted, fontSize: 14, lineHeight: 21 },
   list: { borderRadius: 24, paddingHorizontal: 16, backgroundColor: colors.surface, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },

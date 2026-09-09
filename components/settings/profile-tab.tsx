@@ -16,7 +16,7 @@ import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
 import { useNotice } from '@/src/notice-context';
 import { cadenceLabel, paceFraction } from '@/src/rhythm';
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import { rhythmFor, useLearningStats, useRhythm } from '@/src/use-rhythm';
 
 /**
@@ -241,5 +241,5 @@ const useStyles = createThemedStyles((colors) => ({
   chipTextSelected: { color: colors.primary },
   addChip: { minHeight: 36, justifyContent: 'center', borderRadius: 999, paddingHorizontal: 13, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.border },
   addChipText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
-  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: 30 },
+  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: serifLineHeight(24) },
 }));

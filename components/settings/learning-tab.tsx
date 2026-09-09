@@ -14,7 +14,7 @@ import { languageColours } from '@/src/crest';
 import { useCrest } from '@/src/crest-context';
 import { languageName, sortLanguages } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import type { CefrLevel, Learner } from '@/src/types';
 
 export const levels: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
@@ -395,13 +395,13 @@ const useStyles = createThemedStyles((colors) => ({
   levelPillText: { color: colors.ink, fontSize: 13, fontWeight: '600' },
   addIcon: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 17, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.border },
   note: { color: colors.muted, fontSize: 13, lineHeight: 19 },
-  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: 30 },
+  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: serifLineHeight(24) },
   levelList: { gap: 4 },
   levelRow: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 8 },
   levelRowSelected: { backgroundColor: colors.accentSoft },
   levelCode: { width: 28, color: colors.metadata, fontSize: 12, fontWeight: '600' },
   levelCodeSelected: { color: colors.primary },
-  levelSentence: { flex: 1, color: colors.ink, fontFamily: fonts.serifRegular, fontSize: 15, lineHeight: 21 },
+  levelSentence: { flex: 1, color: colors.ink, fontFamily: fonts.serifRegular, fontSize: 15, lineHeight: serifLineHeight(15) },
   removeAction: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   removeText: { color: colors.danger, fontSize: 13, fontWeight: '600' },
   swatches: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },

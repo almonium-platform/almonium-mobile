@@ -20,7 +20,7 @@ import {
   type RhythmWeek,
   type WeeklyTarget,
 } from '@/src/rhythm';
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import { useSetRhythmTarget } from '@/src/use-rhythm';
 
 /**
@@ -195,7 +195,7 @@ const useStyles = createThemedStyles((colors) => ({
   cadenceQuiet: { color: colors.metadata, fontSize: 13 },
   link: { color: colors.primary, fontSize: 13, fontWeight: '600' },
   panel: { gap: 12 },
-  panelTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, lineHeight: 25 },
+  panelTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, lineHeight: serifLineHeight(19) },
   choices: { gap: 4 },
   choice: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 8 },
   choiceSelected: { backgroundColor: colors.accentSoft },

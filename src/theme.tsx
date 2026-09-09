@@ -243,6 +243,14 @@ export const fonts = {
   sansSemibold: 'IBMPlexSans_600SemiBold',
 } as const;
 
+/**
+ * Literata asks for 1.485em of line box (1.177 above the baseline, 0.308 below). Given anything
+ * tighter, React Native keeps the ascent and takes the difference out of the descent, which shears
+ * the tails off g, y and p on Android. Serif text asks for its line height by name rather than
+ * carrying a number that was picked to look tight in a mockup.
+ */
+export const serifLineHeight = (fontSize: number) => Math.ceil(fontSize * 1.49);
+
 export const radii = { inline: 12, control: 999, panel: 20, card: 28 } as const;
 
 export const shadows = {

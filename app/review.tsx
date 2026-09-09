@@ -28,7 +28,7 @@ import {
 import { lightImpact, successHaptic } from '@/src/haptics';
 import { configureDailyReminder, dismissReviewReminderOffer, shouldOfferReviewReminder } from '@/src/reminders';
 import { useLearningActivity } from '@/src/use-activity';
-import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 
 export default function ReviewScreen() {
   const { colors } = useTheme();
@@ -453,7 +453,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   almo: { width: 120, height: 126, alignSelf: 'center' },
   closeOverview: { position: 'absolute', top: 8, right: 12, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   eyebrow: { color: colors.raspberry, fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 1.5 },
-  overviewTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 37, textAlign: 'center' },
+  overviewTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30), textAlign: 'center' },
   overviewCopy: { color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: 'center' },
   summaryCard: { gap: 6, padding: 18, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
   groupRow: { flexDirection: 'row', alignItems: 'baseline', gap: 12, borderBottomWidth: 1, borderBottomColor: colors.line, paddingVertical: 8 },
@@ -482,7 +482,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   questionContent: { flexGrow: 1, justifyContent: 'center', gap: 18, padding: 20, paddingBottom: 32 },
   questionHeading: { alignItems: 'center', gap: 9 },
   instruction: { color: colors.muted, fontSize: 13.5 },
-  prompt: { color: colors.ink, fontFamily: fonts.serif, fontSize: 29, lineHeight: 38, textAlign: 'center' },
+  prompt: { color: colors.ink, fontFamily: fonts.serif, fontSize: 29, lineHeight: serifLineHeight(29), textAlign: 'center' },
   sourceContext: { color: colors.muted, fontFamily: fonts.serifRegular, fontSize: 15, lineHeight: 23, fontStyle: 'italic', textAlign: 'center' },
   answerGroup: { gap: 7 },
   answerLabel: { color: colors.ink, fontFamily: fonts.sansMedium, fontSize: 13 },
@@ -494,12 +494,12 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   hintHeading: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
   hintLabel: { color: colors.ink, fontFamily: fonts.sansMedium, fontSize: 13.5 },
   hintCost: { color: colors.metadata, fontSize: 11 },
-  hintContent: { color: colors.primaryDark, fontFamily: fonts.serif, fontSize: 17, lineHeight: 24 },
+  hintContent: { color: colors.primaryDark, fontFamily: fonts.serif, fontSize: 17, lineHeight: serifLineHeight(17) },
   revealAction: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   revealText: { color: colors.raspberry, fontFamily: fonts.sansMedium, fontSize: 13 },
   feedbackContent: { flexGrow: 1, justifyContent: 'center', gap: 14, padding: 16, paddingBottom: 30 },
   feedbackHeading: { gap: 6, paddingHorizontal: 4 },
-  feedbackTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 26, lineHeight: 33 },
+  feedbackTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 26, lineHeight: serifLineHeight(26) },
   comparisonCard: { overflow: 'hidden', borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
   comparisonMuted: { gap: 6, padding: 17, backgroundColor: colors.nested },
   comparisonAsked: { gap: 6, padding: 17 },
@@ -518,7 +518,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   completeIcon: { width: 72, height: 72, alignItems: 'center', justifyContent: 'center', borderRadius: 26, backgroundColor: colors.primary },
   dessertCard: { width: '100%', gap: 9, padding: 20, borderRadius: 24, backgroundColor: isDark ? colors.overlay : colors.reader, ...shadows.card },
   dessertEyebrow: { color: colors.accentBorder, fontSize: 10, letterSpacing: 1.3 },
-  dessertTitle: { color: colors.canvas, fontFamily: fonts.serif, fontSize: 21, lineHeight: 27 },
+  dessertTitle: { color: colors.canvas, fontFamily: fonts.serif, fontSize: 21, lineHeight: serifLineHeight(21) },
   dessertCopy: { color: colors.canvas, fontFamily: fonts.serifRegular, fontSize: 16, lineHeight: 25, opacity: 0.82 },
   reminderOffer: { width: '100%', alignItems: 'center', gap: 9, borderRadius: 24, padding: 18, backgroundColor: colors.surface, ...shadows.card },
   reminderTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 20 },

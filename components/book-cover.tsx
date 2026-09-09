@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { useEffect, useMemo, useState } from 'react';
 import { ImageStyle, StyleProp, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts } from '@/src/theme';
+import { colors, fonts, serifLineHeight } from '@/src/theme';
 
 const coverColors = ['#6f405c', '#315c62', '#8a543f', '#4f5f3d', '#5a4b78', '#9a6a33'];
 
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     color: colors.ink,
     fontFamily: fonts.serif,
     fontSize: 13,
-    lineHeight: 16,
+    lineHeight: serifLineHeight(13),
     fontWeight: '700',
     textAlign: 'center',
   },

@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 
 import { paceFraction, type LanguageRhythm } from '@/src/rhythm';
-import { createThemedStyles, fonts } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight } from '@/src/theme';
 import type { LearningStats } from '@/src/types';
 
 /**
@@ -43,7 +43,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 const useStyles = createThemedStyles((colors) => ({
   strip: { flexDirection: 'row', gap: 12 },
   stat: { flex: 1, gap: 2 },
-  value: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: 30 },
+  value: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: serifLineHeight(24) },
   label: { color: colors.muted, fontSize: 12, lineHeight: 16 },
   empty: { color: colors.muted, fontSize: 14, lineHeight: 21 },
 }));

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Alert, Pressable, ScrollView, Share, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui';
 import { AvatarMark } from '@/components/avatar-mark';
@@ -10,7 +11,7 @@ import { channelTypes, privateChannelId } from '@/src/chat';
 import { config } from '@/src/config';
 import { useNotice } from '@/src/notice-context';
 import { languageName } from '@/src/languages';
-import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import type { RelationshipAction, UserProfile } from '@/src/types';
 
 export default function UserProfileScreen() {
@@ -34,109 +35,111 @@ export default function UserProfileScreen() {
     relationship.mutate({ id: profile.data.relationshipId, action });
   }
 
-  if (profile.isLoading) return <View style={styles.center}><Text style={styles.meta}>Loading reader…</Text></View>;
+  if (profile.isLoading) return <SafeAreaView style={styles.center}><Text style={styles.meta}>Loading reader…</Text></SafeAreaView>;
   if (profile.isError || !profile.data) return (
-    <View style={styles.center}>
+    <SafeAreaView style={styles.center}>
       <Ionicons name="person-outline" size={42} color={colors.primary} />
       <Text style={styles.title}>Profile unavailable</Text>
       <Text style={styles.copy}>{profile.error instanceof Error ? profile.error.message : 'This profile could not be opened.'}</Text>
       <Button onPress={() => profile.refetch()}>Try again</Button>
-    </View>
+    </SafeAreaView>
   );
 
   const user = profile.data;
   // A DM is addressed by the friendship, so it only exists once the two of you are friends.
   const friendshipId = user.relationshipStatus === 'FRIENDS' ? user.relationshipId : null;
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <View style={styles.card}>
-        <Avatar profile={user} />
-        <View style={styles.identity}>
-          <View style={styles.nameRow}>
-            <Text style={styles.title}>@{user.username}</Text>
+    <SafeAreaView edges={['top']} style={styles.screen}>
+      <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+        <View style={styles.card}>
+          <Avatar profile={user} />
+          <View style={styles.identity}>
+            <View style={styles.nameRow}>
+              <Text style={styles.title}>@{user.username}</Text>
+            </View>
+            <Text style={styles.meta}>Joined {formatMonth(user.registeredAt)}</Text>
           </View>
-          <Text style={styles.meta}>Joined {formatMonth(user.registeredAt)}</Text>
-        </View>
 
-        {user.hidden ? (
-          <View style={styles.privateBlock}>
-            <Ionicons name="lock-closed-outline" size={24} color={colors.primary} />
-            <Text style={styles.subtitle}>This reader keeps their profile private</Text>
-            <Text style={styles.copy}>Their learning languages and interests are visible to friends.</Text>
-          </View>
-        ) : (
-          <>
-            {!!user.fluentLangs?.length && <ProfileSection label="SPEAKS"><Text style={styles.copy}>{user.fluentLangs.map(languageName).join(', ')}</Text></ProfileSection>}
-            {!!user.targetLangs?.length && (
-              <ProfileSection label="LEARNING">
-                <View style={styles.chips}>{user.targetLangs.map((target) => <View key={target.language} style={styles.chip}><Text style={styles.chipText}>{languageName(target.language)} · {target.cefrLevel}</Text></View>)}</View>
-              </ProfileSection>
-            )}
-            {!!user.interests?.length && (
-              <ProfileSection label="LIKES"><View style={styles.chips}>{user.interests.map((interest) => <View key={interest} style={styles.neutralChip}><Text style={styles.neutralChipText}>{interest}</Text></View>)}</View></ProfileSection>
-            )}
-          </>
-        )}
-
-        <View style={styles.actions}>
-          {user.relationshipStatus === 'STRANGER' && user.acceptsRequests !== false && <Button loading={request.isPending} onPress={() => request.mutate()}>Add friend</Button>}
-          {user.relationshipStatus === 'PENDING_INCOMING' && <><Button loading={relationship.isPending} onPress={() => manage('ACCEPT')}>Accept request</Button><Button variant="secondary" onPress={() => manage('REJECT')}>Decline</Button></>}
-          {user.relationshipStatus === 'PENDING_OUTGOING' && <Button variant="secondary" onPress={() => manage('CANCEL')}>Cancel request</Button>}
-          {!!friendshipId && (
-            <Button
-              onPress={() =>
-                router.push({
-                  pathname: '/chat/[type]/[id]',
-                  params: {
-                    type: channelTypes.private,
-                    id: privateChannelId(friendshipId),
-                    recipientId: user.id,
-                    title: user.username,
-                  },
-                })
-              }>
-              Message
-            </Button>
+          {user.hidden ? (
+            <View style={styles.privateBlock}>
+              <Ionicons name="lock-closed-outline" size={24} color={colors.primary} />
+              <Text style={styles.subtitle}>This reader keeps their profile private</Text>
+              <Text style={styles.copy}>Their learning languages and interests are visible to friends.</Text>
+            </View>
+          ) : (
+            <>
+              {!!user.fluentLangs?.length && <ProfileSection label="SPEAKS"><Text style={styles.copy}>{user.fluentLangs.map(languageName).join(', ')}</Text></ProfileSection>}
+              {!!user.targetLangs?.length && (
+                <ProfileSection label="LEARNING">
+                  <View style={styles.chips}>{user.targetLangs.map((target) => <View key={target.language} style={styles.chip}><Text style={styles.chipText}>{languageName(target.language)} · {target.cefrLevel}</Text></View>)}</View>
+                </ProfileSection>
+              )}
+              {!!user.interests?.length && (
+                <ProfileSection label="LIKES"><View style={styles.chips}>{user.interests.map((interest) => <View key={interest} style={styles.neutralChip}><Text style={styles.neutralChipText}>{interest}</Text></View>)}</View></ProfileSection>
+              )}
+            </>
           )}
-          {user.relationshipStatus === 'FRIENDS' && <Button variant="secondary" onPress={() => manage('UNFRIEND')}>Remove friend</Button>}
-          <Pressable
-            accessibilityRole="button"
-            onPress={async () => {
-              try {
-                await Share.share({ message: `${config.webBaseUrl}/users/${encodeURIComponent(user.username)}` });
-              } catch {
-                showNotice({ title: 'Could not share profile', message: 'Try again.', tone: 'error' });
-              }
-            }}
-            style={styles.share}>
-            <Ionicons name="share-outline" size={19} color={colors.primary} />
-            <Text style={styles.shareText}>Share profile</Text>
-          </Pressable>
-        </View>
-      </View>
 
-      {user.relationshipStatus !== 'BLOCKED' && (
-        <Pressable
-          onPress={() => Alert.alert('Block this reader?', 'They will no longer be able to find or contact you.', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Block',
-              style: 'destructive',
-              onPress: async () => {
+          <View style={styles.actions}>
+            {user.relationshipStatus === 'STRANGER' && user.acceptsRequests !== false && <Button loading={request.isPending} onPress={() => request.mutate()}>Add friend</Button>}
+            {user.relationshipStatus === 'PENDING_INCOMING' && <><Button loading={relationship.isPending} onPress={() => manage('ACCEPT')}>Accept request</Button><Button variant="secondary" onPress={() => manage('REJECT')}>Decline</Button></>}
+            {user.relationshipStatus === 'PENDING_OUTGOING' && <Button variant="secondary" onPress={() => manage('CANCEL')}>Cancel request</Button>}
+            {!!friendshipId && (
+              <Button
+                onPress={() =>
+                  router.push({
+                    pathname: '/chat/[type]/[id]',
+                    params: {
+                      type: channelTypes.private,
+                      id: privateChannelId(friendshipId),
+                      recipientId: user.id,
+                      title: user.username,
+                    },
+                  })
+                }>
+                Message
+              </Button>
+            )}
+            {user.relationshipStatus === 'FRIENDS' && <Button variant="secondary" onPress={() => manage('UNFRIEND')}>Remove friend</Button>}
+            <Pressable
+              accessibilityRole="button"
+              onPress={async () => {
                 try {
-                  await api.blockUser(user.id);
-                  await profile.refetch();
-                } catch (error) {
-                  showNotice({ title: 'Could not block reader', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+                  await Share.share({ message: `${config.webBaseUrl}/users/${encodeURIComponent(user.username)}` });
+                } catch {
+                  showNotice({ title: 'Could not share profile', message: 'Try again.', tone: 'error' });
                 }
+              }}
+              style={styles.share}>
+              <Ionicons name="share-outline" size={19} color={colors.primary} />
+              <Text style={styles.shareText}>Share profile</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {user.relationshipStatus !== 'BLOCKED' && (
+          <Pressable
+            onPress={() => Alert.alert('Block this reader?', 'They will no longer be able to find or contact you.', [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Block',
+                style: 'destructive',
+                onPress: async () => {
+                  try {
+                    await api.blockUser(user.id);
+                    await profile.refetch();
+                  } catch (error) {
+                    showNotice({ title: 'Could not block reader', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+                  }
+                },
               },
-            },
-          ])}
-          style={styles.blockAction}>
-          <Text style={styles.blockText}>Block reader</Text>
-        </Pressable>
-      )}
-    </ScrollView>
+            ])}
+            style={styles.blockAction}>
+            <Text style={styles.blockText}>Block reader</Text>
+          </Pressable>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -161,8 +164,8 @@ const useStyles = createThemedStyles((colors) => ({
   card: { alignItems: 'center', gap: 18, borderRadius: 30, padding: 24, backgroundColor: colors.surface, ...shadows.card },
   identity: { alignItems: 'center', gap: 4 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: 34, fontWeight: '600', textAlign: 'center' },
-  subtitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, lineHeight: 25, fontWeight: '600', textAlign: 'center' },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: serifLineHeight(27), fontWeight: '600', textAlign: 'center' },
+  subtitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, lineHeight: serifLineHeight(19), fontWeight: '600', textAlign: 'center' },
   meta: { color: colors.muted, fontSize: 12, textAlign: 'center' },
   copy: { color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: 'center' },
   privateBlock: { alignItems: 'center', gap: 8, borderRadius: 18, padding: 17, backgroundColor: colors.canvas },

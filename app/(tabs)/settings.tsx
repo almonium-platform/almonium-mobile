@@ -11,7 +11,7 @@ import { LearningTab } from '@/components/settings/learning-tab';
 import { ProfileTab } from '@/components/settings/profile-tab';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 
 type Tab = 'profile' | 'account' | 'learning' | 'app';
 const tabs: { key: Tab; label: string }[] = [
@@ -87,7 +87,7 @@ const useStyles = createThemedStyles((colors) => ({
   back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginLeft: -10 },
   heading: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   headingCopy: { flex: 1, gap: 3 },
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 26, lineHeight: 32 },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 26, lineHeight: serifLineHeight(26) },
   caption: { color: colors.muted, fontSize: 13, lineHeight: 19 },
   tabs: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.line },
   tab: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent', marginBottom: -1 },

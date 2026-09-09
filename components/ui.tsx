@@ -2,7 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import type { ComponentProps, PropsWithChildren, ReactNode } from 'react';
 
-import { createThemedStyles, fonts, gradients, radii, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, gradients, radii, serifLineHeight, shadows, useTheme } from '@/src/theme';
 
 export function Title({ children }: PropsWithChildren) {
   const styles = useStyles();
@@ -102,7 +102,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   title: {
     fontFamily: fonts.serif,
     fontSize: 32,
-    lineHeight: 39,
+    lineHeight: serifLineHeight(32),
     color: colors.ink,
   },
   body: { fontFamily: fonts.sans, fontSize: 16, lineHeight: 23, color: colors.ink },

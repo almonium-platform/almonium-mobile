@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { colors, darkColors, gradients, radii } from './theme';
+import { colors, darkColors, gradients, radii, serifLineHeight } from './theme';
 
 vi.mock('react-native', () => ({
   Platform: {
@@ -46,5 +46,13 @@ describe('Almonium visual system', () => {
   it('uses mobile-safe rounded controls', () => {
     expect(radii.control).toBe(999);
     expect(radii.panel).toBeGreaterThanOrEqual(20);
+  });
+});
+
+describe('serifLineHeight', () => {
+  it('gives Literata its whole line box, tails included', () => {
+    // Literata: 1.177em above the baseline, 0.308em below. Anything under 1.485em shears the tails.
+    expect(serifLineHeight(30)).toBeGreaterThanOrEqual(Math.ceil(30 * 1.485));
+    expect(serifLineHeight(13)).toBeGreaterThanOrEqual(Math.ceil(13 * 1.485));
   });
 });

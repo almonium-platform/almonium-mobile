@@ -1,11 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/src/auth-context';
 import { fonts, useTheme } from '@/src/theme';
 
+/**
+ * The bar pays for its own row on top of the system inset rather than out of it. React Navigation
+ * sizes the bar as one UIKit height plus the inset, which leaves 42pt of content for a 54pt item,
+ * so on Android the labels slid down over the gesture bar. Height, padding and item are one sum.
+ */
+const tabBarPaddingTop = 7;
+const tabBarItemHeight = 54;
+
 export default function TabsLayout() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { firebaseUser, profile, loading } = useAuth();
   if (!loading && !firebaseUser) return <Redirect href="/(auth)/sign-in" />;
   if (!loading && !profile) return <Redirect href="/" />;
@@ -18,10 +28,11 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
         tabBarLabelStyle: { fontFamily: fonts.sansMedium, fontSize: 11 },
-        tabBarItemStyle: { minHeight: 54 },
+        tabBarItemStyle: { minHeight: tabBarItemHeight },
         tabBarStyle: {
-          minHeight: 66,
-          paddingTop: 7,
+          height: tabBarPaddingTop + tabBarItemHeight + insets.bottom,
+          paddingTop: tabBarPaddingTop,
+          paddingBottom: insets.bottom,
           backgroundColor: colors.surface,
           borderTopColor: colors.line,
         },

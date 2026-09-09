@@ -13,7 +13,7 @@ import { config } from '@/src/config';
 import { freeSavedItemLimit } from '@/src/limits';
 import { membershipName, planDescribesMembership } from '@/src/membership';
 import { useNotice } from '@/src/notice-context';
-import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import type { PlanOffer, PlanType, SubscriptionInfo } from '@/src/types';
 
 type Cadence = 'MONTHLY' | 'YEARLY';
@@ -268,7 +268,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginLeft: -10 },
   heading: { gap: 6 },
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 37, fontWeight: '600' },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30), fontWeight: '600' },
   card: { gap: 14, borderRadius: 28, padding: 20, backgroundColor: colors.surface, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },
   sectionTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 21, fontWeight: '600' },
   receiptRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, borderBottomWidth: 1, borderBottomColor: colors.line, paddingBottom: 10 },

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Sheet } from '@/components/sheet';
 import { Button, Field } from '@/components/ui';
 import { useAuth } from '@/src/auth-context';
-import { createThemedStyles, fonts } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight } from '@/src/theme';
 
 interface Consequence {
   label: string;
@@ -157,7 +157,7 @@ export function ReauthSheet({
 }
 
 const useStyles = createThemedStyles((colors) => ({
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: 30 },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: serifLineHeight(24) },
   copy: { color: colors.muted, fontSize: 14, lineHeight: 21 },
   consequences: { borderRadius: 16, backgroundColor: colors.nested, paddingHorizontal: 14 },
   consequence: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.line },

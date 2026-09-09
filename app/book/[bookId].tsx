@@ -11,7 +11,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
 import { downloadBook, downloadedBooks, formattedDownloadSize, removeDownloadedBook } from '@/src/offline-books';
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import { isUuid } from '@/src/uuid';
 
 export default function BookDetailsScreen() {
@@ -237,7 +237,7 @@ const useStyles = createThemedStyles((colors) => ({
   hero: { flexDirection: 'row', gap: 18, alignItems: 'flex-start' },
   cover: { width: 126, height: 184, borderRadius: 15, backgroundColor: colors.accentSoft },
   heroCopy: { flex: 1, gap: 9, paddingTop: 4 },
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: 33, fontWeight: '600' },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: serifLineHeight(27), fontWeight: '600' },
   author: { color: colors.muted, fontFamily: fonts.serif, fontSize: 18 },
   meta: { color: colors.muted, fontWeight: '600' },
   favorite: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingTop: 5 },

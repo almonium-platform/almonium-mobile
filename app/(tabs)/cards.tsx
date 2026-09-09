@@ -20,7 +20,7 @@ import { Image } from 'expo-image';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
-import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import { intentLabel } from '@/src/review';
 import type { LearningIntent, LearningItem } from '@/src/types';
 
@@ -240,7 +240,7 @@ const useStyles = createThemedStyles((colors) => ({
   list: { flexGrow: 1, padding: 16, paddingBottom: 32, backgroundColor: colors.canvas },
   header: { gap: 13, paddingBottom: 20 },
   eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
-  hero: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 36, fontWeight: '600' },
+  hero: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30), fontWeight: '600' },
   subhead: { color: colors.muted, fontSize: 13.5, lineHeight: 20 },
   actions: { gap: 9 },
   groups: { paddingBottom: 4 },

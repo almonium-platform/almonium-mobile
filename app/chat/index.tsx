@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Channel } from 'stream-chat';
 
 import { ChatAvatar } from '@/components/chat-avatar';
@@ -96,74 +97,76 @@ export default function ChatListScreen() {
   const unavailable = status !== 'ready' ? chatUnavailableCopy(status, error) : listError;
 
   return (
-    <FlatList
-      data={rows}
-      keyExtractor={(item) => item.key}
-      contentContainerStyle={styles.list}
-      refreshControl={
-        client ? (
-          <RefreshControl refreshing={loading && rows.length > 0} onRefresh={load} tintColor={colors.primary} />
-        ) : undefined
-      }
-      ListHeaderComponent={
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} accessibilityLabel="Go back" hitSlop={10} style={styles.back}>
-            <Ionicons name="chevron-back" size={22} color={colors.muted} />
+    <SafeAreaView edges={['top']} style={styles.safe}>
+      <FlatList
+        data={rows}
+        keyExtractor={(item) => item.key}
+        contentContainerStyle={styles.list}
+        refreshControl={
+          client ? (
+            <RefreshControl refreshing={loading && rows.length > 0} onRefresh={load} tintColor={colors.primary} />
+          ) : undefined
+        }
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <Pressable onPress={() => router.back()} accessibilityLabel="Go back" hitSlop={10} style={styles.back}>
+              <Ionicons name="chevron-back" size={22} color={colors.muted} />
+            </Pressable>
+            <Text style={styles.title}>Chats</Text>
+          </View>
+        }
+        renderItem={({ item }) => (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() =>
+              router.push({
+                pathname: '/chat/[type]/[id]',
+                params: { type: item.type, id: item.id, title: item.title },
+              })
+            }
+            style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
+            <ChatAvatar type={item.type} channelId={item.id} image={item.image} name={item.title} size={44} />
+            <View style={styles.rowCopy}>
+              <View style={styles.rowTop}>
+                <Text numberOfLines={1} style={styles.rowTitle}>
+                  {item.title}
+                </Text>
+                {!!item.stamp && <Text style={styles.stamp}>{item.stamp}</Text>}
+              </View>
+              <View style={styles.rowBottom}>
+                <Text numberOfLines={1} style={styles.rowPreview}>
+                  {item.preview}
+                </Text>
+                {/* A count here rather than a dot: there is no second column saying which chat is open. */}
+                {item.unread > 0 && (
+                  <View accessibilityLabel={`${item.unread} unread`} style={styles.unread}>
+                    <Text style={styles.unreadText}>{item.unread > 99 ? '99+' : item.unread}</Text>
+                  </View>
+                )}
+              </View>
+            </View>
           </Pressable>
-          <Text style={styles.title}>Chats</Text>
-        </View>
-      }
-      renderItem={({ item }) => (
-        <Pressable
-          accessibilityRole="button"
-          onPress={() =>
-            router.push({
-              pathname: '/chat/[type]/[id]',
-              params: { type: item.type, id: item.id, title: item.title },
-            })
-          }
-          style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
-          <ChatAvatar type={item.type} channelId={item.id} image={item.image} name={item.title} size={44} />
-          <View style={styles.rowCopy}>
-            <View style={styles.rowTop}>
-              <Text numberOfLines={1} style={styles.rowTitle}>
-                {item.title}
+        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListEmptyComponent={
+          loading ? (
+            <ActivityIndicator style={styles.loader} color={colors.primary} />
+          ) : (
+            <View style={styles.empty}>
+              <Ionicons
+                name={unavailable ? 'cloud-offline-outline' : 'chatbubbles-outline'}
+                size={40}
+                color={colors.primary}
+              />
+              <Text style={styles.emptyTitle}>{unavailable ? 'Chat is not available' : 'No chats yet'}</Text>
+              <Text style={styles.emptyCopy}>
+                {unavailable ?? 'Open a friend from People to write to them, or keep notes in Saved Messages.'}
               </Text>
-              {!!item.stamp && <Text style={styles.stamp}>{item.stamp}</Text>}
             </View>
-            <View style={styles.rowBottom}>
-              <Text numberOfLines={1} style={styles.rowPreview}>
-                {item.preview}
-              </Text>
-              {/* A count here rather than a dot: there is no second column saying which chat is open. */}
-              {item.unread > 0 && (
-                <View accessibilityLabel={`${item.unread} unread`} style={styles.unread}>
-                  <Text style={styles.unreadText}>{item.unread > 99 ? '99+' : item.unread}</Text>
-                </View>
-              )}
-            </View>
-          </View>
-        </Pressable>
-      )}
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
-      ListEmptyComponent={
-        loading ? (
-          <ActivityIndicator style={styles.loader} color={colors.primary} />
-        ) : (
-          <View style={styles.empty}>
-            <Ionicons
-              name={unavailable ? 'cloud-offline-outline' : 'chatbubbles-outline'}
-              size={40}
-              color={colors.primary}
-            />
-            <Text style={styles.emptyTitle}>{unavailable ? 'Chat is not available' : 'No chats yet'}</Text>
-            <Text style={styles.emptyCopy}>
-              {unavailable ?? 'Open a friend from People to write to them, or keep notes in Saved Messages.'}
-            </Text>
-          </View>
-        )
-      }
-    />
+          )
+        }
+      />
+    </SafeAreaView>
   );
 }
 
@@ -193,6 +196,7 @@ function stampFor(date: Date, now = new Date()) {
 }
 
 const useStyles = createThemedStyles((colors) => ({
+  safe: { flex: 1, backgroundColor: colors.canvas },
   list: { flexGrow: 1, padding: 20, paddingBottom: 36, backgroundColor: colors.canvas },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingBottom: 10 },
   back: { width: 44, height: 44, marginLeft: -11, alignItems: 'center', justifyContent: 'center' },

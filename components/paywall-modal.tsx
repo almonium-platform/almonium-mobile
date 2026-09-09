@@ -4,7 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { Sheet } from '@/components/sheet';
 import { Button } from '@/components/ui';
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 
 /** One sheet, five bodies. Each names the boundary reached, never a restriction. */
 export type PaywallContext =
@@ -105,7 +105,7 @@ export function PaywallModal({
 
 const useStyles = createThemedStyles((colors) => ({
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 25, lineHeight: 31 },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 25, lineHeight: serifLineHeight(25) },
   body: { color: colors.muted, fontSize: 14.5, lineHeight: 22 },
   list: { gap: 8, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 14 },
   listLabel: { color: colors.metadata, fontSize: 10.5, fontWeight: '600', letterSpacing: 1.3, paddingBottom: 2 },

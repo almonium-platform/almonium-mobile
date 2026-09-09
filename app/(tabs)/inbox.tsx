@@ -10,7 +10,7 @@ import { useAuth } from '@/src/auth-context';
 import { useChat } from '@/src/chat-client';
 import { relativeTime } from '@/src/card-utils';
 import { languageName } from '@/src/languages';
-import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import type { AppNotification, NotificationType } from '@/src/types';
 
 const iconForType: Record<NotificationType, keyof typeof Ionicons.glyphMap> = {
@@ -81,154 +81,156 @@ export default function InboxScreen() {
   }
 
   return (
-    <FlatList
-      data={query.data ?? []}
-      keyExtractor={(item) => item.id}
-      contentContainerStyle={styles.list}
-      refreshControl={
-        <RefreshControl
-          refreshing={query.isRefetching}
-          onRefresh={query.refetch}
-          tintColor={colors.primary}
-        />
-      }
-      ListHeaderComponent={
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <View style={styles.headerCopy}>
-              <Text style={styles.eyebrow}>INBOX</Text>
-              <Text style={styles.hero}>What’s new.</Text>
+    <SafeAreaView edges={['top']} style={styles.safe}>
+      <FlatList
+        data={query.data ?? []}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={query.isRefetching}
+            onRefresh={query.refetch}
+            tintColor={colors.primary}
+          />
+        }
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <View style={styles.headerCopy}>
+                <Text style={styles.eyebrow}>INBOX</Text>
+                <Text style={styles.hero}>What’s new.</Text>
+              </View>
+              {unread > 0 && (
+                <Pressable
+                  disabled={allReadMutation.isPending}
+                  onPress={() => allReadMutation.mutate()}
+                  style={styles.markAll}>
+                  <Text style={styles.markAllText}>Mark all read</Text>
+                </Pressable>
+              )}
             </View>
-            {unread > 0 && (
+            <Text style={styles.caption}>
+              Friend activity, finished imports and the translations you asked for appear here.
+            </Text>
+            {/* The bell counts waiting messages, so its destination has to lead to them. */}
+            {unreadChats > 0 && (
               <Pressable
-                disabled={allReadMutation.isPending}
-                onPress={() => allReadMutation.mutate()}
-                style={styles.markAll}>
-                <Text style={styles.markAllText}>Mark all read</Text>
+                accessibilityRole="button"
+                onPress={() => router.push('/chat')}
+                style={({ pressed }) => [styles.messagesRow, pressed && styles.pressed]}>
+                <View style={styles.messagesIcon}>
+                  <Ionicons name="chatbubbles" size={19} color={colors.white} />
+                </View>
+                <View style={styles.copy}>
+                  <Text style={styles.title}>Messages</Text>
+                  <Text style={styles.message}>
+                    {unreadChats === 1 ? '1 unread in Chats' : `${unreadChats} unread in Chats`}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={19} color={colors.muted} />
               </Pressable>
             )}
-          </View>
-          <Text style={styles.caption}>
-            Friend activity, finished imports and the translations you asked for appear here.
-          </Text>
-          {/* The bell counts waiting messages, so its destination has to lead to them. */}
-          {unreadChats > 0 && (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => router.push('/chat')}
-              style={({ pressed }) => [styles.messagesRow, pressed && styles.pressed]}>
-              <View style={styles.messagesIcon}>
-                <Ionicons name="chatbubbles" size={19} color={colors.white} />
-              </View>
-              <View style={styles.copy}>
-                <Text style={styles.title}>Messages</Text>
-                <Text style={styles.message}>
-                  {unreadChats === 1 ? '1 unread in Chats' : `${unreadChats} unread in Chats`}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={19} color={colors.muted} />
-            </Pressable>
-          )}
-          {/* The list carries two states only: asked and ready. A declined request disappears quietly. */}
-          {openOrders.length > 0 && (
-            <View style={styles.requests}>
-              <Text style={styles.requestsLabel}>YOUR REQUESTS</Text>
-              {openOrders.map((order) => (
-                <View key={order.id} style={styles.requestRow}>
-                  <View style={styles.copy}>
-                    <Text style={styles.title}>{order.bookTitle} → {languageName(order.language)}</Text>
-                    <Text style={styles.message}>
-                      {order.status === 'READY' ? 'Ready' : `Asked ${new Date(order.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`}
-                    </Text>
+            {/* The list carries two states only: asked and ready. A declined request disappears quietly. */}
+            {openOrders.length > 0 && (
+              <View style={styles.requests}>
+                <Text style={styles.requestsLabel}>YOUR REQUESTS</Text>
+                {openOrders.map((order) => (
+                  <View key={order.id} style={styles.requestRow}>
+                    <View style={styles.copy}>
+                      <Text style={styles.title}>{order.bookTitle} → {languageName(order.language)}</Text>
+                      <Text style={styles.message}>
+                        {order.status === 'READY' ? 'Ready' : `Asked ${new Date(order.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`}
+                      </Text>
+                    </View>
+                    {order.status === 'READY' && order.fulfilledBookId ? (
+                      <Pressable
+                        onPress={() => router.push({ pathname: '/reader/[bookId]', params: { bookId: order.fulfilledBookId!, title: order.bookTitle, parallel: order.language } })}
+                        style={styles.acceptAction}>
+                        <Text style={styles.acceptText}>Read</Text>
+                      </Pressable>
+                    ) : (
+                      <Pressable disabled={withdrawMutation.isPending} onPress={() => withdrawMutation.mutate({ bookId: order.bookId, language: order.language })} hitSlop={8}>
+                        <Text style={styles.profileLink}>Withdraw</Text>
+                      </Pressable>
+                    )}
                   </View>
-                  {order.status === 'READY' && order.fulfilledBookId ? (
-                    <Pressable
-                      onPress={() => router.push({ pathname: '/reader/[bookId]', params: { bookId: order.fulfilledBookId!, title: order.bookTitle, parallel: order.language } })}
-                      style={styles.acceptAction}>
-                      <Text style={styles.acceptText}>Read</Text>
-                    </Pressable>
-                  ) : (
-                    <Pressable disabled={withdrawMutation.isPending} onPress={() => withdrawMutation.mutate({ bookId: order.bookId, language: order.language })} hitSlop={8}>
-                      <Text style={styles.profileLink}>Withdraw</Text>
+                ))}
+              </View>
+            )}
+            {query.isError && query.data && (
+              <Text style={styles.offline}>Showing saved notifications. Reconnect to refresh.</Text>
+            )}
+          </View>
+        }
+        renderItem={({ item }) => (
+          <Pressable
+            onPress={() => toggleRead(item)}
+            onLongPress={() => confirmDelete(item)}
+            style={({ pressed }) => [
+              styles.notification,
+              !item.readAt && styles.unread,
+              pressed && styles.pressed,
+            ]}>
+            <View style={[styles.icon, !item.readAt && styles.iconUnread]}>
+              <Ionicons
+                name={iconForType[item.type] ?? 'notifications-outline'}
+                size={21}
+                color={colors.primaryDark}
+              />
+            </View>
+            <View style={styles.copy}>
+              <View style={styles.titleRow}>
+                <Text style={styles.title} numberOfLines={1}>{calmText(item.title)}</Text>
+                <Text style={styles.time}>{relativeTime(item.createdAt)}</Text>
+              </View>
+              {!!item.message && <Text style={styles.message}>{calmText(item.message)}</Text>}
+              {item.type === 'FRIENDSHIP_REQUESTED' && item.referenceId && !item.readAt && (
+                <View style={styles.friendActions}>
+                  <Pressable
+                    onPress={() => relationshipMutation.mutate({ id: item.referenceId!, action: 'ACCEPT' })}
+                    style={styles.acceptAction}>
+                    <Text style={styles.acceptText}>Accept</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => relationshipMutation.mutate({ id: item.referenceId!, action: 'REJECT' })}
+                    style={styles.declineAction}>
+                    <Text style={styles.declineText}>Decline</Text>
+                  </Pressable>
+                  {item.senderId && (
+                    <Pressable onPress={() => router.push({ pathname: '/profile/[userId]', params: { userId: item.senderId! } })}>
+                      <Text style={styles.profileLink}>Profile</Text>
                     </Pressable>
                   )}
                 </View>
-              ))}
+              )}
+              <Text style={styles.action}>
+                Tap to mark {item.readAt ? 'unread' : 'read'} · Hold to delete
+              </Text>
             </View>
-          )}
-          {query.isError && query.data && (
-            <Text style={styles.offline}>Showing saved notifications. Reconnect to refresh.</Text>
-          )}
-        </View>
-      }
-      renderItem={({ item }) => (
-        <Pressable
-          onPress={() => toggleRead(item)}
-          onLongPress={() => confirmDelete(item)}
-          style={({ pressed }) => [
-            styles.notification,
-            !item.readAt && styles.unread,
-            pressed && styles.pressed,
-          ]}>
-          <View style={[styles.icon, !item.readAt && styles.iconUnread]}>
+            {!item.readAt && <View style={styles.dot} />}
+          </Pressable>
+        )}
+        ItemSeparatorComponent={() => <View style={{ height: 11 }} />}
+        ListEmptyComponent={
+          <View style={styles.empty}>
             <Ionicons
-              name={iconForType[item.type] ?? 'notifications-outline'}
-              size={21}
-              color={colors.primaryDark}
+              name={query.isError ? 'cloud-offline-outline' : 'notifications-off-outline'}
+              size={43}
+              color={colors.primary}
             />
-          </View>
-          <View style={styles.copy}>
-            <View style={styles.titleRow}>
-              <Text style={styles.title} numberOfLines={1}>{calmText(item.title)}</Text>
-              <Text style={styles.time}>{relativeTime(item.createdAt)}</Text>
-            </View>
-            {!!item.message && <Text style={styles.message}>{calmText(item.message)}</Text>}
-            {item.type === 'FRIENDSHIP_REQUESTED' && item.referenceId && !item.readAt && (
-              <View style={styles.friendActions}>
-                <Pressable
-                  onPress={() => relationshipMutation.mutate({ id: item.referenceId!, action: 'ACCEPT' })}
-                  style={styles.acceptAction}>
-                  <Text style={styles.acceptText}>Accept</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => relationshipMutation.mutate({ id: item.referenceId!, action: 'REJECT' })}
-                  style={styles.declineAction}>
-                  <Text style={styles.declineText}>Decline</Text>
-                </Pressable>
-                {item.senderId && (
-                  <Pressable onPress={() => router.push({ pathname: '/profile/[userId]', params: { userId: item.senderId! } })}>
-                    <Text style={styles.profileLink}>Profile</Text>
-                  </Pressable>
-                )}
-              </View>
-            )}
-            <Text style={styles.action}>
-              Tap to mark {item.readAt ? 'unread' : 'read'} · Hold to delete
+            <Text style={styles.emptyTitle}>
+              {query.isError ? 'Inbox unavailable' : 'All quiet for now'}
             </Text>
+            <Text style={styles.emptyText}>
+              {query.isError
+                ? query.error instanceof Error ? query.error.message : 'Check your connection.'
+                : 'New friendship and translation updates will appear here.'}
+            </Text>
+            {query.isError && <Button onPress={() => query.refetch()}>Try again</Button>}
           </View>
-          {!item.readAt && <View style={styles.dot} />}
-        </Pressable>
-      )}
-      ItemSeparatorComponent={() => <View style={{ height: 11 }} />}
-      ListEmptyComponent={
-        <SafeAreaView style={styles.empty}>
-          <Ionicons
-            name={query.isError ? 'cloud-offline-outline' : 'notifications-off-outline'}
-            size={43}
-            color={colors.primary}
-          />
-          <Text style={styles.emptyTitle}>
-            {query.isError ? 'Inbox unavailable' : 'All quiet for now'}
-          </Text>
-          <Text style={styles.emptyText}>
-            {query.isError
-              ? query.error instanceof Error ? query.error.message : 'Check your connection.'
-              : 'New friendship and translation updates will appear here.'}
-          </Text>
-          {query.isError && <Button onPress={() => query.refetch()}>Try again</Button>}
-        </SafeAreaView>
       }
     />
+    </SafeAreaView>
   );
 }
 
@@ -237,12 +239,13 @@ function calmText(value: string) {
 }
 
 const useStyles = createThemedStyles((colors) => ({
+  safe: { flex: 1, backgroundColor: colors.canvas },
   list: { flexGrow: 1, padding: 20, paddingBottom: 36, backgroundColor: colors.canvas },
   header: { gap: 9, paddingBottom: 21 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   headerCopy: { flex: 1, gap: 3 },
   eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
-  hero: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 36, fontWeight: '600' },
+  hero: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30), fontWeight: '600' },
   caption: { color: colors.muted, fontSize: 14, lineHeight: 20 },
   markAll: { paddingVertical: 8, paddingHorizontal: 11, borderRadius: 11, backgroundColor: colors.accentSoft },
   markAllText: { color: colors.primaryDark, fontWeight: '600', fontSize: 12 },

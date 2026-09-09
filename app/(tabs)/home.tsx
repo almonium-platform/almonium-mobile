@@ -16,7 +16,7 @@ import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
 import { membershipName } from '@/src/membership';
 import { intentLabel } from '@/src/review';
-import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import { rhythmFor, useLearningStats, useRhythm } from '@/src/use-rhythm';
 
 const wordsPerMinute = 200;
@@ -262,7 +262,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   cover: { width: 84, height: 122, borderRadius: 10 },
   continueCopy: { flex: 1, justifyContent: 'center', gap: 6 },
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
-  bookTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 25, lineHeight: 30, fontWeight: '600' },
+  bookTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 25, lineHeight: serifLineHeight(25), fontWeight: '600' },
   meta: { color: colors.muted, fontSize: 13, lineHeight: 19 },
   copy: { color: colors.muted, fontSize: 14, lineHeight: 21 },
   progressTrack: { height: 5, overflow: 'hidden', borderRadius: 3, backgroundColor: colors.line },
@@ -270,7 +270,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   inlineAction: { minHeight: 40, alignItems: 'center', justifyContent: 'center' },
   section: { gap: 10, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 16, paddingHorizontal: 2 },
   sectionHead: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 },
-  sectionTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 22, lineHeight: 28, fontWeight: '600', marginTop: 2 },
+  sectionTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 22, lineHeight: serifLineHeight(22), fontWeight: '600', marginTop: 2 },
   groupRow: { flexDirection: 'row', alignItems: 'baseline', gap: 12, paddingVertical: 4 },
   groupCount: { width: 32, color: colors.primaryDark, fontFamily: fonts.serif, fontSize: 22 },
   groupLabel: { color: colors.ink, fontSize: 14 },

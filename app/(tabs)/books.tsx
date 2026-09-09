@@ -23,7 +23,7 @@ import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { downloadedBooks } from '@/src/offline-books';
-import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import type { BookSummary, CefrLevel } from '@/src/types';
 
 const shelfLanguageKey = 'almonium:shelf-language';
@@ -236,7 +236,7 @@ const useStyles = createThemedStyles((colors) => ({
   list: { padding: 16, paddingBottom: 32, backgroundColor: colors.canvas, flexGrow: 1 },
   header: { gap: 12, paddingBottom: 20 },
   eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
-  heroTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 36, fontWeight: '600' },
+  heroTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30), fontWeight: '600' },
   subhead: { color: colors.muted, fontSize: 13.5, lineHeight: 20 },
   search: { minHeight: 50, borderRadius: 999, paddingHorizontal: 16, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, ...shadows.field },
   searchInput: { flex: 1, color: colors.ink, fontSize: 15 },

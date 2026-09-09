@@ -13,7 +13,7 @@ import { createCardDraft } from '@/src/card-utils';
 import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
 import { intentLabel } from '@/src/review';
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import type { LearningIntent } from '@/src/types';
 
 const intents: LearningIntent[] = ['UNDERSTAND', 'PRODUCE', 'DISAMBIGUATE', 'PRONOUNCE', 'CHUNK'];
@@ -243,8 +243,8 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginLeft: -10 },
   heading: { gap: 6, paddingVertical: 3 },
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: 34, fontWeight: '600' },
-  entry: { color: colors.ink, fontFamily: fonts.serif, fontSize: 34, lineHeight: 40 },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: serifLineHeight(27), fontWeight: '600' },
+  entry: { color: colors.ink, fontFamily: fonts.serif, fontSize: 34, lineHeight: serifLineHeight(34) },
   caption: { color: colors.muted, fontSize: 13, lineHeight: 19 },
   fieldGroup: { gap: 7 },
   label: { color: colors.ink, fontWeight: '600', fontSize: 14 },

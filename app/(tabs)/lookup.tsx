@@ -22,7 +22,7 @@ import { createCardDraft } from '@/src/card-utils';
 import { normalizedLookupEntry, tokenizeSentence, type DiscoverLookup } from '@/src/discover';
 import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
-import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 
 const lookupLanguageKey = 'almonium:lookup-language';
 
@@ -333,7 +333,7 @@ const useStyles = createThemedStyles((colors) => ({
   content: { padding: 16, paddingBottom: 36, gap: 14 },
   intro: { gap: 5 },
   eyebrow: { color: colors.raspberry, fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 1.5 },
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 28, lineHeight: 34 },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 28, lineHeight: serifLineHeight(28) },
   subhead: { color: colors.muted, fontFamily: fonts.sans, fontSize: 13.5, lineHeight: 20 },
   searchField: {
     minHeight: 52,
@@ -361,7 +361,7 @@ const useStyles = createThemedStyles((colors) => ({
   wordSheet: { gap: 15, padding: 18, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
   entryHeading: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   entryCopy: { flex: 1, gap: 4 },
-  entry: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 37 },
+  entry: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30) },
   entryMeta: { color: colors.metadata, fontFamily: fonts.sans, fontSize: 12 },
   audioButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderRadius: 22 },
   senses: { paddingHorizontal: 2 },

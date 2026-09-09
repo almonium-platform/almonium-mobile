@@ -13,7 +13,7 @@ import { api } from '@/src/api';
 import { appleFirebaseCredential, googleFirebaseCredential, useAuth } from '@/src/auth-context';
 import { auth } from '@/src/firebase';
 import { useNotice } from '@/src/notice-context';
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 
 type Provider = 'google.com' | 'apple.com' | 'password';
 type Pending = 'email' | 'password' | 'delete' | null;
@@ -219,5 +219,5 @@ const useStyles = createThemedStyles((colors) => ({
   deleteRow: { minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 12 },
   deleteLabel: { color: colors.muted, fontSize: 14 },
   note: { color: colors.muted, fontSize: 13, lineHeight: 19 },
-  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: 30 },
+  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: serifLineHeight(24) },
 }));

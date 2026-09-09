@@ -1,7 +1,7 @@
 import type { PropsWithChildren, ReactNode } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 
 /** A section of the settings page: kicker, optional title, rows separated by hairlines. */
 export function Section({ eyebrow, title, action, children }: PropsWithChildren<{ eyebrow: string; title?: string; action?: ReactNode }>) {
@@ -99,7 +99,7 @@ const useStyles = createThemedStyles((colors) => ({
   sectionHead: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, paddingBottom: 6 },
   sectionHeadCopy: { flex: 1, gap: 4 },
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
-  sectionTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 20, lineHeight: 26 },
+  sectionTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 20, lineHeight: serifLineHeight(20) },
   row: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 12, borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 10 },
   rowCopy: { flex: 1, gap: 2 },
   rowLabel: { color: colors.ink, fontSize: 15, fontWeight: '600' },

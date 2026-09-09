@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
 import { BookCover } from '@/components/book-cover';
-import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import type { BookSummary } from '@/src/types';
 
 export function BookCard({
@@ -105,7 +105,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   parallel: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   parallelText: { color: colors.primary, fontSize: 10, fontWeight: '600' },
   offlineText: { color: colors.success, fontSize: 10, fontWeight: '600' },
-  bookTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, lineHeight: 23, fontWeight: '600' },
+  bookTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 19, lineHeight: serifLineHeight(19), fontWeight: '600' },
   author: { color: colors.muted, fontSize: 14 },
   footer: { flexDirection: 'row', gap: 10 },
   year: { color: colors.muted, fontSize: 12 },

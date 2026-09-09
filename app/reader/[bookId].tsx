@@ -37,7 +37,7 @@ import {
   saveReaderSettings,
   type ReaderSettings,
 } from '@/src/reader-settings';
-import { colors as lightColors, createThemedStyles, darkColors, fonts, shadows, useTheme } from '@/src/theme';
+import { colors as lightColors, createThemedStyles, darkColors, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import type { Bookshelf } from '@/src/types';
 import { useLearningActivity } from '@/src/use-activity';
 import { isUuid } from '@/src/uuid';
@@ -681,7 +681,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   sheetLoading: { minHeight: 220, alignItems: 'center', justifyContent: 'center', gap: 12 },
   sheetHeading: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   sheetHeadingCopy: { flex: 1, gap: 4 },
-  sheetEntry: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: 37 },
+  sheetEntry: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30) },
   sheetMeta: { color: colors.metadata, fontSize: 12 },
   sheetAudio: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderRadius: 22 },
   senses: { borderRadius: 20, paddingHorizontal: 16, backgroundColor: colors.surface, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },
@@ -732,7 +732,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   certificate: { padding: 10, backgroundColor: lightColors.canvas },
   certificateInner: { alignItems: 'center', gap: 10, padding: 22, borderWidth: 1, borderColor: '#612B5E' },
   certificateEyebrow: { color: '#872657', fontFamily: fonts.serifRegular, fontSize: 11, letterSpacing: 2.5 },
-  certificateTitle: { color: lightColors.ink, fontFamily: fonts.serif, fontSize: 26, lineHeight: 31, textAlign: 'center' },
+  certificateTitle: { color: lightColors.ink, fontFamily: fonts.serif, fontSize: 26, lineHeight: serifLineHeight(26), textAlign: 'center' },
   certificateMeta: { color: lightColors.muted, fontFamily: fonts.serifRegular, fontSize: 13, fontStyle: 'italic', textAlign: 'center' },
   certificateRule: { width: 100, height: 1, backgroundColor: '#612B5E', opacity: 0.5, marginVertical: 4 },
   certificateNumbers: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 16 },

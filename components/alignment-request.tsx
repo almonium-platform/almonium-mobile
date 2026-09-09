@@ -10,7 +10,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
-import { createThemedStyles, fonts, useTheme } from '@/src/theme';
+import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import type { BookDetails, TranslationOrder } from '@/src/types';
 
 function monthName(value: string | undefined) {
@@ -168,7 +168,7 @@ const useStyles = createThemedStyles((colors) => ({
   chipText: { color: colors.ink, fontSize: 13, fontWeight: '600' },
   chipTextSolid: { color: colors.onPrimary },
   note: { color: colors.muted, fontSize: 13, lineHeight: 19 },
-  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: 30 },
+  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: serifLineHeight(24) },
   quota: { color: colors.ink, fontSize: 14, fontWeight: '600' },
   dismiss: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   link: { color: colors.primary, fontSize: 13, fontWeight: '600' },
