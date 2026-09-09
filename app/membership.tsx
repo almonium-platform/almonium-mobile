@@ -11,6 +11,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { config } from '@/src/config';
 import { freeSavedItemLimit } from '@/src/limits';
+import { membershipName, planDescribesMembership } from '@/src/membership';
 import { useNotice } from '@/src/notice-context';
 import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import type { PlanOffer, PlanType, SubscriptionInfo } from '@/src/types';
@@ -87,8 +88,14 @@ export default function MembershipScreen() {
         {premium ? (
           <>
             <View style={styles.card}>
-              <Receipt label="Price" value={priceLine(subscription, monthly, yearly)} />
-              <Receipt label={subscription?.autoRenewal === false ? 'Access ends' : 'Renews'} value={formatDate(subscription?.endDate)} />
+              {planDescribesMembership(subscription) ? (
+                <>
+                  <Receipt label="Price" value={priceLine(subscription, monthly, yearly)} />
+                  <Receipt label={subscription?.autoRenewal === false ? 'Access ends' : 'Renews'} value={formatDate(subscription?.endDate)} />
+                </>
+              ) : (
+                <Receipt label="Plan" value={`${membershipName(subscription)}, granted`} />
+              )}
               <Receipt label="Member since" value={formatDate(subscription?.startDate)} />
               {subscription?.scheduledChange && (
                 <Receipt
@@ -96,7 +103,7 @@ export default function MembershipScreen() {
                   value={`${subscription.scheduledChange.type === 'MONTHLY' ? 'Monthly' : 'Annual'} from ${formatDate(subscription.scheduledChange.effectiveAt)}`}
                 />
               )}
-              {subscription?.type !== 'LIFETIME' && (
+              {planDescribesMembership(subscription) && subscription?.type !== 'LIFETIME' && (
                 <Button loading={openingPortal} onPress={() => void openPortal()}>Manage plan, card and invoices</Button>
               )}
             </View>
@@ -241,6 +248,9 @@ function priceLine(subscription: SubscriptionInfo | undefined, monthly: PlanOffe
 
 function membershipTitle(subscription: SubscriptionInfo | undefined) {
   if (subscription?.founder) return 'Founding member';
+  // A granted membership sits on the free row, so the row's dates and LIFETIME type describe
+  // nothing here: the entitlement is the whole story.
+  if (!planDescribesMembership(subscription)) return 'Premium member';
   if (subscription?.type === 'LIFETIME') return 'Lifetime member';
   if (subscription?.autoRenewal === false) return `Premium until ${formatDate(subscription.endDate)}`;
   return 'Premium member';

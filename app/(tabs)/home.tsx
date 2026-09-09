@@ -14,6 +14,7 @@ import { useAuth } from '@/src/auth-context';
 import { useCrest } from '@/src/crest-context';
 import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
+import { membershipName } from '@/src/membership';
 import { intentLabel } from '@/src/review';
 import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import { rhythmFor, useLearningStats, useRhythm } from '@/src/use-rhythm';
@@ -227,7 +228,7 @@ export default function HomeScreen() {
             <View style={styles.planLine}>
               <Text style={styles.copy}>
                 {profile?.premium
-                  ? `You’re on ${planLabel(profile.subscription.name)}.`
+                  ? `You’re on ${membershipName(profile.subscription)}.`
                   : `Free covers one language and ${freeSavedItemLimit} saved words.${savedCount ? ` You have kept ${savedCount}, all in ${languageName(language)}.` : ''}`}{' '}
                 <Text onPress={() => router.push('/membership')} style={styles.link}>
                   {profile?.premium ? 'Membership' : 'See what Premium adds'}
@@ -247,10 +248,6 @@ export default function HomeScreen() {
 
 function minutesLeft(wordCount: number, percentage: number) {
   return Math.max(1, Math.round((wordCount * (1 - percentage / 100)) / wordsPerMinute));
-}
-
-function planLabel(name: string) {
-  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 }
 
 const useStyles = createThemedStyles((colors, isDark) => ({
