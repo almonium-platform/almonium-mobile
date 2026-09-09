@@ -89,7 +89,7 @@ export default function HomeScreen() {
       <View style={styles.center}>
         <Text style={styles.sectionTitle}>Choose a learning language</Text>
         <Text style={styles.copy}>Add or activate a target language in Settings to build your home.</Text>
-        <Button onPress={() => router.push('/(tabs)/settings')}>Open settings</Button>
+        <Button onPress={() => router.push({ pathname: '/(tabs)/settings', params: { tab: 'learning' } })}>Open settings</Button>
       </View>
     );
   }

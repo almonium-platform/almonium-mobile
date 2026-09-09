@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,13 +23,15 @@ const tabs: { key: Tab; label: string }[] = [
 
 /**
  * Settings sit behind the avatar, not in a tab. Four sections in the web's order; the header
- * names the language, which is the one true fact a new account has.
+ * names the language, which is the one true fact a new account has. A `tab` param lets language
+ * affordances elsewhere land on Learning instead of making people hunt for it.
  */
 export default function SettingsScreen() {
   const { colors } = useTheme();
   const styles = useStyles();
   const { profile } = useAuth();
-  const [tab, setTab] = useState<Tab>('profile');
+  const { tab: requestedTab } = useLocalSearchParams<{ tab?: string }>();
+  const [tab, setTab] = useState<Tab>(tabs.some((item) => item.key === requestedTab) ? (requestedTab as Tab) : 'profile');
   const activeLanguages = profile?.learners.filter((learner) => learner.active).map((learner) => languageName(learner.language)) ?? [];
 
   return (

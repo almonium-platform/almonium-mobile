@@ -125,7 +125,7 @@ export function AppHeader({
         <Pressable
           onPress={() => {
             setLanguagesVisible(false);
-            router.push('/(tabs)/settings');
+            router.push({ pathname: '/(tabs)/settings', params: { tab: 'learning' } });
           }}
           style={styles.manageLanguages}>
           <Ionicons name="add" size={18} color={colors.primary} />

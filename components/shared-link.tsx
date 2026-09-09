@@ -143,7 +143,7 @@ export function SharedLinkScreen({ kind, id }: { kind: 'card' | 'deck'; id: stri
         ) : noLearner ? (
           <>
             <Text style={styles.copy}>You are not learning {languageName(language)} yet. Add it in Settings and these words can join your shelf.</Text>
-            <Button variant="secondary" onPress={() => router.push('/(tabs)/settings')}>Open settings</Button>
+            <Button variant="secondary" onPress={() => router.push({ pathname: '/(tabs)/settings', params: { tab: 'learning' } })}>Open settings</Button>
           </>
         ) : !canAdd ? (
           <Text style={styles.copy}>{fresh.length === 0 && words.length ? 'You already keep every word here.' : ''}</Text>
