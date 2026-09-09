@@ -49,6 +49,8 @@ interface AuthState {
   reauthenticateWithApple(): Promise<void>;
   logOut(): Promise<void>;
   refreshProfile(): Promise<void>;
+  /** Optimistic, in-memory only; the next refreshProfile writes the authoritative copy to cache. */
+  patchProfile(patch: Partial<UserInfo>): void;
   retryProfile(): Promise<void>;
 }
 
@@ -232,6 +234,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
         queryClient.clear();
         if (uid) await AsyncStorage.removeItem(profileCacheKey(uid));
         setProfile(null);
+      },
+      patchProfile(patch) {
+        setProfile((current) => (current ? { ...current, ...patch } : current));
       },
       async refreshProfile() {
         if (auth.currentUser) {
