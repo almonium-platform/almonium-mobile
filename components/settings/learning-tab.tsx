@@ -15,6 +15,7 @@ import { languageColours } from '@/src/crest';
 import { useCrest } from '@/src/crest-context';
 import { msg } from '@/src/i18n';
 import { languageName, sortLanguages } from '@/src/languages';
+import { activeLanguageAllowance } from '@/src/membership';
 import { useNotice } from '@/src/notice-context';
 import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import type { CefrLevel, Learner } from '@/src/types';
@@ -71,7 +72,7 @@ export function LearningTab() {
   });
   const learners = useMemo(() => profile?.learners ?? [], [profile?.learners]);
   const activeCount = learners.filter((learner) => learner.active).length;
-  const allowance = policy.data?.allowance ?? profile?.subscription.limits.MAX_ACTIVE_LANGS ?? 1;
+  const allowance = policy.data?.allowance ?? activeLanguageAllowance(profile?.subscription);
   const unlimited = allowance === -1;
   const targetLimit = profile?.subscription.limits.MAX_TARGET_LANGS ?? 3;
   const fluentLimit = profile?.subscription.limits.MAX_FLUENT_LANGS ?? 1;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { membershipName, planDescribesMembership, planLabel } from './membership';
+import { activeLanguageAllowance, membershipName, planDescribesMembership, planLabel } from './membership';
 import type { SubscriptionInfo } from './types';
 
 function subscription(overrides: Partial<SubscriptionInfo> = {}): SubscriptionInfo {
@@ -34,5 +34,18 @@ describe('membershipName', () => {
 describe('planLabel', () => {
   it('lowercases the shouting', () => {
     expect(planLabel('PREMIUM')).toBe('Premium');
+  });
+});
+
+describe('activeLanguageAllowance', () => {
+  it('reads the row when the plan has one', () => {
+    expect(activeLanguageAllowance(subscription({ limits: { MAX_ACTIVE_LANGS: 3 } }))).toBe(3);
+    expect(activeLanguageAllowance(subscription({ limits: { MAX_ACTIVE_LANGS: 1 } }))).toBe(1);
+  });
+
+  it('treats an absent row the way the backend does: no ceiling, not one language', () => {
+    expect(activeLanguageAllowance(subscription({ limits: {} }))).toBe(-1);
+    expect(activeLanguageAllowance(subscription({ limits: { MAX_ACTIVE_LANGS: -1 } }))).toBe(-1);
+    expect(activeLanguageAllowance(undefined)).toBe(-1);
   });
 });

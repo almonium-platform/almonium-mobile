@@ -1,5 +1,7 @@
+import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
+import type { StyleProp, TextStyle } from 'react-native';
 import type { ComponentProps, PropsWithChildren, ReactNode } from 'react';
 
 import { createThemedStyles, fonts, gradients, radii, serifLineHeight, shadows, useTheme } from '@/src/theme';
@@ -29,6 +31,22 @@ export function Field(props: ComponentProps<typeof TextInput>) {
       {...props}
       style={[styles.field, props.style]}
     />
+  );
+}
+
+/**
+ * The web's premium title: serif ink filled with the plum-to-raspberry gradient. Premium-only, like
+ * the gradient itself. The mask is the text; a transparent twin inside the gradient gives it a size.
+ */
+export function GradientText({ children, style }: { children: string; style?: StyleProp<TextStyle> }) {
+  const { isDark } = useTheme();
+  const styles = useStyles();
+  return (
+    <MaskedView maskElement={<Text style={style}>{children}</Text>}>
+      <LinearGradient colors={isDark ? gradients.premiumDark : gradients.premium} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+        <Text style={[style, styles.gradientSizer]}>{children}</Text>
+      </LinearGradient>
+    </MaskedView>
   );
 }
 
@@ -133,6 +151,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  gradientSizer: { opacity: 0 },
   buttonFill: {
     minHeight: 54,
     width: '100%',

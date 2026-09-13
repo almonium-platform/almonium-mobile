@@ -8,12 +8,12 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { premiumLines } from '@/components/paywall-modal';
-import { Button } from '@/components/ui';
+import { Button, GradientText } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { config } from '@/src/config';
 import { freeSavedItemLimit } from '@/src/limits';
-import { membershipName, planDescribesMembership } from '@/src/membership';
+import { activeLanguageAllowance, membershipName, planDescribesMembership } from '@/src/membership';
 import { useNotice } from '@/src/notice-context';
 import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import type { PlanOffer, PlanType, SubscriptionInfo } from '@/src/types';
@@ -62,7 +62,8 @@ export default function MembershipScreen() {
   const monthly = planFor('MONTHLY');
   const yearly = planFor('YEARLY');
   const priceOf = (plan: PlanOffer | undefined) => (plan ? (founderAvailable && plan.founderPrice ? plan.founderPrice : plan.price) : null);
-  const activeLimit = subscription?.limits.MAX_ACTIVE_LANGS ?? 1;
+  const allowance = activeLanguageAllowance(subscription);
+  const activeLimit = allowance < 0 ? null : allowance;
   const activeLanguages = profile?.learners.filter((learner) => learner.active).length ?? 0;
 
   async function openPortal() {
@@ -85,31 +86,38 @@ export default function MembershipScreen() {
         </Pressable>
         <View style={styles.heading}>
           <Text style={styles.eyebrow}>{t('MEMBERSHIP')}</Text>
-          <Text style={styles.title}>{premium ? membershipTitle(t, subscription) : t('You’re on Free')}</Text>
+          {premium ? (
+            <GradientText style={styles.title}>{membershipTitle(t, subscription)}</GradientText>
+          ) : (
+            <Text style={styles.title}>{t('You’re on Free')}</Text>
+          )}
         </View>
 
         {premium ? (
           <>
             <View style={styles.card}>
-              {planDescribesMembership(subscription) ? (
-                <>
-                  <Receipt label={t('Price')} value={priceLine(t, subscription, monthly, yearly)} />
-                  <Receipt label={subscription?.autoRenewal === false ? t('Access ends') : t('Renews')} value={formatDate(subscription?.endDate)} />
-                </>
-              ) : (
-                <Receipt label={t('Plan')} value={t('{plan}, granted', { plan: membershipName(subscription) })} />
-              )}
-              <Receipt label={t('Member since')} value={formatDate(subscription?.startDate)} />
-              {subscription?.scheduledChange && (
-                <Receipt
-                  label={t('Scheduled change')}
-                  value={
-                    subscription.scheduledChange.type === 'MONTHLY'
-                      ? t('Monthly from {date}', { date: formatDate(subscription.scheduledChange.effectiveAt) })
-                      : t('Annual from {date}', { date: formatDate(subscription.scheduledChange.effectiveAt) })
-                  }
-                />
-              )}
+              <Receipts
+                rows={[
+                  ...(planDescribesMembership(subscription)
+                    ? [
+                        { label: t('Price'), value: priceLine(t, subscription, monthly, yearly) },
+                        { label: subscription?.autoRenewal === false ? t('Access ends') : t('Renews'), value: formatDate(subscription?.endDate) },
+                      ]
+                    : [{ label: t('Plan'), value: t('{plan}, granted', { plan: membershipName(subscription) }) }]),
+                  { label: t('Member since'), value: formatDate(subscription?.startDate) },
+                  ...(subscription?.scheduledChange
+                    ? [
+                        {
+                          label: t('Scheduled change'),
+                          value:
+                            subscription.scheduledChange.type === 'MONTHLY'
+                              ? t('Monthly from {date}', { date: formatDate(subscription.scheduledChange.effectiveAt) })
+                              : t('Annual from {date}', { date: formatDate(subscription.scheduledChange.effectiveAt) }),
+                        },
+                      ]
+                    : []),
+                ]}
+              />
               {planDescribesMembership(subscription) && subscription?.type !== 'LIFETIME' && (
                 <Button loading={openingPortal} onPress={() => void openPortal()}>{t('Manage plan, card and invoices')}</Button>
               )}
@@ -117,7 +125,7 @@ export default function MembershipScreen() {
             <View style={styles.card}>
               <Text style={styles.sectionTitle}>{t('What’s running on it')}</Text>
               <Usage label={t('Saved words')} used={savedWords} limit={null} />
-              <Usage label={t('Languages active')} used={activeLanguages} limit={activeLimit > 0 ? activeLimit : null} />
+              <Usage label={t('Languages active')} used={activeLanguages} limit={activeLimit} />
               {quota.data && <Usage label={t('Translation requests this month')} used={quota.data.used} limit={quota.data.limit} />}
             </View>
             {subscription?.founder && (
@@ -131,7 +139,7 @@ export default function MembershipScreen() {
             <View style={styles.card}>
               <Text style={styles.sectionTitle}>{t('Where you are against the free limits')}</Text>
               <Usage label={t('Saved words')} used={savedWords} limit={freeSavedItemLimit} />
-              <Usage label={t('Languages active')} used={activeLanguages} limit={activeLimit > 0 ? activeLimit : 1} />
+              <Usage label={t('Languages active')} used={activeLanguages} limit={activeLimit} />
               {quota.data && <Usage label={t('Translation requests this month')} used={quota.data.used} limit={quota.data.limit} />}
             </View>
 
@@ -221,12 +229,17 @@ function PriceBlock({
   );
 }
 
-function Receipt({ label, value }: { label: string; value: string }) {
+/** A receipt reads as one list: a line between entries, none under the last. */
+function Receipts({ rows }: { rows: { label: string; value: string }[] }) {
   const styles = useStyles();
   return (
-    <View style={styles.receiptRow}>
-      <Text style={styles.receiptLabel}>{label}</Text>
-      <Text style={styles.receiptValue}>{value}</Text>
+    <View style={styles.receipts}>
+      {rows.map((row, index) => (
+        <View key={row.label} style={[styles.receiptRow, index > 0 && styles.receiptRowAfterFirst]}>
+          <Text style={styles.receiptLabel}>{row.label}</Text>
+          <Text style={styles.receiptValue}>{row.value}</Text>
+        </View>
+      ))}
     </View>
   );
 }
@@ -286,7 +299,9 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30), fontWeight: '600' },
   card: { gap: 14, borderRadius: 28, padding: 20, backgroundColor: colors.surface, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },
   sectionTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 21, fontWeight: '600' },
-  receiptRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, borderBottomWidth: 1, borderBottomColor: colors.line, paddingBottom: 10 },
+  receipts: { marginVertical: -10 },
+  receiptRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingVertical: 10 },
+  receiptRowAfterFirst: { borderTopWidth: 1, borderTopColor: colors.line },
   receiptLabel: { color: colors.muted, fontSize: 14 },
   receiptValue: { flex: 1, color: colors.ink, fontSize: 14, fontWeight: '600', textAlign: 'right' },
   usage: { gap: 7 },
