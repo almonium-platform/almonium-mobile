@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
+import { t } from './i18n';
 import { normalizeReminderHour } from '@/src/reminder-utils';
 
 export { reminderTimeLabel } from '@/src/reminder-utils';
@@ -45,23 +46,23 @@ export async function configureDailyReminder(enabled: boolean, hour: number) {
     await AsyncStorage.setItem(settingsKey, JSON.stringify(settings));
     return settings;
   }
-  if (Platform.OS === 'web') throw new Error('Review reminders are available in the iOS and Android app.');
+  if (Platform.OS === 'web') throw new Error(t('Review reminders are available in the iOS and Android app.'));
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(channelId, {
-      name: 'Review reminders',
+      name: t('Review reminders'),
       importance: Notifications.AndroidImportance.DEFAULT,
     });
   }
   const permission = await Notifications.requestPermissionsAsync({
     ios: { allowAlert: true, allowBadge: false, allowSound: true },
   });
-  if (!permission.granted) throw new Error('Notifications are off. You can enable them in system settings.');
+  if (!permission.granted) throw new Error(t('Notifications are off. You can enable them in system settings.'));
 
   const notificationId = await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'A few words may be ready',
-      body: 'Open a short review when it suits you.',
+      title: t('A few words may be ready'),
+      body: t('Open a short review when it suits you.'),
       data: { url: '/review' },
     },
     trigger: {

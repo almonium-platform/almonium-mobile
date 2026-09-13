@@ -3,16 +3,17 @@
  * the same shapes and rules the web client reads, ported so a fraction can never disagree with
  * itself across clients. Keep this module free of React imports so the rules stay unit-testable.
  */
+import { msg, t } from './i18n';
 
 /** Days per week asked of one language. `null` means never chosen; 0 is the deliberate "no target". */
 export type WeeklyTarget = number | null;
 
-/** The targets the backend accepts, in the order the harness offers them. */
+/** The targets the backend accepts, in the order the harness offers them. Translate where shown: `t(option.label)`. */
 export const targetOptions: { value: number; label: string; note?: string }[] = [
-  { value: 1, label: 'Once a week' },
-  { value: 2, label: 'Twice a week' },
-  { value: 4, label: 'Four times a week' },
-  { value: 0, label: 'No target', note: 'Keep the record, drop the bar' },
+  { value: 1, label: msg('Once a week') },
+  { value: 2, label: msg('Twice a week') },
+  { value: 4, label: msg('Four times a week') },
+  { value: 0, label: msg('No target'), note: msg('Keep the record, drop the bar') },
 ];
 
 /** Weeks kept against weeks asked for, fixed at a moment rather than rolling. */
@@ -79,18 +80,20 @@ export function hasTarget(target: WeeklyTarget): target is number {
 }
 
 export function cadenceLabel(target: WeeklyTarget) {
-  if (target === null) return 'No pace set';
-  return targetOptions.find((option) => option.value === target)?.label ?? `${target} times a week`;
+  if (target === null) return t('No pace set');
+  const option = targetOptions.find((option) => option.value === target);
+  return option ? t(option.label) : t('{count} times a week', { count: target });
 }
 
 const numberWords = [
-  'No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six',
-  'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve',
+  msg('No'), msg('One'), msg('Two'), msg('Three'), msg('Four'), msg('Five'), msg('Six'),
+  msg('Seven'), msg('Eight'), msg('Nine'), msg('Ten'), msg('Eleven'), msg('Twelve'),
 ];
 
 /** The record speaks in words, not figures: it is a sentence about a person, not a readout. */
 export function numberWord(value: number) {
-  return numberWords[value] ?? `${value}`;
+  const word = numberWords[value];
+  return word ? t(word) : `${value}`;
 }
 
 /** The Monday the given day belongs to, so a start date can be compared with a week's start. */
@@ -157,16 +160,33 @@ export function isEmptyRecord(rhythm: LanguageRhythm) {
  */
 export function rhythmSummary(rhythm: LanguageRhythm, languageName: string) {
   const pace = paceFraction(rhythm);
-  const bar = hasTarget(rhythm.target)
-    ? ` met your target of ${cadenceLabel(rhythm.target).toLowerCase()}`
-    : ' had time learning in them';
+  const withTarget = hasTarget(rhythm.target);
+  const cadence = withTarget ? cadenceLabel(rhythm.target).toLowerCase() : '';
   if (rhythm.setAsideAt) {
-    return `${numberWord(pace.met)} ${pace.met === 1 ? 'week' : 'weeks'}${bar} before you set ${languageName} aside on ${formatDay(rhythm.setAsideAt)}. The weeks since are not counted against you.`;
+    const values = { count: pace.met, word: numberWord(pace.met), cadence, language: languageName, date: formatDay(rhythm.setAsideAt) };
+    return withTarget
+      ? t(
+          '{count, plural, one {{word} week} other {{word} weeks}} met your target of {cadence} before you set {language} aside on {date}. The weeks since are not counted against you.',
+          values,
+        )
+      : t(
+          '{count, plural, one {{word} week} other {{word} weeks}} had time learning in them before you set {language} aside on {date}. The weeks since are not counted against you.',
+          values,
+        );
   }
   if (pace.counted === 0) {
-    return 'Twelve weeks, filling in as you learn. You can set a target once there is something to measure.';
+    return t('Twelve weeks, filling in as you learn. You can set a target once there is something to measure.');
   }
-  return `${numberWord(pace.met)} of the last ${numberWord(pace.counted).toLowerCase()} ${pace.counted === 1 ? 'week' : 'weeks'}${bar}. Tint shows time learning, not a score.`;
+  const values = { met: numberWord(pace.met), count: pace.counted, word: numberWord(pace.counted).toLowerCase(), cadence };
+  return withTarget
+    ? t(
+        '{met} of the last {count, plural, one {{word} week} other {{word} weeks}} met your target of {cadence}. Tint shows time learning, not a score.',
+        values,
+      )
+    : t(
+        '{met} of the last {count, plural, one {{word} week} other {{word} weeks}} had time learning in them. Tint shows time learning, not a score.',
+        values,
+      );
 }
 
 export function formatDay(value: string) {

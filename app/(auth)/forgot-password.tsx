@@ -1,5 +1,6 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text } from 'react-native';
 
 import { Screen } from '@/components/screen';
@@ -9,6 +10,7 @@ import { useNotice } from '@/src/notice-context';
 import { createThemedStyles } from '@/src/theme';
 
 export default function ForgotPasswordScreen() {
+  const { t } = useTranslation();
   const styles = useStyles();
   const { resetPassword } = useAuth();
   const showNotice = useNotice();
@@ -19,9 +21,9 @@ export default function ForgotPasswordScreen() {
     setLoading(true);
     try {
       await resetPassword(email);
-      showNotice({ title: 'Email sent', message: 'Use the link in your inbox to choose a new password.', tone: 'success' });
+      showNotice({ title: t('Email sent'), message: t('Use the link in your inbox to choose a new password.'), tone: 'success' });
     } catch (error) {
-      showNotice({ title: 'Could not send email', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not send email'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setLoading(false);
     }
@@ -29,22 +31,22 @@ export default function ForgotPasswordScreen() {
 
   return (
     <Screen contentStyle={styles.content}>
-      <Title>Reset password</Title>
-      <Text style={styles.subtitle}>Firebase will send a secure reset link to your email.</Text>
+      <Title>{t('Reset password')}</Title>
+      <Text style={styles.subtitle}>{t('Firebase will send a secure reset link to your email.')}</Text>
       <Card>
         <Field
           value={email}
           onChangeText={setEmail}
-          placeholder="Email"
+          placeholder={t('Email')}
           keyboardType="email-address"
           autoComplete="email"
         />
         <Button loading={loading} disabled={!email.trim()} onPress={submit}>
-          Send reset link
+          {t('Send reset link')}
         </Button>
       </Card>
       <Link href="/(auth)/sign-in" style={styles.link}>
-        Back to sign in
+        {t('Back to sign in')}
       </Link>
     </Screen>
   );

@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -28,6 +29,7 @@ const cardLanguageKey = 'almonium:card-language';
 const intentFilters: ('ALL' | LearningIntent)[] = ['ALL', 'UNDERSTAND', 'PRODUCE', 'DISAMBIGUATE', 'PRONOUNCE', 'CHUNK'];
 
 export default function CardsScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
@@ -82,8 +84,8 @@ export default function CardsScreen() {
     return (
       <SafeAreaView style={styles.center}>
         <Ionicons name="albums-outline" size={44} color={colors.primary} />
-        <Text style={styles.emptyTitle}>No active study language</Text>
-        <Text style={styles.emptyText}>Activate or add a target language in Settings first.</Text>
+        <Text style={styles.emptyTitle}>{t('No active study language')}</Text>
+        <Text style={styles.emptyText}>{t('Activate or add a target language in Settings first.')}</Text>
       </SafeAreaView>
     );
   }
@@ -107,12 +109,12 @@ export default function CardsScreen() {
       }
       ListHeaderComponent={
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>REVIEW</Text>
+          <Text style={styles.eyebrow}>{t('REVIEW')}</Text>
           <Text style={styles.hero}>
-            {review.isLoading ? 'Gathering what is due' : due ? `${due} ${due === 1 ? 'word is' : 'words are'} due` : 'You are clear for now'}
+            {review.isLoading ? t('Gathering what is due') : due ? t('{count, plural, one {# word is due} other {# words are due}}', { count: due }) : t('You are clear for now')}
           </Text>
           <Text style={styles.subhead}>
-            {review.isLoading ? 'Your schedule is kept across every device.' : due ? `${review.data?.sessionSize ?? Math.min(10, due)} make a session. Nothing is lost by stopping.` : 'Reading a page will give Almo more to ask you.'}
+            {review.isLoading ? t('Your schedule is kept across every device.') : due ? t('{count} make a session. Nothing is lost by stopping.', { count: review.data?.sessionSize ?? Math.min(10, due) }) : t('Reading a page will give Almo more to ask you.')}
           </Text>
           {review.isLoading ? <ActivityIndicator style={styles.loader} color={colors.primary} /> : due ? <View style={styles.actions}>
             {/* Three stacked groups, not columns. */}
@@ -138,8 +140,8 @@ export default function CardsScreen() {
                   <Text style={styles.reviewCountText}>{due}</Text>
                 </View>
                 <View style={styles.actionCopy}>
-                  <Text style={styles.actionTitle}>Review due items</Text>
-                  <Text style={styles.actionCaption}>Your schedule follows you</Text>
+                  <Text style={styles.actionTitle}>{t('Review due items')}</Text>
+                  <Text style={styles.actionCaption}>{t('Your schedule follows you')}</Text>
                 </View>
                 <Ionicons name="arrow-forward" size={20} color={colors.onPrimary} />
               </View>
@@ -147,21 +149,21 @@ export default function CardsScreen() {
             <Button
               variant="secondary"
               onPress={() => router.push({ pathname: '/item/new', params: { language } })}>
-              Add an item
+              {t('Add an item')}
             </Button>
           </View> : (
             <View style={styles.caughtUp}>
               <Image source={require('../../assets/images/almo-asleep.png')} contentFit="contain" style={styles.almo} />
               <View style={styles.caughtUpCopy}>
-                <Text style={styles.caughtUpTitle}>Nothing due</Text>
-                <Text style={styles.subhead}>Come back when the next word is ready, or meet another one in a book.</Text>
+                <Text style={styles.caughtUpTitle}>{t('Nothing due')}</Text>
+                <Text style={styles.subhead}>{t('Come back when the next word is ready, or meet another one in a book.')}</Text>
               </View>
               <Button
                 variant="secondary"
                 onPress={() => query.data?.length
                   ? router.push('/(tabs)/books')
                   : router.push({ pathname: '/item/new', params: { language } })}>
-                {query.data?.length ? 'Open your shelf' : 'Keep your first word'}
+                {query.data?.length ? t('Open your shelf') : t('Keep your first word')}
               </Button>
             </View>
           )}
@@ -170,7 +172,7 @@ export default function CardsScreen() {
             <TextInput
               value={search}
               onChangeText={setSearch}
-              placeholder="Search words, translations, or tags"
+              placeholder={t('Search words, translations, or tags')}
               placeholderTextColor={colors.muted}
               style={styles.searchInput}
             />
@@ -184,13 +186,13 @@ export default function CardsScreen() {
                 onPress={() => setIntent(value)}
                 style={[styles.filter, intent === value && styles.filterActive]}>
                 <Text style={[styles.filterText, intent === value && styles.filterTextActive]}>
-                  {value === 'ALL' ? 'All saved' : intentLabel(value)}
+                  {value === 'ALL' ? t('All saved') : intentLabel(value)}
                 </Text>
               </Pressable>
             ))}
           </ScrollView>
           {(query.isError || review.isError) && (query.data || review.data) && (
-            <Text style={styles.offline}>Showing available review details. Reconnect to refresh the schedule.</Text>
+            <Text style={styles.offline}>{t('Showing available review details. Reconnect to refresh the schedule.')}</Text>
           )}
         </View>
       }
@@ -220,13 +222,13 @@ export default function CardsScreen() {
         ) : (
           <View style={styles.emptyInline}>
             <Ionicons name="layers-outline" size={38} color={colors.primary} />
-            <Text style={styles.emptyTitle}>{search || intent !== 'ALL' ? 'No matching items' : 'Your first word goes here'}</Text>
+            <Text style={styles.emptyTitle}>{search || intent !== 'ALL' ? t('No matching items') : t('Your first word goes here')}</Text>
             <Text style={styles.emptyText}>
               {query.isError && !query.data
-                ? query.error instanceof Error ? query.error.message : 'Could not load your saved items.'
-                : search || intent !== 'ALL' ? 'Try a different search or learning intent.' : 'Keep a word, then begin a short review.'}
+                ? query.error instanceof Error ? query.error.message : t('Could not load your saved items.')
+                : search || intent !== 'ALL' ? t('Try a different search or learning intent.') : t('Keep a word, then begin a short review.')}
             </Text>
-            {!search && intent === 'ALL' && <Button onPress={() => router.push({ pathname: '/item/new', params: { language } })}>Keep a word</Button>}
+            {!search && intent === 'ALL' && <Button onPress={() => router.push({ pathname: '/item/new', params: { language } })}>{t('Keep a word')}</Button>}
           </View>
         )
       }

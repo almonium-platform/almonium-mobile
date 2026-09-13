@@ -29,6 +29,7 @@ import type {
 } from '@/src/types';
 import { config } from '@/src/config';
 import { decodeJsonBody, errorMessageFromBody } from '@/src/http-errors';
+import { t } from './i18n';
 import type { DiscoverLookup } from '@/src/discover';
 import type { LearningActivity, Rhythm, WeeklyTarget } from '@/src/rhythm';
 import type {
@@ -54,7 +55,7 @@ async function fetchWithTimeout(url: string, init: RequestInit = {}) {
     return await fetch(url, { ...init, signal: controller.signal });
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new ApiError('The server took too long to respond', 0);
+      throw new ApiError(t('The server took too long to respond'), 0);
     }
     throw error;
   } finally {
@@ -69,7 +70,7 @@ async function responseError(response: Response) {
 
 async function authorizedFetch(path: string, init: RequestInit = {}, forceRefresh = false) {
   const user = auth.currentUser;
-  if (!user) throw new ApiError('Sign in required', 401);
+  if (!user) throw new ApiError(t('Sign in required'), 401);
 
   const token = await user.getIdToken(forceRefresh);
   return fetchWithTimeout(`${config.apiBaseUrl}${path}`, {
@@ -113,7 +114,7 @@ async function publicPost<T>(path: string, body: unknown): Promise<T> {
 export const api = {
   requestEmailVerification: async () => {
     const user = auth.currentUser;
-    if (!user) throw new ApiError('Sign in required', 401);
+    if (!user) throw new ApiError(t('Sign in required'), 401);
     return publicPost<void>('/public/auth/email-verification', {idToken: await user.getIdToken(true)});
   },
   requestPasswordReset: (email: string) => publicPost<{message: string}>('/public/auth/password-resets', {email}),
@@ -220,7 +221,7 @@ export const api = {
   bookInfo: (bookId: string) => request<BookMiniDetails>(`/books/${bookId}`),
   bookText: async (bookId: string) => {
     const response = await authorizedFetch(`/books/${bookId}/text`);
-    if (!response.ok) throw new ApiError('Could not load this book', response.status);
+    if (!response.ok) throw new ApiError(t('Could not load this book'), response.status);
     return response.text();
   },
   parallelText: async (bookId: string, language: string) => {

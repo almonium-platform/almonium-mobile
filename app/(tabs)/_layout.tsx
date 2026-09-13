@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/src/auth-context';
@@ -14,6 +15,7 @@ const tabBarPaddingTop = 7;
 const tabBarItemHeight = 54;
 
 export default function TabsLayout() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { firebaseUser, profile, loading } = useAuth();
@@ -40,47 +42,47 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Home',
+          title: t('Home'),
           tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="books"
         options={{
-          title: 'Read',
+          title: t('Read'),
           tabBarIcon: ({ color, size }) => <Ionicons name="book" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="cards"
         options={{
-          title: 'Review',
+          title: t('Review'),
           tabBarIcon: ({ color, size }) => <Ionicons name="layers" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="lookup"
         options={{
-          title: 'Look up',
+          title: t('Look up'),
           tabBarIcon: ({ color, size }) => <Ionicons name="search" color={color} size={size} />,
         }}
       />
-      <Tabs.Screen name="play" options={{ href: null, title: 'Play' }} />
+      <Tabs.Screen name="play" options={{ href: null, title: t('Play') }} />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'More',
+          title: t('More'),
           href: null,
         }}
       />
       <Tabs.Screen
         name="inbox"
         options={{
-          title: 'Inbox',
+          title: t('Inbox'),
           href: null,
         }}
       />
-      <Tabs.Screen name="people" options={{ href: null, title: 'People' }} />
+      <Tabs.Screen name="people" options={{ href: null, title: t('People') }} />
     </Tabs>
   );
 }

@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { AppHeader } from '@/components/app-header';
@@ -26,6 +27,7 @@ const wordsPerMinute = 200;
  * ground, separated by hairlines. One primary action (Continue); Start a session outlines toward ink.
  */
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
@@ -88,9 +90,9 @@ export default function HomeScreen() {
   if (!language) {
     return (
       <View style={styles.center}>
-        <Text style={styles.sectionTitle}>Choose a learning language</Text>
-        <Text style={styles.copy}>Add or activate a target language in Settings to build your home.</Text>
-        <Button onPress={() => router.push({ pathname: '/(tabs)/settings', params: { tab: 'learning' } })}>Open settings</Button>
+        <Text style={styles.sectionTitle}>{t('Choose a learning language')}</Text>
+        <Text style={styles.copy}>{t('Add or activate a target language in Settings to build your home.')}</Text>
+        <Button onPress={() => router.push({ pathname: '/(tabs)/settings', params: { tab: 'learning' } })}>{t('Open settings')}</Button>
       </View>
     );
   }
@@ -116,12 +118,12 @@ export default function HomeScreen() {
         ) : !hasActivity ? (
           <View style={styles.card}>
             <Image source={require('../../assets/images/almo-standing.png')} contentFit="contain" style={styles.almo} />
-            <Text style={styles.eyebrow}>NOTHING HERE YET</Text>
-            <Text style={styles.bookTitle}>Start with one page</Text>
-            <Text style={styles.copy}>Open a book and the words you keep collect here, next to the sentence you met them in. One page is enough to see how it works.</Text>
-            <Button onPress={() => router.push('/(tabs)/books')}>Open the library</Button>
+            <Text style={styles.eyebrow}>{t('NOTHING HERE YET')}</Text>
+            <Text style={styles.bookTitle}>{t('Start with one page')}</Text>
+            <Text style={styles.copy}>{t('Open a book and the words you keep collect here, next to the sentence you met them in. One page is enough to see how it works.')}</Text>
+            <Button onPress={() => router.push('/(tabs)/books')}>{t('Open the library')}</Button>
             <Pressable onPress={() => router.push('/(tabs)/lookup')} style={styles.inlineAction}>
-              <Text style={styles.link}>Or paste a sentence into Look up</Text>
+              <Text style={styles.link}>{t('Or paste a sentence into Look up')}</Text>
             </Pressable>
           </View>
         ) : continueBook ? (
@@ -135,11 +137,13 @@ export default function HomeScreen() {
                 style={styles.cover}
               />
               <View style={styles.continueCopy}>
-                <Text style={styles.eyebrow}>CONTINUE READING</Text>
+                <Text style={styles.eyebrow}>{t('CONTINUE READING')}</Text>
                 <Text style={styles.bookTitle}>{continueBook.title}</Text>
                 <Text style={styles.meta}>
                   {continueBook.author} · {continueBook.cefrLevel}
-                  {continueBook.hasParallelTranslation ? ` · ${languageName(continueBook.language)} beside ${languageName(profile?.fluentLangs[0] ?? '')}` : ''}
+                  {continueBook.hasParallelTranslation
+                    ? ` · ${t('{language} beside {fluent}', { language: languageName(continueBook.language), fluent: languageName(profile?.fluentLangs[0] ?? '') })}`
+                    : ''}
                 </Text>
               </View>
             </View>
@@ -147,32 +151,38 @@ export default function HomeScreen() {
               <View style={[styles.progress, { width: `${continueBook.progressPercentage ?? 0}%` }]} />
             </View>
             <Text style={styles.meta}>
-              {continueBook.progressPercentage ?? 0}% · about {minutesLeft(continueBook.wordCount, continueBook.progressPercentage ?? 0)} minutes left
+              {t('{percentage}% · about {count, plural, one {# minute} other {# minutes}} left', {
+                percentage: continueBook.progressPercentage ?? 0,
+                count: minutesLeft(continueBook.wordCount, continueBook.progressPercentage ?? 0),
+              })}
             </Text>
             <Button onPress={() => router.push({ pathname: '/reader/[bookId]', params: { bookId: continueBook.id, title: continueBook.title } })}>
-              Continue
+              {t('Continue')}
             </Button>
           </View>
         ) : (
           <View style={styles.card}>
-            <Text style={styles.eyebrow}>CONTINUE READING</Text>
-            <Text style={styles.bookTitle}>Choose your next page</Text>
-            <Text style={styles.copy}>Your saved words are waiting for somewhere to return.</Text>
-            <Button onPress={() => router.push('/(tabs)/books')}>Open the library</Button>
+            <Text style={styles.eyebrow}>{t('CONTINUE READING')}</Text>
+            <Text style={styles.bookTitle}>{t('Choose your next page')}</Text>
+            <Text style={styles.copy}>{t('Your saved words are waiting for somewhere to return.')}</Text>
+            <Button onPress={() => router.push('/(tabs)/books')}>{t('Open the library')}</Button>
           </View>
         )}
 
         {!loading && (
           <>
             <View style={styles.section}>
-              <Text style={styles.eyebrow}>REVIEW</Text>
+              <Text style={styles.eyebrow}>{t('REVIEW')}</Text>
               <Text style={styles.sectionTitle}>
-                {due === 0 ? 'Nothing due' : due === 1 ? 'One word is due' : `${due} words are due`}
+                {t('{count, plural, =0 {Nothing due} one {One word is due} other {# words are due}}', { count: due })}
               </Text>
               <Text style={styles.copy}>
                 {due === 0
-                  ? hasActivity ? 'Reading a page will give Almo more to ask you.' : 'Reviews appear a day after you keep your first word.'
-                  : `${sessionSize} make a session, about ${Math.max(1, Math.ceil(sessionSize * 0.7))} minutes.`}
+                  ? hasActivity ? t('Reading a page will give Almo more to ask you.') : t('Reviews appear a day after you keep your first word.')
+                  : t('{count} make a session, about {minutes, plural, one {# minute} other {# minutes}}.', {
+                      count: sessionSize,
+                      minutes: Math.max(1, Math.ceil(sessionSize * 0.7)),
+                    })}
               </Text>
               {groups.map((group) => (
                 <View key={group.label} style={styles.groupRow}>
@@ -182,7 +192,7 @@ export default function HomeScreen() {
               ))}
               {due > 0 && (
                 <Button variant="secondary" onPress={() => router.push({ pathname: '/review', params: { language } })}>
-                  Start a session
+                  {t('Start a session')}
                 </Button>
               )}
             </View>
@@ -191,13 +201,13 @@ export default function HomeScreen() {
               <View style={styles.section}>
                 <View style={styles.sectionHead}>
                   <View>
-                    <Text style={styles.eyebrow}>KEPT WHILE READING</Text>
+                    <Text style={styles.eyebrow}>{t('KEPT WHILE READING')}</Text>
                     <Text style={styles.sectionTitle}>
-                      {keptThisWeek === 0 ? 'Nothing new this week' : keptThisWeek === 1 ? 'One word this week' : `${keptThisWeek} words this week`}
+                      {t('{count, plural, =0 {Nothing new this week} one {One word this week} other {# words this week}}', { count: keptThisWeek })}
                     </Text>
                   </View>
                   <Pressable onPress={() => router.push('/(tabs)/cards')} hitSlop={8}>
-                    <Text style={styles.link}>All {savedCount}</Text>
+                    <Text style={styles.link}>{t('All {count}', { count: savedCount })}</Text>
                   </Pressable>
                 </View>
                 {recentCards.map((card) => (
@@ -211,10 +221,10 @@ export default function HomeScreen() {
                         {!!card.partOfSpeech && <Text style={styles.wordMeta}>{card.partOfSpeech.toLowerCase()}</Text>}
                       </View>
                       <Text style={styles.translation} numberOfLines={1}>
-                        {card.translations[0]?.translation ?? 'Translation not added yet'}
+                        {card.translations[0]?.translation ?? t('Translation not added yet')}
                       </Text>
                     </View>
-                    {card.falseFriend && <Text style={styles.wordMeta}>false friend</Text>}
+                    {card.falseFriend && <Text style={styles.wordMeta}>{t('false friend')}</Text>}
                   </Pressable>
                 ))}
               </View>
@@ -228,10 +238,12 @@ export default function HomeScreen() {
             <View style={styles.planLine}>
               <Text style={styles.copy}>
                 {profile?.premium
-                  ? `You’re on ${membershipName(profile.subscription)}.`
-                  : `Free covers one language and ${freeSavedItemLimit} saved words.${savedCount ? ` You have kept ${savedCount}, all in ${languageName(language)}.` : ''}`}{' '}
+                  ? t('You’re on {membership}.', { membership: membershipName(profile.subscription) })
+                  : `${t('Free covers one language and {limit} saved words.', { limit: freeSavedItemLimit })}${
+                      savedCount ? ` ${t('You have kept {count}, all in {language}.', { count: savedCount, language: languageName(language) })}` : ''
+                    }`}{' '}
                 <Text onPress={() => router.push('/membership')} style={styles.link}>
-                  {profile?.premium ? 'Membership' : 'See what Premium adds'}
+                  {profile?.premium ? t('Membership') : t('See what Premium adds')}
                 </Text>
               </Text>
             </View>
@@ -239,7 +251,7 @@ export default function HomeScreen() {
         )}
 
         {(shelf.isError || cards.isError || review.isError) && (
-          <Text style={styles.error}>Some home details could not be refreshed. Available sections are shown.</Text>
+          <Text style={styles.error}>{t('Some home details could not be refreshed. Available sections are shown.')}</Text>
         )}
       </ScrollView>
     </View>

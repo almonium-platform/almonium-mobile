@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 import { AvatarMark } from '@/components/avatar-mark';
@@ -19,6 +20,7 @@ import { createThemedStyles } from '@/src/theme';
  * so the request runs behind the choice and only a failure puts the old ring back.
  */
 export function AvatarPicker({ tileSize = 56, gap = 9 }: { tileSize?: number; gap?: number }) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const { profile, patchProfile, refreshProfile } = useAuth();
   const showNotice = useNotice();
@@ -37,18 +39,18 @@ export function AvatarPicker({ tileSize = 56, gap = 9 }: { tileSize?: number; ga
       if (latestChoice.current === choiceId) await refreshProfile();
     } catch (error) {
       if (latestChoice.current === choiceId) patchProfile({ avatarUrl: previous });
-      showNotice({ title: 'Could not change your avatar', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not change your avatar'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     }
   }
 
   const choices: { key: string; url: string | null; label: string }[] = [
-    { key: 'letter', url: null, label: 'Your letter' },
-    ...animals.map((animal) => ({ key: animal, url: avatarUrlFor(animal, config.webBaseUrl), label: animalLabels[animal] })),
+    { key: 'letter', url: null, label: t('Your letter') },
+    ...animals.map((animal) => ({ key: animal, url: avatarUrlFor(animal, config.webBaseUrl), label: t(animalLabels[animal]) })),
   ];
 
   return (
     <View style={styles.picker}>
-      <Text style={styles.eyebrow}>HOW YOU APPEAR</Text>
+      <Text style={styles.eyebrow}>{t('HOW YOU APPEAR')}</Text>
       <View style={[styles.row, { gap }]}>
         {choices.map((choice) => {
           const selected = choice.url ? current === animalFromUrl(choice.url) : !current && !profile?.avatarUrl;
@@ -77,7 +79,7 @@ export function AvatarPicker({ tileSize = 56, gap = 9 }: { tileSize?: number; ga
           );
         })}
       </View>
-      <Text style={styles.helper}>Your letter, or one of five drawings. The small one is how you appear in chats.</Text>
+      <Text style={styles.helper}>{t('Your letter, or one of five drawings. The small one is how you appear in chats.')}</Text>
     </View>
   );
 }

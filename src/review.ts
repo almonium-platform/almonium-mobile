@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import type { LearningIntent } from '@/src/types';
 
 export type ReviewPromptType = 'MEANING_RECALL' | 'FORM_RECALL' | 'SENSE_DISCRIMINATION';
@@ -82,16 +83,16 @@ export interface ReviewSessionResult {
 
 export function intentLabel(intent: LearningIntent) {
   return {
-    UNDERSTAND: 'Understand',
-    PRODUCE: 'Produce',
-    PRONOUNCE: 'Pronounce',
-    DISAMBIGUATE: 'Tell apart',
-    CHUNK: 'Use the chunk',
+    UNDERSTAND: t('Understand'),
+    PRODUCE: t('Produce'),
+    PRONOUNCE: t('Pronounce'),
+    DISAMBIGUATE: t('Tell apart'),
+    CHUNK: t('Use the chunk'),
   }[intent];
 }
 
 export function intentInstruction(intent: LearningIntent) {
-  if (intent === 'UNDERSTAND') return 'Write what this means.';
-  if (intent === 'DISAMBIGUATE') return 'Write the exact word that fits this meaning.';
-  return 'Write it in the language you are learning.';
+  if (intent === 'UNDERSTAND') return t('Write what this means.');
+  if (intent === 'DISAMBIGUATE') return t('Write the exact word that fits this meaning.');
+  return t('Write it in the language you are learning.');
 }

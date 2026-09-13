@@ -1,5 +1,6 @@
 import { Platform, Text, View } from 'react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Sheet } from '@/components/sheet';
 import { Button, Field } from '@/components/ui';
@@ -40,6 +41,7 @@ export function ReauthSheet({
   /** The word to type before step two: the username on account deletion. */
   typedGate?: string;
 }) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const { firebaseUser, reauthenticateWithPassword, reauthenticateWithGoogle, reauthenticateWithApple } = useAuth();
   const [step, setStep] = useState<'intent' | 'identity'>(typedGate || consequences ? 'intent' : 'identity');
@@ -70,13 +72,14 @@ export function ReauthSheet({
       onClose();
     } catch (cause) {
       // Wrong password is an inline field error, not a toast: the typed name and the pending action survive.
-      setError(cause instanceof Error ? cause.message : 'That did not go through. Try again.');
+      setError(cause instanceof Error ? cause.message : t('That did not go through. Try again.'));
     } finally {
       setBusy(false);
     }
   }
 
   const method = usesPassword ? 'password' : usesGoogle ? 'Google' : usesApple ? 'Apple' : null;
+  const email = firebaseUser?.email ?? t('this account');
 
   return (
     <Sheet visible={visible} onClose={onClose}>
@@ -96,38 +99,42 @@ export function ReauthSheet({
           )}
           {!!typedGate && (
             <View style={styles.gate}>
-              <Text style={styles.label}>Type {typedGate} to confirm</Text>
+              <Text style={styles.label}>{t('Type {name} to confirm', { name: typedGate })}</Text>
               <Field value={typed} onChangeText={setTyped} placeholder={typedGate} autoCorrect={false} />
             </View>
           )}
           <View style={styles.actions}>
             <View style={styles.action}>
-              <Button variant="secondary" onPress={onClose}>Keep my account</Button>
+              <Button variant="secondary" onPress={onClose}>{t('Keep my account')}</Button>
             </View>
             <View style={styles.action}>
               <Button disabled={Boolean(typedGate) && typed.trim() !== typedGate} onPress={() => setStep('identity')}>
-                Continue
+                {t('Continue')}
               </Button>
             </View>
           </View>
         </>
       ) : (
         <>
-          <Text style={styles.title}>Confirm it’s you</Text>
+          <Text style={styles.title}>{t('Confirm it’s you')}</Text>
           <Text style={styles.copy}>
             {method === 'password'
-              ? `${destructive ? 'Deleting an account is permanent' : 'This is a sensitive change'}, so we ask for your password once more. You are signed in as ${firebaseUser?.email ?? 'this account'}.`
+              ? destructive
+                ? t('Deleting an account is permanent, so we ask for your password once more. You are signed in as {email}.', { email })
+                : t('This is a sensitive change, so we ask for your password once more. You are signed in as {email}.', { email })
               : method
-                ? `Your account signs in with ${method}, so ${method} will ask you to confirm again${Platform.OS === 'ios' ? ' in a sheet' : ''}.`
-                : 'Sign out and back in with your provider, then try again.'}
+                ? Platform.OS === 'ios'
+                  ? t('Your account signs in with {method}, so {method} will ask you to confirm again in a sheet.', { method })
+                  : t('Your account signs in with {method}, so {method} will ask you to confirm again.', { method })
+                : t('Sign out and back in with your provider, then try again.')}
           </Text>
           {method === 'password' && (
             <View style={styles.gate}>
-              <Text style={styles.label}>Password</Text>
+              <Text style={styles.label}>{t('Password')}</Text>
               <Field
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Password"
+                placeholder={t('Password')}
                 secureTextEntry
                 textContentType="password"
                 autoComplete="current-password"
@@ -138,7 +145,7 @@ export function ReauthSheet({
           {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
           <View style={styles.actions}>
             <View style={styles.action}>
-              <Button variant="secondary" disabled={busy} onPress={onClose}>Cancel</Button>
+              <Button variant="secondary" disabled={busy} onPress={onClose}>{t('Cancel')}</Button>
             </View>
             <View style={styles.action}>
               <Button

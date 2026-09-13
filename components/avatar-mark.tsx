@@ -1,6 +1,7 @@
 import MaskedView from '@react-native-masked-view/masked-view';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { Platform, StyleSheet, View } from 'react-native';
 import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop, Text as SvgText } from 'react-native-svg';
 
@@ -45,6 +46,7 @@ export function AvatarMark({
   /** The colour behind the ring gap: white on paper, the card colour at night. */
   ringOffset?: string;
 }) {
+  const { t } = useTranslation();
   const { colors, isDark } = useTheme();
   const mode = isDark ? 'dark' : 'light';
   const animal = animalFromUrl(avatarUrl);
@@ -53,10 +55,12 @@ export function AvatarMark({
   const gap = ring ? (size >= 40 ? 2 : 1.5) : 0;
   const frame = { width: size, height: size, borderRadius: size / 2 };
   const label = animal
-    ? `${animalLabels[animal]} avatar${premium ? ', member' : ''}`
+    ? premium
+      ? t('{animal} avatar, member', { animal: t(animalLabels[animal]) })
+      : t('{animal} avatar', { animal: t(animalLabels[animal]) })
     : premium
-      ? 'Member'
-      : 'Member avatar';
+      ? t('Member')
+      : t('Member avatar');
 
   const disc = (
     <View

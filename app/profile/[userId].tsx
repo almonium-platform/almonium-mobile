@@ -1,6 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -15,6 +17,7 @@ import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@
 import type { RelationshipAction, UserProfile } from '@/src/types';
 
 export default function UserProfileScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { userId = '' } = useLocalSearchParams<{ userId: string }>();
@@ -35,13 +38,13 @@ export default function UserProfileScreen() {
     relationship.mutate({ id: profile.data.relationshipId, action });
   }
 
-  if (profile.isLoading) return <SafeAreaView style={styles.center}><Text style={styles.meta}>Loading reader…</Text></SafeAreaView>;
+  if (profile.isLoading) return <SafeAreaView style={styles.center}><Text style={styles.meta}>{t('Loading reader…')}</Text></SafeAreaView>;
   if (profile.isError || !profile.data) return (
     <SafeAreaView style={styles.center}>
       <Ionicons name="person-outline" size={42} color={colors.primary} />
-      <Text style={styles.title}>Profile unavailable</Text>
-      <Text style={styles.copy}>{profile.error instanceof Error ? profile.error.message : 'This profile could not be opened.'}</Text>
-      <Button onPress={() => profile.refetch()}>Try again</Button>
+      <Text style={styles.title}>{t('Profile unavailable')}</Text>
+      <Text style={styles.copy}>{profile.error instanceof Error ? profile.error.message : t('This profile could not be opened.')}</Text>
+      <Button onPress={() => profile.refetch()}>{t('Try again')}</Button>
     </SafeAreaView>
   );
 
@@ -57,33 +60,33 @@ export default function UserProfileScreen() {
             <View style={styles.nameRow}>
               <Text style={styles.title}>@{user.username}</Text>
             </View>
-            <Text style={styles.meta}>Joined {formatMonth(user.registeredAt)}</Text>
+            <Text style={styles.meta}>{joinedCopy(user.registeredAt, t)}</Text>
           </View>
 
           {user.hidden ? (
             <View style={styles.privateBlock}>
               <Ionicons name="lock-closed-outline" size={24} color={colors.primary} />
-              <Text style={styles.subtitle}>This reader keeps their profile private</Text>
-              <Text style={styles.copy}>Their learning languages and interests are visible to friends.</Text>
+              <Text style={styles.subtitle}>{t('This reader keeps their profile private')}</Text>
+              <Text style={styles.copy}>{t('Their learning languages and interests are visible to friends.')}</Text>
             </View>
           ) : (
             <>
-              {!!user.fluentLangs?.length && <ProfileSection label="SPEAKS"><Text style={styles.copy}>{user.fluentLangs.map(languageName).join(', ')}</Text></ProfileSection>}
+              {!!user.fluentLangs?.length && <ProfileSection label={t('SPEAKS')}><Text style={styles.copy}>{user.fluentLangs.map(languageName).join(', ')}</Text></ProfileSection>}
               {!!user.targetLangs?.length && (
-                <ProfileSection label="LEARNING">
+                <ProfileSection label={t('LEARNING')}>
                   <View style={styles.chips}>{user.targetLangs.map((target) => <View key={target.language} style={styles.chip}><Text style={styles.chipText}>{languageName(target.language)} · {target.cefrLevel}</Text></View>)}</View>
                 </ProfileSection>
               )}
               {!!user.interests?.length && (
-                <ProfileSection label="LIKES"><View style={styles.chips}>{user.interests.map((interest) => <View key={interest} style={styles.neutralChip}><Text style={styles.neutralChipText}>{interest}</Text></View>)}</View></ProfileSection>
+                <ProfileSection label={t('LIKES')}><View style={styles.chips}>{user.interests.map((interest) => <View key={interest} style={styles.neutralChip}><Text style={styles.neutralChipText}>{interest}</Text></View>)}</View></ProfileSection>
               )}
             </>
           )}
 
           <View style={styles.actions}>
-            {user.relationshipStatus === 'STRANGER' && user.acceptsRequests !== false && <Button loading={request.isPending} onPress={() => request.mutate()}>Add friend</Button>}
-            {user.relationshipStatus === 'PENDING_INCOMING' && <><Button loading={relationship.isPending} onPress={() => manage('ACCEPT')}>Accept request</Button><Button variant="secondary" onPress={() => manage('REJECT')}>Decline</Button></>}
-            {user.relationshipStatus === 'PENDING_OUTGOING' && <Button variant="secondary" onPress={() => manage('CANCEL')}>Cancel request</Button>}
+            {user.relationshipStatus === 'STRANGER' && user.acceptsRequests !== false && <Button loading={request.isPending} onPress={() => request.mutate()}>{t('Add friend')}</Button>}
+            {user.relationshipStatus === 'PENDING_INCOMING' && <><Button loading={relationship.isPending} onPress={() => manage('ACCEPT')}>{t('Accept request')}</Button><Button variant="secondary" onPress={() => manage('REJECT')}>{t('Decline')}</Button></>}
+            {user.relationshipStatus === 'PENDING_OUTGOING' && <Button variant="secondary" onPress={() => manage('CANCEL')}>{t('Cancel request')}</Button>}
             {!!friendshipId && (
               <Button
                 onPress={() =>
@@ -97,45 +100,45 @@ export default function UserProfileScreen() {
                     },
                   })
                 }>
-                Message
+                {t('Message')}
               </Button>
             )}
-            {user.relationshipStatus === 'FRIENDS' && <Button variant="secondary" onPress={() => manage('UNFRIEND')}>Remove friend</Button>}
+            {user.relationshipStatus === 'FRIENDS' && <Button variant="secondary" onPress={() => manage('UNFRIEND')}>{t('Remove friend')}</Button>}
             <Pressable
               accessibilityRole="button"
               onPress={async () => {
                 try {
                   await Share.share({ message: `${config.webBaseUrl}/users/${encodeURIComponent(user.username)}` });
                 } catch {
-                  showNotice({ title: 'Could not share profile', message: 'Try again.', tone: 'error' });
+                  showNotice({ title: t('Could not share profile'), message: t('Try again.'), tone: 'error' });
                 }
               }}
               style={styles.share}>
               <Ionicons name="share-outline" size={19} color={colors.primary} />
-              <Text style={styles.shareText}>Share profile</Text>
+              <Text style={styles.shareText}>{t('Share profile')}</Text>
             </Pressable>
           </View>
         </View>
 
         {user.relationshipStatus !== 'BLOCKED' && (
           <Pressable
-            onPress={() => Alert.alert('Block this reader?', 'They will no longer be able to find or contact you.', [
-              { text: 'Cancel', style: 'cancel' },
+            onPress={() => Alert.alert(t('Block this reader?'), t('They will no longer be able to find or contact you.'), [
+              { text: t('Cancel'), style: 'cancel' },
               {
-                text: 'Block',
+                text: t('Block'),
                 style: 'destructive',
                 onPress: async () => {
                   try {
                     await api.blockUser(user.id);
                     await profile.refetch();
                   } catch (error) {
-                    showNotice({ title: 'Could not block reader', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+                    showNotice({ title: t('Could not block reader'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
                   }
                 },
               },
             ])}
             style={styles.blockAction}>
-            <Text style={styles.blockText}>Block reader</Text>
+            <Text style={styles.blockText}>{t('Block reader')}</Text>
           </Pressable>
         )}
       </ScrollView>
@@ -152,9 +155,11 @@ function ProfileSection({ label, children }: { label: string; children: React.Re
   return <View style={styles.section}><Text style={styles.eyebrow}>{label}</Text>{children}</View>;
 }
 
-function formatMonth(value: string) {
+function joinedCopy(value: string, t: TFunction) {
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? 'recently' : date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+  return Number.isNaN(date.getTime())
+    ? t('Joined recently')
+    : t('Joined {month}', { month: date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) });
 }
 
 const useStyles = createThemedStyles((colors) => ({

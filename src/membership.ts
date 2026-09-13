@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import type { SubscriptionInfo } from '@/src/types';
 
 /**
@@ -19,5 +20,5 @@ export function planLabel(name: string) {
 
 /** What to call the membership on a screen that has already established the person is a member. */
 export function membershipName(subscription: SubscriptionInfo | null | undefined) {
-  return planDescribesMembership(subscription) ? planLabel(subscription!.name) : 'Premium';
+  return planDescribesMembership(subscription) ? planLabel(subscription!.name) : t('Premium');
 }

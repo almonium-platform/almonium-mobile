@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Channel } from 'stream-chat';
@@ -15,6 +16,7 @@ import {
   clockTime,
   dayLabel,
   isChannelType,
+  isToday,
   type ChannelType,
 } from '@/src/chat';
 import { createThemedStyles, fonts, useTheme } from '@/src/theme';
@@ -45,6 +47,7 @@ const listEvents = new Set([
 ]);
 
 export default function ChatListScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { client, status, error, userId } = useChat();
@@ -72,11 +75,11 @@ export default function ChatListScreen() {
       );
       rebuild();
     } catch (reason) {
-      setListError(reason instanceof Error ? reason.message : 'Your chats could not be loaded.');
+      setListError(reason instanceof Error ? reason.message : t('Your chats could not be loaded.'));
     } finally {
       setLoading(false);
     }
-  }, [client, rebuild, userId]);
+  }, [client, rebuild, t, userId]);
 
   useEffect(() => {
     if (!client) {
@@ -109,10 +112,10 @@ export default function ChatListScreen() {
         }
         ListHeaderComponent={
           <View style={styles.header}>
-            <Pressable onPress={() => router.back()} accessibilityLabel="Go back" hitSlop={10} style={styles.back}>
+            <Pressable onPress={() => router.back()} accessibilityLabel={t('Go back')} hitSlop={10} style={styles.back}>
               <Ionicons name="chevron-back" size={22} color={colors.muted} />
             </Pressable>
-            <Text style={styles.title}>Chats</Text>
+            <Text style={styles.title}>{t('Chats')}</Text>
           </View>
         }
         renderItem={({ item }) => (
@@ -139,7 +142,7 @@ export default function ChatListScreen() {
                 </Text>
                 {/* A count here rather than a dot: there is no second column saying which chat is open. */}
                 {item.unread > 0 && (
-                  <View accessibilityLabel={`${item.unread} unread`} style={styles.unread}>
+                  <View accessibilityLabel={t('{count, plural, one {# unread} other {# unread}}', { count: item.unread })} style={styles.unread}>
                     <Text style={styles.unreadText}>{item.unread > 99 ? '99+' : item.unread}</Text>
                   </View>
                 )}
@@ -158,9 +161,9 @@ export default function ChatListScreen() {
                 size={40}
                 color={colors.primary}
               />
-              <Text style={styles.emptyTitle}>{unavailable ? 'Chat is not available' : 'No chats yet'}</Text>
+              <Text style={styles.emptyTitle}>{unavailable ? t('Chat is not available') : t('No chats yet')}</Text>
               <Text style={styles.emptyCopy}>
-                {unavailable ?? 'Open a friend from People to write to them, or keep notes in Saved Messages.'}
+                {unavailable ?? t('Open a friend from People to write to them, or keep notes in Saved Messages.')}
               </Text>
             </View>
           )
@@ -191,8 +194,7 @@ function byActivity(a: ChannelRow, b: ChannelRow) {
 }
 
 function stampFor(date: Date, now = new Date()) {
-  const label = dayLabel(date, now);
-  return label === 'Today' ? clockTime(date) : label;
+  return isToday(date, now) ? clockTime(date) : dayLabel(date, now);
 }
 
 const useStyles = createThemedStyles((colors) => ({

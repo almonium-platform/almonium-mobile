@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
+import { t } from './i18n';
 import type { BookSummary } from '@/src/types';
 
 export { formattedDownloadSize } from '@/src/offline-utils';
@@ -23,7 +24,7 @@ export async function downloadedBooks(): Promise<DownloadedBook[]> {
 }
 
 export async function downloadBook(book: BookSummary, content: string) {
-  if (Platform.OS === 'web') throw new Error('Book downloads are available in the iOS and Android app.');
+  if (Platform.OS === 'web') throw new Error(t('Book downloads are available in the iOS and Android app.'));
   const { booksDirectory, file } = await bookFile(book.id);
   booksDirectory.create({ intermediates: true, idempotent: true });
   file.create({ intermediates: true, overwrite: true });

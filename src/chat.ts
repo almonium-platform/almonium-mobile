@@ -6,6 +6,7 @@
  * app. See `docs/CHAT_INTEGRATION.md`. Keep this module free of React and React Native imports so
  * the rules stay unit-testable.
  */
+import { msg, t } from '@/src/i18n';
 
 /** The type is the only reliable answer to "what kind of channel is this?". Never the name. */
 export const channelTypes = {
@@ -16,10 +17,10 @@ export const channelTypes = {
 
 export type ChannelType = (typeof channelTypes)[keyof typeof channelTypes];
 
-export const selfChatName = 'Saved Messages';
+export const selfChatName = msg('Saved Messages');
 
 /** The footer a broadcast room shows in place of a composer. */
-export const broadcastFooter = 'Only Almonium posts in this channel';
+export const broadcastFooter = msg('Only Almonium posts in this channel');
 
 interface UserLike {
   id?: string;
@@ -72,7 +73,7 @@ export function interlocutor(channel: ChannelLike, currentUserId: string): UserL
  * Branch on the type first, so the leftover `name: 'Private Chat'` older DMs still carry in Stream
  * can never reach the screen.
  */
-export function channelTitle(channel: ChannelLike, currentUserId: string, fallback = 'Chat') {
+export function channelTitle(channel: ChannelLike, currentUserId: string, fallback = t('Chat')) {
   if (channel.type === channelTypes.private) {
     return interlocutor(channel, currentUserId)?.name?.trim() || fallback;
   }
@@ -127,16 +128,16 @@ export function channelPreview(
   const text = !last
     ? ''
     : last.type === 'deleted'
-      ? 'Message deleted'
+      ? t('Message deleted')
       : (last.text?.replace(/\s+/g, ' ').trim() ?? '');
 
   if (!text) {
-    if (channel.type === channelTypes.self) return 'Only you can see this';
-    if (channel.type === channelTypes.broadcast) return 'No updates yet';
-    return 'No messages yet';
+    if (channel.type === channelTypes.self) return t('Only you can see this');
+    if (channel.type === channelTypes.broadcast) return t('No updates yet');
+    return t('No messages yet');
   }
   if (channel.type === channelTypes.self) return text;
-  return last?.user?.id === currentUserId ? `You: ${text}` : text;
+  return last?.user?.id === currentUserId ? t('You: {text}', { text }) : text;
 }
 
 export interface ChatMessage {
@@ -157,7 +158,7 @@ export interface ChatMessage {
 export function toChatMessage(message: MessageLike, currentUserId: string): ChatMessage {
   return {
     id: message.id,
-    text: message.type === 'deleted' ? 'Message deleted' : message.text ?? '',
+    text: message.type === 'deleted' ? t('Message deleted') : message.text ?? '',
     authorId: message.user?.id,
     authorName: message.user?.name,
     authorImage: message.user?.image,
@@ -187,7 +188,7 @@ export function messageLink(message: Pick<MessageLike, 'text' | 'attachments'>):
 }
 
 function linkLabel(url: string) {
-  return /\/books?\//.test(url) || /\/reader\//.test(url) ? 'Open book' : /\/(c|d)\//.test(url) ? 'Open pack' : 'Open';
+  return /\/books?\//.test(url) || /\/reader\//.test(url) ? t('Open book') : /\/(c|d)\//.test(url) ? t('Open pack') : t('Open');
 }
 
 export type ChatRow =
@@ -196,7 +197,7 @@ export type ChatRow =
   | { kind: 'message'; key: string; message: ChatMessage; startsRun: boolean };
 
 /** The divider that marks where reading stopped. Held still while the room is open. */
-export const unreadDividerLabel = 'Unread messages';
+export const unreadDividerLabel = msg('Unread messages');
 
 /** Consecutive messages from one sender group into a run while they stay this close together. */
 export const runWindowMs = 5 * 60 * 1000;
@@ -225,7 +226,7 @@ export function transcriptRows(
     // A divider breaks the run: the message under it opens a new one, avatar and corner included.
     const boundary = message.id === firstUnreadId;
     if (boundary) {
-      rows.push({ kind: 'unread', key: 'unread-divider', label: unreadDividerLabel });
+      rows.push({ kind: 'unread', key: 'unread-divider', label: t(unreadDividerLabel) });
       previous = undefined;
     }
     const continues =
@@ -262,11 +263,15 @@ function dayKey(date: Date) {
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }
 
+export function isToday(date: Date, now = new Date()) {
+  return dayKey(date) === dayKey(now);
+}
+
 export function dayLabel(date: Date, now = new Date()) {
-  if (dayKey(date) === dayKey(now)) return 'Today';
+  if (isToday(date, now)) return t('Today');
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
-  if (dayKey(date) === dayKey(yesterday)) return 'Yesterday';
+  if (dayKey(date) === dayKey(yesterday)) return t('Yesterday');
   const sameYear = date.getFullYear() === now.getFullYear();
   return date.toLocaleDateString(undefined, {
     day: 'numeric',

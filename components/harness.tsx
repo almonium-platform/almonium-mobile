@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui';
@@ -29,6 +30,7 @@ import { useSetRhythmTarget } from '@/src/use-rhythm';
  * weeks appear.
  */
 export function WeekBand({ weeks, crest, dimmed = false }: { weeks: RhythmWeek[]; crest: string; dimmed?: boolean }) {
+  const { t } = useTranslation();
   const { colors, isDark } = useTheme();
   const styles = useStyles();
   const ramp = crestRamp(crest, isDark ? colors.surface : colors.canvas, isDark ? colors.nested : '#F1ECEF');
@@ -40,7 +42,9 @@ export function WeekBand({ weeks, crest, dimmed = false }: { weeks: RhythmWeek[]
       {slots.map((week, index) => (
         <View
           key={week?.weekStart ?? `empty-${index}`}
-          accessibilityLabel={week ? `${week.weekStart}, ${weekMinutes(week)} minutes` : undefined}
+          accessibilityLabel={
+            week ? t('{date}, {count, plural, one {# minute} other {# minutes}}', { date: week.weekStart, count: weekMinutes(week) }) : undefined
+          }
           style={[
             styles.week,
             { backgroundColor: week ? ramp[weekLevel(week)] : ramp[0] },
@@ -68,6 +72,7 @@ export function Harness({
   language: string;
   loading?: boolean;
 }) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const showNotice = useNotice();
   const setTarget = useSetRhythmTarget();
@@ -79,12 +84,14 @@ export function Harness({
     return (
       <View style={styles.card} accessibilityState={{ busy: loading }}>
         <View style={styles.head}>
-          <Text style={styles.eyebrow}>THE RECORD</Text>
+          <Text style={styles.eyebrow}>{t('THE RECORD')}</Text>
           <Text style={styles.languageLabel}>{name}</Text>
         </View>
         <WeekBand weeks={[]} crest={crest} />
         <Text style={styles.summary}>
-          {loading ? 'Reading your weeks…' : 'Twelve weeks, filling in as you learn. You can set a target once there is something to measure.'}
+          {loading
+            ? t('Reading your weeks…')
+            : t('Twelve weeks, filling in as you learn. You can set a target once there is something to measure.')}
         </Text>
       </View>
     );
@@ -99,24 +106,21 @@ export function Harness({
       await setTarget.mutateAsync({ language: rhythm.language, target: draft });
       setEditing(false);
     } catch (error) {
-      showNotice({ title: 'Could not move the bar', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not move the bar'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     }
   }
 
   return (
     <View style={styles.card}>
       <View style={styles.head}>
-        <Text style={styles.eyebrow}>THE RECORD</Text>
-        <Text style={styles.languageLabel}>
-          {name}
-          {!rhythm.editable && ' · set aside'}
-        </Text>
+        <Text style={styles.eyebrow}>{t('THE RECORD')}</Text>
+        <Text style={styles.languageLabel}>{rhythm.editable ? name : t('{name} · set aside', { name })}</Text>
       </View>
       <WeekBand weeks={bandWeeks(rhythm)} crest={crest} dimmed={editing} />
 
       {editing ? (
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>How often is a good week?</Text>
+          <Text style={styles.panelTitle}>{t('How often is a good week?')}</Text>
           <View accessibilityRole="radiogroup" style={styles.choices}>
             {targetOptions.map((option) => {
               const selected = draft === option.value;
@@ -129,20 +133,20 @@ export function Harness({
                   style={[styles.choice, selected && styles.choiceSelected]}>
                   <View style={[styles.dot, selected && styles.dotSelected]} />
                   <View style={styles.choiceCopy}>
-                    <Text style={styles.choiceLabel}>{option.label}</Text>
-                    {!!option.note && <Text style={styles.choiceNote}>{option.note}</Text>}
+                    <Text style={styles.choiceLabel}>{t(option.label)}</Text>
+                    {!!option.note && <Text style={styles.choiceNote}>{t(option.note)}</Text>}
                   </View>
                 </Pressable>
               );
             })}
           </View>
-          <Text style={styles.panelNote}>Changing this re-reads the twelve weeks you already have. Nothing is lost either way.</Text>
+          <Text style={styles.panelNote}>{t('Changing this re-reads the twelve weeks you already have. Nothing is lost either way.')}</Text>
           <View style={styles.panelActions}>
             <View style={styles.panelAction}>
-              <Button loading={setTarget.isPending} onPress={() => void save()}>Save</Button>
+              <Button loading={setTarget.isPending} onPress={() => void save()}>{t('Save')}</Button>
             </View>
             <Pressable disabled={setTarget.isPending} onPress={() => setEditing(false)} style={styles.cancel}>
-              <Text style={styles.link}>Cancel</Text>
+              <Text style={styles.link}>{t('Cancel')}</Text>
             </Pressable>
           </View>
         </View>
@@ -151,17 +155,18 @@ export function Harness({
           <Text style={styles.summary}>{rhythmSummary(rhythm, name)}</Text>
           {!rhythm.editable ? (
             <View style={styles.foot}>
-              <Text style={styles.cadenceQuiet}>No target while set aside</Text>
+              <Text style={styles.cadenceQuiet}>{t('No target while set aside')}</Text>
               <Pressable onPress={() => router.push({ pathname: '/language/[code]', params: { code: rhythm.language } })} hitSlop={8}>
-                <Text style={styles.link}>View record</Text>
+                <Text style={styles.link}>{t('View record')}</Text>
               </Pressable>
             </View>
           ) : (
             !empty && (
               <View style={styles.foot}>
                 <Text style={styles.cadence}>
-                  {cadenceLabel(rhythm.target)}
-                  {hasTarget(rhythm.target) && pace.counted > 0 ? ` · ${pace.met}/${pace.counted} weeks` : ''}
+                  {hasTarget(rhythm.target) && pace.counted > 0
+                    ? t('{cadence} · {met}/{count, plural, one {# week} other {# weeks}}', { cadence: cadenceLabel(rhythm.target), met: pace.met, count: pace.counted })
+                    : cadenceLabel(rhythm.target)}
                 </Text>
                 <Pressable
                   onPress={() => {
@@ -169,7 +174,7 @@ export function Harness({
                     setEditing(true);
                   }}
                   hitSlop={8}>
-                  <Text style={styles.link}>{rhythm.target === null ? 'Set a target' : 'Change'}</Text>
+                  <Text style={styles.link}>{rhythm.target === null ? t('Set a target') : t('Change')}</Text>
                 </Pressable>
               </View>
             )

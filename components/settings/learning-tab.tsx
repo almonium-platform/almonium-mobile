@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Switch, Text, TextInput, View } from 'react-native';
 
 import { PaywallModal } from '@/components/paywall-modal';
@@ -12,6 +13,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageColours } from '@/src/crest';
 import { useCrest } from '@/src/crest-context';
+import { msg } from '@/src/i18n';
 import { languageName, sortLanguages } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
@@ -20,18 +22,18 @@ import type { CefrLevel, Learner } from '@/src/types';
 export const levels: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 /** The sentence someone chose at onboarding, so they are never handed a code they never picked. */
 export const levelSentences: Record<CefrLevel, string> = {
-  A1: 'I know some words and set phrases.',
-  A2: 'I can follow short, direct sentences about familiar things.',
-  B1: 'I can get through a simple story if I look words up often.',
-  B2: 'I can follow a novel with a dictionary nearby.',
-  C1: 'I read fluently and stop only at unusual or literary words.',
-  C2: 'I read anything, including older and specialised prose.',
+  A1: msg('I know some words and set phrases.'),
+  A2: msg('I can follow short, direct sentences about familiar things.'),
+  B1: msg('I can get through a simple story if I look words up often.'),
+  B2: msg('I can follow a novel with a dictionary nearby.'),
+  C1: msg('I read fluently and stop only at unusual or literary words.'),
+  C2: msg('I read anything, including older and specialised prose.'),
 };
 
 /** Only EN and DE carry extras today; every other card reads Core features. */
 export const languageFeatures: Record<string, string> = {
-  DE: 'Lexemes · Frequency · Prepared decks',
-  EN: 'Lexemes · Frequency · Decks · POS',
+  DE: msg('Lexemes · Frequency · Prepared decks'),
+  EN: msg('Lexemes · Frequency · Decks · POS'),
 };
 
 /**
@@ -40,6 +42,7 @@ export const languageFeatures: Record<string, string> = {
  * becomes a single choice made through Make active, so the account can never sit at zero.
  */
 export function LearningTab() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile, refreshProfile } = useAuth();
@@ -101,7 +104,7 @@ export function LearningTab() {
       await api.updateLearner(learner.language, updates);
       await changed();
     } catch (error) {
-      showNotice({ title: 'Could not update language', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not update language'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setBusyLanguage(null);
     }
@@ -114,7 +117,7 @@ export function LearningTab() {
       setLevelFor(null);
       await changed();
     } catch (error) {
-      showNotice({ title: 'Could not remove language', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not remove language'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setBusyLanguage(null);
     }
@@ -127,7 +130,7 @@ export function LearningTab() {
       await changed();
       setFluentVisible(false);
     } catch (error) {
-      showNotice({ title: 'Could not update languages', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not update languages'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setSavingFluent(false);
     }
@@ -153,7 +156,7 @@ export function LearningTab() {
       await changed();
       setAddVisible(false);
     } catch (error) {
-      showNotice({ title: 'Could not add language', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not add language'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setAdding(false);
     }
@@ -162,8 +165,8 @@ export function LearningTab() {
   return (
     <View style={styles.tab}>
       <Section
-        eyebrow="I KNOW"
-        action={<ActionPill label="Edit" onPress={() => { setFluentDraft(profile?.fluentLangs ?? []); setFluentVisible(true); }} />}>
+        eyebrow={t('I KNOW')}
+        action={<ActionPill label={t('Edit')} onPress={() => { setFluentDraft(profile?.fluentLangs ?? []); setFluentVisible(true); }} />}>
         <View style={styles.chips}>
           {(profile?.fluentLangs ?? []).map((code) => (
             <View key={code} style={styles.neutralChip}>
@@ -173,7 +176,7 @@ export function LearningTab() {
         </View>
       </Section>
 
-      <Section eyebrow="I’M LEARNING" title={unlimited ? undefined : `${activeCount} of ${allowance} active`}>
+      <Section eyebrow={t('I’M LEARNING')} title={unlimited ? undefined : t('{count} of {allowance} active', { count: activeCount, allowance })}>
         {learners.map((learner) => {
           const crest = crestFor(learner.language);
           const busy = busyLanguage === learner.language;
@@ -182,20 +185,20 @@ export function LearningTab() {
             <Row
               key={learner.id}
               icon={
-                <Pressable accessibilityLabel={`Colour for ${languageName(learner.language)}`} onPress={() => setColourFor(learner.language)} hitSlop={10}>
+                <Pressable accessibilityLabel={t('Colour for {language}', { language: languageName(learner.language) })} onPress={() => setColourFor(learner.language)} hitSlop={10}>
                   <View style={[styles.swatch, { backgroundColor: crest }]} />
                 </Pressable>
               }
               label={languageName(learner.language)}
               detail={
                 learner.active
-                  ? words !== undefined ? `${words.toLocaleString()} words kept` : undefined
-                  : `Read-only${words !== undefined ? ` · ${words.toLocaleString()} words kept` : ''}`
+                  ? words !== undefined ? t('{count, plural, one {# word kept} other {# words kept}}', { count: words }) : undefined
+                  : words !== undefined ? t('Read-only · {count, plural, one {# word kept} other {# words kept}}', { count: words }) : t('Read-only')
               }
               onPress={() => router.push({ pathname: '/language/[code]', params: { code: learner.language } })}>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`Level ${learner.selfReportedLevel}`}
+                accessibilityLabel={t('Level {level}', { level: learner.selfReportedLevel })}
                 disabled={busy}
                 onPress={() => setLevelFor(learner)}
                 style={styles.levelPill}>
@@ -213,32 +216,34 @@ export function LearningTab() {
                 />
               ) : (
                 !learner.active && (
-                  <ActionPill label="Make active" busy={busy} disabled={inCooldown} onPress={() => void update(learner, { active: true })} />
+                  <ActionPill label={t('Make active')} busy={busy} disabled={inCooldown} onPress={() => void update(learner, { active: true })} />
                 )
               )}
             </Row>
           );
         })}
-        <Row label="Another language" onPress={openAdd}>
+        <Row label={t('Another language')} onPress={openAdd}>
           <View style={styles.addIcon}><Ionicons name="add" size={18} color={colors.primary} /></View>
         </Row>
         {!unlimited && inCooldown && cooldownUntil && (
           <Text style={styles.note}>
-            You can change your active language once a month. Next change available {cooldownUntil.toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}.
+            {t('You can change your active language once a month. Next change available {date}.', {
+              date: cooldownUntil.toLocaleDateString(undefined, { day: 'numeric', month: 'long' }),
+            })}
           </Text>
         )}
         {!profile?.premium && (
-          <LimitLine linkLabel={learners.length > 1 ? 'Upgrade' : 'Add more'} onPress={() => setWallVisible(true)}>
+          <LimitLine linkLabel={learners.length > 1 ? t('Upgrade') : t('Add more')} onPress={() => setWallVisible(true)}>
             {learners.length > 1
-              ? 'Premium runs three at once. Yours come back exactly as you left them.'
-              : 'Free covers one language at a time.'}
+              ? t('Premium runs three at once. Yours come back exactly as you left them.')
+              : t('Free covers one language at a time.')}
           </LimitLine>
         )}
       </Section>
 
       {/* D9: the closed control is a code; the open list carries the sentence beside each code. */}
       <Sheet visible={levelFor !== null} onClose={() => setLevelFor(null)}>
-        <Text style={styles.sheetTitle}>{levelFor ? `How much ${languageName(levelFor.language)} can you read?` : ''}</Text>
+        <Text style={styles.sheetTitle}>{levelFor ? t('How much {language} can you read?', { language: languageName(levelFor.language) }) : ''}</Text>
         <View accessibilityRole="radiogroup" style={styles.levelList}>
           {levels.map((level) => {
             const selected = levelFor?.selfReportedLevel === level;
@@ -253,7 +258,7 @@ export function LearningTab() {
                 }}
                 style={[styles.levelRow, selected && styles.levelRowSelected]}>
                 <Text style={[styles.levelCode, selected && styles.levelCodeSelected]}>{level}</Text>
-                <Text style={styles.levelSentence}>{levelSentences[level]}</Text>
+                <Text style={styles.levelSentence}>{t(levelSentences[level])}</Text>
               </Pressable>
             );
           })}
@@ -264,7 +269,7 @@ export function LearningTab() {
             disabled={busyLanguage === levelFor.language}
             onPress={() => void remove(levelFor)}
             style={styles.removeAction}>
-            <Text style={styles.removeText}>Remove {languageName(levelFor.language)} and everything kept in it</Text>
+            <Text style={styles.removeText}>{t('Remove {language} and everything kept in it', { language: languageName(levelFor.language) })}</Text>
           </Pressable>
         )}
       </Sheet>
@@ -272,7 +277,7 @@ export function LearningTab() {
       {/* D4: eight hues, no free choice. */}
       <Sheet visible={colourFor !== null} onClose={() => setColourFor(null)}>
         <Text style={styles.sheetTitle}>{colourFor ? languageName(colourFor) : ''}</Text>
-        <Text style={styles.note}>The colour of its rail and its record. Eight, all at one weight, so no language shouts louder than another.</Text>
+        <Text style={styles.note}>{t('The colour of its rail and its record. Eight, all at one weight, so no language shouts louder than another.')}</Text>
         <View style={styles.swatches}>
           {languageColours.map((colour) => {
             const selected = colourFor ? crestFor(colourFor) === colour.hex : false;
@@ -280,7 +285,7 @@ export function LearningTab() {
               <Pressable
                 key={colour.hex}
                 accessibilityRole="radio"
-                accessibilityLabel={colour.name}
+                accessibilityLabel={t(colour.name)}
                 accessibilityState={{ selected }}
                 onPress={() => {
                   if (colourFor) void setCrest(colourFor, colour.hex);
@@ -295,8 +300,8 @@ export function LearningTab() {
       </Sheet>
 
       <Sheet visible={fluentVisible} onClose={() => setFluentVisible(false)}>
-        <Text style={styles.sheetTitle}>Languages you know</Text>
-        <Text style={styles.note}>Translations and parallel texts come in these.</Text>
+        <Text style={styles.sheetTitle}>{t('Languages you know')}</Text>
+        <Text style={styles.note}>{t('Translations and parallel texts come in these.')}</Text>
         <View style={styles.chips}>
           {sortLanguages(languagesQuery.data ?? [])
             .filter((code) => !learners.some((learner) => learner.language === code))
@@ -316,20 +321,24 @@ export function LearningTab() {
               );
             })}
         </View>
-        {!profile?.premium && <LimitLine linkLabel="Add more" onPress={() => { setFluentVisible(false); setWallVisible(true); }}>Free covers {fluentLimit === 1 ? 'one fluent language' : `${fluentLimit} fluent languages`}.</LimitLine>}
-        <Button loading={savingFluent} disabled={!fluentDraft.length} onPress={() => void saveFluent()}>Save</Button>
+        {!profile?.premium && (
+          <LimitLine linkLabel={t('Add more')} onPress={() => { setFluentVisible(false); setWallVisible(true); }}>
+            {t('Free covers {count, plural, one {one fluent language} other {# fluent languages}}.', { count: fluentLimit })}
+          </LimitLine>
+        )}
+        <Button loading={savingFluent} disabled={!fluentDraft.length} onPress={() => void saveFluent()}>{t('Save')}</Button>
       </Sheet>
 
       {/* D2: pick, then place. Level optional, A1 pre-chosen. */}
       <Sheet visible={addVisible} onClose={() => setAddVisible(false)}>
         {addStep === 'pick' ? (
           <>
-            <Text style={styles.sheetTitle}>Add a language</Text>
-            <Text style={styles.note}>Step 1 of 2 · {learners.length} of {targetLimit} slots used</Text>
+            <Text style={styles.sheetTitle}>{t('Add a language')}</Text>
+            <Text style={styles.note}>{t('Step 1 of 2 · {used} of {total} slots used', { used: learners.length, total: targetLimit })}</Text>
             <TextInput
               value={addSearch}
               onChangeText={setAddSearch}
-              placeholder="Type to search…"
+              placeholder={t('Type to search…')}
               placeholderTextColor={colors.muted}
               autoCorrect={false}
               style={styles.search}
@@ -347,32 +356,32 @@ export function LearningTab() {
                     <Text style={styles.pickCode}>{code}</Text>
                     <View style={styles.pickCopy}>
                       <Text style={styles.pickName}>{languageName(code)}</Text>
-                      <Text style={styles.pickFeatures}>{languageFeatures[code] ?? 'Core features'}</Text>
+                      <Text style={styles.pickFeatures}>{languageFeatures[code] ? t(languageFeatures[code]) : t('Core features')}</Text>
                     </View>
                     {selected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
                   </Pressable>
                 );
               })}
             </View>
-            <Button disabled={!addLanguage} onPress={() => setAddStep('place')}>Continue</Button>
+            <Button disabled={!addLanguage} onPress={() => setAddStep('place')}>{t('Continue')}</Button>
           </>
         ) : (
           <>
-            <Text style={styles.sheetTitle}>Where are you now?</Text>
-            <Text style={styles.note}>Step 2 of 2 · change it any time</Text>
+            <Text style={styles.sheetTitle}>{t('Where are you now?')}</Text>
+            <Text style={styles.note}>{t('Step 2 of 2 · change it any time')}</Text>
             <View style={styles.levelList}>
               {levels.map((level) => {
                 const selected = addLevel === level;
                 return (
                   <Pressable key={level} accessibilityRole="radio" accessibilityState={{ selected }} onPress={() => setAddLevel(level)} style={[styles.levelRow, selected && styles.levelRowSelected]}>
                     <Text style={[styles.levelCode, selected && styles.levelCodeSelected]}>{level}</Text>
-                    <Text style={styles.levelSentence}>{levelSentences[level]}</Text>
+                    <Text style={styles.levelSentence}>{t(levelSentences[level])}</Text>
                   </Pressable>
                 );
               })}
             </View>
-            <Text style={styles.note}>Not sure? Leave it at A1 — you can move it from this tab whenever you like.</Text>
-            <Button loading={adding} onPress={() => void submitAdd()}>Start learning</Button>
+            <Text style={styles.note}>{t('Not sure? Leave it at A1 — you can move it from this tab whenever you like.')}</Text>
+            <Button loading={adding} onPress={() => void submitAdd()}>{t('Start learning')}</Button>
           </>
         )}
       </Sheet>

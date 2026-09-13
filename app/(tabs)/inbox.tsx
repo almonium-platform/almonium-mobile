@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Alert, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -22,6 +23,7 @@ const iconForType: Record<NotificationType, keyof typeof Ionicons.glyphMap> = {
 };
 
 export default function InboxScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser } = useAuth();
@@ -70,10 +72,10 @@ export default function InboxScreen() {
   }
 
   function confirmDelete(notification: AppNotification) {
-    Alert.alert('Delete notification?', notification.title, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('Delete notification?'), notification.title, [
+      { text: t('Cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('Delete'),
         style: 'destructive',
         onPress: () => deleteMutation.mutate(notification.id),
       },
@@ -97,20 +99,20 @@ export default function InboxScreen() {
           <View style={styles.header}>
             <View style={styles.headerRow}>
               <View style={styles.headerCopy}>
-                <Text style={styles.eyebrow}>INBOX</Text>
-                <Text style={styles.hero}>What’s new.</Text>
+                <Text style={styles.eyebrow}>{t('INBOX')}</Text>
+                <Text style={styles.hero}>{t('What’s new.')}</Text>
               </View>
               {unread > 0 && (
                 <Pressable
                   disabled={allReadMutation.isPending}
                   onPress={() => allReadMutation.mutate()}
                   style={styles.markAll}>
-                  <Text style={styles.markAllText}>Mark all read</Text>
+                  <Text style={styles.markAllText}>{t('Mark all read')}</Text>
                 </Pressable>
               )}
             </View>
             <Text style={styles.caption}>
-              Friend activity, finished imports and the translations you asked for appear here.
+              {t('Friend activity, finished imports and the translations you asked for appear here.')}
             </Text>
             {/* The bell counts waiting messages, so its destination has to lead to them. */}
             {unreadChats > 0 && (
@@ -122,9 +124,9 @@ export default function InboxScreen() {
                   <Ionicons name="chatbubbles" size={19} color={colors.white} />
                 </View>
                 <View style={styles.copy}>
-                  <Text style={styles.title}>Messages</Text>
+                  <Text style={styles.title}>{t('Messages')}</Text>
                   <Text style={styles.message}>
-                    {unreadChats === 1 ? '1 unread in Chats' : `${unreadChats} unread in Chats`}
+                    {t('{count, plural, one {# unread in Chats} other {# unread in Chats}}', { count: unreadChats })}
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={19} color={colors.muted} />
@@ -133,24 +135,24 @@ export default function InboxScreen() {
             {/* The list carries two states only: asked and ready. A declined request disappears quietly. */}
             {openOrders.length > 0 && (
               <View style={styles.requests}>
-                <Text style={styles.requestsLabel}>YOUR REQUESTS</Text>
+                <Text style={styles.requestsLabel}>{t('YOUR REQUESTS')}</Text>
                 {openOrders.map((order) => (
                   <View key={order.id} style={styles.requestRow}>
                     <View style={styles.copy}>
                       <Text style={styles.title}>{order.bookTitle} → {languageName(order.language)}</Text>
                       <Text style={styles.message}>
-                        {order.status === 'READY' ? 'Ready' : `Asked ${new Date(order.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`}
+                        {order.status === 'READY' ? t('Ready') : t('Asked {date}', { date: new Date(order.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) })}
                       </Text>
                     </View>
                     {order.status === 'READY' && order.fulfilledBookId ? (
                       <Pressable
                         onPress={() => router.push({ pathname: '/reader/[bookId]', params: { bookId: order.fulfilledBookId!, title: order.bookTitle, parallel: order.language } })}
                         style={styles.acceptAction}>
-                        <Text style={styles.acceptText}>Read</Text>
+                        <Text style={styles.acceptText}>{t('Read')}</Text>
                       </Pressable>
                     ) : (
                       <Pressable disabled={withdrawMutation.isPending} onPress={() => withdrawMutation.mutate({ bookId: order.bookId, language: order.language })} hitSlop={8}>
-                        <Text style={styles.profileLink}>Withdraw</Text>
+                        <Text style={styles.profileLink}>{t('Withdraw')}</Text>
                       </Pressable>
                     )}
                   </View>
@@ -158,7 +160,7 @@ export default function InboxScreen() {
               </View>
             )}
             {query.isError && query.data && (
-              <Text style={styles.offline}>Showing saved notifications. Reconnect to refresh.</Text>
+              <Text style={styles.offline}>{t('Showing saved notifications. Reconnect to refresh.')}</Text>
             )}
           </View>
         }
@@ -189,22 +191,22 @@ export default function InboxScreen() {
                   <Pressable
                     onPress={() => relationshipMutation.mutate({ id: item.referenceId!, action: 'ACCEPT' })}
                     style={styles.acceptAction}>
-                    <Text style={styles.acceptText}>Accept</Text>
+                    <Text style={styles.acceptText}>{t('Accept')}</Text>
                   </Pressable>
                   <Pressable
                     onPress={() => relationshipMutation.mutate({ id: item.referenceId!, action: 'REJECT' })}
                     style={styles.declineAction}>
-                    <Text style={styles.declineText}>Decline</Text>
+                    <Text style={styles.declineText}>{t('Decline')}</Text>
                   </Pressable>
                   {item.senderId && (
                     <Pressable onPress={() => router.push({ pathname: '/profile/[userId]', params: { userId: item.senderId! } })}>
-                      <Text style={styles.profileLink}>Profile</Text>
+                      <Text style={styles.profileLink}>{t('Profile')}</Text>
                     </Pressable>
                   )}
                 </View>
               )}
               <Text style={styles.action}>
-                Tap to mark {item.readAt ? 'unread' : 'read'} · Hold to delete
+                {item.readAt ? t('Tap to mark unread · Hold to delete') : t('Tap to mark read · Hold to delete')}
               </Text>
             </View>
             {!item.readAt && <View style={styles.dot} />}
@@ -219,14 +221,14 @@ export default function InboxScreen() {
               color={colors.primary}
             />
             <Text style={styles.emptyTitle}>
-              {query.isError ? 'Inbox unavailable' : 'All quiet for now'}
+              {query.isError ? t('Inbox unavailable') : t('All quiet for now')}
             </Text>
             <Text style={styles.emptyText}>
               {query.isError
-                ? query.error instanceof Error ? query.error.message : 'Check your connection.'
-                : 'New friendship and translation updates will appear here.'}
+                ? query.error instanceof Error ? query.error.message : t('Check your connection.')
+                : t('New friendship and translation updates will appear here.')}
             </Text>
-            {query.isError && <Button onPress={() => query.refetch()}>Try again</Button>}
+            {query.isError && <Button onPress={() => query.refetch()}>{t('Try again')}</Button>}
           </View>
       }
     />

@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 
 import { AvatarMark } from '@/components/avatar-mark';
 import { animalFromUrl } from '@/src/avatars';
-import { broadcastCode, channelTypes, type ChannelType } from '@/src/chat';
+import { broadcastCode, channelTypes, selfChatName, type ChannelType } from '@/src/chat';
 import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 
 /**
@@ -25,13 +26,14 @@ export function ChatAvatar({
   name?: string;
   size?: number;
 }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const frame = { width: size, height: size, borderRadius: size / 2 };
 
   if (type === channelTypes.self) {
     return (
-      <View accessibilityLabel="Saved Messages" style={[styles.frame, styles.saved, frame]}>
+      <View accessibilityLabel={t(selfChatName)} style={[styles.frame, styles.saved, frame]}>
         <Ionicons name="bookmark" size={size * 0.45} color={colors.white} />
       </View>
     );

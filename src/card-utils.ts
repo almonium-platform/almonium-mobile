@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import type { CardDraft, LearningCard } from '@/src/types';
 
 export function lines(value: string) {
@@ -69,9 +70,9 @@ export function cardUpdate(
 
 export function relativeTime(value: string, now = new Date()) {
   const seconds = Math.max(0, Math.floor((now.getTime() - new Date(value).getTime()) / 1000));
-  if (seconds < 60) return 'now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-  if (seconds < 86_400) return `${Math.floor(seconds / 3600)}h`;
-  if (seconds < 604_800) return `${Math.floor(seconds / 86_400)}d`;
+  if (seconds < 60) return t('now');
+  if (seconds < 3600) return t('{minutes}m', { minutes: Math.floor(seconds / 60) });
+  if (seconds < 86_400) return t('{hours}h', { hours: Math.floor(seconds / 3600) });
+  if (seconds < 604_800) return t('{days}d', { days: Math.floor(seconds / 86_400) });
   return new Date(value).toLocaleDateString();
 }

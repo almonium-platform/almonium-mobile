@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandMark } from '@/components/brand-mark';
@@ -28,6 +29,7 @@ export function AppHeader({
   language: string;
   onLanguageChange?: (language: string) => void;
 }) {
+  const { t } = useTranslation();
   const { colors, isDark } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
@@ -55,7 +57,11 @@ export function AppHeader({
         <View style={styles.crestSlot}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Current language ${languageName(language)}${canSwitch ? ', switch' : ''}`}
+            accessibilityLabel={
+              canSwitch
+                ? t('Current language {name}, switch', { name: languageName(language) })
+                : t('Current language {name}', { name: languageName(language) })
+            }
             disabled={!canSwitch}
             onPress={() => setLanguagesVisible(true)}
             style={({ pressed }) => [styles.crest, { borderColor: crest, backgroundColor: tint }, pressed && styles.pressed]}>
@@ -73,7 +79,7 @@ export function AppHeader({
         <View style={styles.spacer} />
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={waiting > 0 ? `Notifications, ${waiting} waiting` : 'Notifications'}
+          accessibilityLabel={waiting > 0 ? t('Notifications, {count} waiting', { count: waiting }) : t('Notifications')}
           onPress={() => router.push('/(tabs)/inbox')}
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
           <Ionicons
@@ -89,7 +95,7 @@ export function AppHeader({
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Open settings"
+          accessibilityLabel={t('Open settings')}
           onPress={() => router.push('/(tabs)/settings')}
           style={({ pressed }) => [styles.avatar, pressed && styles.pressed]}>
           <AvatarMark avatarUrl={profile?.avatarUrl} username={profile?.username} premium={profile?.premium} size={36} />
@@ -97,7 +103,7 @@ export function AppHeader({
       </View>
       <View style={[styles.rail, { backgroundColor: crest }]} />
       <Sheet visible={languagesVisible} onClose={() => setLanguagesVisible(false)}>
-        <Text style={styles.sheetEyebrow}>NOW STUDYING</Text>
+        <Text style={styles.sheetEyebrow}>{t('NOW STUDYING')}</Text>
         <View style={styles.languageList}>
           {learners.map((learner) => {
             const code = learner.language;
@@ -129,7 +135,7 @@ export function AppHeader({
           }}
           style={styles.manageLanguages}>
           <Ionicons name="add" size={18} color={colors.primary} />
-          <Text style={styles.manageLanguagesText}>Add a language</Text>
+          <Text style={styles.manageLanguagesText}>{t('Add a language')}</Text>
         </Pressable>
       </Sheet>
     </SafeAreaView>

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 import { BookCover } from '@/components/book-cover';
@@ -17,6 +18,7 @@ export function BookCard({
   onLongPress?(): void;
   offline?: boolean;
 }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   return (
@@ -45,13 +47,13 @@ export function BookCard({
           {book.hasParallelTranslation && (
             <View style={styles.parallel}>
               <Ionicons name="git-compare-outline" size={12} color={colors.primary} />
-              <Text style={styles.parallelText}>Parallel</Text>
+              <Text style={styles.parallelText}>{t('Parallel')}</Text>
             </View>
           )}
           {offline && (
             <View style={styles.parallel}>
               <Ionicons name="cloud-done-outline" size={12} color={colors.success} />
-              <Text style={styles.offlineText}>Offline</Text>
+              <Text style={styles.offlineText}>{t('Offline')}</Text>
             </View>
           )}
         </View>

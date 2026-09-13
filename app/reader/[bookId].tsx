@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   AppState,
@@ -169,6 +170,7 @@ function readerHtml(content: string) {
 const finishedKey = (bookId: string) => `almonium:finished:${bookId}`;
 
 export default function ReaderScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const params = useLocalSearchParams<{ bookId: string; language?: string; title?: string; parallel?: string }>();
@@ -386,7 +388,7 @@ export default function ReaderScreen() {
       lightImpact();
       setWordSaved(true);
     } catch (error) {
-      setWordSaveError(error instanceof Error ? error.message : 'The word could not be kept.');
+      setWordSaveError(error instanceof Error ? error.message : t('The word could not be kept.'));
     } finally {
       setSavingWord(false);
     }
@@ -395,8 +397,8 @@ export default function ReaderScreen() {
   if (!validBookId) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorTitle}>This reader link is invalid.</Text>
-        <Button onPress={() => router.back()}>Back to library</Button>
+        <Text style={styles.errorTitle}>{t('This reader link is invalid.')}</Text>
+        <Button onPress={() => router.back()}>{t('Back to library')}</Button>
       </View>
     );
   }
@@ -414,41 +416,41 @@ export default function ReaderScreen() {
       {loading && (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.status}>Opening at your last page…</Text>
+          <Text style={styles.status}>{t('Opening at your last page…')}</Text>
         </View>
       )}
       {error && (
         <View style={styles.center}>
-          <Text style={styles.errorTitle}>This page would not open.</Text>
-          <Text style={styles.status}>{error instanceof Error ? error.message : 'Please try again.'}</Text>
+          <Text style={styles.errorTitle}>{t('This page would not open.')}</Text>
+          <Text style={styles.status}>{error instanceof Error ? error.message : t('Please try again.')}</Text>
           <Button
             onPress={() => {
               void textQuery.refetch();
               void infoQuery.refetch();
               if (parallelActive) void parallelQuery.refetch();
             }}>
-            Try again
+            {t('Try again')}
           </Button>
-          {parallelActive && <Button variant="secondary" onPress={() => update({ parallel: 'off' })}>Read the original only</Button>}
+          {parallelActive && <Button variant="secondary" onPress={() => update({ parallel: 'off' })}>{t('Read the original only')}</Button>}
         </View>
       )}
       {content && infoQuery.data && progress !== null && !loading && !error && (
         <>
           <SafeAreaView edges={['top']} style={[styles.readerHeader, night && styles.toolbarNight]}>
             <View style={styles.readerHeaderRow}>
-              <Pressable accessibilityLabel="Back to book" onPress={() => router.back()} style={styles.toolButton}>
+              <Pressable accessibilityLabel={t('Back to book')} onPress={() => router.back()} style={styles.toolButton}>
                 <Ionicons name="chevron-back" size={24} color={night ? colors.white : colors.primary} />
               </Pressable>
               <View style={styles.readerTitleCopy}>
                 <Text numberOfLines={1} style={[styles.readerTitle, night && styles.nightText]}>
-                  {params.title || shelfBook?.title || 'Reader'}
+                  {params.title || shelfBook?.title || t('Reader')}
                 </Text>
                 <Text style={styles.readerMeta}>
                   {sourceLanguage}
                   {parallelActive && parallelLanguage ? ` → ${parallelLanguage}` : ''}
                 </Text>
               </View>
-              <Pressable accessibilityLabel="Open reader settings" onPress={() => setSettingsVisible(true)} style={styles.toolButton}>
+              <Pressable accessibilityLabel={t('Open reader settings')} onPress={() => setSettingsVisible(true)} style={styles.toolButton}>
                 <Text style={[styles.largeA, night && styles.nightText]}>Aa</Text>
               </Pressable>
             </View>
@@ -474,11 +476,11 @@ export default function ReaderScreen() {
       {/* The word sheet: Discover's plate, with the reader dimmed behind it and never dismissed. */}
       <Sheet visible={Boolean(selection)} onClose={() => setSelection(null)}>
         {selectionQuery.isLoading ? (
-          <View style={styles.sheetLoading}><ActivityIndicator color={colors.primary} /><Text style={styles.status}>Opening the entry…</Text></View>
+          <View style={styles.sheetLoading}><ActivityIndicator color={colors.primary} /><Text style={styles.status}>{t('Opening the entry…')}</Text></View>
         ) : selectionQuery.isError ? (
           <View style={styles.sheetLoading}>
-            <Text style={styles.errorTitle}>This word sheet would not open.</Text>
-            <Button onPress={() => selectionQuery.refetch()}>Try again</Button>
+            <Text style={styles.errorTitle}>{t('This word sheet would not open.')}</Text>
+            <Button onPress={() => selectionQuery.refetch()}>{t('Try again')}</Button>
           </View>
         ) : lookup ? (
           <>
@@ -486,13 +488,13 @@ export default function ReaderScreen() {
               <View style={styles.sheetHeadingCopy}>
                 <Text style={styles.sheetEntry}>{selectedSense?.headword || lookup.entry}</Text>
                 <Text style={styles.sheetMeta}>
-                  {selectedSense?.partOfSpeech || 'word'}
+                  {selectedSense?.partOfSpeech || t('word')}
                   {selectedSense?.transcription ? ` · /${selectedSense.transcription}/` : ''}
                   {lookup.frequency ? ` · ${lookup.frequency.band}` : ''}
                 </Text>
               </View>
               <Pressable
-                accessibilityLabel="Learn about narrated audio"
+                accessibilityLabel={t('Learn about narrated audio')}
                 onPress={() => {
                   setSelection(null);
                   setPaywallContext('audio');
@@ -516,7 +518,7 @@ export default function ReaderScreen() {
                       <Text style={[styles.senseIndex, !selected && styles.senseIndexMuted]}>{sense.index}</Text>
                       <View style={styles.definitionCopy}>
                         <Text style={[styles.definitionText, !selected && styles.definitionMuted]}>
-                          {sense.translations.join(', ') || 'Meaning not supplied'}
+                          {sense.translations.join(', ') || t('Meaning not supplied')}
                         </Text>
                         {selected && !!lookup.sourceContext && <Text style={styles.sourceContext}>„{lookup.sourceContext}“</Text>}
                       </View>
@@ -524,28 +526,28 @@ export default function ReaderScreen() {
                   );
                 })
               ) : (
-                <Text style={styles.status}>No structured dictionary sense is available yet.</Text>
+                <Text style={styles.status}>{t('No structured dictionary sense is available yet.')}</Text>
               )}
             </View>
             <View style={styles.sheetIntents}>
-              <View style={styles.sheetIntentActive}><Text style={styles.sheetIntentActiveText}>Understand it</Text></View>
+              <View style={styles.sheetIntentActive}><Text style={styles.sheetIntentActiveText}>{t('Understand it')}</Text></View>
               <Pressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: produceSelected, disabled: wordSaved }}
                 disabled={wordSaved}
                 onPress={() => setProduceSelected((value) => !value)}
                 style={[produceSelected ? styles.sheetIntentActive : styles.sheetIntent, wordSaved && styles.sheetIntentDisabled]}>
-                <Text style={produceSelected ? styles.sheetIntentActiveText : styles.sheetIntentText}>Say it too</Text>
+                <Text style={produceSelected ? styles.sheetIntentActiveText : styles.sheetIntentText}>{t('Say it too')}</Text>
               </Pressable>
             </View>
             <Button disabled={savingWord || wordSaved || !selectedSense?.translations.length} onPress={() => void keepSelectedWord()}>
-              {wordSaved ? 'Kept' : savingWord ? 'Keeping…' : 'Keep this word'}
+              {wordSaved ? t('Kept') : savingWord ? t('Keeping…') : t('Keep this word')}
             </Button>
             {!!wordSaveError && <Text style={styles.sheetError}>{wordSaveError}</Text>}
             {!profile?.premium && (
               <Text style={styles.capLine}>
-                {savedInLanguage} of {freeSavedItemLimit} words kept. Free covers a hundred at a time —{' '}
-                <Text onPress={() => { setSelection(null); setPaywallContext('item-cap'); }} style={styles.capLink}>see what changes</Text>.
+                {t('{saved} of {limit} words kept. Free covers a hundred at a time.', { saved: savedInLanguage, limit: freeSavedItemLimit })}{' '}
+                <Text onPress={() => { setSelection(null); setPaywallContext('item-cap'); }} style={styles.capLink}>{t('See what changes.')}</Text>
               </Text>
             )}
           </>
@@ -555,9 +557,9 @@ export default function ReaderScreen() {
       {/* Reader type: three presets, size, translation mode, page. */}
       <Sheet visible={settingsVisible} onClose={() => setSettingsVisible(false)}>
         <View style={styles.settingsHeading}>
-          <Text style={styles.settingsTitle}>Type</Text>
-          <Pressable accessibilityLabel="Close reader settings" onPress={() => setSettingsVisible(false)} hitSlop={8}>
-            <Text style={styles.done}>Done</Text>
+          <Text style={styles.settingsTitle}>{t('Type')}</Text>
+          <Pressable accessibilityLabel={t('Close reader settings')} onPress={() => setSettingsVisible(false)} hitSlop={8}>
+            <Text style={styles.done}>{t('Done')}</Text>
           </Pressable>
         </View>
         <View style={styles.settingGroup}>
@@ -568,49 +570,49 @@ export default function ReaderScreen() {
                 <View style={[styles.dot, selected && styles.dotSelected]} />
                 <View style={styles.optionCopy}>
                   <Text style={[styles.sample, face.value === 'literata' ? styles.sampleSerif : styles.sampleSans]}>
-                    The fact was Piglet was wishing he had thought of it first.
+                    {t('The fact was Piglet was wishing he had thought of it first.')}
                   </Text>
-                  <Text style={styles.optionNote}>{face.label}{face.note ? ` · ${face.note}` : ''}</Text>
+                  <Text style={styles.optionNote}>{face.label}{face.note ? ` · ${t(face.note)}` : ''}</Text>
                 </View>
               </Pressable>
             );
           })}
         </View>
         <View style={styles.sizeRow}>
-          <Text style={styles.sizeLabel}>Size</Text>
-          <Pressable accessibilityLabel="Decrease text size" onPress={() => update({ fontSize: Math.max(16, settings.fontSize - 1) })} style={styles.sizeButton}>
+          <Text style={styles.sizeLabel}>{t('Size')}</Text>
+          <Pressable accessibilityLabel={t('Decrease text size')} onPress={() => update({ fontSize: Math.max(16, settings.fontSize - 1) })} style={styles.sizeButton}>
             <Text style={styles.sizeSmall}>A</Text>
           </Pressable>
           <View style={styles.sizeTrack}>
             <View style={[styles.sizeFill, { width: `${((settings.fontSize - 16) / 12) * 100}%` }]} />
           </View>
-          <Pressable accessibilityLabel="Increase text size" onPress={() => update({ fontSize: Math.min(28, settings.fontSize + 1) })} style={styles.sizeButton}>
+          <Pressable accessibilityLabel={t('Increase text size')} onPress={() => update({ fontSize: Math.min(28, settings.fontSize + 1) })} style={styles.sizeButton}>
             <Text style={styles.sizeLarge}>A</Text>
           </Pressable>
         </View>
         {!!parallelLanguage && (
           <View style={styles.settingGroup}>
-            <Text style={styles.settingLabel}>{languageName(parallelLanguage).toUpperCase()} BESIDE THE TEXT</Text>
+            <Text style={styles.settingLabel}>{t('{language} BESIDE THE TEXT', { language: languageName(parallelLanguage).toUpperCase() })}</Text>
             {parallelModes.map((mode) => {
               const selected = settings.parallel === mode.value;
               return (
                 <Pressable key={mode.value} accessibilityRole="radio" accessibilityState={{ selected }} onPress={() => update({ parallel: mode.value })} style={[styles.option, selected && styles.optionSelected]}>
                   <View style={[styles.dot, selected && styles.dotSelected]} />
                   <View style={styles.optionCopy}>
-                    <Text style={styles.optionLabel}>{mode.label}</Text>
-                    <Text style={styles.optionNote}>{mode.note}</Text>
+                    <Text style={styles.optionLabel}>{t(mode.label)}</Text>
+                    <Text style={styles.optionNote}>{t(mode.note)}</Text>
                   </View>
                 </Pressable>
               );
             })}
-            <Text style={styles.optionNote}>Read the original first. Use the translation to check, not to skip.</Text>
+            <Text style={styles.optionNote}>{t('Read the original first. Use the translation to check, not to skip.')}</Text>
           </View>
         )}
         <View style={styles.settingGroup}>
-          <Text style={styles.settingLabel}>PAGE</Text>
+          <Text style={styles.settingLabel}>{t('PAGE')}</Text>
           <View style={styles.optionRow}>
-            <ReaderOption label="Paper" selected={!night} onPress={() => update({ theme: 'paper' })} />
-            <ReaderOption label="Night" selected={night} onPress={() => update({ theme: 'night' })} />
+            <ReaderOption label={t('Paper')} selected={!night} onPress={() => update({ theme: 'paper' })} />
+            <ReaderOption label={t('Night')} selected={night} onPress={() => update({ theme: 'night' })} />
           </View>
         </View>
       </Sheet>
@@ -620,29 +622,40 @@ export default function ReaderScreen() {
         <View style={styles.certificate}>
           <View style={styles.certificateInner}>
             <BrandMark size={44} />
-            <Text style={styles.certificateEyebrow}>READ TO THE END</Text>
-            <Text style={styles.certificateTitle}>{params.title || shelfBook?.title || 'This book'}</Text>
+            <Text style={styles.certificateEyebrow}>{t('READ TO THE END')}</Text>
+            <Text style={styles.certificateTitle}>{params.title || shelfBook?.title || t('This book')}</Text>
             <Text style={styles.certificateMeta}>
-              {shelfBook?.author ? `${shelfBook.author} · ` : ''}{languageName(sourceLanguage)} · read by @{profile?.username}
+              {shelfBook?.author ? `${shelfBook.author} · ` : ''}
+              {t('{language} · read by @{username}', { language: languageName(sourceLanguage), username: profile?.username })}
             </Text>
             <View style={styles.certificateRule} />
             <View style={styles.certificateNumbers}>
-              {!!shelfBook?.wordCount && <Text style={styles.certificateNumber}><Text style={styles.certificateStrong}>{shelfBook.wordCount.toLocaleString()}</Text> words read</Text>}
-              <Text style={styles.certificateNumber}><Text style={styles.certificateStrong}>{savedInLanguage}</Text> saved</Text>
+              {!!shelfBook?.wordCount && (
+                <Text style={styles.certificateNumber}>
+                  <Text style={styles.certificateStrong}>{shelfBook.wordCount.toLocaleString()}</Text>{' '}
+                  {t('{count, plural, one {word read} other {words read}}', { count: shelfBook.wordCount })}
+                </Text>
+              )}
+              <Text style={styles.certificateNumber}>
+                <Text style={styles.certificateStrong}>{savedInLanguage}</Text> {t('saved')}
+              </Text>
               <Text style={styles.certificateNumber}>{new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</Text>
             </View>
           </View>
         </View>
-        <Button onPress={() => { setFinished(false); router.replace('/(tabs)/books'); }}>Back to your shelf</Button>
+        <Button onPress={() => { setFinished(false); router.replace('/(tabs)/books'); }}>{t('Back to your shelf')}</Button>
         <Pressable
           accessibilityRole="button"
           onPress={() =>
             void Share.share({
-              message: `I read ${params.title || shelfBook?.title || 'a book'} to the end in ${languageName(sourceLanguage)} on Almonium.`,
+              message: t('I read {title} to the end in {language} on Almonium.', {
+                title: params.title || shelfBook?.title || t('a book'),
+                language: languageName(sourceLanguage),
+              }),
             }).catch(() => undefined)
           }
           style={styles.shareAction}>
-          <Text style={styles.capLink}>Share</Text>
+          <Text style={styles.capLink}>{t('Share')}</Text>
         </Pressable>
       </Sheet>
 

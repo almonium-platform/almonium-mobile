@@ -1,12 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Linking, Platform, Pressable, Switch, Text, View } from 'react-native';
 
 import { ActionPill, Row, Section } from '@/components/settings/shared';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { config } from '@/src/config';
+import { UI_LOCALE_AUTO, type UiLocalePreference } from '@/src/i18n';
+import { useUiLocale } from '@/src/i18n-context';
 import { useNotice } from '@/src/notice-context';
 import { downloadedBooks, formattedDownloadSize, removeDownloadedBook } from '@/src/offline-books';
 import {
@@ -23,12 +26,14 @@ import { createThemedStyles, useTheme, type AppearancePreference, type MotionPre
 const reminderHours = [8, 12, 18, 20, 21];
 
 /**
- * What you cannot preview: theme, motion, notifications, reader defaults, data. Size and width
- * live in the reader, where the effect is visible. Account and billing mail is listed as always
- * sent, so its absence reads as a decision rather than an omission.
+ * What you cannot preview: theme, language, motion, notifications, reader defaults, data. Size
+ * and width live in the reader, where the effect is visible. Account and billing mail is listed
+ * as always sent, so its absence reads as a decision rather than an omission.
  */
 export function AppTab() {
+  const { t } = useTranslation();
   const { appearance, colors, motion, setAppearance, setMotion } = useTheme();
+  const uiLocale = useUiLocale();
   const styles = useStyles();
   const { firebaseUser, profile, refreshProfile } = useAuth();
   const showNotice = useNotice();
@@ -72,7 +77,7 @@ export function AppTab() {
     } catch (error) {
       setReminderEnabled(previous.enabled);
       setReminderHour(previous.hour);
-      setReminderError(error instanceof Error ? error.message : 'The reminder could not be changed.');
+      setReminderError(error instanceof Error ? error.message : t('The reminder could not be changed.'));
     } finally {
       setSavingReminder(false);
     }
@@ -86,7 +91,7 @@ export function AppTab() {
       await refreshProfile();
     } catch (error) {
       setSocialEmails(!value);
-      showNotice({ title: 'Could not update email settings', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not update email settings'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setSavingSocial(false);
     }
@@ -103,7 +108,7 @@ export function AppTab() {
     try {
       const rows = cardQueries.flatMap((query) => query.data ?? []);
       if (!rows.length) {
-        showNotice({ title: 'Nothing to export yet', message: 'Keep a word first.' });
+        showNotice({ title: t('Nothing to export yet'), message: t('Keep a word first.') });
         return;
       }
       const escape = (value: string | undefined) => `"${(value ?? '').replace(/"/g, '""')}"`;
@@ -127,9 +132,9 @@ export function AppTab() {
       const file = new File(Paths.cache, `almonium-words-${new Date().toISOString().slice(0, 10)}.csv`);
       file.create({ overwrite: true });
       file.write(csv);
-      await Sharing.shareAsync(file.uri, { mimeType: 'text/csv', dialogTitle: 'Export my words' });
+      await Sharing.shareAsync(file.uri, { mimeType: 'text/csv', dialogTitle: t('Export my words') });
     } catch (error) {
-      showNotice({ title: 'Could not export', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not export'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setExporting(false);
     }
@@ -140,11 +145,15 @@ export function AppTab() {
       await Promise.all((downloads.data ?? []).map((book) => removeDownloadedBook(book.id)));
       await queryClient.invalidateQueries({ queryKey: ['offline-books'] });
     } catch (error) {
-      showNotice({ title: 'Could not clear downloads', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not clear downloads'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     }
   }
 
   const downloadSize = (downloads.data ?? []).reduce((total, book) => total + book.size, 0);
+  const languageOptions: { value: UiLocalePreference; label: string }[] = [
+    { value: UI_LOCALE_AUTO, label: t('Automatic · {language}', { language: uiLocale.detected.nativeName }) },
+    ...uiLocale.options.map((locale) => ({ value: locale.code as UiLocalePreference, label: locale.nativeName })),
+  ];
   const switchColors = {
     trackColor: { false: colors.line, true: colors.accentBorder },
     ios_backgroundColor: colors.line,
@@ -152,25 +161,37 @@ export function AppTab() {
 
   return (
     <View style={styles.tab}>
-      <Section eyebrow="APPEARANCE">
-        <Row label="Theme">
+      <Section eyebrow={t('APPEARANCE')}>
+        <Row label={t('Theme')}>
           <Segmented<AppearancePreference>
             value={appearance}
-            options={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }, { value: 'system', label: 'System' }]}
+            options={[{ value: 'light', label: t('Light') }, { value: 'dark', label: t('Dark') }, { value: 'system', label: t('System') }]}
             onChange={(value) => void setAppearance(value)}
           />
         </Row>
-        <Row label="Reduce motion" detail="Stops slides and anything that moves across the screen. Fades and colour changes stay.">
+        <Row label={t('Reduce motion')} detail={t('Stops slides and anything that moves across the screen. Fades and colour changes stay.')}>
           <Segmented<MotionPreference>
             value={motion}
-            options={[{ value: 'full', label: 'Off' }, { value: 'reduced', label: 'On' }, { value: 'system', label: 'System' }]}
+            options={[{ value: 'full', label: t('Off') }, { value: 'reduced', label: t('On') }, { value: 'system', label: t('System') }]}
             onChange={(value) => void setMotion(value)}
           />
         </Row>
+        <Row label={t('App language')} detail={t('Follows your device until you pick one. Applies at once.')} />
+        <View accessibilityRole="radiogroup" style={styles.group}>
+          {languageOptions.map((option) => {
+            const selected = uiLocale.preference === option.value;
+            return (
+              <Pressable key={option.value} accessibilityRole="radio" accessibilityState={{ selected }} onPress={() => void uiLocale.setPreference(option.value)} style={[styles.option, selected && styles.optionSelected]}>
+                <View style={[styles.dot, selected && styles.dotSelected]} />
+                <Text style={styles.optionLabel}>{option.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </Section>
 
-      <Section eyebrow="NOTIFICATIONS">
-        <Row label="Daily review nudge" detail="One notification, at a time you pick. Nothing to lose by missing it.">
+      <Section eyebrow={t('NOTIFICATIONS')}>
+        <Row label={t('Daily review nudge')} detail={t('One notification, at a time you pick. Nothing to lose by missing it.')}>
           <Switch
             disabled={savingReminder || Platform.OS === 'web'}
             value={reminderEnabled}
@@ -195,7 +216,7 @@ export function AppTab() {
           </View>
         )}
         {!!reminderError && <Text accessibilityRole="alert" style={styles.error}>{reminderError}</Text>}
-        <Row label="Connection requests" detail="Email when someone asks to connect, and when they accept.">
+        <Row label={t('Connection requests')} detail={t('Email when someone asks to connect, and when they accept.')}>
           <Switch
             disabled={savingSocial}
             value={socialEmails}
@@ -204,66 +225,70 @@ export function AppTab() {
             {...switchColors}
           />
         </Row>
-        <Row label="Account and billing email" detail="Always sent." />
+        <Row label={t('Account and billing email')} detail={t('Always sent.')} />
       </Section>
 
-      <Section eyebrow="READER DEFAULTS">
-        <Text style={styles.note}>Size lives in the reader, where you can see the effect.</Text>
+      <Section eyebrow={t('READER DEFAULTS')}>
+        <Text style={styles.note}>{t('Size lives in the reader, where you can see the effect.')}</Text>
         <View style={styles.group}>
-          <Text style={styles.groupLabel}>TYPE</Text>
+          <Text style={styles.groupLabel}>{t('TYPE')}</Text>
           {readerFaces.map((face) => {
             const selected = reader.face === face.value;
             return (
               <Pressable key={face.value} accessibilityRole="radio" accessibilityState={{ selected }} onPress={() => updateReader({ face: face.value })} style={[styles.option, selected && styles.optionSelected]}>
                 <View style={[styles.dot, selected && styles.dotSelected]} />
                 <View style={styles.optionCopy}>
-                  <Text style={styles.optionLabel}>{face.label}</Text>
-                  {!!face.note && <Text style={styles.optionNote}>{face.note}</Text>}
+                  <Text style={styles.optionLabel}>{t(face.label)}</Text>
+                  {!!face.note && <Text style={styles.optionNote}>{t(face.note)}</Text>}
                 </View>
               </Pressable>
             );
           })}
         </View>
         <View style={styles.group}>
-          <Text style={styles.groupLabel}>TRANSLATION</Text>
+          <Text style={styles.groupLabel}>{t('TRANSLATION')}</Text>
           {parallelModes.map((mode) => {
             const selected = reader.parallel === mode.value;
             return (
               <Pressable key={mode.value} accessibilityRole="radio" accessibilityState={{ selected }} onPress={() => updateReader({ parallel: mode.value })} style={[styles.option, selected && styles.optionSelected]}>
                 <View style={[styles.dot, selected && styles.dotSelected]} />
                 <View style={styles.optionCopy}>
-                  <Text style={styles.optionLabel}>{mode.label}</Text>
-                  <Text style={styles.optionNote}>{mode.note}</Text>
+                  <Text style={styles.optionLabel}>{t(mode.label)}</Text>
+                  <Text style={styles.optionNote}>{t(mode.note)}</Text>
                 </View>
               </Pressable>
             );
           })}
         </View>
-        <Row label="Page">
+        <Row label={t('Page')}>
           <Segmented<ReaderSettings['theme']>
             value={reader.theme}
-            options={[{ value: 'paper', label: 'Paper' }, { value: 'night', label: 'Night' }]}
+            options={[{ value: 'paper', label: t('Paper') }, { value: 'night', label: t('Night') }]}
             onChange={(theme) => updateReader({ theme })}
           />
         </Row>
       </Section>
 
-      <Section eyebrow="DATA & STORAGE">
-        <Row label="Export my words" detail="CSV, every language.">
-          <ActionPill label="Export" busy={exporting} onPress={() => void exportWords()} />
+      <Section eyebrow={t('DATA & STORAGE')}>
+        <Row label={t('Export my words')} detail={t('CSV, every language.')}>
+          <ActionPill label={t('Export')} busy={exporting} onPress={() => void exportWords()} />
         </Row>
         <Row
-          label="Offline books"
-          detail={downloads.data?.length ? `${downloads.data.length} ${downloads.data.length === 1 ? 'book' : 'books'} · ${formattedDownloadSize(downloadSize)}` : 'Nothing downloaded'}>
-          {!!downloads.data?.length && <ActionPill label="Clear" onPress={() => void clearDownloads()} />}
+          label={t('Offline books')}
+          detail={
+            downloads.data?.length
+              ? t('{count, plural, one {# book} other {# books}} · {size}', { count: downloads.data.length, size: formattedDownloadSize(downloadSize) })
+              : t('Nothing downloaded')
+          }>
+          {!!downloads.data?.length && <ActionPill label={t('Clear')} onPress={() => void clearDownloads()} />}
         </Row>
       </Section>
 
-      <Section eyebrow="LEGAL">
-        <Row label="Privacy policy" onPress={() => void Linking.openURL(`${config.webBaseUrl}/privacy-policy`)}>
+      <Section eyebrow={t('LEGAL')}>
+        <Row label={t('Privacy policy')} onPress={() => void Linking.openURL(`${config.webBaseUrl}/privacy-policy`)}>
           <Ionicons name="open-outline" size={18} color={colors.muted} />
         </Row>
-        <Row label="Terms of use" onPress={() => void Linking.openURL(`${config.webBaseUrl}/terms-of-use`)}>
+        <Row label={t('Terms of use')} onPress={() => void Linking.openURL(`${config.webBaseUrl}/terms-of-use`)}>
           <Ionicons name="open-outline" size={18} color={colors.muted} />
         </Row>
       </Section>

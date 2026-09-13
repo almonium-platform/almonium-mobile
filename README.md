@@ -116,6 +116,41 @@ useful for the email/password, library, settings, and reader flows.
 profiles. The app config is linked to the `almonium-app` Expo account and its
 Almonium EAS project.
 
+## Interface languages
+
+The interface is written in English and marked for translation with i18next,
+the way the web client is marked with Angular's i18n: `t('Keep this word')` in
+a component (`useTranslation()` from `react-i18next`), `t` from `src/i18n.ts`
+in a plain module, and `msg('...')` around copy held in a constant, translated
+where it is shown. The English text is the key, so a line that is reworded
+simply loses its old translations; nothing is named by hand. Placeholders and
+plurals are ICU, the same syntax the web client's messages carry:
+`t('Hello {name}', { name })`,
+`t('{count, plural, one {# book} other {# books}}', { count })`.
+
+The setting under **Settings → App → App language** follows the device until a
+language is picked and applies at once, without a restart. The choice is stored
+per device beside appearance. Dates and numbers keep following the device.
+
+```
+npm run i18n
+```
+
+That extracts every marked message to `src/locales/en.json` (the file to hand
+to a translator) and stretches it into `src/locales/pseudo.json`, the
+pseudo-locale: `[Šéţţîñĝš~~~~]`. Accents mark text that went through
+translation, the tail is the surplus a longer language such as German brings,
+and a missing bracket is a clipped end. Dev clients and the preview channel
+offer it in the App language setting; one pass through the app in it stands in
+for testing every language. Text that appears unaccented in it is copy that
+never went through i18n. Rerun the command after changing copy.
+
+Adding a language: translate `en.json` into `src/locales/<code>.json` (same
+flat shape), add one line to `UI_LOCALES` and one `require` to `resources` in
+`src/i18n.ts`. Layouts already give text room: no fixed widths on containers
+that hold copy, ellipsis only on user-generated strings such as names and
+titles.
+
 ## Every push to `develop` lands on your phone
 
 Pushing to `develop` triggers [`.github/workflows/develop-to-phone.yml`](.github/workflows/develop-to-phone.yml).

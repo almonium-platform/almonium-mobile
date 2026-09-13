@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createContext, type PropsWithChildren, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -16,6 +17,7 @@ interface Notice {
 const NoticeContext = createContext<((notice: Notice) => void) | null>(null);
 
 export function NoticeProvider({ children }: PropsWithChildren) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const insets = useSafeAreaInsets();
@@ -44,7 +46,7 @@ export function NoticeProvider({ children }: PropsWithChildren) {
               <Text style={styles.title}>{notice.title}</Text>
               {!!notice.message && <Text style={styles.message}>{notice.message}</Text>}
             </View>
-            <Pressable accessibilityLabel="Dismiss message" hitSlop={8} onPress={() => setNotice(null)}>
+            <Pressable accessibilityLabel={t('Dismiss message')} hitSlop={8} onPress={() => setNotice(null)}>
               <Ionicons name="close" size={20} color={colors.muted} />
             </Pressable>
           </View>

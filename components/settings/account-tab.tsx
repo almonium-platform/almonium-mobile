@@ -3,6 +3,7 @@ import { useQueries } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { EmailAuthProvider, linkWithCredential, unlink, updatePassword } from 'firebase/auth';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, Text, View } from 'react-native';
 
 import { ReauthSheet } from '@/components/reauth-sheet';
@@ -32,6 +33,7 @@ function needsRecentLogin(error: unknown) {
  * shouting.
  */
 export function AccountTab() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile, logOut, refreshProfile } = useAuth();
@@ -64,7 +66,7 @@ export function AccountTab() {
         setGuard(key);
         return;
       }
-      showNotice({ title: 'That did not go through', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('That did not go through'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setBusy(null);
     }
@@ -95,7 +97,7 @@ export function AccountTab() {
 
   async function submitPassword() {
     const user = auth.currentUser;
-    if (!user?.email) throw new Error('This account has no email address to set a password on.');
+    if (!user?.email) throw new Error(t('This account has no email address to set a password on.'));
     if (has('password')) await updatePassword(user, newPassword);
     else await linkWithCredential(user, EmailAuthProvider.credential(user.email, newPassword));
     await user.reload();
@@ -117,15 +119,15 @@ export function AccountTab() {
 
   return (
     <View style={styles.tab}>
-      <Section eyebrow="EMAIL">
+      <Section eyebrow={t('EMAIL')}>
         <Row
           label={profile?.email ?? firebaseUser?.email ?? ''}
-          detail={firebaseUser?.emailVerified ? '✓ Verified' : 'Not verified'}>
-          <ActionPill label="Change" onPress={() => setEmailVisible(true)} />
+          detail={firebaseUser?.emailVerified ? t('✓ Verified') : t('Not verified')}>
+          <ActionPill label={t('Change')} onPress={() => setEmailVisible(true)} />
         </Row>
       </Section>
 
-      <Section eyebrow="HOW YOU SIGN IN">
+      <Section eyebrow={t('HOW YOU SIGN IN')}>
         {providerRows.map((provider) => {
           const linked = has(provider.id);
           const unavailable = provider.id === 'apple.com' && Platform.OS !== 'ios' && !linked;
@@ -135,17 +137,17 @@ export function AccountTab() {
               key={provider.id}
               icon={<View style={styles.methodIcon}><Ionicons name={provider.icon} size={17} color={colors.ink} /></View>}
               label={provider.label}
-              detail={linked ? (firebaseUser?.providerData.find((entry) => entry.providerId === provider.id)?.email ?? 'Connected') : 'Not connected'}
-              note={linked && onlyMethod ? 'Your only sign-in method. Add another before disconnecting it.' : undefined}>
+              detail={linked ? (firebaseUser?.providerData.find((entry) => entry.providerId === provider.id)?.email ?? t('Connected')) : t('Not connected')}
+              note={linked && onlyMethod ? t('Your only sign-in method. Add another before disconnecting it.') : undefined}>
               <ActionPill
-                label={linked ? 'Disconnect' : 'Connect'}
+                label={linked ? t('Disconnect') : t('Connect')}
                 disabled={linked && onlyMethod}
                 busy={busy === provider.id}
                 onPress={() =>
                   void run(
                     provider.id,
                     () => (linked ? disconnect(provider.id) : connect(provider.id)),
-                    linked ? `${provider.label} disconnected` : `${provider.label} connected`,
+                    linked ? t('{provider} disconnected', { provider: provider.label }) : t('{provider} connected', { provider: provider.label }),
                   )
                 }
               />
@@ -154,36 +156,40 @@ export function AccountTab() {
         })}
         <Row
           icon={<View style={styles.methodIcon}><Ionicons name="mail-outline" size={17} color={colors.ink} /></View>}
-          label="Password"
-          detail={has('password') ? 'Set' : 'Not set — adds a way back in if a connected account is lost'}>
-          <ActionPill label={has('password') ? 'Change' : 'Set up'} onPress={() => setPasswordVisible(true)} />
+          label={t('Password')}
+          detail={has('password') ? t('Set') : t('Not set — adds a way back in if a connected account is lost')}>
+          <ActionPill label={has('password') ? t('Change') : t('Set up')} onPress={() => setPasswordVisible(true)} />
         </Row>
       </Section>
 
       <View style={styles.deleteRow}>
-        <Text style={styles.deleteLabel}>Delete account and all data</Text>
-        <ActionPill label="Delete" tone="danger" onPress={() => setGuard('delete')} />
+        <Text style={styles.deleteLabel}>{t('Delete account and all data')}</Text>
+        <ActionPill label={t('Delete')} tone="danger" onPress={() => setGuard('delete')} />
       </View>
 
       <Button variant="secondary" onPress={() => void logOut().then(() => router.replace('/(auth)/sign-in'))}>
-        Sign out
+        {t('Sign out')}
       </Button>
 
       <Sheet visible={emailVisible} onClose={() => setEmailVisible(false)}>
-        <Text style={styles.sheetTitle}>Change your email</Text>
-        <Text style={styles.note}>We send a verification link to the new address. Your sign-in changes once you open it.</Text>
-        <Field value={newEmail} onChangeText={setNewEmail} placeholder="New email address" keyboardType="email-address" autoComplete="email" autoFocus />
-        <Button loading={busy === 'email'} disabled={!/^\S+@\S+\.\S+$/.test(newEmail.trim())} onPress={() => void run('email', submitEmail, 'Check the new inbox for the link')}>
-          Send verification link
+        <Text style={styles.sheetTitle}>{t('Change your email')}</Text>
+        <Text style={styles.note}>{t('We send a verification link to the new address. Your sign-in changes once you open it.')}</Text>
+        <Field value={newEmail} onChangeText={setNewEmail} placeholder={t('New email address')} keyboardType="email-address" autoComplete="email" autoFocus />
+        <Button loading={busy === 'email'} disabled={!/^\S+@\S+\.\S+$/.test(newEmail.trim())} onPress={() => void run('email', submitEmail, t('Check the new inbox for the link'))}>
+          {t('Send verification link')}
         </Button>
       </Sheet>
 
       <Sheet visible={passwordVisible} onClose={() => setPasswordVisible(false)}>
-        <Text style={styles.sheetTitle}>{has('password') ? 'Change your password' : 'Set a password'}</Text>
-        <Text style={styles.note}>8 or more characters. {has('password') ? 'The old one stops working straight away.' : 'It signs you in alongside your connected account.'}</Text>
-        <Field value={newPassword} onChangeText={setNewPassword} placeholder="New password" secureTextEntry autoComplete="new-password" autoFocus />
-        <Button loading={busy === 'password'} disabled={newPassword.length < 8} onPress={() => void run('password', submitPassword, has('password') ? 'Password changed' : 'Password set')}>
-          {has('password') ? 'Change password' : 'Set password'}
+        <Text style={styles.sheetTitle}>{has('password') ? t('Change your password') : t('Set a password')}</Text>
+        <Text style={styles.note}>
+          {has('password')
+            ? t('8 or more characters. The old one stops working straight away.')
+            : t('8 or more characters. It signs you in alongside your connected account.')}
+        </Text>
+        <Field value={newPassword} onChangeText={setNewPassword} placeholder={t('New password')} secureTextEntry autoComplete="new-password" autoFocus />
+        <Button loading={busy === 'password'} disabled={newPassword.length < 8} onPress={() => void run('password', submitPassword, has('password') ? t('Password changed') : t('Password set'))}>
+          {has('password') ? t('Change password') : t('Set password')}
         </Button>
       </Sheet>
 
@@ -191,18 +197,18 @@ export function AccountTab() {
         visible={guard !== null}
         onClose={() => setGuard(null)}
         destructive={guard === 'delete'}
-        title={guard === 'delete' ? 'Delete your account?' : 'Confirm it’s you'}
+        title={guard === 'delete' ? t('Delete your account?') : t('Confirm it’s you')}
         description={
           guard === 'delete'
-            ? 'This removes your account, your saved words and your reading progress. It cannot be undone and support cannot restore it.'
-            : 'This is a sensitive change, so we ask once more before it goes through.'
+            ? t('This removes your account, your saved words and your reading progress. It cannot be undone and support cannot restore it.')
+            : t('This is a sensitive change, so we ask once more before it goes through.')
         }
-        actionLabel={guard === 'delete' ? 'Delete account' : guard === 'email' ? 'Change email' : 'Change password'}
+        actionLabel={guard === 'delete' ? t('Delete account') : guard === 'email' ? t('Change email') : t('Change password')}
         consequences={
           guard === 'delete'
             ? [
-                { label: 'Saved words', value: savedWords.toLocaleString() },
-                { label: 'Languages', value: String(profile?.learners.length ?? 0) },
+                { label: t('Saved words'), value: savedWords.toLocaleString() },
+                { label: t('Languages'), value: String(profile?.learners.length ?? 0) },
               ]
             : undefined
         }

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -27,12 +28,13 @@ export function MessageActionsSheet({
   children?: React.ReactNode;
   onClose(): void;
 }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
 
   return (
     <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
-      <Pressable accessibilityLabel="Dismiss" style={styles.scrim} onPress={onClose} />
+      <Pressable accessibilityLabel={t('Dismiss')} style={styles.scrim} onPress={onClose} />
       {/* The pressed bubble sits directly above the sheet, lit over the dimmed thread. */}
       <SafeAreaView edges={['bottom']} pointerEvents="box-none" style={styles.sheetLayer}>
         <View style={styles.lifted} pointerEvents="box-none">
@@ -61,7 +63,7 @@ export function MessageActionsSheet({
             accessibilityRole="button"
             onPress={onClose}
             style={({ pressed }) => [styles.cancel, pressed && styles.pressed]}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.cancelText}>{t('Cancel')}</Text>
           </Pressable>
         )}
       </SafeAreaView>

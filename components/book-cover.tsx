@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ImageStyle, StyleProp, StyleSheet, Text, View } from 'react-native';
 
 import { colors, fonts, serifLineHeight } from '@/src/theme';
@@ -19,9 +20,11 @@ export function BookCover({
   coverUrl: string | null;
   style?: StyleProp<ImageStyle>;
 }) {
+  const { t } = useTranslation();
   const [imageFailed, setImageFailed] = useState(false);
   const color = useMemo(() => coverColors[hash(workSlug) % coverColors.length], [workSlug]);
   useEffect(() => setImageFailed(false), [coverUrl]);
+  const coverLabel = t('{title} by {author} cover', { title, author });
 
   if (coverUrl && !imageFailed) {
     return (
@@ -31,13 +34,13 @@ export function BookCover({
         contentFit="cover"
         transition={180}
         onError={() => setImageFailed(true)}
-        accessibilityLabel={`${title} by ${author} cover`}
+        accessibilityLabel={coverLabel}
       />
     );
   }
 
   return (
-    <View style={[styles.cover, style]} accessibilityLabel={`${title} by ${author} cover`}>
+    <View style={[styles.cover, style]} accessibilityLabel={coverLabel}>
       <View style={[styles.colorField, { backgroundColor: color }]} />
       <Text style={[styles.imprint, { color }]}>ALMONIUM</Text>
       <Text style={styles.title} numberOfLines={4}>{title}</Text>

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 import { PaywallModal } from '@/components/paywall-modal';
@@ -25,6 +26,7 @@ function monthName(value: string | undefined) {
  * same sheet lists what the allowance went to, with Withdraw.
  */
 export function AlignmentRow({ book, language, onOpenParallel }: { book: BookDetails; language: string; onOpenParallel(parallel: string): void }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
@@ -44,14 +46,14 @@ export function AlignmentRow({ book, language, onOpenParallel }: { book: BookDet
     onSuccess: async (_, target) => {
       await invalidate();
       setAsking(null);
-      showNotice({ title: `${languageName(target)} requested`, message: 'When this one is ready, the bell will say so.', tone: 'success' });
+      showNotice({ title: t('{language} requested', { language: languageName(target) }), message: t('When this one is ready, the bell will say so.'), tone: 'success' });
     },
-    onError: (error) => showNotice({ title: 'Could not send the request', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' }),
+    onError: (error) => showNotice({ title: t('Could not send the request'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' }),
   });
   const withdraw = useMutation({
     mutationFn: (order: TranslationOrder) => api.withdrawTranslation(order.bookId, order.language),
     onSuccess: invalidate,
-    onError: (error) => showNotice({ title: 'Could not withdraw', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' }),
+    onError: (error) => showNotice({ title: t('Could not withdraw'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' }),
   });
 
   const aligned = book.languageVariants.filter((variant) => variant.language !== book.language);
@@ -70,7 +72,7 @@ export function AlignmentRow({ book, language, onOpenParallel }: { book: BookDet
 
   return (
     <View style={styles.block}>
-      <Text style={styles.eyebrow}>PARALLEL TEXT</Text>
+      <Text style={styles.eyebrow}>{t('PARALLEL TEXT')}</Text>
       <View style={styles.chips}>
         {aligned.map((variant) => {
           const solid = variant.language === readingPair;
@@ -78,7 +80,7 @@ export function AlignmentRow({ book, language, onOpenParallel }: { book: BookDet
             <Pressable
               key={variant.language}
               accessibilityRole="button"
-              accessibilityLabel={`Read with ${languageName(variant.language)}`}
+              accessibilityLabel={t('Read with {language}', { language: languageName(variant.language) })}
               onPress={() => onOpenParallel(variant.language)}
               style={[styles.chip, solid ? styles.chipSolid : styles.chipOutline]}>
               <Text style={[styles.chipText, solid && styles.chipTextSolid]}>{languageName(variant.language)}</Text>
@@ -91,7 +93,7 @@ export function AlignmentRow({ book, language, onOpenParallel }: { book: BookDet
             <Pressable
               key={code}
               accessibilityRole="button"
-              accessibilityLabel={pending ? `${languageName(code)} requested` : `Ask for ${languageName(code)}`}
+              accessibilityLabel={pending ? t('{language} requested', { language: languageName(code) }) : t('Ask for {language}', { language: languageName(code) })}
               onPress={() => setAsking(code)}
               style={[styles.chip, styles.chipDashed]}>
               <Ionicons name={pending ? 'time-outline' : 'add'} size={14} color={colors.muted} />
@@ -103,50 +105,50 @@ export function AlignmentRow({ book, language, onOpenParallel }: { book: BookDet
       {requestable.length > 0 && (
         <Text style={styles.note}>
           {askedHere(requestable[0])
-            ? `${languageName(requestable[0])} is on its way. You asked for it; there is no date, and the bell says when it is ready.`
-            : `${languageName(requestable[0])} is not aligned for this book yet. You can ask for it.`}
+            ? t('{language} is on its way. You asked for it; there is no date, and the bell says when it is ready.', { language: languageName(requestable[0]) })
+            : t('{language} is not aligned for this book yet. You can ask for it.', { language: languageName(requestable[0]) })}
         </Text>
       )}
 
       <Sheet visible={asking !== null} onClose={() => setAsking(null)}>
         {asking && askingOrder ? (
           <>
-            <Text style={styles.sheetTitle}>{languageName(asking)} for {book.title}</Text>
-            <Text style={styles.note}>You asked for this one in {monthName(askingOrder.createdAt)}. When it is ready, every reader of the pair has it, and you hear first.</Text>
+            <Text style={styles.sheetTitle}>{t('{language} for {title}', { language: languageName(asking), title: book.title })}</Text>
+            <Text style={styles.note}>{t('You asked for this one in {month}. When it is ready, every reader of the pair has it, and you hear first.', { month: monthName(askingOrder.createdAt) })}</Text>
             <Button variant="secondary" loading={withdraw.isPending} onPress={() => withdraw.mutate(askingOrder, { onSuccess: () => setAsking(null) })}>
-              Withdraw the request
+              {t('Withdraw the request')}
             </Button>
           </>
         ) : asking && remaining > 0 ? (
           <>
-            <Text style={styles.sheetTitle}>{languageName(asking)} for {book.title}</Text>
-            <Text style={styles.note}>We add requested translations as we go. There is no date and no queue position — when this one is ready, the bell says so.</Text>
-            <Text style={styles.quota}>This uses 1 of your {limit} {limit === 1 ? 'request' : 'requests'} for {month}.</Text>
-            <Button loading={request.isPending} onPress={() => request.mutate(asking)}>Request {languageName(asking)}</Button>
-            <Pressable onPress={() => setAsking(null)} style={styles.dismiss}><Text style={styles.link}>Not now</Text></Pressable>
+            <Text style={styles.sheetTitle}>{t('{language} for {title}', { language: languageName(asking), title: book.title })}</Text>
+            <Text style={styles.note}>{t('We add requested translations as we go. There is no date and no queue position — when this one is ready, the bell says so.')}</Text>
+            <Text style={styles.quota}>{t('{count, plural, one {This uses 1 of your # request for {month}.} other {This uses 1 of your # requests for {month}.}}', { count: limit, month })}</Text>
+            <Button loading={request.isPending} onPress={() => request.mutate(asking)}>{t('Request {language}', { language: languageName(asking) })}</Button>
+            <Pressable onPress={() => setAsking(null)} style={styles.dismiss}><Text style={styles.link}>{t('Not now')}</Text></Pressable>
           </>
         ) : (
           <>
-            <Text style={styles.sheetTitle}>You have used your {month} {limit === 1 ? 'request' : 'requests'}</Text>
+            <Text style={styles.sheetTitle}>{t('{count, plural, one {You have used your {month} request} other {You have used your {month} requests}}', { count: limit, month })}</Text>
             <Text style={styles.note}>
               {asked.length
-                ? `Withdraw one to spend it here instead, or ask again next month.`
-                : 'Ask again next month.'}
+                ? t('Withdraw one to spend it here instead, or ask again next month.')
+                : t('Ask again next month.')}
             </Text>
             {asked.map((order) => (
               <View key={order.id} style={styles.orderRow}>
                 <View style={styles.orderCopy}>
                   <Text style={styles.orderTitle}>{order.bookTitle} → {languageName(order.language)}</Text>
-                  <Text style={styles.orderMeta}>Asked {new Date(order.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</Text>
+                  <Text style={styles.orderMeta}>{t('Asked {date}', { date: new Date(order.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) })}</Text>
                 </View>
                 <Pressable disabled={withdraw.isPending} onPress={() => withdraw.mutate(order)} hitSlop={8}>
-                  <Text style={styles.link}>Withdraw</Text>
+                  <Text style={styles.link}>{t('Withdraw')}</Text>
                 </Pressable>
               </View>
             ))}
             {!profile?.premium && (
               <Pressable onPress={() => { setAsking(null); setWallVisible(true); }} style={styles.dismiss}>
-                <Text style={styles.link}>Premium gets three a month, read first.</Text>
+                <Text style={styles.link}>{t('Premium gets three a month, read first.')}</Text>
               </Pressable>
             )}
           </>

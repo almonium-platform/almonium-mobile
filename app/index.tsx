@@ -1,4 +1,5 @@
 import { Redirect } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui';
@@ -7,6 +8,7 @@ import { authenticatedDestination } from '@/src/navigation';
 import { createThemedStyles, useTheme } from '@/src/theme';
 
 export default function Index() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile, profileError, retryProfile, logOut, loading } = useAuth();
@@ -22,11 +24,11 @@ export default function Index() {
   if (firebaseUser && profileError) {
     return (
       <View style={styles.recovery}>
-        <Text style={styles.title}>We could not reach your Almonium profile.</Text>
+        <Text style={styles.title}>{t('We could not reach your Almonium profile.')}</Text>
         <Text style={styles.message}>{profileError}</Text>
-        <Button onPress={retryProfile}>Try again</Button>
+        <Button onPress={retryProfile}>{t('Try again')}</Button>
         <Button variant="secondary" onPress={logOut}>
-          Sign out
+          {t('Sign out')}
         </Button>
       </View>
     );

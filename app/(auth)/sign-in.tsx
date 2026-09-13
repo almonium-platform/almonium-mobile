@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Linking, Platform, Text, View } from 'react-native';
 
 import { BrandMark } from '@/components/brand-mark';
@@ -12,6 +13,7 @@ import { useNotice } from '@/src/notice-context';
 import { createThemedStyles, gradients, useTheme } from '@/src/theme';
 
 export default function SignInScreen() {
+  const { t } = useTranslation();
   const { isDark } = useTheme();
   const styles = useStyles();
   const { signIn, signInWithGoogle, signInWithApple } = useAuth();
@@ -33,7 +35,7 @@ export default function SignInScreen() {
       await signIn(email, password);
       router.replace('/');
     } catch (error) {
-      showNotice({ title: 'Could not sign in', message: error instanceof Error ? error.message : 'Please try again.', tone: 'error' });
+      showNotice({ title: t('Could not sign in'), message: error instanceof Error ? error.message : t('Please try again.'), tone: 'error' });
     } finally {
       setLoading(false);
     }
@@ -52,7 +54,7 @@ export default function SignInScreen() {
       ) {
         return;
       }
-      showNotice({ title: 'Could not sign in with Apple', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not sign in with Apple'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setLoading(false);
     }
@@ -71,7 +73,7 @@ export default function SignInScreen() {
       ) {
         return;
       }
-      showNotice({ title: 'Could not sign in with Google', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not sign in with Google'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setLoading(false);
     }
@@ -84,9 +86,9 @@ export default function SignInScreen() {
         style={styles.container}>
         <View style={styles.brand}>
           <BrandMark />
-          <Title>Read beyond{'\n'}your vocabulary.</Title>
+          <Title>{t('Read beyond\nyour vocabulary.')}</Title>
           <Text style={styles.subtitle}>
-            Books that grow with your language, one page at a time.
+            {t('Books that grow with your language, one page at a time.')}
           </Text>
         </View>
 
@@ -94,14 +96,14 @@ export default function SignInScreen() {
           <Field
             value={email}
             onChangeText={setEmail}
-            placeholder="Email"
+            placeholder={t('Email')}
             keyboardType="email-address"
             autoComplete="email"
           />
           <Field
             value={password}
             onChangeText={setPassword}
-            placeholder="Password"
+            placeholder={t('Password')}
             secureTextEntry
             autoComplete="current-password"
           />
@@ -109,11 +111,11 @@ export default function SignInScreen() {
             loading={loading}
             disabled={!email.trim() || password.length < 8}
             onPress={submit}>
-            Sign in
+            {t('Sign in')}
           </Button>
           <View style={styles.divider}>
             <View style={styles.dividerRule} />
-            <Text style={styles.dividerText}>or</Text>
+            <Text style={styles.dividerText}>{t('or')}</Text>
             <View style={styles.dividerRule} />
           </View>
           {/* Apple above Google on iOS: store review reads the order. */}
@@ -128,26 +130,30 @@ export default function SignInScreen() {
           )}
           {Platform.OS !== 'web' && !isExpoGo && (
             <Button variant="secondary" disabled={loading} onPress={googleSignIn}>
-              Continue with Google
+              {t('Continue with Google')}
             </Button>
           )}
           {isExpoGo && (
             <Text style={styles.expoGoHint}>
-              Google sign-in is available in the development build. Use email and password in Expo Go.
+              {t('Google sign-in is available in the development build. Use email and password in Expo Go.')}
             </Text>
           )}
           <View style={styles.links}>
             <Link href="/(auth)/forgot-password" style={styles.link}>
-              Forgot password?
+              {t('Forgot password?')}
             </Link>
             <Link href="/(auth)/register" style={styles.link}>
-              Create account
+              {t('Create account')}
             </Link>
           </View>
           <Text style={styles.legal}>
-            By continuing you agree to the{' '}
-            <Text onPress={() => void Linking.openURL(`${config.webBaseUrl}/terms-of-use`)} style={styles.legalLink}>Terms</Text> and{' '}
-            <Text onPress={() => void Linking.openURL(`${config.webBaseUrl}/privacy-policy`)} style={styles.legalLink}>Privacy Policy</Text>.
+            <Trans
+              i18nKey="By continuing you agree to the <1>Terms</1> and <3>Privacy Policy</3>."
+              components={{
+                1: <Text onPress={() => void Linking.openURL(`${config.webBaseUrl}/terms-of-use`)} style={styles.legalLink} />,
+                3: <Text onPress={() => void Linking.openURL(`${config.webBaseUrl}/privacy-policy`)} style={styles.legalLink} />,
+              }}
+            />
           </Text>
         </Card>
       </KeyboardAvoidingView>

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { WeekBand } from '@/components/harness';
@@ -22,6 +23,7 @@ import { rhythmFor, useLearningStats, useRhythm } from '@/src/use-rhythm';
  * one line, and inside the cooldown Make active greys with that line as the whole explanation.
  */
 export default function LanguageRecordScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { code = '' } = useLocalSearchParams<{ code: string }>();
@@ -58,7 +60,7 @@ export default function LanguageRecordScreen() {
       ]);
     },
     onError: (error) =>
-      showNotice({ title: 'Could not make this language active', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' }),
+      showNotice({ title: t('Could not make this language active'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' }),
   });
 
   const name = languageName(code);
@@ -76,9 +78,9 @@ export default function LanguageRecordScreen() {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.topRow}>
-          <Pressable accessibilityLabel="Back" onPress={() => router.back()} hitSlop={10} style={styles.back}>
+          <Pressable accessibilityLabel={t('Back')} onPress={() => router.back()} hitSlop={10} style={styles.back}>
             <Ionicons name="chevron-back" size={24} color={colors.ink} />
-            <Text style={styles.backText}>Profile</Text>
+            <Text style={styles.backText}>{t('Profile')}</Text>
           </Pressable>
         </View>
         <View style={styles.heading}>
@@ -88,22 +90,28 @@ export default function LanguageRecordScreen() {
           <Text style={styles.title}>{name}</Text>
           <Text style={styles.copy}>
             {active
-              ? `Active${learner ? ` · ${learner.selfReportedLevel}` : ''}. Everything you read and keep counts here.`
+              ? learner
+                ? t('Active · {level}. Everything you read and keep counts here.', { level: learner.selfReportedLevel })
+                : t('Active. Everything you read and keep counts here.')
               : languageRhythm?.setAsideAt
-                ? `Set aside on ${formatDay(languageRhythm.setAsideAt)}. Everything is kept.`
-                : 'Set aside. Everything is kept.'}
+                ? t('Set aside on {date}. Everything is kept.', { date: formatDay(languageRhythm.setAsideAt) })
+                : t('Set aside. Everything is kept.')}
           </Text>
           {!active && (
             <View style={styles.activate}>
               <Button loading={activate.isPending} disabled={inCooldown || policy.isLoading} onPress={() => activate.mutate()}>
-                Make active
+                {t('Make active')}
               </Button>
               <Text style={styles.copy}>
                 {inCooldown && cooldownUntil
-                  ? `You can change your active language once a month. Next change available ${cooldownUntil.toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}.`
+                  ? t('You can change your active language once a month. Next change available {date}.', {
+                      date: cooldownUntil.toLocaleDateString(undefined, { day: 'numeric', month: 'long' }),
+                    })
                   : swaps
-                    ? `Making ${name} active sets ${languageName(swaps.language)} aside in its place.${allowance === 1 ? ' You can change again in a month.' : ''}`
-                    : `Making ${name} active adds it to the languages you are studying.`}
+                    ? allowance === 1
+                      ? t('Making {language} active sets {other} aside in its place. You can change again in a month.', { language: name, other: languageName(swaps.language) })
+                      : t('Making {language} active sets {other} aside in its place.', { language: name, other: languageName(swaps.language) })
+                    : t('Making {language} active adds it to the languages you are studying.', { language: name })}
               </Text>
             </View>
           )}
@@ -120,24 +128,26 @@ export default function LanguageRecordScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.eyebrow}>YOUR WORDS</Text>
+          <Text style={styles.eyebrow}>{t('YOUR WORDS')}</Text>
           <Text style={styles.sectionTitle}>
-            {due ? `${due} due${active ? '' : ' when you come back'}` : wordsKept ? 'Nothing due right now' : 'Nothing kept yet'}
+            {due
+              ? active ? t('{count} due', { count: due }) : t('{count} due when you come back', { count: due })
+              : wordsKept ? t('Nothing due right now') : t('Nothing kept yet')}
           </Text>
           {(cards.data ?? []).slice(0, 3).map((card) => (
             <View key={card.id} style={styles.wordRow}>
               <Text style={styles.word}>{card.entry}</Text>
               <Text style={styles.wordMeta}>
-                {card.iteration ? `seen ${card.iteration}×` : card.translations[0]?.translation ?? ''}
+                {card.iteration ? t('seen {count}×', { count: card.iteration }) : card.translations[0]?.translation ?? ''}
               </Text>
             </View>
           ))}
           {wordsKept > 0 && (
             <Pressable onPress={() => router.push('/(tabs)/cards')} style={styles.inlineAction}>
-              <Text style={styles.link}>All {wordsKept.toLocaleString()} words</Text>
+              <Text style={styles.link}>{t('All {count, plural, one {# word} other {# words}}', { count: wordsKept })}</Text>
             </Pressable>
           )}
-          {!active && due > 0 && <Text style={styles.copy}>Reviewing needs this language active.</Text>}
+          {!active && due > 0 && <Text style={styles.copy}>{t('Reviewing needs this language active.')}</Text>}
         </View>
       </ScrollView>
     </SafeAreaView>

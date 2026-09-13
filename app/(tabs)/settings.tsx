@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -10,15 +11,16 @@ import { AppTab } from '@/components/settings/app-tab';
 import { LearningTab } from '@/components/settings/learning-tab';
 import { ProfileTab } from '@/components/settings/profile-tab';
 import { useAuth } from '@/src/auth-context';
+import { msg } from '@/src/i18n';
 import { languageName } from '@/src/languages';
 import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 
 type Tab = 'profile' | 'account' | 'learning' | 'app';
 const tabs: { key: Tab; label: string }[] = [
-  { key: 'profile', label: 'Profile' },
-  { key: 'account', label: 'Account' },
-  { key: 'learning', label: 'Learning' },
-  { key: 'app', label: 'App' },
+  { key: 'profile', label: msg('Profile') },
+  { key: 'account', label: msg('Account') },
+  { key: 'learning', label: msg('Learning') },
+  { key: 'app', label: msg('App') },
 ];
 
 /**
@@ -27,6 +29,7 @@ const tabs: { key: Tab; label: string }[] = [
  * affordances elsewhere land on Learning instead of making people hunt for it.
  */
 export default function SettingsScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { profile } = useAuth();
@@ -38,7 +41,7 @@ export default function SettingsScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.topRow}>
-          <Pressable accessibilityLabel="Back" onPress={() => router.back()} hitSlop={10} style={styles.back}>
+          <Pressable accessibilityLabel={t('Back')} onPress={() => router.back()} hitSlop={10} style={styles.back}>
             <Ionicons name="chevron-back" size={24} color={colors.ink} />
           </Pressable>
         </View>
@@ -47,8 +50,9 @@ export default function SettingsScreen() {
           <View style={styles.headingCopy}>
             <Text style={styles.title}>@{profile?.username}</Text>
             <Text style={styles.caption}>
-              Here since {formatMonth(profile?.subscription.startDate)}
-              {activeLanguages.length ? ` · learning ${activeLanguages.join(', ')}` : ''}
+              {activeLanguages.length
+                ? t('Here since {month} · learning {languages}', { month: formatMonth(profile?.subscription.startDate), languages: activeLanguages.join(', ') })
+                : t('Here since {month}', { month: formatMonth(profile?.subscription.startDate) })}
             </Text>
           </View>
         </View>
@@ -61,7 +65,7 @@ export default function SettingsScreen() {
               accessibilityState={{ selected: tab === item.key }}
               onPress={() => setTab(item.key)}
               style={[styles.tab, tab === item.key && styles.tabActive]}>
-              <Text style={[styles.tabText, tab === item.key && styles.tabTextActive]}>{item.label}</Text>
+              <Text style={[styles.tabText, tab === item.key && styles.tabTextActive]}>{t(item.label)}</Text>
             </Pressable>
           ))}
         </View>

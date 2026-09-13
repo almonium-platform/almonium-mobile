@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Keyboard,
@@ -27,6 +28,7 @@ import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@
 const lookupLanguageKey = 'almonium:lookup-language';
 
 export default function LookupScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const params = useLocalSearchParams<{ text?: string }>();
@@ -161,10 +163,10 @@ export default function LookupScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag">
         <View style={styles.intro}>
-          <Text style={styles.eyebrow}>LOOK UP</Text>
-          <Text style={styles.title}>A word, or a whole sentence</Text>
+          <Text style={styles.eyebrow}>{t('LOOK UP')}</Text>
+          <Text style={styles.title}>{t('A word, or a whole sentence')}</Text>
           <Text style={styles.subhead}>
-            Paste anything {languageName(language)} and tap what you don’t know.
+            {t('Paste anything {language} and tap what you don’t know.', { language: languageName(language) })}
           </Text>
         </View>
 
@@ -174,7 +176,7 @@ export default function LookupScreen() {
             value={search}
             onChangeText={setSearch}
             onSubmitEditing={submit}
-            placeholder="Word, phrase or sentence"
+            placeholder={t('Word, phrase or sentence')}
             placeholderTextColor={colors.metadata}
             returnKeyType="search"
             multiline
@@ -182,18 +184,18 @@ export default function LookupScreen() {
             style={styles.input}
           />
           {!!search && (
-            <Pressable accessibilityLabel="Clear lookup" hitSlop={10} onPress={() => setSearch('')}>
+            <Pressable accessibilityLabel={t('Clear lookup')} hitSlop={10} onPress={() => setSearch('')}>
               <Ionicons name="close-circle" size={20} color={colors.metadata} />
             </Pressable>
           )}
         </View>
         <Button disabled={!search.trim() || lookupMutation.isPending} onPress={submit}>
-          {lookupMutation.isPending ? 'Opening…' : 'Look up'}
+          {lookupMutation.isPending ? t('Opening…') : t('Look up')}
         </Button>
 
         {tokens.length > 1 && (
           <View style={styles.card}>
-            <Text style={styles.eyebrow}>YOUR SENTENCE</Text>
+            <Text style={styles.eyebrow}>{t('YOUR SENTENCE')}</Text>
             <View style={styles.tokens}>
               {tokens.map((token, index) => {
                 const active = lookup?.entry.toLocaleLowerCase() === token.toLocaleLowerCase();
@@ -207,14 +209,14 @@ export default function LookupScreen() {
                 );
               })}
             </View>
-            <Text style={styles.hint}>Tap a word to open its dictionary sheet.</Text>
+            <Text style={styles.hint}>{t('Tap a word to open its dictionary sheet.')}</Text>
           </View>
         )}
 
         {lookupMutation.isPending && (
           <View style={styles.loading}>
             <ActivityIndicator color={colors.primary} />
-            <Text style={styles.subhead}>Opening the entry…</Text>
+            <Text style={styles.subhead}>{t('Opening the entry…')}</Text>
           </View>
         )}
 
@@ -224,7 +226,7 @@ export default function LookupScreen() {
             <Text style={styles.errorText}>
               {lookupMutation.error instanceof Error
                 ? lookupMutation.error.message
-                : 'This word sheet could not be loaded.'}
+                : t('This word sheet could not be loaded.')}
             </Text>
           </View>
         )}
@@ -235,13 +237,13 @@ export default function LookupScreen() {
               <View style={styles.entryCopy}>
                 <Text style={styles.entry}>{selectedSense?.headword || lookup.entry}</Text>
                 <Text style={styles.entryMeta}>
-                  {selectedSense?.partOfSpeech || 'word'}
+                  {selectedSense?.partOfSpeech || t('word')}
                   {selectedSense?.transcription ? ` · /${selectedSense.transcription}/` : ''}
                   {lookup.frequency ? ` · ${lookup.frequency.band}` : ''}
                 </Text>
               </View>
               <Pressable
-                accessibilityLabel="Learn about premium audio"
+                accessibilityLabel={t('Learn about premium audio')}
                 onPress={() => setPaywallContext('audio')}
                 style={styles.audioButton}>
                 <Ionicons name="volume-medium-outline" size={20} color={colors.primary} />
@@ -263,7 +265,7 @@ export default function LookupScreen() {
                     </Text>
                     <View style={styles.senseCopy}>
                       <Text style={[styles.meaning, index !== senseIndex && styles.meaningMuted]}>
-                        {sense.translations.join(', ') || 'Meaning not supplied'}
+                        {sense.translations.join(', ') || t('Meaning not supplied')}
                       </Text>
                       {index === senseIndex && lookup.sourceContext && (
                         <Text style={styles.context}>“{lookup.sourceContext}”</Text>
@@ -277,38 +279,38 @@ export default function LookupScreen() {
                   </Pressable>
                 ))
               ) : (
-                <Text style={styles.subhead}>No structured dictionary sense is available yet.</Text>
+                <Text style={styles.subhead}>{t('No structured dictionary sense is available yet.')}</Text>
               )}
             </View>
 
             <View style={styles.intentRow}>
-              <View style={styles.intentSelected}><Text style={styles.intentSelectedText}>Understand it</Text></View>
+              <View style={styles.intentSelected}><Text style={styles.intentSelectedText}>{t('Understand it')}</Text></View>
               <Pressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: produce, disabled: saved }}
                 disabled={saved}
                 onPress={() => setProduce((value) => !value)}
                 style={[produce ? styles.intentSelected : styles.intent, saved && styles.intentDisabled]}>
-                <Text style={produce ? styles.intentSelectedText : styles.intentText}>Say it too</Text>
+                <Text style={produce ? styles.intentSelectedText : styles.intentText}>{t('Say it too')}</Text>
               </Pressable>
             </View>
             <Button
               disabled={!selectedSense?.translations.length || saveMutation.isPending || saved}
               onPress={keepWord}>
-              {saved ? 'Kept' : saveMutation.isPending ? 'Keeping…' : 'Keep this word'}
+              {saved ? t('Kept') : saveMutation.isPending ? t('Keeping…') : t('Keep this word')}
             </Button>
             {saveMutation.isError && (
-              <Text style={styles.saveError}>The word could not be kept. Please try again.</Text>
+              <Text style={styles.saveError}>{t('The word could not be kept. Please try again.')}</Text>
             )}
             <Text style={styles.provider}>
-              {lookup.provider ? `Dictionary provider: ${lookup.provider}` : 'Dictionary provenance unavailable'}
+              {lookup.provider ? t('Dictionary provider: {provider}', { provider: lookup.provider }) : t('Dictionary provenance unavailable')}
             </Text>
           </View>
         )}
 
         {!!history.length && (
           <View style={styles.history}>
-            <Text style={styles.eyebrow}>LOOKED UP EARLIER</Text>
+            <Text style={styles.eyebrow}>{t('LOOKED UP EARLIER')}</Text>
             <View style={styles.historyChips}>
               {history.map((item) => (
                 <Pressable key={item} onPress={() => openWord(item)} style={styles.historyChip}>

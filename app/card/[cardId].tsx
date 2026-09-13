@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
@@ -24,6 +25,7 @@ const intents: LearningIntent[] = ['UNDERSTAND', 'PRODUCE', 'DISAMBIGUATE', 'PRO
  * the item can be removed. Creating a word by hand keeps the small form.
  */
 export default function LearningItemScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { cardId, itemId, language: languageParam } = useLocalSearchParams<{ cardId?: string; itemId?: string; language: string }>();
@@ -70,7 +72,7 @@ export default function LearningItemScreen() {
       await queryClient.invalidateQueries({ queryKey: ['cards'] });
       router.back();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'The item could not be saved. Try again.');
+      setErrorMessage(error instanceof Error ? error.message : t('The item could not be saved. Try again.'));
     } finally {
       setSaving(false);
     }
@@ -84,7 +86,7 @@ export default function LearningItemScreen() {
       await api.updateCard(card.id, card.language, { learningIntents: next });
       await queryClient.invalidateQueries({ queryKey: ['cards'] });
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'The intent could not be changed.');
+      setErrorMessage(error instanceof Error ? error.message : t('The intent could not be changed.'));
     }
   }
 
@@ -97,7 +99,7 @@ export default function LearningItemScreen() {
       await queryClient.invalidateQueries({ queryKey: ['cards'] });
       router.back();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'The item could not be deleted. Try again.');
+      setErrorMessage(error instanceof Error ? error.message : t('The item could not be deleted. Try again.'));
       setConfirmingDelete(false);
     } finally {
       setSaving(false);
@@ -107,38 +109,39 @@ export default function LearningItemScreen() {
   if (cardQuery.isError) {
     return (
       <Screen contentStyle={styles.center}>
-        <Text style={styles.errorTitle}>This word could not be opened</Text>
-        <Text style={styles.caption}>{cardQuery.error instanceof Error ? cardQuery.error.message : 'Check your connection.'}</Text>
-        <Button onPress={() => cardQuery.refetch()}>Try again</Button>
+        <Text style={styles.errorTitle}>{t('This word could not be opened')}</Text>
+        <Text style={styles.caption}>{cardQuery.error instanceof Error ? cardQuery.error.message : t('Check your connection.')}</Text>
+        <Button onPress={() => cardQuery.refetch()}>{t('Try again')}</Button>
       </Screen>
     );
   }
 
   const card = cardQuery.data;
+  const keptOn = card?.createdAt ? new Date(card.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long' }) : '';
 
   if (!editing) {
     const valid = Boolean(entry.trim() && translations.trim() && language);
     return (
       <Screen>
         <View style={styles.heading}>
-          <Text style={styles.eyebrow}>KEEP A WORD</Text>
-          <Text style={styles.title}>Save a word worth remembering.</Text>
-          <Text style={styles.caption}>{languageName(language)} · usually you meet it in a book or paste it into Look up.</Text>
+          <Text style={styles.eyebrow}>{t('KEEP A WORD')}</Text>
+          <Text style={styles.title}>{t('Save a word worth remembering.')}</Text>
+          <Text style={styles.caption}>{t('{language} · usually you meet it in a book or paste it into Look up.', { language: languageName(language) })}</Text>
         </View>
         <Card>
           <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Word or phrase</Text>
-            <Field value={entry} onChangeText={setEntry} placeholder="verlassen" autoCapitalize="sentences" maxLength={200} />
+            <Text style={styles.label}>{t('Word or phrase')}</Text>
+            <Field value={entry} onChangeText={setEntry} placeholder={t('verlassen')} autoCapitalize="sentences" maxLength={200} />
           </View>
           <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Meaning</Text>
-            <Text style={styles.caption}>One translation per line.</Text>
-            <Field value={translations} onChangeText={setTranslations} placeholder={'to leave\nto abandon'} autoCapitalize="sentences" multiline textAlignVertical="top" style={styles.multiline} />
+            <Text style={styles.label}>{t('Meaning')}</Text>
+            <Text style={styles.caption}>{t('One translation per line.')}</Text>
+            <Field value={translations} onChangeText={setTranslations} placeholder={t('to leave\nto abandon')} autoCapitalize="sentences" multiline textAlignVertical="top" style={styles.multiline} />
           </View>
           <IntentRow value={learningIntents} onChange={setLearningIntents} />
         </Card>
         {!!errorMessage && <View accessibilityRole="alert" style={styles.errorSurface}><Text style={styles.errorText}>{errorMessage}</Text></View>}
-        <Button loading={saving} disabled={!valid} onPress={() => void create()}>Keep this word</Button>
+        <Button loading={saving} disabled={!valid} onPress={() => void create()}>{t('Keep this word')}</Button>
         <PaywallModal context="item-cap" visible={showItemCap} onClose={() => setShowItemCap(false)} />
       </Screen>
     );
@@ -146,7 +149,7 @@ export default function LearningItemScreen() {
 
   return (
     <Screen>
-      <Pressable accessibilityLabel="Back" onPress={() => router.back()} hitSlop={10} style={styles.back}>
+      <Pressable accessibilityLabel={t('Back')} onPress={() => router.back()} hitSlop={10} style={styles.back}>
         <Ionicons name="chevron-back" size={24} color={colors.ink} />
       </Pressable>
       <View style={styles.heading}>
@@ -154,8 +157,7 @@ export default function LearningItemScreen() {
         <Text style={styles.entry}>{card?.entry ?? '…'}</Text>
         {!!card?.createdAt && (
           <Text style={styles.caption}>
-            Kept {new Date(card.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}
-            {card.iteration ? ` · seen ${card.iteration}×` : ''}
+            {card.iteration ? t('Kept {date} · seen {count}×', { date: keptOn, count: card.iteration }) : t('Kept {date}', { date: keptOn })}
           </Text>
         )}
       </View>
@@ -169,12 +171,12 @@ export default function LearningItemScreen() {
                 <Text style={styles.senseText}>{translation.translation}</Text>
               </View>
             ))}
-            {!!card.selectedSense && <Text style={styles.senseNote}>Sense kept: {card.selectedSense}</Text>}
+            {!!card.selectedSense && <Text style={styles.senseNote}>{t('Sense kept: {sense}', { sense: card.selectedSense })}</Text>}
           </View>
 
           {(!!card.sourceContext || !!card.examples?.length) && (
             <View style={styles.section}>
-              <Text style={styles.eyebrow}>WHERE YOU MET IT</Text>
+              <Text style={styles.eyebrow}>{t('WHERE YOU MET IT')}</Text>
               {!!card.sourceContext && <Text style={styles.context}>„{card.sourceContext}“</Text>}
               {card.examples?.filter((example) => example.example !== card.sourceContext).map((example, index) => (
                 <Text key={example.id ?? index} style={styles.context}>„{example.example}“</Text>
@@ -183,31 +185,31 @@ export default function LearningItemScreen() {
           )}
 
           <View style={styles.section}>
-            <Text style={styles.eyebrow}>WHAT YOU WANT FROM IT</Text>
+            <Text style={styles.eyebrow}>{t('WHAT YOU WANT FROM IT')}</Text>
             <IntentRow value={learningIntents} onChange={(next) => void saveIntents(next)} />
           </View>
 
           {(card.falseFriend || card.irregularPlural || card.irregularSpelling) && (
             <View style={styles.section}>
-              <Text style={styles.eyebrow}>WATCH OUT</Text>
+              <Text style={styles.eyebrow}>{t('WATCH OUT')}</Text>
               <Text style={styles.caption}>
-                {[card.falseFriend && 'false friend', card.irregularPlural && 'irregular plural', card.irregularSpelling && 'irregular spelling'].filter(Boolean).join(' · ')}
+                {[card.falseFriend && t('false friend'), card.irregularPlural && t('irregular plural'), card.irregularSpelling && t('irregular spelling')].filter(Boolean).join(' · ')}
               </Text>
             </View>
           )}
 
-          <Text style={styles.caption}>Editing senses and translations happens on the web, where there is room for two panes.</Text>
+          <Text style={styles.caption}>{t('Editing senses and translations happens on the web, where there is room for two panes.')}</Text>
           {!!errorMessage && <View accessibilityRole="alert" style={styles.errorSurface}><Text style={styles.errorText}>{errorMessage}</Text></View>}
           {confirmingDelete ? (
             <View style={styles.deleteConfirm}>
-              <Text style={styles.deleteTitle}>Remove “{card.entry}”?</Text>
-              <Text style={styles.caption}>Its review history goes with it.</Text>
-              <Button variant="destructive" loading={saving} onPress={() => void confirmRemove()}>Remove</Button>
-              <Button variant="secondary" disabled={saving} onPress={() => setConfirmingDelete(false)}>Keep it</Button>
+              <Text style={styles.deleteTitle}>{t('Remove “{entry}”?', { entry: card.entry })}</Text>
+              <Text style={styles.caption}>{t('Its review history goes with it.')}</Text>
+              <Button variant="destructive" loading={saving} onPress={() => void confirmRemove()}>{t('Remove')}</Button>
+              <Button variant="secondary" disabled={saving} onPress={() => setConfirmingDelete(false)}>{t('Keep it')}</Button>
             </View>
           ) : (
             <Pressable onPress={() => setConfirmingDelete(true)} style={styles.deleteLink}>
-              <Text style={styles.deleteText}>Remove this word</Text>
+              <Text style={styles.deleteText}>{t('Remove this word')}</Text>
             </Pressable>
           )}
         </>
@@ -217,6 +219,7 @@ export default function LearningItemScreen() {
 }
 
 function IntentRow({ value, onChange }: { value: LearningIntent[]; onChange(next: LearningIntent[]): void }) {
+  useTranslation();
   const styles = useStyles();
   return (
     <View style={styles.intents}>

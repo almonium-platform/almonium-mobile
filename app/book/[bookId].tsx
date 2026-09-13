@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 import { AlignmentRow } from '@/components/alignment-request';
@@ -15,6 +16,7 @@ import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/them
 import { isUuid } from '@/src/uuid';
 
 export default function BookDetailsScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const params = useLocalSearchParams<{ bookId: string; language?: string }>();
@@ -62,8 +64,8 @@ export default function BookDetailsScreen() {
   if (!validBookId || !language) {
     return (
       <Screen contentStyle={styles.center}>
-        <Text style={styles.errorTitle}>This book link is invalid.</Text>
-        <Button onPress={() => router.back()}>Back to library</Button>
+        <Text style={styles.errorTitle}>{t('This book link is invalid.')}</Text>
+        <Button onPress={() => router.back()}>{t('Back to library')}</Button>
       </Screen>
     );
   }
@@ -71,7 +73,7 @@ export default function BookDetailsScreen() {
   if (query.isLoading) {
     return (
       <Screen contentStyle={styles.center}>
-        <Text style={styles.loading}>Opening book details…</Text>
+        <Text style={styles.loading}>{t('Opening book details…')}</Text>
       </Screen>
     );
   }
@@ -80,11 +82,11 @@ export default function BookDetailsScreen() {
     return (
       <Screen contentStyle={styles.center}>
         <Ionicons name="book-outline" size={42} color={colors.primary} />
-        <Text style={styles.errorTitle}>This book would not open.</Text>
+        <Text style={styles.errorTitle}>{t('This book would not open.')}</Text>
         <Text style={styles.errorText}>
-          {query.error instanceof Error ? query.error.message : 'Please try again.'}
+          {query.error instanceof Error ? query.error.message : t('Please try again.')}
         </Text>
-        <Button onPress={() => query.refetch()}>Try again</Button>
+        <Button onPress={() => query.refetch()}>{t('Try again')}</Button>
       </Screen>
     );
   }
@@ -117,7 +119,7 @@ export default function BookDetailsScreen() {
               color={colors.primary}
             />
             <Text style={styles.favoriteText}>
-              {book.favorite ? 'Saved to favorites' : 'Save to favorites'}
+              {book.favorite ? t('Saved to favorites') : t('Save to favorites')}
             </Text>
           </Pressable>
         </View>
@@ -130,29 +132,29 @@ export default function BookDetailsScreen() {
             params: { bookId: String(book.id), language, title: book.title },
           })
         }>
-        {book.progressPercentage ? `Continue at ${book.progressPercentage}%` : 'Start reading'}
+        {book.progressPercentage ? t('Continue at {percentage}%', { percentage: book.progressPercentage }) : t('Start reading')}
       </Button>
 
       {downloaded ? (
         <View style={styles.downloadRow}>
           <View style={styles.downloadCopy}>
             <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-            <Text style={styles.downloadText}>Available offline · {formattedDownloadSize(downloaded.size)}</Text>
+            <Text style={styles.downloadText}>{t('Available offline · {size}', { size: formattedDownloadSize(downloaded.size) })}</Text>
           </View>
           <Pressable disabled={removeDownloadMutation.isPending} onPress={() => removeDownloadMutation.mutate()} hitSlop={8}>
-            <Text style={styles.removeDownload}>Remove</Text>
+            <Text style={styles.removeDownload}>{t('Remove')}</Text>
           </Pressable>
         </View>
       ) : (
         <Button variant="secondary" loading={downloadMutation.isPending} onPress={() => downloadMutation.mutate()}>
-          Download for offline reading
+          {t('Download for offline reading')}
         </Button>
       )}
       {(downloadMutation.isError || removeDownloadMutation.isError) && (
         <Text accessibilityRole="alert" style={styles.downloadError}>
           {(downloadMutation.error || removeDownloadMutation.error) instanceof Error
             ? (downloadMutation.error || removeDownloadMutation.error)?.message
-            : 'The offline copy could not be changed.'}
+            : t('The offline copy could not be changed.')}
         </Text>
       )}
 
@@ -162,17 +164,17 @@ export default function BookDetailsScreen() {
             <Text style={styles.statValue}>
               {book.cefrLevel}
             </Text>
-            <Text style={styles.statLabel}>Level</Text>
+            <Text style={styles.statLabel}>{t('Level')}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.stat}>
             <Text style={styles.statValue}>{pages}</Text>
-            <Text style={styles.statLabel}>Est. pages</Text>
+            <Text style={styles.statLabel}>{t('Est. pages')}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.stat}>
             <Text style={styles.statValue}>{languageName(book.language)}</Text>
-            <Text style={styles.statLabel}>Language</Text>
+            <Text style={styles.statLabel}>{t('Language')}</Text>
           </View>
         </View>
       </Card>
@@ -190,7 +192,7 @@ export default function BookDetailsScreen() {
         />
         {book.languageVariants.length > 1 && (
           <>
-            <Text style={styles.sectionTitle}>Read it in</Text>
+            <Text style={styles.sectionTitle}>{t('Read it in')}</Text>
             <View style={styles.variants}>
               {book.languageVariants.map((variant) => (
                 <Pressable
@@ -221,8 +223,8 @@ export default function BookDetailsScreen() {
 
       {book.translator && (
         <Card>
-          <Text style={styles.sectionTitle}>Translation</Text>
-          <Text style={styles.translator}>Translated by {book.translator}</Text>
+          <Text style={styles.sectionTitle}>{t('Translation')}</Text>
+          <Text style={styles.translator}>{t('Translated by {translator}', { translator: book.translator })}</Text>
         </Card>
       )}
     </Screen>

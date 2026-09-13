@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import type { TFunction } from 'i18next';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Switch, Text, View } from 'react-native';
 
 import { AvatarPicker } from '@/components/avatar-picker';
@@ -25,6 +27,7 @@ import { rhythmFor, useLearningStats, useRhythm } from '@/src/use-rhythm';
  * A fresh profile never grades someone who has not started: no zero counters, no empty strip.
  */
 export function ProfileTab() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { profile, refreshProfile } = useAuth();
@@ -61,7 +64,7 @@ export function ProfileTab() {
       await refreshProfile();
       setEditingName(false);
     } catch (error) {
-      showNotice({ title: 'Could not save your name', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not save your name'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setSavingName(false);
     }
@@ -75,7 +78,7 @@ export function ProfileTab() {
       await refreshProfile();
     } catch (error) {
       setHidden(!nextHidden);
-      showNotice({ title: 'Could not update visibility', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not update visibility'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setSavingHidden(false);
     }
@@ -88,7 +91,7 @@ export function ProfileTab() {
       await refreshProfile();
       setInterestsVisible(false);
     } catch (error) {
-      showNotice({ title: 'Could not update interests', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not update interests'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setSavingInterests(false);
     }
@@ -102,45 +105,45 @@ export function ProfileTab() {
     <View style={styles.tab}>
       <AvatarPicker />
 
-      <Section eyebrow="USERNAME">
+      <Section eyebrow={t('USERNAME')}>
         {editingName ? (
           <View style={styles.nameEditor}>
-            <Field value={username} onChangeText={setUsername} placeholder="Username" autoCapitalize="none" autoFocus maxLength={20} />
-            <Text style={styles.note}>3–20 letters, numbers or underscores. Only used if you share a word pack.</Text>
+            <Field value={username} onChangeText={setUsername} placeholder={t('Username')} autoCapitalize="none" autoFocus maxLength={20} />
+            <Text style={styles.note}>{t('3–20 letters, numbers or underscores. Only used if you share a word pack.')}</Text>
             <View style={styles.actions}>
               <View style={styles.action}>
-                <Button variant="secondary" disabled={savingName} onPress={() => { setEditingName(false); setUsername(profile?.username ?? ''); }}>Cancel</Button>
+                <Button variant="secondary" disabled={savingName} onPress={() => { setEditingName(false); setUsername(profile?.username ?? ''); }}>{t('Cancel')}</Button>
               </View>
               <View style={styles.action}>
-                <Button loading={savingName} disabled={!validName || username.trim() === profile?.username} onPress={() => void saveUsername()}>Save</Button>
+                <Button loading={savingName} disabled={!validName || username.trim() === profile?.username} onPress={() => void saveUsername()}>{t('Save')}</Button>
               </View>
             </View>
           </View>
         ) : (
-          <Row label={profile?.username ?? ''} note="Only used if you share a word pack.">
-            <ActionPill label="Change" onPress={() => setEditingName(true)} />
+          <Row label={profile?.username ?? ''} note={t('Only used if you share a word pack.')}>
+            <ActionPill label={t('Change')} onPress={() => setEditingName(true)} />
           </Row>
         )}
       </Section>
 
-      <Section eyebrow="YOUR RECORD" title={active ? languageName(active.language) : undefined}>
+      <Section eyebrow={t('YOUR RECORD')} title={active ? languageName(active.language) : undefined}>
         <View style={styles.block}>
           <RecordStrip stats={stats.data} rhythm={activeRhythm} />
           {activeRhythm && paceFraction(activeRhythm).counted > 0 ? (
             <View style={styles.recordFoot}>
-              <Text style={styles.note}>{cadenceLabel(activeRhythm.target)}. Tint shows time learning, not a score.</Text>
+              <Text style={styles.note}>{t('{cadence}. Tint shows time learning, not a score.', { cadence: cadenceLabel(activeRhythm.target) })}</Text>
               <Pressable onPress={() => router.push('/(tabs)/home')} hitSlop={8}>
-                <Text style={styles.link}>Change on home</Text>
+                <Text style={styles.link}>{t('Change on home')}</Text>
               </Pressable>
             </View>
           ) : (
-            <Button variant="secondary" onPress={() => router.push('/(tabs)/books')}>Open the library</Button>
+            <Button variant="secondary" onPress={() => router.push('/(tabs)/books')}>{t('Open the library')}</Button>
           )}
         </View>
       </Section>
 
       {others.length > 0 && (
-        <Section eyebrow="ALSO LEARNING">
+        <Section eyebrow={t('ALSO LEARNING')}>
           {others.map((learner) => {
             const record = rhythmFor(rhythm.data, learner.language);
             const pace = record ? paceFraction(record) : null;
@@ -150,7 +153,7 @@ export function ProfileTab() {
                 key={learner.id}
                 icon={<View style={[styles.swatch, { backgroundColor: crest }]} />}
                 label={languageName(learner.language)}
-                detail={learner.active ? `${learner.selfReportedLevel}` : 'Set aside'}
+                detail={learner.active ? `${learner.selfReportedLevel}` : t('Set aside')}
                 onPress={() => router.push({ pathname: '/language/[code]', params: { code: learner.language } })}>
                 {!!pace?.counted && <Text style={styles.fraction}>{pace.met}/{pace.counted}</Text>}
                 <Ionicons name="chevron-forward" size={18} color={colors.muted} />
@@ -160,7 +163,7 @@ export function ProfileTab() {
         </Section>
       )}
 
-      <Section eyebrow="INTERESTS">
+      <Section eyebrow={t('INTERESTS')}>
         <View style={styles.chips}>
           {profile?.interests.map((interest) => (
             <View key={interest.id} style={styles.chip}>
@@ -168,14 +171,14 @@ export function ProfileTab() {
             </View>
           ))}
           <Pressable accessibilityRole="button" onPress={() => setInterestsVisible(true)} style={styles.addChip}>
-            <Text style={styles.addChipText}>+ Add</Text>
+            <Text style={styles.addChipText}>{t('+ Add')}</Text>
           </Pressable>
         </View>
-        <Text style={styles.note}>Used to pick which books get suggested.</Text>
+        <Text style={styles.note}>{t('Used to pick which books get suggested.')}</Text>
       </Section>
 
-      <Section eyebrow="VISIBILITY">
-        <Row label="Profile is visible" detail="Others can find you and send connection requests.">
+      <Section eyebrow={t('VISIBILITY')}>
+        <Row label={t('Profile is visible')} detail={t('Others can find you and send connection requests.')}>
           <Switch
             disabled={savingHidden}
             value={!hidden}
@@ -187,21 +190,17 @@ export function ProfileTab() {
         </Row>
       </Section>
 
-      <Section eyebrow="PLAN">
+      <Section eyebrow={t('PLAN')}>
         <Row
-          label={premium ? (profile?.subscription.founder ? 'Founding member' : 'Premium') : 'Free'}
-          detail={
-            premium
-              ? `${activeLimit && activeLimit > 0 ? `${activeLimit} languages` : 'Every language'}${requestLimit ? `, ${requestLimit} translation requests a month` : ''}.`
-              : `One language, ${freeSavedItemLimit === 100 ? 'a hundred' : freeSavedItemLimit} saved words.`
-          }>
-          <ActionPill label={premium ? 'Manage' : 'What Premium adds'} onPress={() => router.push('/membership')} />
+          label={premium ? (profile?.subscription.founder ? t('Founding member') : t('Premium')) : t('Free')}
+          detail={premium ? planDetail(t, activeLimit, requestLimit) : freeDetail(t)}>
+          <ActionPill label={premium ? t('Manage') : t('What Premium adds')} onPress={() => router.push('/membership')} />
         </Row>
       </Section>
 
       <Sheet visible={interestsVisible} onClose={() => setInterestsVisible(false)}>
-        <Text style={styles.sheetTitle}>Interests</Text>
-        <Text style={styles.note}>Pick anything you enjoy. They only shape which books come first.</Text>
+        <Text style={styles.sheetTitle}>{t('Interests')}</Text>
+        <Text style={styles.note}>{t('Pick anything you enjoy. They only shape which books come first.')}</Text>
         <View style={styles.chips}>
           {(interestsQuery.data ?? []).map((interest) => {
             const selected = selectedInterests.includes(interest.id);
@@ -217,10 +216,32 @@ export function ProfileTab() {
             );
           })}
         </View>
-        <Button loading={savingInterests} onPress={() => void saveInterests()}>Save</Button>
+        <Button loading={savingInterests} onPress={() => void saveInterests()}>{t('Save')}</Button>
       </Sheet>
     </View>
   );
+}
+
+/** The plan line, one sentence: the language seats and, when the plan has them, the translation requests. */
+function planDetail(t: TFunction, activeLimit: number | undefined, requestLimit: number | undefined) {
+  const languages = activeLimit && activeLimit > 0 ? activeLimit : null;
+  if (languages !== null && requestLimit) {
+    return t(
+      '{languages, plural, one {# language} other {# languages}}, {requests, plural, one {# translation request} other {# translation requests}} a month.',
+      { languages, requests: requestLimit },
+    );
+  }
+  if (languages !== null) return t('{count, plural, one {# language} other {# languages}}.', { count: languages });
+  if (requestLimit) {
+    return t('Every language, {count, plural, one {# translation request} other {# translation requests}} a month.', { count: requestLimit });
+  }
+  return t('Every language.');
+}
+
+function freeDetail(t: TFunction) {
+  return freeSavedItemLimit === 100
+    ? t('One language, a hundred saved words.')
+    : t('One language, {count} saved words.', { count: freeSavedItemLimit });
 }
 
 const useStyles = createThemedStyles((colors) => ({

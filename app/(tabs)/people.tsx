@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -10,12 +11,20 @@ import { AvatarMark } from '@/components/avatar-mark';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { channelTypes, privateChannelId } from '@/src/chat';
+import { msg } from '@/src/i18n';
 import { createThemedStyles, fonts, shadows, useTheme } from '@/src/theme';
 import type { PublicUserSummary, RelatedUserSummary, RelationshipAction } from '@/src/types';
 
 type Section = 'friends' | 'requests' | 'blocked';
 
+const sectionLabels: Record<Section, string> = {
+  friends: msg('Friends'),
+  requests: msg('Requests'),
+  blocked: msg('Blocked'),
+};
+
 export default function PeopleScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser } = useAuth();
@@ -59,16 +68,16 @@ export default function PeopleScreen() {
         ListHeaderComponent={
           <View style={styles.header}>
             <View style={styles.titleRow}>
-              <Pressable onPress={() => router.back()} accessibilityLabel="Go back" hitSlop={8} style={styles.back}>
+              <Pressable onPress={() => router.back()} accessibilityLabel={t('Go back')} hitSlop={8} style={styles.back}>
                 <Ionicons name="chevron-back" size={24} color={colors.ink} />
               </Pressable>
-              <View style={styles.titleCopy}><Text style={styles.eyebrow}>SOCIAL</Text><Text style={styles.title}>People</Text></View>
+              <View style={styles.titleCopy}><Text style={styles.eyebrow}>{t('SOCIAL')}</Text><Text style={styles.title}>{t('People')}</Text></View>
             </View>
             <View style={styles.tabs}>
               {(['friends', 'requests', 'blocked'] as const).map((item) => (
                 <Pressable key={item} onPress={() => setSection(item)} style={[styles.tab, section === item && styles.tabActive]}>
                   <Text style={[styles.tabText, section === item && styles.tabTextActive]}>
-                    {item[0].toUpperCase() + item.slice(1)}{item === 'requests' && requestCount ? ` ${requestCount}` : ''}
+                    {item === 'requests' && requestCount ? t('Requests {count}', { count: requestCount }) : t(sectionLabels[item])}
                   </Text>
                 </Pressable>
               ))}
@@ -81,7 +90,7 @@ export default function PeopleScreen() {
                     value={search}
                     onChangeText={setSearch}
                     onSubmitEditing={() => setSubmittedSearch(search.trim())}
-                    placeholder="Find someone by @handle"
+                    placeholder={t('Find someone by @handle')}
                     placeholderTextColor={colors.muted}
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -90,14 +99,14 @@ export default function PeopleScreen() {
                     style={styles.searchInput}
                   />
                   <Pressable onPress={() => setSubmittedSearch(search.trim())} disabled={search.trim().length < 3}>
-                    <Text style={[styles.searchAction, search.trim().length < 3 && styles.searchDisabled]}>Search</Text>
+                    <Text style={[styles.searchAction, search.trim().length < 3 && styles.searchDisabled]}>{t('Search')}</Text>
                   </Pressable>
                 </View>
                 {submittedSearch.length >= 3 && (
                   <View style={styles.results}>
                     {results.isLoading ? <ActivityIndicator color={colors.primary} /> :
                       results.data?.length ? results.data.map((user) => <SearchResult key={user.id} user={user} />) :
-                        <Text style={styles.emptyCopy}>No reader matched @{submittedSearch}.</Text>}
+                        <Text style={styles.emptyCopy}>{t('No reader matched @{handle}.', { handle: submittedSearch })}</Text>}
                   </View>
                 )}
               </View>
@@ -110,14 +119,14 @@ export default function PeopleScreen() {
               <Avatar user={item} />
               <View style={styles.personCopy}>
                 <Text style={styles.username}>@{item.username}</Text>
-                <Text style={styles.relationship}>{relationshipCopy(item)}</Text>
+                <Text style={styles.relationship}>{t(relationshipCopy(item))}</Text>
               </View>
             </Pressable>
             <View style={styles.actions}>
-              {item.relationshipStatus === 'PENDING_INCOMING' && <><SmallAction label="Accept" primary onPress={() => action(item, 'ACCEPT')} /><SmallAction label="Decline" onPress={() => action(item, 'REJECT')} /></>}
-              {item.relationshipStatus === 'PENDING_OUTGOING' && <SmallAction label="Cancel" onPress={() => action(item, 'CANCEL')} />}
-              {item.relationshipStatus === 'FRIENDS' && <><SmallAction label="Message" primary onPress={() => openPrivateChat(item)} /><SmallAction label="Remove" onPress={() => action(item, 'UNFRIEND')} /></>}
-              {item.relationshipStatus === 'BLOCKED' && <SmallAction label="Unblock" onPress={() => action(item, 'UNBLOCK')} />}
+              {item.relationshipStatus === 'PENDING_INCOMING' && <><SmallAction label={t('Accept')} primary onPress={() => action(item, 'ACCEPT')} /><SmallAction label={t('Decline')} onPress={() => action(item, 'REJECT')} /></>}
+              {item.relationshipStatus === 'PENDING_OUTGOING' && <SmallAction label={t('Cancel')} onPress={() => action(item, 'CANCEL')} />}
+              {item.relationshipStatus === 'FRIENDS' && <><SmallAction label={t('Message')} primary onPress={() => openPrivateChat(item)} /><SmallAction label={t('Remove')} onPress={() => action(item, 'UNFRIEND')} /></>}
+              {item.relationshipStatus === 'BLOCKED' && <SmallAction label={t('Unblock')} onPress={() => action(item, 'UNBLOCK')} />}
             </View>
           </View>
         )}
@@ -125,8 +134,8 @@ export default function PeopleScreen() {
         ListEmptyComponent={activeQuery.isLoading ? <ActivityIndicator style={styles.loader} color={colors.primary} /> : (
           <View style={styles.empty}>
             <Ionicons name={section === 'blocked' ? 'shield-outline' : 'people-outline'} size={40} color={colors.primary} />
-            <Text style={styles.emptyTitle}>{section === 'friends' ? 'No friends here yet' : section === 'requests' ? 'No open requests' : 'Nobody is blocked'}</Text>
-            <Text style={styles.emptyCopy}>{section === 'friends' ? 'Search by handle to find another reader.' : 'This list will update when something changes.'}</Text>
+            <Text style={styles.emptyTitle}>{section === 'friends' ? t('No friends here yet') : section === 'requests' ? t('No open requests') : t('Nobody is blocked')}</Text>
+            <Text style={styles.emptyCopy}>{section === 'friends' ? t('Search by handle to find another reader.') : t('This list will update when something changes.')}</Text>
           </View>
         )}
       />
@@ -135,6 +144,7 @@ export default function PeopleScreen() {
 }
 
 function SearchResult({ user }: { user: PublicUserSummary }) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const queryClient = useQueryClient();
   const request = useMutation({
@@ -147,7 +157,7 @@ function SearchResult({ user }: { user: PublicUserSummary }) {
         <Avatar user={user} />
         <Text style={styles.username}>@{user.username}</Text>
       </Pressable>
-      <Button loading={request.isPending} onPress={() => request.mutate()}>Add</Button>
+      <Button loading={request.isPending} onPress={() => request.mutate()}>{t('Add')}</Button>
     </View>
   );
 }
@@ -179,11 +189,11 @@ function openPrivateChat(user: RelatedUserSummary) {
 }
 
 function relationshipCopy(user: RelatedUserSummary) {
-  if (user.relationshipStatus === 'FRIENDS') return 'Friend';
-  if (user.relationshipStatus === 'PENDING_INCOMING') return 'Wants to be friends';
-  if (user.relationshipStatus === 'PENDING_OUTGOING') return 'You asked';
-  if (user.relationshipStatus === 'BLOCKED') return 'Blocked';
-  return 'Reader';
+  if (user.relationshipStatus === 'FRIENDS') return msg('Friend');
+  if (user.relationshipStatus === 'PENDING_INCOMING') return msg('Wants to be friends');
+  if (user.relationshipStatus === 'PENDING_OUTGOING') return msg('You asked');
+  if (user.relationshipStatus === 'BLOCKED') return msg('Blocked');
+  return msg('Reader');
 }
 
 const useStyles = createThemedStyles((colors) => ({

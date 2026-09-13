@@ -1,3 +1,5 @@
+import { t } from './i18n';
+
 export function errorMessageFromBody(body: unknown, status: number) {
   if (body && typeof body === 'object') {
     const record = body as Record<string, unknown>;
@@ -7,8 +9,8 @@ export function errorMessageFromBody(body: unknown, status: number) {
     );
     if (validationMessages.length) return validationMessages.join('\n');
   }
-  if (status === 401) return 'Your session expired. Sign in again.';
-  return `Request failed (${status})`;
+  if (status === 401) return t('Your session expired. Sign in again.');
+  return t('Request failed ({status})', { status });
 }
 
 export function decodeJsonBody<T>(text: string): T {

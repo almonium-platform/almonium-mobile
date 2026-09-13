@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 
 import { paceFraction, type LanguageRhythm } from '@/src/rhythm';
@@ -11,21 +12,29 @@ import type { LearningStats } from '@/src/types';
 export function RecordStrip({
   stats,
   rhythm,
-  emptyCopy = 'Nothing here until you finish a first session. Then this holds the words you can read, the books you finished, and the weeks you kept pace.',
+  emptyCopy,
 }: {
   stats: LearningStats | undefined;
   rhythm: LanguageRhythm | null;
   emptyCopy?: string;
 }) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const pace = rhythm ? paceFraction(rhythm) : { met: 0, counted: 0 };
   const hasRecord = Boolean(stats && (stats.wordsKept > 0 || stats.booksFinished > 0 || pace.counted > 0));
-  if (!hasRecord) return <Text style={styles.empty}>{emptyCopy}</Text>;
+  if (!hasRecord) {
+    return (
+      <Text style={styles.empty}>
+        {emptyCopy ??
+          t('Nothing here until you finish a first session. Then this holds the words you can read, the books you finished, and the weeks you kept pace.')}
+      </Text>
+    );
+  }
   return (
     <View style={styles.strip}>
-      <Stat value={stats!.wordsKept.toLocaleString()} label="Words you can read" />
-      <Stat value={stats!.booksFinished.toLocaleString()} label="Books finished" />
-      <Stat value={pace.counted ? `${pace.met}/${pace.counted}` : '—'} label="Weeks at pace" />
+      <Stat value={stats!.wordsKept.toLocaleString()} label={t('Words you can read')} />
+      <Stat value={stats!.booksFinished.toLocaleString()} label={t('Books finished')} />
+      <Stat value={pace.counted ? `${pace.met}/${pace.counted}` : '—'} label={t('Weeks at pace')} />
     </View>
   );
 }

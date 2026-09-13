@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import type { TFunction } from 'i18next';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { premiumLines } from '@/components/paywall-modal';
@@ -28,6 +30,7 @@ function money(value: number) {
  * the web until store billing ships: the app explains, it does not transact.
  */
 export default function MembershipScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
@@ -68,7 +71,7 @@ export default function MembershipScreen() {
       const { sessionUrl } = await api.customerPortal();
       await Linking.openURL(sessionUrl);
     } catch (error) {
-      showNotice({ title: 'Could not open billing', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not open billing'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setOpeningPortal(false);
     }
@@ -77,12 +80,12 @@ export default function MembershipScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Pressable accessibilityLabel="Back" onPress={() => router.back()} hitSlop={10} style={styles.back}>
+        <Pressable accessibilityLabel={t('Back')} onPress={() => router.back()} hitSlop={10} style={styles.back}>
           <Ionicons name="chevron-back" size={24} color={colors.ink} />
         </Pressable>
         <View style={styles.heading}>
-          <Text style={styles.eyebrow}>MEMBERSHIP</Text>
-          <Text style={styles.title}>{premium ? membershipTitle(subscription) : 'You’re on Free'}</Text>
+          <Text style={styles.eyebrow}>{t('MEMBERSHIP')}</Text>
+          <Text style={styles.title}>{premium ? membershipTitle(t, subscription) : t('You’re on Free')}</Text>
         </View>
 
         {premium ? (
@@ -90,52 +93,56 @@ export default function MembershipScreen() {
             <View style={styles.card}>
               {planDescribesMembership(subscription) ? (
                 <>
-                  <Receipt label="Price" value={priceLine(subscription, monthly, yearly)} />
-                  <Receipt label={subscription?.autoRenewal === false ? 'Access ends' : 'Renews'} value={formatDate(subscription?.endDate)} />
+                  <Receipt label={t('Price')} value={priceLine(t, subscription, monthly, yearly)} />
+                  <Receipt label={subscription?.autoRenewal === false ? t('Access ends') : t('Renews')} value={formatDate(subscription?.endDate)} />
                 </>
               ) : (
-                <Receipt label="Plan" value={`${membershipName(subscription)}, granted`} />
+                <Receipt label={t('Plan')} value={t('{plan}, granted', { plan: membershipName(subscription) })} />
               )}
-              <Receipt label="Member since" value={formatDate(subscription?.startDate)} />
+              <Receipt label={t('Member since')} value={formatDate(subscription?.startDate)} />
               {subscription?.scheduledChange && (
                 <Receipt
-                  label="Scheduled change"
-                  value={`${subscription.scheduledChange.type === 'MONTHLY' ? 'Monthly' : 'Annual'} from ${formatDate(subscription.scheduledChange.effectiveAt)}`}
+                  label={t('Scheduled change')}
+                  value={
+                    subscription.scheduledChange.type === 'MONTHLY'
+                      ? t('Monthly from {date}', { date: formatDate(subscription.scheduledChange.effectiveAt) })
+                      : t('Annual from {date}', { date: formatDate(subscription.scheduledChange.effectiveAt) })
+                  }
                 />
               )}
               {planDescribesMembership(subscription) && subscription?.type !== 'LIFETIME' && (
-                <Button loading={openingPortal} onPress={() => void openPortal()}>Manage plan, card and invoices</Button>
+                <Button loading={openingPortal} onPress={() => void openPortal()}>{t('Manage plan, card and invoices')}</Button>
               )}
             </View>
             <View style={styles.card}>
-              <Text style={styles.sectionTitle}>What’s running on it</Text>
-              <Usage label="Saved words" used={savedWords} limit={null} />
-              <Usage label="Languages active" used={activeLanguages} limit={activeLimit > 0 ? activeLimit : null} />
-              {quota.data && <Usage label="Translation requests this month" used={quota.data.used} limit={quota.data.limit} />}
+              <Text style={styles.sectionTitle}>{t('What’s running on it')}</Text>
+              <Usage label={t('Saved words')} used={savedWords} limit={null} />
+              <Usage label={t('Languages active')} used={activeLanguages} limit={activeLimit > 0 ? activeLimit : null} />
+              {quota.data && <Usage label={t('Translation requests this month')} used={quota.data.used} limit={quota.data.limit} />}
             </View>
             {subscription?.founder && (
               <Text style={styles.footnote}>
-                Your price is one of the first twenty. It stays locked for as long as the subscription runs, and it is gone if you cancel.
+                {t('Your price is one of the first twenty. It stays locked for as long as the subscription runs, and it is gone if you cancel.')}
               </Text>
             )}
           </>
         ) : (
           <>
             <View style={styles.card}>
-              <Text style={styles.sectionTitle}>Where you are against the free limits</Text>
-              <Usage label="Saved words" used={savedWords} limit={freeSavedItemLimit} />
-              <Usage label="Languages active" used={activeLanguages} limit={activeLimit > 0 ? activeLimit : 1} />
-              {quota.data && <Usage label="Translation requests this month" used={quota.data.used} limit={quota.data.limit} />}
+              <Text style={styles.sectionTitle}>{t('Where you are against the free limits')}</Text>
+              <Usage label={t('Saved words')} used={savedWords} limit={freeSavedItemLimit} />
+              <Usage label={t('Languages active')} used={activeLanguages} limit={activeLimit > 0 ? activeLimit : 1} />
+              {quota.data && <Usage label={t('Translation requests this month')} used={quota.data.used} limit={quota.data.limit} />}
             </View>
 
             <View style={styles.card}>
-              <Text style={styles.eyebrow}>{founderAvailable ? 'FOUNDING MEMBER' : 'PREMIUM'}</Text>
-              <Text style={styles.sectionTitle}>Everything in Free, plus</Text>
+              <Text style={styles.eyebrow}>{founderAvailable ? t('FOUNDING MEMBER') : t('PREMIUM')}</Text>
+              <Text style={styles.sectionTitle}>{t('Everything in Free, plus')}</Text>
               <View style={styles.lines}>
                 {premiumLines.map((line) => (
                   <View key={line} style={styles.line}>
                     <Ionicons name="checkmark" size={16} color={colors.primary} />
-                    <Text style={styles.lineText}>{line}</Text>
+                    <Text style={styles.lineText}>{t(line)}</Text>
                   </View>
                 ))}
               </View>
@@ -149,7 +156,7 @@ export default function MembershipScreen() {
                         accessibilityState={{ selected: cadence === option }}
                         onPress={() => setCadence(option)}
                         style={[styles.cadenceOption, cadence === option && styles.cadenceOptionSelected]}>
-                        <Text style={[styles.cadenceText, cadence === option && styles.cadenceTextSelected]}>{option === 'MONTHLY' ? 'Monthly' : 'Annual'}</Text>
+                        <Text style={[styles.cadenceText, cadence === option && styles.cadenceTextSelected]}>{option === 'MONTHLY' ? t('Monthly') : t('Annual')}</Text>
                       </Pressable>
                     ))}
                   </View>
@@ -157,13 +164,13 @@ export default function MembershipScreen() {
                 </>
               )}
               <Button variant="premium" onPress={() => void Linking.openURL(`${config.webBaseUrl}/membership`)}>
-                {founderAvailable ? 'Claim your place' : 'Become a member'}
+                {founderAvailable ? t('Claim your place') : t('Become a member')}
               </Button>
               <Text style={styles.footnote}>
                 {founderAvailable && founding.data
-                  ? `Only ${founding.data.capacity} founding memberships available, then the standard price. Keep this price while your subscription stays active. `
+                  ? `${t('Only {count} founding memberships available, then the standard price. Keep this price while your subscription stays active.', { count: founding.data.capacity })} `
                   : ''}
-                Membership is bought on the web for now; the app recognises it as soon as it is active. 14-day money-back guarantee.
+                {t('Membership is bought on the web for now; the app recognises it as soon as it is active. 14-day money-back guarantee.')}
               </Text>
             </View>
           </>
@@ -186,6 +193,7 @@ function PriceBlock({
   founder: boolean;
   priceOf(plan: PlanOffer | undefined): number | null;
 }) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const monthlyPrice = priceOf(monthly) ?? monthly.price;
   const yearlyPrice = priceOf(yearly) ?? yearly.price;
@@ -194,21 +202,21 @@ function PriceBlock({
     return (
       <View style={styles.price}>
         <View style={styles.priceLine}>
-          <Text style={styles.priceMain}>{money(monthlyPrice)} / month</Text>
+          <Text style={styles.priceMain}>{t('{price} / month', { price: money(monthlyPrice) })}</Text>
           {founder && <Text style={styles.priceStruck}>{money(monthly.price)}</Text>}
         </View>
-        <Text style={styles.priceNote}>or {money(yearlyPrice)} a year — that’s {money(Number(perMonth.toFixed(2)))} a month</Text>
+        <Text style={styles.priceNote}>{t('or {yearly} a year — that’s {monthly} a month', { yearly: money(yearlyPrice), monthly: money(Number(perMonth.toFixed(2))) })}</Text>
       </View>
     );
   }
   return (
     <View style={styles.price}>
       <View style={styles.priceLine}>
-        <Text style={styles.priceMain}>{money(yearlyPrice)} / year</Text>
+        <Text style={styles.priceMain}>{t('{price} / year', { price: money(yearlyPrice) })}</Text>
         {founder && <Text style={styles.priceStruck}>{money(yearly.price)}</Text>}
       </View>
-      <Text style={styles.priceNote}>That’s {money(Number(perMonth.toFixed(2)))} a month</Text>
-      <Text style={styles.priceNote}>or {money(monthlyPrice * 12)} a year, billed monthly at {money(monthlyPrice)}</Text>
+      <Text style={styles.priceNote}>{t('That’s {price} a month', { price: money(Number(perMonth.toFixed(2))) })}</Text>
+      <Text style={styles.priceNote}>{t('or {yearly} a year, billed monthly at {monthly}', { yearly: money(monthlyPrice * 12), monthly: money(monthlyPrice) })}</Text>
     </View>
   );
 }
@@ -224,36 +232,43 @@ function Receipt({ label, value }: { label: string; value: string }) {
 }
 
 function Usage({ label, used, limit }: { label: string; used: number; limit: number | null }) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const percentage = limit ? Math.min(100, (used / limit) * 100) : 100;
   return (
     <View style={styles.usage}>
       <View style={styles.usageHeading}>
         <Text style={styles.usageLabel}>{label}</Text>
-        <Text style={styles.usageValue}>{used.toLocaleString()}{limit === null ? ' · unlimited' : ` / ${limit}`}</Text>
+        <Text style={styles.usageValue}>
+          {limit === null ? t('{used} · unlimited', { used: used.toLocaleString() }) : t('{used} / {limit}', { used: used.toLocaleString(), limit })}
+        </Text>
       </View>
       {limit !== null && <View style={styles.track}><View style={[styles.fill, { width: `${percentage}%` }]} /></View>}
     </View>
   );
 }
 
-function priceLine(subscription: SubscriptionInfo | undefined, monthly: PlanOffer | undefined, yearly: PlanOffer | undefined) {
+function priceLine(t: TFunction, subscription: SubscriptionInfo | undefined, monthly: PlanOffer | undefined, yearly: PlanOffer | undefined) {
   if (!subscription) return '—';
-  if (subscription.type === 'LIFETIME') return 'Lifetime';
-  const plan = subscription.type === 'MONTHLY' ? monthly : yearly;
+  if (subscription.type === 'LIFETIME') return t('Lifetime');
+  const isMonthly = subscription.type === 'MONTHLY';
+  const plan = isMonthly ? monthly : yearly;
   const price = plan ? (subscription.founder && plan.founderPrice ? plan.founderPrice : plan.price) : null;
-  const unit = subscription.type === 'MONTHLY' ? 'month' : 'year';
-  return price !== null ? `${money(price)} / ${unit}${subscription.founder ? ', locked' : ''}` : subscription.type === 'MONTHLY' ? 'Monthly' : 'Annual';
+  if (price === null) return isMonthly ? t('Monthly') : t('Annual');
+  if (subscription.founder) {
+    return isMonthly ? t('{price} / month, locked', { price: money(price) }) : t('{price} / year, locked', { price: money(price) });
+  }
+  return isMonthly ? t('{price} / month', { price: money(price) }) : t('{price} / year', { price: money(price) });
 }
 
-function membershipTitle(subscription: SubscriptionInfo | undefined) {
-  if (subscription?.founder) return 'Founding member';
+function membershipTitle(t: TFunction, subscription: SubscriptionInfo | undefined) {
+  if (subscription?.founder) return t('Founding member');
   // A granted membership sits on the free row, so the row's dates and LIFETIME type describe
   // nothing here: the entitlement is the whole story.
-  if (!planDescribesMembership(subscription)) return 'Premium member';
-  if (subscription?.type === 'LIFETIME') return 'Lifetime member';
-  if (subscription?.autoRenewal === false) return `Premium until ${formatDate(subscription.endDate)}`;
-  return 'Premium member';
+  if (!planDescribesMembership(subscription)) return t('Premium member');
+  if (subscription?.type === 'LIFETIME') return t('Lifetime member');
+  if (subscription?.autoRenewal === false) return t('Premium until {date}', { date: formatDate(subscription.endDate) });
+  return t('Premium member');
 }
 
 function formatDate(value: string | null | undefined) {

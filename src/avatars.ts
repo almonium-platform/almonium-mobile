@@ -3,16 +3,18 @@
  * Nothing is uploaded anywhere. The five animals are addressed by the same URL the web client
  * stores, so a choice made on either client shows on both.
  */
+import { msg } from './i18n';
+
 export const animals = ['owl', 'fox', 'stag', 'whale', 'rabbit'] as const;
 export type Animal = (typeof animals)[number];
 
 /** Species names live in accessibility labels only, never as a caption under a drawing. */
 export const animalLabels: Record<Animal, string> = {
-  owl: 'Owl',
-  fox: 'Fox',
-  stag: 'Stag',
-  whale: 'Whale',
-  rabbit: 'Hare',
+  owl: msg('Owl'),
+  fox: msg('Fox'),
+  stag: msg('Stag'),
+  whale: msg('Whale'),
+  rabbit: msg('Hare'),
 };
 
 const defaultAvatarPath = /assets\/img\/avatars\/default\/(owl|fox|stag|whale|rabbit)\.png(?:[?#].*)?$/;

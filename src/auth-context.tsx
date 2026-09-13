@@ -31,6 +31,7 @@ import { api } from '@/src/api';
 import { withoutStreamToken } from '@/src/chat';
 import { config } from '@/src/config';
 import { auth } from '@/src/firebase';
+import { t } from './i18n';
 import { queryClient } from '@/src/query-client';
 import type { UserInfo } from '@/src/types';
 
@@ -64,12 +65,12 @@ class ProviderSignInCancelledError extends Error {
 
 export async function googleFirebaseCredential(): Promise<AuthCredential> {
   if (isExpoGo) {
-    throw new Error('Google sign-in is unavailable in Expo Go. Use email and password, or open a development build.');
+    throw new Error(t('Google sign-in is unavailable in Expo Go. Use email and password, or open a development build.'));
   }
   const platformClientId =
     Platform.OS === 'ios' ? config.google.iosClientId : config.google.androidClientId;
   if (!config.google.webClientId || !platformClientId) {
-    throw new Error(`Google sign-in is not configured for ${Platform.OS}.`);
+    throw new Error(t('Google sign-in is not configured for {platform}.', { platform: Platform.OS }));
   }
 
   const { GoogleSignin, isCancelledResponse } = await import(
@@ -85,7 +86,7 @@ export async function googleFirebaseCredential(): Promise<AuthCredential> {
 
   const response = await GoogleSignin.signIn();
   if (isCancelledResponse(response)) throw new ProviderSignInCancelledError();
-  if (!response.data.idToken) throw new Error('Google did not return an identity token.');
+  if (!response.data.idToken) throw new Error(t('Google did not return an identity token.'));
   return GoogleAuthProvider.credential(response.data.idToken);
 }
 
@@ -102,7 +103,7 @@ export async function appleFirebaseCredential(): Promise<AuthCredential> {
     ],
     nonce,
   });
-  if (!appleCredential.identityToken) throw new Error('Apple did not return an identity token.');
+  if (!appleCredential.identityToken) throw new Error(t('Apple did not return an identity token.'));
   return new OAuthProvider('apple.com').credential({
     idToken: appleCredential.identityToken,
     rawNonce,
@@ -153,10 +154,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
             try {
               setProfile(JSON.parse(cached) as UserInfo);
             } catch {
-              setProfileError(error instanceof Error ? error.message : 'Could not load your profile.');
+              setProfileError(error instanceof Error ? error.message : t('Could not load your profile.'));
             }
           } else {
-            setProfileError(error instanceof Error ? error.message : 'Could not load your profile.');
+            setProfileError(error instanceof Error ? error.message : t('Could not load your profile.'));
           }
         } finally {
           setLoading(false);
@@ -176,7 +177,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         if (!credential.user.emailVerified) {
           await api.requestEmailVerification();
           await signOut(auth);
-          throw new Error('Verify your email first. We sent you a fresh verification link.');
+          throw new Error(t('Verify your email first. We sent you a fresh verification link.'));
         }
         await loadProfile(credential.user);
       },
@@ -201,7 +202,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       },
       async reauthenticateWithPassword(password) {
         const user = auth.currentUser;
-        if (!user?.email) throw new Error('This account does not have an email address.');
+        if (!user?.email) throw new Error(t('This account does not have an email address.'));
         await reauthenticateWithCredential(
           user,
           EmailAuthProvider.credential(user.email, password),
@@ -210,13 +211,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
       },
       async reauthenticateWithGoogle() {
         const user = auth.currentUser;
-        if (!user) throw new Error('Sign in required.');
+        if (!user) throw new Error(t('Sign in required.'));
         await reauthenticateWithCredential(user, await googleFirebaseCredential());
         await user.getIdToken(true);
       },
       async reauthenticateWithApple() {
         const user = auth.currentUser;
-        if (!user) throw new Error('Sign in required.');
+        if (!user) throw new Error(t('Sign in required.'));
         await reauthenticateWithCredential(user, await appleFirebaseCredential());
         await user.getIdToken(true);
       },
@@ -251,7 +252,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         try {
           await loadProfile(auth.currentUser);
         } catch (error) {
-          setProfileError(error instanceof Error ? error.message : 'Could not load your profile.');
+          setProfileError(error instanceof Error ? error.message : t('Could not load your profile.'));
         } finally {
           setLoading(false);
         }

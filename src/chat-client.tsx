@@ -3,6 +3,7 @@ import { StreamChat } from 'stream-chat';
 
 import { useAuth } from '@/src/auth-context';
 import { config } from '@/src/config';
+import { t } from '@/src/i18n';
 
 /**
  * Chat is authenticated separately from the backend: the API mints a Stream user token on
@@ -54,7 +55,7 @@ export function ChatProvider({ children }: PropsWithChildren) {
       .catch((reason: unknown) => {
         if (!active) return;
         setClient(null);
-        setError(reason instanceof Error ? reason.message : 'Could not connect to chat.');
+        setError(reason instanceof Error ? reason.message : t('Could not connect to chat.'));
       });
 
     return () => {
@@ -109,7 +110,7 @@ function ownUnreadCount(client: StreamChat) {
 
 /** The copy shown wherever chat cannot open, so every surface explains the same thing. */
 export function chatUnavailableCopy(status: ChatStatus, error: string | null) {
-  if (status === 'unconfigured') return 'Chat is not configured for this build.';
-  if (status === 'signed-out') return 'Reconnect to load your chats. Chat needs a fresh sign-in.';
-  return error ?? 'Chat could not be reached.';
+  if (status === 'unconfigured') return t('Chat is not configured for this build.');
+  if (status === 'signed-out') return t('Reconnect to load your chats. Chat needs a fresh sign-in.');
+  return error ?? t('Chat could not be reached.');
 }

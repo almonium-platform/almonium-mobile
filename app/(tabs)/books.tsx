@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -20,6 +21,7 @@ import { BookCard } from '@/components/book-card';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { msg } from '@/src/i18n';
 import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { downloadedBooks } from '@/src/offline-books';
@@ -29,8 +31,15 @@ import type { BookSummary, CefrLevel } from '@/src/types';
 const shelfLanguageKey = 'almonium:shelf-language';
 const levelFilters: ('ALL' | CefrLevel)[] = ['ALL', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 type LengthFilter = 'ALL' | 'SHORT' | 'MEDIUM' | 'LONG';
+const lengthLabels: Record<LengthFilter, string> = {
+  ALL: msg('Any'),
+  SHORT: msg('Short'),
+  MEDIUM: msg('Medium'),
+  LONG: msg('Long'),
+};
 
 export default function BooksScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
@@ -81,26 +90,26 @@ export default function BooksScreen() {
         return matchesSearch && matchesLevel && matchesLength;
       });
     return [
-      { title: 'Downloads', data: filter((downloads.data ?? []).filter((book) => book.language === language)) },
-      { title: 'Continue reading', data: filter(query.data?.continueReading ?? []) },
-      { title: 'Favorites', data: filter(query.data?.favorites ?? []) },
-      { title: 'Available', data: filter(query.data?.available ?? []) },
+      { title: t('Downloads'), offline: true, data: filter((downloads.data ?? []).filter((book) => book.language === language)) },
+      { title: t('Continue reading'), offline: false, data: filter(query.data?.continueReading ?? []) },
+      { title: t('Favorites'), offline: false, data: filter(query.data?.favorites ?? []) },
+      { title: t('Available'), offline: false, data: filter(query.data?.available ?? []) },
     ].filter((section) => section.data.length);
-  }, [downloads.data, language, lengthFilter, levelFilter, query.data, search]);
+  }, [downloads.data, language, lengthFilter, levelFilter, query.data, search, t]);
 
   async function resetProgress(book: BookSummary) {
     if (!book.progressPercentage) return;
-    Alert.alert('Reset reading progress?', `${book.title} will return to the beginning.`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('Reset reading progress?'), t('{title} will return to the beginning.', { title: book.title }), [
+      { text: t('Cancel'), style: 'cancel' },
       {
-        text: 'Reset',
+        text: t('Reset'),
         style: 'destructive',
         onPress: async () => {
           try {
             await api.deleteProgress(book.id);
             await query.refetch();
           } catch (error) {
-            showNotice({ title: 'Could not reset progress', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+            showNotice({ title: t('Could not reset progress'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
           }
         },
       },
@@ -111,8 +120,8 @@ export default function BooksScreen() {
     return (
       <SafeAreaView style={styles.empty}>
         <Ionicons name="language" size={42} color={colors.primary} />
-        <Text style={styles.emptyTitle}>Choose a reading language</Text>
-        <Text style={styles.emptyText}>Activate a target language in Settings to build this shelf.</Text>
+        <Text style={styles.emptyTitle}>{t('Choose a reading language')}</Text>
+        <Text style={styles.emptyText}>{t('Activate a target language in Settings to build this shelf.')}</Text>
       </SafeAreaView>
     );
   }
@@ -129,11 +138,11 @@ export default function BooksScreen() {
     return (
       <SafeAreaView style={styles.empty}>
         <Ionicons name="cloud-offline-outline" size={42} color={colors.primary} />
-        <Text style={styles.emptyTitle}>Your shelf is out of reach</Text>
+        <Text style={styles.emptyTitle}>{t('Your shelf is out of reach')}</Text>
         <Text style={styles.emptyText}>
-          {query.error instanceof Error ? query.error.message : 'Check your connection and try again.'}
+          {query.error instanceof Error ? query.error.message : t('Check your connection and try again.')}
         </Text>
-        <Button onPress={() => query.refetch()}>Try again</Button>
+        <Button onPress={() => query.refetch()}>{t('Try again')}</Button>
       </SafeAreaView>
     );
   }
@@ -158,42 +167,42 @@ export default function BooksScreen() {
       }
       ListHeaderComponent={
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>YOUR SHELF</Text>
+          <Text style={styles.eyebrow}>{t('YOUR SHELF')}</Text>
           <Text style={styles.heroTitle}>
             {query.data?.continueReading.length
-              ? `${query.data.continueReading.length} ${query.data.continueReading.length === 1 ? 'book' : 'books'} open`
-              : 'Choose your next page'}
+              ? t('{count, plural, one {# book open} other {# books open}}', { count: query.data.continueReading.length })
+              : t('Choose your next page')}
           </Text>
-          <Text style={styles.subhead}>Everything you have started, and where you stopped.</Text>
+          <Text style={styles.subhead}>{t('Everything you have started, and where you stopped.')}</Text>
           <View style={styles.search}>
             <Ionicons name="search" size={19} color={colors.muted} />
             <TextInput
               value={search}
               onChangeText={setSearch}
-              placeholder={`Search ${languageName(language)} books`}
+              placeholder={t('Search {language} books', { language: languageName(language) })}
               placeholderTextColor={colors.muted}
               style={styles.searchInput}
             />
           </View>
           <View style={styles.filterGroup}>
-            <Text style={styles.filterLabel}>LEVEL</Text>
+            <Text style={styles.filterLabel}>{t('LEVEL')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
               {levelFilters.map((value) => (
-                <FilterChip key={value} label={value === 'ALL' ? 'Any level' : value} selected={levelFilter === value} onPress={() => setLevelFilter(value)} />
+                <FilterChip key={value} label={value === 'ALL' ? t('Any level') : value} selected={levelFilter === value} onPress={() => setLevelFilter(value)} />
               ))}
             </ScrollView>
           </View>
           <View style={styles.filterGroup}>
-            <Text style={styles.filterLabel}>LENGTH</Text>
+            <Text style={styles.filterLabel}>{t('LENGTH')}</Text>
             <View style={styles.filters}>
               {(['ALL', 'SHORT', 'MEDIUM', 'LONG'] as const).map((value) => (
-                <FilterChip key={value} label={value === 'ALL' ? 'Any' : value[0] + value.slice(1).toLowerCase()} selected={lengthFilter === value} onPress={() => setLengthFilter(value)} />
+                <FilterChip key={value} label={t(lengthLabels[value])} selected={lengthFilter === value} onPress={() => setLengthFilter(value)} />
               ))}
             </View>
           </View>
-          <Text style={styles.hint}>Tip: hold a book to reset its progress.</Text>
+          <Text style={styles.hint}>{t('Tip: hold a book to reset its progress.')}</Text>
           {query.isError && query.data && (
-            <Text style={styles.offline}>Showing your saved shelf. Reconnect to refresh it.</Text>
+            <Text style={styles.offline}>{t('Showing your saved shelf. Reconnect to refresh it.')}</Text>
           )}
         </View>
       }
@@ -204,15 +213,15 @@ export default function BooksScreen() {
         </View>
       )}
       renderItem={({ item, section }) => (
-        <BookCard book={item} language={language} offline={section.title === 'Downloads'} onLongPress={() => resetProgress(item)} />
+        <BookCard book={item} language={language} offline={section.offline} onLongPress={() => resetProgress(item)} />
       )}
       SectionSeparatorComponent={() => <View style={styles.sectionGap} />}
       ItemSeparatorComponent={() => <View style={styles.itemGap} />}
       ListEmptyComponent={
         <View style={styles.emptyInline}>
-          <Text style={styles.emptyTitle}>{search ? 'No matching books' : 'No books here yet'}</Text>
+          <Text style={styles.emptyTitle}>{search ? t('No matching books') : t('No books here yet')}</Text>
           <Text style={styles.emptyText}>
-            {search ? 'Try a title or author with different words.' : 'Pull down to refresh this shelf.'}
+            {search ? t('Try a title or author with different words.') : t('Pull down to refresh this shelf.')}
           </Text>
         </View>
       }

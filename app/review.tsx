@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -31,6 +32,7 @@ import { useLearningActivity } from '@/src/use-activity';
 import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 
 export default function ReviewScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { language = '' } = useLocalSearchParams<{ language: string }>();
@@ -66,7 +68,7 @@ export default function ReviewScreen() {
       setSession(next);
       setCurrentIndex(0);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not start this review session.');
+      setError(cause instanceof Error ? cause.message : t('Could not start this review session.'));
     } finally {
       setSubmitting(false);
     }
@@ -91,7 +93,7 @@ export default function ReviewScreen() {
         queryKey: ['review-summary', firebaseUser?.uid, language],
       });
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Your answer could not be recorded.');
+      setError(cause instanceof Error ? cause.message : t('Your answer could not be recorded.'));
     } finally {
       setSubmitting(false);
     }
@@ -116,7 +118,7 @@ export default function ReviewScreen() {
       successHaptic();
       void activity.complete();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not load the session record.');
+      setError(cause instanceof Error ? cause.message : t('Could not load the session record.'));
     } finally {
       setSubmitting(false);
     }
@@ -130,7 +132,7 @@ export default function ReviewScreen() {
       await api.markReviewMistype(feedback.eventId);
       setMistypeRecorded(true);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not record the correction.');
+      setError(cause instanceof Error ? cause.message : t('Could not record the correction.'));
     } finally {
       setSubmitting(false);
     }
@@ -144,7 +146,7 @@ export default function ReviewScreen() {
       await api.reencounterReviewItem(itemId);
       await summary.refetch();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not prepare another prompt shape.');
+      setError(cause instanceof Error ? cause.message : t('Could not prepare another prompt shape.'));
     } finally {
       setSubmitting(false);
     }
@@ -162,12 +164,12 @@ export default function ReviewScreen() {
     return (
       <SafeAreaView style={styles.center}>
         <Ionicons name="cloud-offline-outline" size={42} color={colors.primary} />
-        <Text style={styles.stateTitle}>Review is unavailable</Text>
+        <Text style={styles.stateTitle}>{t('Review is unavailable')}</Text>
         <Text style={styles.stateCopy}>
-          {summary.error instanceof Error ? summary.error.message : 'Choose an active language and try again.'}
+          {summary.error instanceof Error ? summary.error.message : t('Choose an active language and try again.')}
         </Text>
-        <Button onPress={() => summary.refetch()}>Try again</Button>
-        <Button variant="secondary" onPress={leave}>Back to Review</Button>
+        <Button onPress={() => summary.refetch()}>{t('Try again')}</Button>
+        <Button variant="secondary" onPress={leave}>{t('Back to Review')}</Button>
       </SafeAreaView>
     );
   }
@@ -179,32 +181,37 @@ export default function ReviewScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <ScrollView contentContainerStyle={styles.overview}>
-          <Pressable accessibilityLabel="Close review" onPress={leave} style={styles.closeOverview}>
+          <Pressable accessibilityLabel={t('Close review')} onPress={leave} style={styles.closeOverview}>
             <Ionicons name="close" size={26} color={colors.muted} />
           </Pressable>
           {due ? (
             <>
-              <Text style={styles.eyebrow}>REVIEW · {language}</Text>
-              <Text style={styles.overviewTitle}>{due} {due === 1 ? 'word is' : 'words are'} due</Text>
-              <Text style={styles.overviewCopy}>Ten or fewer make a session. Leaving early never reschedules what you did not answer.</Text>
+              <Text style={styles.eyebrow}>{t('REVIEW · {language}', { language })}</Text>
+              <Text style={styles.overviewTitle}>{t('{count, plural, one {# word is due} other {# words are due}}', { count: due })}</Text>
+              <Text style={styles.overviewCopy}>{t('Ten or fewer make a session. Leaving early never reschedules what you did not answer.')}</Text>
               <View style={styles.summaryCard}>
                 {/* Three stacked groups, not columns: a phone reads down. */}
                 {[
-                  { label: 'Understand', value: summary.data?.understandCount ?? 0 },
-                  { label: 'Produce', value: summary.data?.produceCount ?? 0 },
-                  { label: 'Tell apart', value: summary.data?.disambiguateCount ?? 0 },
+                  { label: t('Understand'), value: summary.data?.understandCount ?? 0 },
+                  { label: t('Produce'), value: summary.data?.produceCount ?? 0 },
+                  { label: t('Tell apart'), value: summary.data?.disambiguateCount ?? 0 },
                 ].map((group) => (
                   <View key={group.label} style={styles.groupRow}>
                     <Text style={styles.groupCount}>{group.value}</Text>
                     <Text style={styles.groupLabel}>{group.label}</Text>
                   </View>
                 ))}
-                <Text style={[styles.sessionCopy, styles.sessionCopySpaced]}>{summary.data?.sessionSize ?? 0} in this session · about {Math.max(1, Math.ceil((summary.data?.sessionSize ?? 0) * 0.7))} minutes</Text>
+                <Text style={[styles.sessionCopy, styles.sessionCopySpaced]}>
+                  {t('{count} in this session · about {minutes, plural, one {# minute} other {# minutes}}', {
+                    count: summary.data?.sessionSize ?? 0,
+                    minutes: Math.max(1, Math.ceil((summary.data?.sessionSize ?? 0) * 0.7)),
+                  })}
+                </Text>
               </View>
               {!!summary.data?.leeches.length && (
                 <View style={styles.leechPanel}>
-                  <Text style={styles.eyebrow}>{summary.data.leechCount} STOPPED MOVING</Text>
-                  <Text style={styles.leechCopy}>These words need a different prompt shape before they return.</Text>
+                  <Text style={styles.eyebrow}>{t('{count} STOPPED MOVING', { count: summary.data.leechCount })}</Text>
+                  <Text style={styles.leechCopy}>{t('These words need a different prompt shape before they return.')}</Text>
                   {summary.data.leeches.slice(0, 3).map((item) => (
                     <Pressable
                       key={item.itemId}
@@ -213,23 +220,23 @@ export default function ReviewScreen() {
                       style={styles.leechRow}>
                       <View style={styles.leechEntryCopy}>
                         <Text style={styles.leechEntry}>{item.entry}</Text>
-                        <Text style={styles.leechMeta}>{item.failureCount} same-shape misses</Text>
+                        <Text style={styles.leechMeta}>{t('{count, plural, one {# same-shape miss} other {# same-shape misses}}', { count: item.failureCount })}</Text>
                       </View>
-                      <Text style={styles.leechAction}>Meet another way</Text>
+                      <Text style={styles.leechAction}>{t('Meet another way')}</Text>
                     </Pressable>
                   ))}
                 </View>
               )}
               {!!error && <Text style={styles.error}>{error}</Text>}
-              <Button loading={submitting} onPress={startSession}>Start this session</Button>
+              <Button loading={submitting} onPress={startSession}>{t('Start this session')}</Button>
             </>
           ) : (
             <>
               <Image source={require('../assets/images/almo-asleep.png')} contentFit="contain" style={styles.almo} />
-              <Text style={styles.eyebrow}>NOTHING DUE</Text>
-              <Text style={styles.overviewTitle}>You are clear for now</Text>
-              <Text style={styles.stateCopy}>Almo has nothing to ask you today. Reading a page will add more.</Text>
-              <Button onPress={() => router.replace('/(tabs)/books')}>Open your shelf</Button>
+              <Text style={styles.eyebrow}>{t('NOTHING DUE')}</Text>
+              <Text style={styles.overviewTitle}>{t('You are clear for now')}</Text>
+              <Text style={styles.stateCopy}>{t('Almo has nothing to ask you today. Reading a page will add more.')}</Text>
+              <Button onPress={() => router.replace('/(tabs)/books')}>{t('Open your shelf')}</Button>
             </>
           )}
         </ScrollView>
@@ -263,13 +270,13 @@ export default function ReviewScreen() {
               {!!current.sourceContext && <Text style={styles.sourceContext}>“{current.sourceContext}”</Text>}
             </View>
             <View style={styles.answerGroup}>
-              <Text style={styles.answerLabel}>Your answer</Text>
+              <Text style={styles.answerLabel}>{t('Your answer')}</Text>
               <TextInput
                 autoFocus
                 value={answer}
                 onChangeText={setAnswer}
                 onSubmitEditing={() => void submitAnswer(false)}
-                placeholder={current.intent === 'PRODUCE' ? 'Word, with the article' : 'Meaning in your own words'}
+                placeholder={current.intent === 'PRODUCE' ? t('Word, with the article') : t('Meaning in your own words')}
                 placeholderTextColor={colors.metadata}
                 returnKeyType="done"
                 style={styles.answerInput}
@@ -277,8 +284,8 @@ export default function ReviewScreen() {
             </View>
             {!!current.hints.length && (
               <View style={styles.hints}>
-                <Text style={styles.eyebrow}>HINTS</Text>
-                <Text style={styles.hintIntro}>Each one you open is recorded as part of this answer.</Text>
+                <Text style={styles.eyebrow}>{t('HINTS')}</Text>
+                <Text style={styles.hintIntro}>{t('Each one you open is recorded as part of this answer.')}</Text>
                 {current.hints.map((hint) => {
                   const opened = openedHints.includes(hint.type);
                   return (
@@ -297,9 +304,9 @@ export default function ReviewScreen() {
               </View>
             )}
             {!!error && <Text style={styles.error}>{error}</Text>}
-            <Button loading={submitting} disabled={!answer.trim()} onPress={() => submitAnswer(false)}>Check answer</Button>
+            <Button loading={submitting} disabled={!answer.trim()} onPress={() => submitAnswer(false)}>{t('Check answer')}</Button>
             <Pressable disabled={submitting} onPress={() => submitAnswer(true)} style={styles.revealAction}>
-              <Text style={styles.revealText}>Show me the answer</Text>
+              <Text style={styles.revealText}>{t('Show me the answer')}</Text>
             </Pressable>
           </ScrollView>
         )}
@@ -309,6 +316,7 @@ export default function ReviewScreen() {
 }
 
 function SessionHeader({ completed, position, total, onClose }: { completed: number; position: number; total: number; onClose(): void }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   return (
@@ -317,7 +325,7 @@ function SessionHeader({ completed, position, total, onClose }: { completed: num
         {Array.from({ length: total }, (_, index) => <View key={index} style={[styles.plank, index < completed && styles.plankDone]} />)}
       </View>
       <Text style={styles.progressText}>{position}/{total}</Text>
-      <Pressable accessibilityLabel="Leave session" onPress={onClose} style={styles.closeButton}>
+      <Pressable accessibilityLabel={t('Leave session')} onPress={onClose} style={styles.closeButton}>
         <Ionicons name="close" size={24} color={colors.muted} />
       </Pressable>
     </View>
@@ -334,41 +342,42 @@ function FeedbackState({ feedback, prompt, sourceContext, submitting, mistypeRec
   onMistype(): void;
   onNext(): void;
 }) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const confused = feedback.confusedWith;
   return (
     <ScrollView contentContainerStyle={styles.feedbackContent}>
       <View style={styles.feedbackHeading}>
-        <Text style={styles.eyebrow}>{confused ? 'CLOSE, BUT THAT WAS THE OTHER ONE' : feedback.outcome === 'CORRECT' ? 'THAT HELD' : 'LET’S NAME THE DIFFERENCE'}</Text>
-        <Text style={styles.feedbackTitle}>{confused ? `You wrote ${confused.entry}` : feedback.outcome === 'CORRECT' ? 'You had it.' : 'This one comes back.'}</Text>
+        <Text style={styles.eyebrow}>{confused ? t('CLOSE, BUT THAT WAS THE OTHER ONE') : feedback.outcome === 'CORRECT' ? t('THAT HELD') : t('LET’S NAME THE DIFFERENCE')}</Text>
+        <Text style={styles.feedbackTitle}>{confused ? t('You wrote {entry}', { entry: confused.entry }) : feedback.outcome === 'CORRECT' ? t('You had it.') : t('This one comes back.')}</Text>
       </View>
       <View style={styles.comparisonCard}>
         <View style={styles.comparisonMuted}>
-          <Text style={styles.comparisonLabel}>WHAT YOU WROTE</Text>
-          <Text style={styles.comparisonEntry}>{confused?.entry || feedback.answer || 'Answer revealed'}</Text>
+          <Text style={styles.comparisonLabel}>{t('WHAT YOU WROTE')}</Text>
+          <Text style={styles.comparisonEntry}>{confused?.entry || feedback.answer || t('Answer revealed')}</Text>
           {!!confused?.meaning && <Text style={styles.comparisonMeaning}>{confused.meaning}</Text>}
           {!!confused?.example && <Text style={styles.comparisonExample}>“{confused.example}”</Text>}
         </View>
         <View style={styles.comparisonAsked}>
-          <Text style={[styles.comparisonLabel, styles.comparisonLabelAsked]}>WHAT WAS BEING ASKED</Text>
+          <Text style={[styles.comparisonLabel, styles.comparisonLabelAsked]}>{t('WHAT WAS BEING ASKED')}</Text>
           <Text style={[styles.comparisonEntry, styles.comparisonEntryAsked]}>{feedback.expectedAnswer}</Text>
           <Text style={styles.comparisonMeaning}>{prompt}</Text>
           {!!sourceContext && <Text style={styles.comparisonExample}>“{sourceContext}”</Text>}
         </View>
         {confused && (
           <View style={styles.contrastPanel}>
-            <Text style={styles.contrastLabel}>TELLING THEM APART</Text>
-            <Text style={styles.contrastCopy}>Both words now stay connected in tell-apart practice. The next prompt will keep their meanings in view.</Text>
+            <Text style={styles.contrastLabel}>{t('TELLING THEM APART')}</Text>
+            <Text style={styles.contrastCopy}>{t('Both words now stay connected in tell-apart practice. The next prompt will keep their meanings in view.')}</Text>
           </View>
         )}
       </View>
-      {confused && <Text style={styles.confusionNote}>{confused.directionCount === 1 ? 'First time these two have crossed.' : `${confused.directionCount} times these two have crossed.`}</Text>}
-      {feedback.leech && <Text style={styles.leechNotice}>This prompt shape has paused. Review will bring the word back another way.</Text>}
+      {confused && <Text style={styles.confusionNote}>{t('{count, plural, =1 {First time these two have crossed.} other {# times these two have crossed.}}', { count: confused.directionCount })}</Text>}
+      {feedback.leech && <Text style={styles.leechNotice}>{t('This prompt shape has paused. Review will bring the word back another way.')}</Text>}
       {!!error && <Text style={styles.error}>{error}</Text>}
-      <Button loading={submitting} onPress={onNext}>Next word</Button>
+      <Button loading={submitting} onPress={onNext}>{t('Next word')}</Button>
       {confused && (
         <Pressable disabled={submitting || mistypeRecorded} onPress={onMistype} style={styles.revealAction}>
-          <Text style={styles.revealText}>{mistypeRecorded ? 'Mistype recorded' : 'I only mistyped'}</Text>
+          <Text style={styles.revealText}>{mistypeRecorded ? t('Mistype recorded') : t('I only mistyped')}</Text>
         </Pressable>
       )}
     </ScrollView>
@@ -376,6 +385,7 @@ function FeedbackState({ feedback, prompt, sourceContext, submitting, mistypeRec
 }
 
 function CompleteState({ result, onDone }: { result: ReviewSessionResult; onDone(): void }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const [offerReminder, setOfferReminder] = useState(false);
@@ -392,7 +402,7 @@ function CompleteState({ result, onDone }: { result: ReviewSessionResult; onDone
       await configureDailyReminder(true, 20);
       setOfferReminder(false);
     } catch (cause) {
-      setReminderError(cause instanceof Error ? cause.message : 'The reminder could not be enabled.');
+      setReminderError(cause instanceof Error ? cause.message : t('The reminder could not be enabled.'));
     } finally {
       setSavingReminder(false);
     }
@@ -407,32 +417,32 @@ function CompleteState({ result, onDone }: { result: ReviewSessionResult; onDone
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.completeContent}>
         <View style={styles.completeIcon}><Ionicons name="checkmark" size={38} color={colors.onPrimary} /></View>
-        <Text style={styles.eyebrow}>SESSION COMPLETE</Text>
-        <Text style={styles.overviewTitle}>{result.total} {result.total === 1 ? 'word' : 'words'}</Text>
+        <Text style={styles.eyebrow}>{t('SESSION COMPLETE')}</Text>
+        <Text style={styles.overviewTitle}>{t('{count, plural, one {# word} other {# words}}', { count: result.total })}</Text>
         <View style={styles.summaryStats}>
-          <SummaryStat value={result.straightThrough} label="Straight through" />
-          <SummaryStat value={result.afterHint} label="After a hint" />
-          <SummaryStat value={result.confused} label="Mixed up" />
+          <SummaryStat value={result.straightThrough} label={t('Straight through')} />
+          <SummaryStat value={result.afterHint} label={t('After a hint')} />
+          <SummaryStat value={result.confused} label={t('Mixed up')} />
         </View>
         {!!result.dessertSentences.length && (
           <View style={styles.dessertCard}>
-            <Text style={styles.dessertEyebrow}>A SHORT RE-ENCOUNTER</Text>
-            <Text style={styles.dessertTitle}>Saved sentences around the words that resisted</Text>
+            <Text style={styles.dessertEyebrow}>{t('A SHORT RE-ENCOUNTER')}</Text>
+            <Text style={styles.dessertTitle}>{t('Saved sentences around the words that resisted')}</Text>
             {result.dessertSentences.slice(0, 3).map((sentence) => <Text key={sentence} style={styles.dessertCopy}>{sentence}</Text>)}
           </View>
         )}
         {offerReminder && (
           <View style={styles.reminderOffer}>
             <Ionicons name="notifications-outline" size={25} color={colors.primary} />
-            <Text style={styles.reminderTitle}>Want one calm reminder?</Text>
-            <Text style={styles.stateCopy}>Choose a daily 8:00 PM window. It stays off unless you say yes.</Text>
+            <Text style={styles.reminderTitle}>{t('Want one calm reminder?')}</Text>
+            <Text style={styles.stateCopy}>{t('Choose a daily 8:00 PM window. It stays off unless you say yes.')}</Text>
             {!!reminderError && <Text style={styles.error}>{reminderError}</Text>}
-            <Button loading={savingReminder} onPress={enableReminder}>Turn on review reminder</Button>
-            <Pressable disabled={savingReminder} onPress={dismissReminder} style={styles.revealAction}><Text style={styles.revealText}>Not now</Text></Pressable>
+            <Button loading={savingReminder} onPress={enableReminder}>{t('Turn on review reminder')}</Button>
+            <Pressable disabled={savingReminder} onPress={dismissReminder} style={styles.revealAction}><Text style={styles.revealText}>{t('Not now')}</Text></Pressable>
           </View>
         )}
-        <Text style={styles.stateCopy}>{result.stillDue ? `${result.stillDue} still due. Nothing was lost by stopping here.` : 'You are clear for now.'}</Text>
-        <Button onPress={onDone}>Back to Review</Button>
+        <Text style={styles.stateCopy}>{result.stillDue ? t('{count} still due. Nothing was lost by stopping here.', { count: result.stillDue }) : t('You are clear for now.')}</Text>
+        <Button onPress={onDone}>{t('Back to Review')}</Button>
       </ScrollView>
     </SafeAreaView>
   );

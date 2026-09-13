@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -14,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import type { TFunction } from 'i18next';
 import type { Channel } from 'stream-chat';
 
 import { ChatAvatar } from '@/components/chat-avatar';
@@ -47,6 +49,7 @@ const pageSize = 30;
 const maxPagesToDivider = 8;
 
 export default function ChatRoomScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const showNotice = useNotice();
@@ -86,9 +89,9 @@ export default function ChatRoomScreen() {
   const capture = useCallback(() => {
     const channel = channelRef.current;
     if (!channel || !userId) return;
-    setSnapshot(snapshotOf(channel, userId, unreadAnchor.current));
+    setSnapshot(snapshotOf(channel, userId, unreadAnchor.current, t));
     setHasOlder(channel.state.messagePagination.hasPrev);
-  }, [userId]);
+  }, [t, userId]);
 
   useEffect(() => {
     if (!client || !userId || !channelId) return;
@@ -151,7 +154,7 @@ export default function ChatRoomScreen() {
         await channel.markRead().catch(() => undefined);
       } catch (reason) {
         if (!active) return;
-        setRoomError(reason instanceof Error ? reason.message : 'This chat could not be opened.');
+        setRoomError(reason instanceof Error ? reason.message : t('This chat could not be opened.'));
       }
     })();
 
@@ -159,7 +162,7 @@ export default function ChatRoomScreen() {
       active = false;
       subscription.unsubscribe();
     };
-  }, [capture, channelId, client, recipientId, type, userId]);
+  }, [capture, channelId, client, recipientId, t, type, userId]);
 
   /**
    * Scrolling back asks Stream for the page before the oldest message held. Whether more remains
@@ -196,9 +199,9 @@ export default function ChatRoomScreen() {
     });
   }, [dividerIndex, ready]);
 
-  const title = snapshot.title || params.title || 'Chat';
+  const title = snapshot.title || params.title || t('Chat');
   const unavailable = status !== 'ready' ? chatUnavailableCopy(status, error) : roomError;
-  const empty = emptyCopy(type, channelId);
+  const empty = emptyCopy(type, channelId, t);
 
   async function send() {
     const channel = channelRef.current;
@@ -210,7 +213,7 @@ export default function ChatRoomScreen() {
       setDraft('');
       setReplyTo(null);
     } catch (reason) {
-      setRoomError(reason instanceof Error ? reason.message : 'That message was not sent.');
+      setRoomError(reason instanceof Error ? reason.message : t('That message was not sent.'));
     } finally {
       setSending(false);
     }
@@ -219,12 +222,12 @@ export default function ChatRoomScreen() {
   function actionsFor(message: ChatMessage): MessageAction[] {
     const actions: MessageAction[] = [];
     if (snapshot.canSend && snapshot.canQuote) {
-      actions.push({ key: 'reply', label: 'Reply', icon: 'arrow-undo-outline', run: () => setReplyTo(message) });
+      actions.push({ key: 'reply', label: t('Reply'), icon: 'arrow-undo-outline', run: () => setReplyTo(message) });
     }
     if (type !== channelTypes.self && !!message.text) {
       actions.push({
         key: 'save',
-        label: 'Save to Saved Messages',
+        label: t('Save to Saved Messages'),
         icon: 'bookmark-outline',
         run: () => void saveToSelf(message),
       });
@@ -232,7 +235,7 @@ export default function ChatRoomScreen() {
     if (message.text) {
       actions.push({
         key: 'copy',
-        label: 'Copy text',
+        label: t('Copy text'),
         icon: 'copy-outline',
         run: () => void Clipboard.setStringAsync(message.text),
       });
@@ -240,7 +243,7 @@ export default function ChatRoomScreen() {
     if (snapshot.canMarkUnread) {
       actions.push({
         key: 'unread',
-        label: 'Mark as unread from here',
+        label: t('Mark as unread from here'),
         icon: 'chatbox-outline',
         run: () => void markUnreadFrom(message),
       });
@@ -253,9 +256,9 @@ export default function ChatRoomScreen() {
     try {
       // The self chat's id is the user's own UUID; the backend created it at signup.
       await client.channel(channelTypes.self, userId).sendMessage({ text: message.text });
-      showNotice({ title: 'Saved to Saved Messages', tone: 'success' });
+      showNotice({ title: t('Saved to Saved Messages'), tone: 'success' });
     } catch {
-      showNotice({ title: 'Could not save that message', message: 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not save that message'), message: t('Try again.'), tone: 'error' });
     }
   }
 
@@ -266,14 +269,14 @@ export default function ChatRoomScreen() {
       await channel.markUnread({ message_id: message.id });
       router.back();
     } catch {
-      showNotice({ title: 'Could not mark as unread', message: 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not mark as unread'), message: t('Try again.'), tone: 'error' });
     }
   }
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} accessibilityLabel="Go back" hitSlop={8} style={styles.back}>
+        <Pressable onPress={() => router.back()} accessibilityLabel={t('Go back')} hitSlop={8} style={styles.back}>
           <Ionicons name="chevron-back" size={24} color={colors.ink} />
         </Pressable>
         <ChatAvatar type={type} channelId={channelId} image={snapshot.image} name={snapshot.title} size={38} />
@@ -328,7 +331,7 @@ export default function ChatRoomScreen() {
               <ActivityIndicator style={styles.loader} color={colors.primary} />
             ) : (
               <View style={styles.empty}>
-                <Text style={styles.emptyTitle}>{unavailable ? 'This chat is not available' : empty.title}</Text>
+                <Text style={styles.emptyTitle}>{unavailable ? t('This chat is not available') : empty.title}</Text>
                 <Text style={styles.emptyCopy}>{unavailable ?? empty.copy}</Text>
               </View>
             )
@@ -341,12 +344,12 @@ export default function ChatRoomScreen() {
               <View style={styles.replyBar}>
                 <View style={styles.replyEdge} />
                 <View style={styles.replyCopy}>
-                  <Text style={styles.replyName}>{replyTo.own ? 'You' : replyTo.authorName ?? 'Reply'}</Text>
+                  <Text style={styles.replyName}>{replyTo.own ? t('You') : replyTo.authorName ?? t('Reply')}</Text>
                   <Text numberOfLines={1} style={styles.replyText}>
                     {replyTo.text}
                   </Text>
                 </View>
-                <Pressable accessibilityLabel="Cancel reply" hitSlop={8} onPress={() => setReplyTo(null)}>
+                <Pressable accessibilityLabel={t('Cancel reply')} hitSlop={8} onPress={() => setReplyTo(null)}>
                   <Ionicons name="close" size={19} color={colors.muted} />
                 </Pressable>
               </View>
@@ -358,7 +361,7 @@ export default function ChatRoomScreen() {
                   setDraft(value);
                   void channelRef.current?.keystroke().catch(() => undefined);
                 }}
-                placeholder="Write a message"
+                placeholder={t('Write a message')}
                 placeholderTextColor={colors.muted}
                 multiline
                 autoCapitalize="sentences"
@@ -367,7 +370,7 @@ export default function ChatRoomScreen() {
               />
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Send message"
+                accessibilityLabel={t('Send message')}
                 disabled={!draft.trim() || sending || !ready}
                 onPress={() => void send()}
                 style={({ pressed }) => [styles.send, pressed && styles.pressed]}>
@@ -381,7 +384,7 @@ export default function ChatRoomScreen() {
           </View>
         ) : (
           <View style={styles.readOnly}>
-            <Text style={styles.readOnlyText}>{broadcastFooter}</Text>
+            <Text style={styles.readOnlyText}>{t(broadcastFooter)}</Text>
           </View>
         )}
       </KeyboardAvoidingView>
@@ -478,6 +481,7 @@ function Bubble({
   lifted?: boolean;
   onLongPress?(): void;
 }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
 
@@ -503,7 +507,7 @@ function Bubble({
       {!!message.quoted && (
         <View style={[styles.quote, message.own && styles.quoteOwn]}>
           <Text numberOfLines={1} style={[styles.quoteName, message.own && styles.quoteTextOwn]}>
-            {message.quoted.authorName ?? 'Reply'}
+            {message.quoted.authorName ?? t('Reply')}
           </Text>
           <Text numberOfLines={2} style={[styles.quoteText, message.own && styles.quoteTextOwn]}>
             {message.quoted.text}
@@ -553,7 +557,7 @@ const emptySnapshot: Snapshot = {
   seenMessageId: null,
 };
 
-function snapshotOf(channel: Channel, userId: string, firstUnreadId: string | null): Snapshot {
+function snapshotOf(channel: Channel, userId: string, firstUnreadId: string | null, t: TFunction): Snapshot {
   const messages = channel.state.messages.map((message) => toChatMessage(message, userId));
   const other = interlocutor(channel, userId);
   const typing = Object.keys(channel.state.typing).filter((id) => id !== userId);
@@ -562,7 +566,7 @@ function snapshotOf(channel: Channel, userId: string, firstUnreadId: string | nu
 
   return {
     title: channelTitle(channel, userId),
-    subtitle: subtitleFor(channel, typing.length > 0, other),
+    subtitle: subtitleFor(channel, typing.length > 0, other, t),
     image: channelImage(channel, userId),
     online: Boolean(other?.online),
     canSend: canSendMessages(channel),
@@ -595,35 +599,38 @@ function subtitleFor(
   channel: Channel,
   someoneTyping: boolean,
   other: ReturnType<typeof interlocutor>,
+  t: TFunction,
 ) {
   if (channel.type === channelTypes.broadcast) {
     const language = broadcastLanguage(channel.id ?? '');
-    return language ? `Channel · updates about ${languageName(language)}` : 'Channel · product updates';
+    return language
+      ? t('Channel · updates about {language}', { language: languageName(language) })
+      : t('Channel · product updates');
   }
   // Saved Messages has nobody to be present, so its header carries no presence line.
   if (channel.type === channelTypes.self) return '';
-  if (someoneTyping) return 'typing…';
-  if (other?.online) return 'online';
-  return other?.last_active ? `last seen ${relativeTime(other.last_active)}` : 'offline';
+  if (someoneTyping) return t('typing…');
+  if (other?.online) return t('online');
+  return other?.last_active ? t('last seen {when}', { when: relativeTime(other.last_active) }) : t('offline');
 }
 
-function emptyCopy(type: string, channelId: string) {
+function emptyCopy(type: string, channelId: string, t: TFunction) {
   if (type === channelTypes.self) {
     return {
-      title: 'Your own notebook',
-      copy: 'Forward messages here, or write to yourself. Nobody else can see this chat.',
+      title: t('Your own notebook'),
+      copy: t('Forward messages here, or write to yourself. Nobody else can see this chat.'),
     };
   }
   if (type === channelTypes.broadcast) {
     const language = broadcastLanguage(channelId);
     return {
-      title: 'Nothing posted yet',
+      title: t('Nothing posted yet'),
       copy: language
-        ? `New books, packs and features for ${languageName(language)} will land here.`
-        : 'New books, packs and features will land here.',
+        ? t('New books, packs and features for {language} will land here.', { language: languageName(language) })
+        : t('New books, packs and features will land here.'),
     };
   }
-  return { title: 'Nothing here yet', copy: 'Write the first message.' };
+  return { title: t('Nothing here yet'), copy: t('Write the first message.') };
 }
 
 const useStyles = createThemedStyles((colors, isDark) => ({

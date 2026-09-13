@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { AvatarPicker } from '@/components/avatar-picker';
@@ -13,6 +14,7 @@ import { Sheet } from '@/components/sheet';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { msg } from '@/src/i18n';
 import { languageName, sortLanguages } from '@/src/languages';
 import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import type { CefrLevel, SetupStep } from '@/src/types';
@@ -23,39 +25,39 @@ const featuredLanguages = ['DE', 'EN', 'FR', 'ES', 'PL'];
 
 const copy: Record<SetupStep, { eyebrow: string; title: string; description: string }> = {
   WELCOME: {
-    eyebrow: 'WELCOME',
-    title: 'Your next language lives in stories.',
-    description: 'A short setup shapes your shelf around what you know and what you are learning. No plan to pick, nothing to pay.',
+    eyebrow: msg('WELCOME'),
+    title: msg('Your next language lives in stories.'),
+    description: msg('A short setup shapes your shelf around what you know and what you are learning. No plan to pick, nothing to pay.'),
   },
   LANGUAGES: {
-    eyebrow: 'LANGUAGES',
-    title: 'What are you learning?',
-    description: 'Pick one to begin. You can add more later.',
+    eyebrow: msg('LANGUAGES'),
+    title: msg('What are you learning?'),
+    description: msg('Pick one to begin. You can add more later.'),
   },
   LEVEL: {
-    eyebrow: 'LEVEL',
-    title: 'How much can you read?',
-    description: 'Pick whichever sounds most like you. You can change it whenever you like.',
+    eyebrow: msg('LEVEL'),
+    title: msg('How much can you read?'),
+    description: msg('Pick whichever sounds most like you. You can change it whenever you like.'),
   },
   INTERESTS: {
-    eyebrow: 'INTERESTS',
-    title: 'Tune your recommendations.',
-    description: 'Pick anything you enjoy — or skip this for now.',
+    eyebrow: msg('INTERESTS'),
+    title: msg('Tune your recommendations.'),
+    description: msg('Pick anything you enjoy — or skip this for now.'),
   },
   PROFILE: {
-    eyebrow: 'PROFILE',
-    title: 'Make it yours.',
-    description: 'Both are already set — continue to keep them.',
+    eyebrow: msg('PROFILE'),
+    title: msg('Make it yours.'),
+    description: msg('Both are already set — continue to keep them.'),
   },
   GREETING: {
-    eyebrow: 'READY',
-    title: 'That’s everything. Let’s open a book.',
-    description: 'Almo will be around when a shelf is empty or something needs another try.',
+    eyebrow: msg('READY'),
+    title: msg('That’s everything. Let’s open a book.'),
+    description: msg('Almo will be around when a shelf is empty or something needs another try.'),
   },
   COMPLETED: {
-    eyebrow: 'READY',
-    title: 'Your shelf is ready.',
-    description: 'Time to find your first book.',
+    eyebrow: msg('READY'),
+    title: msg('Your shelf is ready.'),
+    description: msg('Time to find your first book.'),
   },
 };
 
@@ -71,6 +73,7 @@ function detectedLanguage(supported: string[]) {
 }
 
 export default function OnboardingScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { profile, refreshProfile, logOut } = useAuth();
@@ -107,7 +110,7 @@ export default function OnboardingScreen() {
       await action();
       await refreshProfile();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Setup could not continue. Try again.');
+      setErrorMessage(error instanceof Error ? error.message : t('Setup could not continue. Try again.'));
     } finally {
       setBusy(false);
     }
@@ -165,7 +168,7 @@ export default function OnboardingScreen() {
           <BrandMark size={36} />
           <Text style={styles.logo}>ALMONIUM</Text>
         </View>
-        <Pressable onPress={signOut} hitSlop={12} accessibilityLabel="Sign out">
+        <Pressable onPress={signOut} hitSlop={12} accessibilityLabel={t('Sign out')}>
           <Ionicons name="log-out-outline" size={22} color={colors.muted} />
         </Pressable>
       </View>
@@ -175,11 +178,11 @@ export default function OnboardingScreen() {
           <View key={item} style={[styles.plank, index <= stepIndex && styles.plankDone]} />
         ))}
       </View>
-      <Text style={styles.progressLabel}>STEP {Math.min(stepIndex + 1, steps.length)} OF {steps.length}</Text>
+      <Text style={styles.progressLabel}>{t('STEP {step} OF {total}', { step: Math.min(stepIndex + 1, steps.length), total: steps.length })}</Text>
       <View style={styles.intro}>
-        <Text style={styles.eyebrow}>{currentCopy.eyebrow}</Text>
-        <Title>{currentCopy.title}</Title>
-        <Text style={styles.description}>{currentCopy.description}</Text>
+        <Text style={styles.eyebrow}>{t(currentCopy.eyebrow)}</Text>
+        <Title>{t(currentCopy.title)}</Title>
+        <Text style={styles.description}>{t(currentCopy.description)}</Text>
       </View>
 
       {step === 'WELCOME' && (
@@ -187,18 +190,18 @@ export default function OnboardingScreen() {
           <View style={styles.feature}>
             <Ionicons name="book-outline" size={25} color={colors.primary} />
             <View style={styles.featureCopy}>
-              <Text style={styles.featureTitle}>Real books, with the translation beside them</Text>
-              <Text style={styles.featureText}>Tap any word to understand it. Keep the ones worth remembering.</Text>
+              <Text style={styles.featureTitle}>{t('Real books, with the translation beside them')}</Text>
+              <Text style={styles.featureText}>{t('Tap any word to understand it. Keep the ones worth remembering.')}</Text>
             </View>
           </View>
           <View style={styles.feature}>
             <Ionicons name="repeat-outline" size={25} color={colors.primary} />
             <View style={styles.featureCopy}>
-              <Text style={styles.featureTitle}>Short reviews, on a schedule that follows you</Text>
-              <Text style={styles.featureText}>Ten cards make a session. Nothing is lost by stopping.</Text>
+              <Text style={styles.featureTitle}>{t('Short reviews, on a schedule that follows you')}</Text>
+              <Text style={styles.featureText}>{t('Ten cards make a session. Nothing is lost by stopping.')}</Text>
             </View>
           </View>
-          <Button loading={busy} onPress={() => completeSimple('WELCOME')}>Set up my shelf</Button>
+          <Button loading={busy} onPress={() => completeSimple('WELCOME')}>{t('Set up my shelf')}</Button>
         </Card>
       )}
 
@@ -217,7 +220,7 @@ export default function OnboardingScreen() {
                   <Text style={[styles.languageCode, selected && styles.languageCodeSelected]}>{code}</Text>
                   <View style={styles.languageCopy}>
                     <Text style={styles.languageName}>{languageName(code)}</Text>
-                    <Text style={styles.languageFeatures}>{languageFeatures[code] ?? 'Core features'}</Text>
+                    <Text style={styles.languageFeatures}>{languageFeatures[code] ? t(languageFeatures[code]) : t('Core features')}</Text>
                   </View>
                   {selected && <Ionicons name="checkmark" size={20} color={colors.primary} />}
                 </Pressable>
@@ -229,27 +232,39 @@ export default function OnboardingScreen() {
               style={[styles.languageCard, styles.languageCardDashed]}>
               <Ionicons name="search-outline" size={18} color={colors.muted} />
               <View style={styles.languageCopy}>
-                <Text style={styles.languageName}>Another language</Text>
-                <Text style={styles.languageFeatures}>Search all</Text>
+                <Text style={styles.languageName}>{t('Another language')}</Text>
+                <Text style={styles.languageFeatures}>{t('Search all')}</Text>
               </View>
             </Pressable>
           </View>
           <Text style={styles.readingFrom}>
-            Reading from{' '}
-            <Text style={styles.readingFromValue}>{fluentLanguage ? languageName(fluentLanguage) : 'a language you know'}</Text>
-            {' — '}
-            <Text onPress={() => { setPicker('fluent'); setPickerSearch(''); }} style={styles.link}>
-              {fluentLanguage ? 'detected, change it' : 'choose it'}
-            </Text>
+            {fluentLanguage ? (
+              <Trans
+                i18nKey="Reading from <1>{language}</1> — <3>detected, change it</3>"
+                values={{ language: languageName(fluentLanguage) }}
+                components={{
+                  1: <Text style={styles.readingFromValue} />,
+                  3: <Text onPress={() => { setPicker('fluent'); setPickerSearch(''); }} style={styles.link} />,
+                }}
+              />
+            ) : (
+              <Trans
+                i18nKey="Reading from <1>a language you know</1> — <3>choose it</3>"
+                components={{
+                  1: <Text style={styles.readingFromValue} />,
+                  3: <Text onPress={() => { setPicker('fluent'); setPickerSearch(''); }} style={styles.link} />,
+                }}
+              />
+            )}
           </Text>
           <Text style={styles.finePrint}>
             {targetLanguage && languageFeatures[targetLanguage]
-              ? `${languageName(targetLanguage)} adds lexemes, frequency data and prepared decks. Every language has translation, lookups, review and statistics.`
-              : 'Every language has translation, lookups, review and statistics.'}
+              ? t('{language} adds lexemes, frequency data and prepared decks. Every language has translation, lookups, review and statistics.', { language: languageName(targetLanguage) })
+              : t('Every language has translation, lookups, review and statistics.')}
           </Text>
-          <Text style={styles.finePrint}>Free covers one language at a time.</Text>
+          <Text style={styles.finePrint}>{t('Free covers one language at a time.')}</Text>
           <Button loading={busy} disabled={!fluentLanguage || !targetLanguage || languagesQuery.isLoading} onPress={saveLanguages}>
-            Continue
+            {t('Continue')}
           </Button>
         </Card>
       )}
@@ -267,7 +282,7 @@ export default function OnboardingScreen() {
                   onPress={() => setLevel(candidate)}
                   style={[styles.levelOption, selected && styles.levelOptionActive]}>
                   <Text style={[styles.levelCode, selected && styles.levelCodeActive]}>{candidate}</Text>
-                  <Text style={styles.levelDescription}>{levelSentences[candidate]}</Text>
+                  <Text style={styles.levelDescription}>{t(levelSentences[candidate])}</Text>
                   {selected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
                 </Pressable>
               );
@@ -280,12 +295,12 @@ export default function OnboardingScreen() {
               style={[styles.levelOption, styles.levelOptionDashed]}>
               <Text style={styles.levelCode}>?</Text>
               <View style={styles.languageCopy}>
-                <Text style={styles.levelDescription}>I’m not sure — start me at B1.</Text>
-                <Text style={styles.finePrintLeft}>Books at B1 are a fair first test. Change it any time in Settings.</Text>
+                <Text style={styles.levelDescription}>{t('I’m not sure — start me at B1.')}</Text>
+                <Text style={styles.finePrintLeft}>{t('Books at B1 are a fair first test. Change it any time in Settings.')}</Text>
               </View>
             </Pressable>
           </View>
-          <Button loading={busy} onPress={() => void saveLevel()}>Continue</Button>
+          <Button loading={busy} onPress={() => void saveLevel()}>{t('Continue')}</Button>
         </Card>
       )}
 
@@ -311,7 +326,7 @@ export default function OnboardingScreen() {
             })}
           </View>
           <Button loading={busy} onPress={saveInterests}>
-            {selectedInterests.length ? 'Continue' : 'Skip for now'}
+            {selectedInterests.length ? t('Continue') : t('Skip for now')}
           </Button>
         </Card>
       )}
@@ -320,15 +335,15 @@ export default function OnboardingScreen() {
         <Card>
           <AvatarPicker tileSize={52} gap={6} />
           <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Username</Text>
-            <Field value={username} onChangeText={setUsername} placeholder="Username" maxLength={20} autoCapitalize="none" />
-            <Text style={styles.finePrintLeft}>3–20 letters, numbers or underscores. Only used if you share a word pack.</Text>
+            <Text style={styles.label}>{t('Username')}</Text>
+            <Field value={username} onChangeText={setUsername} placeholder={t('Username')} maxLength={20} autoCapitalize="none" />
+            <Text style={styles.finePrintLeft}>{t('3–20 letters, numbers or underscores. Only used if you share a word pack.')}</Text>
           </View>
           <Button
             loading={busy}
             disabled={!/^[a-zA-Z0-9_]{3,20}$/.test(username.trim())}
             onPress={() => completeSimple('PROFILE')}>
-            Continue
+            {t('Continue')}
           </Button>
         </Card>
       )}
@@ -339,9 +354,13 @@ export default function OnboardingScreen() {
             <Image source={require('../assets/images/almo-offering.png')} contentFit="contain" style={styles.almo} />
           </View>
           <Text style={styles.greetingCopy}>
-            {languageName(profile?.learners[0]?.language || targetLanguage)}, {profile?.learners[0]?.selfReportedLevel || level}, {profile?.interests.length || 0} {(profile?.interests.length || 0) === 1 ? 'interest' : 'interests'}. You can change any of it later.
+            {t('{language}, {level}, {count, plural, one {# interest} other {# interests}}. You can change any of it later.', {
+              language: languageName(profile?.learners[0]?.language || targetLanguage),
+              level: profile?.learners[0]?.selfReportedLevel || level,
+              count: profile?.interests.length || 0,
+            })}
           </Text>
-          <Button loading={busy} onPress={() => completeSimple('GREETING')}>Open my shelf</Button>
+          <Button loading={busy} onPress={() => completeSimple('GREETING')}>{t('Open my shelf')}</Button>
         </Card>
       )}
 
@@ -353,11 +372,11 @@ export default function OnboardingScreen() {
       )}
 
       <Sheet visible={picker !== null} onClose={() => setPicker(null)}>
-        <Text style={styles.sheetTitle}>{picker === 'target' ? 'What are you learning?' : 'What do you read from?'}</Text>
+        <Text style={styles.sheetTitle}>{picker === 'target' ? t('What are you learning?') : t('What do you read from?')}</Text>
         <TextInput
           value={pickerSearch}
           onChangeText={setPickerSearch}
-          placeholder="Type a language or code"
+          placeholder={t('Type a language or code')}
           placeholderTextColor={colors.muted}
           autoCorrect={false}
           style={styles.search}

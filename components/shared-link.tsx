@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -21,6 +22,7 @@ import type { SharedWord, Sharer } from '@/src/types';
  * pick. Signed out, the preview still reads and the add routes through sign-in.
  */
 export function SharedLinkScreen({ kind, id }: { kind: 'card' | 'deck'; id: string }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
@@ -53,14 +55,14 @@ export function SharedLinkScreen({ kind, id }: { kind: 'card' | 'deck'; id: stri
         queryClient.invalidateQueries({ queryKey: ['shared-viewer'] }),
       ]);
       showNotice({
-        title: result.added === 1 ? 'One word kept' : `${result.added} words kept`,
-        message: result.alreadyHeld ? `${result.alreadyHeld} you already had.` : 'They join your review schedule.',
+        title: t('{count, plural, one {One word kept} other {# words kept}}', { count: result.added }),
+        message: result.alreadyHeld ? t('{count} you already had.', { count: result.alreadyHeld }) : t('They join your review schedule.'),
         tone: 'success',
       });
       setPicking(false);
       setPicked(new Set());
     },
-    onError: (error) => showNotice({ title: 'Could not add', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' }),
+    onError: (error) => showNotice({ title: t('Could not add'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' }),
   });
 
   const words = view.data?.words ?? [];
@@ -69,15 +71,15 @@ export function SharedLinkScreen({ kind, id }: { kind: 'card' | 'deck'; id: stri
   useEffect(() => setPicked(new Set(fresh.map((word) => word.id))), [viewer.data?.heldWordIds, words.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (view.isLoading) {
-    return <View style={styles.center}><Text style={styles.copy}>Opening the link…</Text></View>;
+    return <View style={styles.center}><Text style={styles.copy}>{t('Opening the link…')}</Text></View>;
   }
   if (view.isError || !view.data || view.data.status !== 'ACTIVE') {
     return (
       <SafeAreaView style={styles.center}>
         <Ionicons name="link-outline" size={40} color={colors.primary} />
-        <Text style={styles.title}>This link has nothing behind it</Text>
-        <Text style={styles.copy}>{view.data?.status === 'REVOKED' ? 'The person who shared it took it back.' : 'It may have been deleted, or never existed.'}</Text>
-        <Button onPress={() => router.replace('/')}>Open Almonium</Button>
+        <Text style={styles.title}>{t('This link has nothing behind it')}</Text>
+        <Text style={styles.copy}>{view.data?.status === 'REVOKED' ? t('The person who shared it took it back.') : t('It may have been deleted, or never existed.')}</Text>
+        <Button onPress={() => router.replace('/')}>{t('Open Almonium')}</Button>
       </SafeAreaView>
     );
   }
@@ -91,16 +93,16 @@ export function SharedLinkScreen({ kind, id }: { kind: 'card' | 'deck'; id: stri
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Pressable accessibilityLabel="Back" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} hitSlop={10} style={styles.back}>
+        <Pressable accessibilityLabel={t('Back')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} hitSlop={10} style={styles.back}>
           <Ionicons name="chevron-back" size={24} color={colors.ink} />
         </Pressable>
         <View style={styles.heading}>
-          <Text style={styles.eyebrow}>{kind === 'card' ? 'A SHARED WORD' : 'A SHARED PACK'} · {languageName(language).toUpperCase()}</Text>
-          <Text style={styles.title}>{kind === 'card' ? words[0]?.entry : view.data.title ?? 'Word pack'}</Text>
+          <Text style={styles.eyebrow}>{kind === 'card' ? t('A SHARED WORD · {language}', { language: languageName(language).toUpperCase() }) : t('A SHARED PACK · {language}', { language: languageName(language).toUpperCase() })}</Text>
+          <Text style={styles.title}>{kind === 'card' ? words[0]?.entry : view.data.title ?? t('Word pack')}</Text>
           {!!sharer && (
             <View style={styles.sharer}>
               <AvatarMark avatarUrl={sharer.avatarUrl} username={sharer.username} premium={sharer.premium} size={28} />
-              <Text style={styles.copy}>Shared by @{sharer.username}</Text>
+              <Text style={styles.copy}>{t('Shared by @{username}', { username: sharer.username })}</Text>
             </View>
           )}
         </View>
@@ -124,7 +126,7 @@ export function SharedLinkScreen({ kind, id }: { kind: 'card' | 'deck'; id: stri
                 style={[styles.word, index > 0 && styles.wordDivider]}>
                 <WordBody word={word} />
                 {already ? (
-                  <Text style={styles.held}>Kept</Text>
+                  <Text style={styles.held}>{t('Kept')}</Text>
                 ) : picking ? (
                   <Ionicons name={selected ? 'checkmark-circle' : 'ellipse-outline'} size={22} color={selected ? colors.primary : colors.border} />
                 ) : null}
@@ -135,37 +137,37 @@ export function SharedLinkScreen({ kind, id }: { kind: 'card' | 'deck'; id: stri
 
         {!signedIn ? (
           <>
-            <Button onPress={() => router.push('/(auth)/sign-in')}>Sign in to keep {words.length === 1 ? 'it' : 'them'}</Button>
-            <Text style={styles.copy}>Reading is free. Signing in keeps these words in your own review schedule.</Text>
+            <Button onPress={() => router.push('/(auth)/sign-in')}>{t('{count, plural, one {Sign in to keep it} other {Sign in to keep them}}', { count: words.length })}</Button>
+            <Text style={styles.copy}>{t('Reading is free. Signing in keeps these words in your own review schedule.')}</Text>
           </>
         ) : viewer.data?.owner ? (
-          <Text style={styles.copy}>This is your own {kind === 'card' ? 'word' : 'pack'}. Anyone with the link sees this page.</Text>
+          <Text style={styles.copy}>{kind === 'card' ? t('This is your own word. Anyone with the link sees this page.') : t('This is your own pack. Anyone with the link sees this page.')}</Text>
         ) : noLearner ? (
           <>
-            <Text style={styles.copy}>You are not learning {languageName(language)} yet. Add it in Settings and these words can join your shelf.</Text>
-            <Button variant="secondary" onPress={() => router.push({ pathname: '/(tabs)/settings', params: { tab: 'learning' } })}>Open settings</Button>
+            <Text style={styles.copy}>{t('You are not learning {language} yet. Add it in Settings and these words can join your shelf.', { language: languageName(language) })}</Text>
+            <Button variant="secondary" onPress={() => router.push({ pathname: '/(tabs)/settings', params: { tab: 'learning' } })}>{t('Open settings')}</Button>
           </>
         ) : !canAdd ? (
-          <Text style={styles.copy}>{fresh.length === 0 && words.length ? 'You already keep every word here.' : ''}</Text>
+          <Text style={styles.copy}>{fresh.length === 0 && words.length ? t('You already keep every word here.') : ''}</Text>
         ) : picking ? (
           <>
             <Button loading={add.isPending} disabled={!picked.size} onPress={() => add.mutate([...picked])}>
-              Keep {picked.size} {picked.size === 1 ? 'word' : 'words'}
+              {t('{count, plural, one {Keep # word} other {Keep # words}}', { count: picked.size })}
             </Button>
-            <Pressable onPress={() => setPicking(false)} style={styles.inlineAction}><Text style={styles.link}>Cancel</Text></Pressable>
+            <Pressable onPress={() => setPicking(false)} style={styles.inlineAction}><Text style={styles.link}>{t('Cancel')}</Text></Pressable>
           </>
         ) : (
           <>
             <Button loading={add.isPending} onPress={() => add.mutate(fresh.map((word) => word.id))}>
-              {kind === 'card' ? 'Keep this word' : `Add all ${fresh.length}`}
+              {kind === 'card' ? t('Keep this word') : t('Add all {count}', { count: fresh.length })}
             </Button>
             {kind === 'deck' && fresh.length > 1 && (
-              <Pressable onPress={() => setPicking(true)} style={styles.inlineAction}><Text style={styles.link}>Pick which ones</Text></Pressable>
+              <Pressable onPress={() => setPicking(true)} style={styles.inlineAction}><Text style={styles.link}>{t('Pick which ones')}</Text></Pressable>
             )}
           </>
         )}
         <Pressable onPress={() => void Linking.openURL(`${config.webBaseUrl}/${kind === 'card' ? 'c' : 'd'}/${encodeURIComponent(id)}`)} style={styles.inlineAction}>
-          <Text style={styles.metaLink}>Open on the web</Text>
+          <Text style={styles.metaLink}>{t('Open on the web')}</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

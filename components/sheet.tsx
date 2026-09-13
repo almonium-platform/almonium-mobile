@@ -1,4 +1,5 @@
 import { type PropsWithChildren, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -29,6 +30,7 @@ export function Sheet({
   contentStyle?: ViewStyle;
   maxHeight?: ViewStyle['maxHeight'];
 }>) {
+  const { t } = useTranslation();
   const { reduceMotion } = useTheme();
   const styles = useStyles();
   const window = useWindowDimensions();
@@ -71,7 +73,7 @@ export function Sheet({
   return (
     <Modal transparent animationType="none" visible={mounted} onRequestClose={onClose}>
       <Animated.View pointerEvents={visible ? 'auto' : 'none'} style={[styles.scrim, { opacity: progress }]}>
-        <Pressable accessibilityLabel="Close" style={StyleSheet.absoluteFill} onPress={onClose} />
+        <Pressable accessibilityLabel={t('Close')} style={StyleSheet.absoluteFill} onPress={onClose} />
       </Animated.View>
       <Animated.View
         onLayout={measure}

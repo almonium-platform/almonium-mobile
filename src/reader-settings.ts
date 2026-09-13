@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { msg } from './i18n';
+
 /**
  * One source of truth for how the reader draws a page. The reader sheet and the App tab's reader
  * defaults both write here, so there is never a second copy to drift.
@@ -18,15 +20,15 @@ export interface ReaderSettings {
 }
 
 export const readerFaces: { value: ReaderFace; label: string; note?: string }[] = [
-  { value: 'literata', label: 'Literata', note: 'default' },
+  { value: 'literata', label: 'Literata', note: msg('default') },
   { value: 'plex', label: 'IBM Plex Sans' },
-  { value: 'atkinson', label: 'Atkinson Hyperlegible', note: 'easier to tell letters apart' },
+  { value: 'atkinson', label: 'Atkinson Hyperlegible', note: msg('easier to tell letters apart') },
 ];
 
 export const parallelModes: { value: ParallelMode; label: string; note: string }[] = [
-  { value: 'off', label: 'Original only', note: 'No translation on the page.' },
-  { value: 'on-demand', label: 'On demand', note: 'Tap a sentence; its translation opens under that line.' },
-  { value: 'inline', label: 'Inline', note: 'Whole paragraph, then its translation, one size down.' },
+  { value: 'off', label: msg('Original only'), note: msg('No translation on the page.') },
+  { value: 'on-demand', label: msg('On demand'), note: msg('Tap a sentence; its translation opens under that line.') },
+  { value: 'inline', label: msg('Inline'), note: msg('Whole paragraph, then its translation, one size down.') },
 ];
 
 export const defaultReaderSettings: ReaderSettings = {

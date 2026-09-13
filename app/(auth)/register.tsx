@@ -1,5 +1,6 @@
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text } from 'react-native';
 
 import { Screen } from '@/components/screen';
@@ -9,6 +10,7 @@ import { useNotice } from '@/src/notice-context';
 import { createThemedStyles } from '@/src/theme';
 
 export default function RegisterScreen() {
+  const { t } = useTranslation();
   const styles = useStyles();
   const { register } = useAuth();
   const showNotice = useNotice();
@@ -21,9 +23,9 @@ export default function RegisterScreen() {
     try {
       await register(email, password);
       router.replace('/(auth)/sign-in');
-      showNotice({ title: 'Check your inbox', message: 'Verify your email, then return here to sign in.', tone: 'success' });
+      showNotice({ title: t('Check your inbox'), message: t('Verify your email, then return here to sign in.'), tone: 'success' });
     } catch (error) {
-      showNotice({ title: 'Could not create account', message: error instanceof Error ? error.message : 'Try again.', tone: 'error' });
+      showNotice({ title: t('Could not create account'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
     } finally {
       setLoading(false);
     }
@@ -31,20 +33,20 @@ export default function RegisterScreen() {
 
   return (
     <Screen contentStyle={styles.content}>
-      <Title>Start your shelf.</Title>
-      <Text style={styles.subtitle}>Create an account, verify your email, and choose your language.</Text>
+      <Title>{t('Start your shelf.')}</Title>
+      <Text style={styles.subtitle}>{t('Create an account, verify your email, and choose your language.')}</Text>
       <Card>
         <Field
           value={email}
           onChangeText={setEmail}
-          placeholder="Email"
+          placeholder={t('Email')}
           keyboardType="email-address"
           autoComplete="email"
         />
         <Field
           value={password}
           onChangeText={setPassword}
-          placeholder="Password (8+ characters)"
+          placeholder={t('Password (8+ characters)')}
           secureTextEntry
           autoComplete="new-password"
         />
@@ -52,11 +54,11 @@ export default function RegisterScreen() {
           loading={loading}
           disabled={!email.trim() || password.length < 8}
           onPress={submit}>
-          Create account
+          {t('Create account')}
         </Button>
       </Card>
       <Link href="/(auth)/sign-in" style={styles.link}>
-        Back to sign in
+        {t('Back to sign in')}
       </Link>
     </Screen>
   );
