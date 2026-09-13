@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Image } from 'expo-image';
+import { Almo } from '@/components/almo';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
@@ -232,7 +232,7 @@ export default function ReviewScreen() {
             </>
           ) : (
             <>
-              <Image source={require('../assets/images/almo-asleep.png')} contentFit="contain" style={styles.almo} />
+              <Almo pose="asleep" height={126} style={styles.almo} />
               <Text style={styles.eyebrow}>{t('NOTHING DUE')}</Text>
               <Text style={styles.overviewTitle}>{t('You are clear for now')}</Text>
               <Text style={styles.stateCopy}>{t('Almo has nothing to ask you today. Reading a page will add more.')}</Text>
@@ -460,7 +460,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   stateTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 26, textAlign: 'center' },
   stateCopy: { maxWidth: 330, color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: 'center' },
   overview: { flexGrow: 1, justifyContent: 'center', gap: 14, padding: 20 },
-  almo: { width: 120, height: 126, alignSelf: 'center' },
+  almo: { alignSelf: 'center' },
   closeOverview: { position: 'absolute', top: 8, right: 12, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   eyebrow: { color: colors.raspberry, fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 1.5 },
   overviewTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30), textAlign: 'center' },

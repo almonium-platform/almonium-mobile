@@ -16,8 +16,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Almo } from '@/components/almo';
 import { AppHeader } from '@/components/app-header';
-import { Image } from 'expo-image';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
@@ -153,7 +153,7 @@ export default function CardsScreen() {
             </Button>
           </View> : (
             <View style={styles.caughtUp}>
-              <Image source={require('../../assets/images/almo-asleep.png')} contentFit="contain" style={styles.almo} />
+              <Almo pose="asleep" height={92} />
               <View style={styles.caughtUpCopy}>
                 <Text style={styles.caughtUpTitle}>{t('Nothing due')}</Text>
                 <Text style={styles.subhead}>{t('Come back when the next word is ready, or meet another one in a book.')}</Text>
@@ -251,7 +251,6 @@ const useStyles = createThemedStyles((colors) => ({
   groupLabel: { color: colors.ink, fontSize: 14 },
   caughtUp: { alignItems: 'center', gap: 11, padding: 18, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
   caughtUpCopy: { alignItems: 'center', gap: 3 },
-  almo: { width: 88, height: 92 },
   caughtUpTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 22 },
   reviewAction: { minHeight: 70, borderRadius: 999, overflow: 'hidden' },
   reviewActionFill: { minHeight: 70, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, backgroundColor: colors.primary },

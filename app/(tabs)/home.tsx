@@ -1,10 +1,10 @@
-import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 
+import { Almo } from '@/components/almo';
 import { AppHeader } from '@/components/app-header';
 import { BookCover } from '@/components/book-cover';
 import { Harness } from '@/components/harness';
@@ -117,7 +117,7 @@ export default function HomeScreen() {
           <View style={styles.loadingCard}><ActivityIndicator size="large" color={colors.primary} /></View>
         ) : !hasActivity ? (
           <View style={styles.card}>
-            <Image source={require('../../assets/images/almo-standing.png')} contentFit="contain" style={styles.almo} />
+            <Almo pose="standing" height={96} style={styles.almo} />
             <Text style={styles.eyebrow}>{t('NOTHING HERE YET')}</Text>
             <Text style={styles.bookTitle}>{t('Start with one page')}</Text>
             <Text style={styles.copy}>{t('Open a book and the words you keep collect here, next to the sentence you met them in. One page is enough to see how it works.')}</Text>
@@ -269,7 +269,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   date: { color: colors.muted, fontSize: 13 },
   loadingCard: { minHeight: 220, borderRadius: 26, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, ...shadows.card },
   card: { gap: 12, padding: 18, borderRadius: 28, backgroundColor: colors.surface, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },
-  almo: { width: 92, height: 96, alignSelf: 'center' },
+  almo: { alignSelf: 'center' },
   continueRow: { flexDirection: 'row', gap: 16 },
   cover: { width: 84, height: 122, borderRadius: 10 },
   continueCopy: { flex: 1, justifyContent: 'center', gap: 6 },

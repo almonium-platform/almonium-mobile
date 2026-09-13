@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
+import { Almo } from '@/components/almo';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { BrandMark } from '@/components/brand-mark';
 import { Screen } from '@/components/screen';
@@ -351,7 +351,7 @@ export default function OnboardingScreen() {
       {step === 'GREETING' && (
         <Card>
           <View style={styles.greetingMark}>
-            <Image source={require('../assets/images/almo-offering.png')} contentFit="contain" style={styles.almo} />
+            <Almo pose="offering" height={130} />
           </View>
           <Text style={styles.greetingCopy}>
             {t('{language}, {level}, {count, plural, one {# interest} other {# interests}}. You can change any of it later.', {
@@ -441,7 +441,6 @@ const useStyles = createThemedStyles((colors) => ({
   levelCodeActive: { color: colors.primary },
   levelDescription: { flex: 1, color: colors.ink, fontFamily: fonts.serifRegular, fontSize: 15, lineHeight: serifLineHeight(15) },
   greetingMark: { alignItems: 'center', paddingVertical: 8 },
-  almo: { width: 124, height: 130 },
   greetingCopy: { color: colors.muted, fontSize: 14, lineHeight: 21, textAlign: 'center' },
   errorSurface: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 16, padding: 14, backgroundColor: colors.dangerSoft },
   errorText: { flex: 1, color: colors.danger, fontSize: 13, lineHeight: 19 },
