@@ -215,11 +215,13 @@ export function createThemedStyles<T extends NamedStyles<T>>(
   const darkDefinition = factory(darkColors, true);
   for (const style of Object.values(darkDefinition)) {
     const themedStyle = style as ViewStyle;
-    if (themedStyle.backgroundColor === darkColors.surface && themedStyle.shadowOpacity) {
+    const raised = Boolean(themedStyle.shadowOpacity || themedStyle.boxShadow);
+    if (themedStyle.backgroundColor === darkColors.surface && raised) {
       themedStyle.borderWidth ??= 1;
       themedStyle.borderColor ??= darkColors.line;
       themedStyle.shadowOpacity = 0;
       themedStyle.elevation = 0;
+      delete themedStyle.boxShadow;
     }
   }
   const dark = StyleSheet.create(darkDefinition);
@@ -253,26 +255,27 @@ export const serifLineHeight = (fontSize: number) => Math.ceil(fontSize * 1.49);
 
 export const radii = { inline: 12, control: 999, panel: 20, card: 28 } as const;
 
+/**
+ * Android draws an elevation shadow from the view's outline, and on current devices that outline
+ * comes back rectangular for a rounded surface, so a grey wedge shows at every corner. RN's own
+ * `boxShadow` follows the border radius, so Android takes that; iOS keeps the layer shadow. A CSS
+ * blur spreads over twice the Core Animation radius, hence the doubled third value.
+ */
+type Shadow = Pick<ViewStyle, 'shadowColor' | 'shadowOpacity' | 'shadowRadius' | 'shadowOffset'> & { boxShadow?: string };
+
+const raise = (opacity: number, radius: number, y: number): Shadow =>
+  Platform.select<Shadow>({
+    android: { boxShadow: `0 ${y}px ${radius * 2}px rgba(0, 0, 0, ${opacity})` },
+    default: {
+      shadowColor: '#000000',
+      shadowOpacity: opacity,
+      shadowRadius: radius,
+      shadowOffset: { width: 0, height: y },
+    },
+  });
+
 export const shadows = {
-  card: {
-    shadowColor: '#000000',
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-  },
-  media: {
-    shadowColor: '#000000',
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  field: {
-    shadowColor: '#000000',
-    shadowOpacity: 0.07,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
-  },
+  card: raise(0.1, 3, 1),
+  media: raise(0.15, 5, 2),
+  field: raise(0.07, 4, 1),
 } as const;
