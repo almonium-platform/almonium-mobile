@@ -1,5 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import * as Clipboard from 'expo-clipboard';
+import Constants from 'expo-constants';
+import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Linking, Platform, Pressable, Switch, Text, View } from 'react-native';
@@ -7,6 +10,7 @@ import { Linking, Platform, Pressable, Switch, Text, View } from 'react-native';
 import { ActionPill, Row, Section } from '@/components/settings/shared';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { buildStamp } from '@/src/build-info';
 import { config } from '@/src/config';
 import { UI_LOCALE_AUTO, type UiLocalePreference } from '@/src/i18n';
 import { useUiLocale } from '@/src/i18n-context';
@@ -54,6 +58,24 @@ export function AppTab() {
       enabled: Boolean(firebaseUser),
     })),
   });
+
+  // Which code is running, for checking a phone against `git log` without a laptop.
+  const stamp = buildStamp(
+    {
+      version: Constants.expoConfig?.version ?? null,
+      build: Constants.nativeBuildVersion ?? null,
+      commit: config.gitSha,
+      embedded: Updates.isEmbeddedLaunch,
+      updatedAt: Updates.createdAt,
+      channel: Updates.channel,
+      runtimeVersion: Updates.runtimeVersion,
+    },
+    (date) => date.toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+  );
+  async function copyStamp() {
+    await Clipboard.setStringAsync(stamp.clipboard);
+    showNotice({ title: t('Copied'), message: stamp.clipboard });
+  }
 
   useEffect(() => {
     void getReminderSettings().then((settings) => {
@@ -290,6 +312,12 @@ export function AppTab() {
         </Row>
         <Row label={t('Terms of use')} onPress={() => void Linking.openURL(`${config.webBaseUrl}/terms-of-use`)}>
           <Ionicons name="open-outline" size={18} color={colors.muted} />
+        </Row>
+      </Section>
+
+      <Section eyebrow={t('ABOUT')}>
+        <Row label={t('Almonium {version}', { version: stamp.headline })} detail={stamp.detail} note={stamp.note} onPress={() => void copyStamp()}>
+          <Ionicons name="copy-outline" size={18} color={colors.muted} />
         </Row>
       </Section>
     </View>

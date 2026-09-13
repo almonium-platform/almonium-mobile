@@ -166,6 +166,8 @@ jobs:
         id: update
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'manual run' }}
+          # Inlined into the bundle; the About row on the phone prints its short form.
+          EXPO_PUBLIC_GIT_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           message="$(printf '%s\n' "$COMMIT_MESSAGE" | head -n 1 | cut -c1-120)"
