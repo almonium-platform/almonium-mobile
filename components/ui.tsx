@@ -29,7 +29,7 @@ export function Field(props: ComponentProps<typeof TextInput>) {
       placeholderTextColor={colors.muted}
       autoCapitalize="none"
       {...props}
-      style={[styles.field, props.style]}
+      style={[styles.field, props.multiline && styles.fieldTall, props.style]}
     />
   );
 }
@@ -143,6 +143,10 @@ const useStyles = createThemedStyles((colors, isDark) => ({
     borderColor: colors.border,
     backgroundColor: isDark ? colors.nested : colors.white,
     ...(isDark ? {} : shadows.field),
+  },
+  // A pill is a one-line shape; a field tall enough for several lines takes the panel's corners.
+  fieldTall: {
+    borderRadius: radii.panel,
   },
   button: {
     minHeight: 54,
