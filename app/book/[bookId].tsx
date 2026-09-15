@@ -14,6 +14,7 @@ import { languageName } from '@/src/languages';
 import { downloadBook, downloadedBooks, formattedDownloadSize, removeDownloadedBook } from '@/src/offline-books';
 import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import { isUuid } from '@/src/uuid';
+import { editionLabel } from '@/src/reader-editions';
 
 export default function BookDetailsScreen() {
   const { t } = useTranslation();
@@ -212,7 +213,7 @@ export default function BookDetailsScreen() {
                       styles.variantText,
                       variant.id === book.id && styles.variantTextActive,
                     ]}>
-                    {languageName(variant.language)}
+                    {editionLabel(variant)}
                   </Text>
                 </Pressable>
               ))}

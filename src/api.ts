@@ -1,4 +1,5 @@
 import { auth } from '@/src/firebase';
+import { parallelEditionPath } from './reader-editions';
 import type {
   ActiveLanguagePolicy,
   AddedWordsResult,
@@ -226,6 +227,11 @@ export const api = {
   },
   parallelText: async (bookId: string, language: string) => {
     const response = await authorizedFetch(`/books/${bookId}/parallel/${language}`);
+    if (!response.ok) throw new ApiError(await responseError(response), response.status);
+    return response.text();
+  },
+  parallelEditionText: async (editionSlug: string, companionSlug: string) => {
+    const response = await authorizedFetch(parallelEditionPath(editionSlug, companionSlug));
     if (!response.ok) throw new ApiError(await responseError(response), response.status);
     return response.text();
   },

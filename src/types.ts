@@ -78,9 +78,18 @@ export interface BookSummary {
   isTranslation: boolean;
 }
 
+export interface BookEditionVariant {
+  id: string;
+  language: string;
+  editionSlug?: string;
+  editionType?: string;
+  cefrLevel?: CefrLevel | null;
+  sourceEditionSlug?: string | null;
+}
+
 export interface BookDetails extends BookSummary {
   favorite: boolean;
-  languageVariants: { id: string; language: string }[];
+  languageVariants: BookEditionVariant[];
   originalLanguage?: string;
   originalId?: string;
   translator?: string;
@@ -89,7 +98,7 @@ export interface BookDetails extends BookSummary {
 export interface BookMiniDetails {
   progressPercentage: number;
   language: string;
-  languageVariants: { id: string; language: string }[];
+  languageVariants: BookEditionVariant[];
 }
 
 export interface Bookshelf {

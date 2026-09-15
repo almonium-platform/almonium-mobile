@@ -42,6 +42,8 @@ import { colors as lightColors, createThemedStyles, darkColors, fonts, serifLine
 import type { Bookshelf } from '@/src/types';
 import { useLearningActivity } from '@/src/use-activity';
 import { isUuid } from '@/src/uuid';
+import { chooseCompanion, companionEditions, editionLabel } from '@/src/reader-editions';
+import { parallelScript } from '@/src/reader-parallel';
 
 const baseProgressScript = `
   (function () {
@@ -82,43 +84,6 @@ const selectionScript = `
   })();
 `;
 
-/**
- * The aligned text arrives as seg-pairs holding one span per language. On demand hides the
- * fluent span until its sentence is tapped; inline gathers a block's fluent spans into a
- * paragraph of their own underneath, one size down. Side by side never runs on a phone.
- */
-function parallelScript(fluent: string, mode: ReaderSettings['parallel']) {
-  if (mode === 'off') return '';
-  return `
-    (function () {
-      var fluent = '${fluent.toUpperCase()}';
-      function isFluent(seg) { return (seg.getAttribute('lang') || '').toUpperCase().indexOf(fluent) === 0; }
-      document.querySelectorAll('span.seg-pair').forEach(function (pair) {
-        pair.querySelectorAll('span.segment').forEach(function (seg) {
-          seg.classList.add(isFluent(seg) ? 'almonium-fluent' : 'almonium-target');
-        });
-      });
-      ${
-        mode === 'inline'
-          ? `document.querySelectorAll('p, h2, div.poem').forEach(function (block) {
-              var fluentSegments = block.querySelectorAll('.almonium-fluent');
-              if (!fluentSegments.length) return;
-              var translation = document.createElement('p');
-              translation.className = 'almonium-inline';
-              fluentSegments.forEach(function (seg) { translation.appendChild(seg); translation.appendChild(document.createTextNode(' ')); });
-              block.parentNode.insertBefore(translation, block.nextSibling);
-            });`
-          : `document.addEventListener('click', function (event) {
-              var selection = window.getSelection();
-              if (selection && selection.toString().trim()) return;
-              var pair = event.target && event.target.closest ? event.target.closest('span.seg-pair') : null;
-              if (pair) pair.classList.toggle('almonium-open');
-            });`
-      }
-    })();
-  `;
-}
-
 function appearanceScript(settings: ReaderSettings, fontCss: string, progress: number) {
   const night = settings.theme === 'night';
   const background = night ? darkColors.canvas : lightColors.canvas;
@@ -148,6 +113,7 @@ function appearanceScript(settings: ReaderSettings, fontCss: string, progress: n
         img { max-width: 100% !important; height: auto !important; }
         a { color: ${lightColors.raspberry} !important; }
         .almonium-fluent { display: none; }
+        .almonium-aligned-active { outline: 1px solid ${muted}; border-radius: 3px; }
         .almonium-open .almonium-fluent { display: block; color: ${muted}; font-size: 0.92em; margin: 0.3em 0 0.6em; padding-left: 0.9em; border-left: 2px solid ${line}; }
         p.almonium-inline { color: ${muted}; font-size: 0.9em; margin-top: -0.55em !important; }
         p.almonium-inline .almonium-fluent { display: inline; }
@@ -225,18 +191,16 @@ export default function ReaderScreen() {
     enabled: validBookId && Boolean(firebaseUser),
   });
   const sourceLanguage = infoQuery.data?.language ?? '';
-  const parallelLanguage =
-    (params.parallel && infoQuery.data?.languageVariants.some((variant) => variant.language === params.parallel)
-      ? params.parallel
-      : undefined) ??
-    infoQuery.data?.languageVariants.find(
-      (variant) => variant.language !== sourceLanguage && profile?.fluentLangs.includes(variant.language),
-    )?.language;
-  const parallelActive = settings.parallel !== 'off' && Boolean(parallelLanguage);
+  const variants = infoQuery.data?.languageVariants ?? [];
+  const primarySlug = variants.find(variant => variant.id === bookId)?.editionSlug;
+  const companions = companionEditions(variants, bookId);
+  const companion = chooseCompanion(variants, bookId, params.parallel, profile?.fluentLangs ?? []);
+  const parallelLanguage = companion?.language;
+  const parallelActive = settings.parallel !== 'off' && Boolean(companion?.editionSlug && primarySlug);
   const parallelQuery = useQuery({
-    queryKey: ['book-parallel', firebaseUser?.uid, bookId, parallelLanguage],
-    queryFn: () => api.parallelText(bookId, parallelLanguage!),
-    enabled: parallelActive,
+    queryKey: ['book-parallel-edition', firebaseUser?.uid, primarySlug, companion?.editionSlug],
+    queryFn: () => api.parallelEditionText(primarySlug!, companion!.editionSlug!),
+    enabled: parallelActive && Boolean(firebaseUser),
     staleTime: 10 * 60_000,
   });
   const translationLanguage =
@@ -431,7 +395,7 @@ export default function ReaderScreen() {
             }}>
             {t('Try again')}
           </Button>
-          {parallelActive && <Button variant="secondary" onPress={() => update({ parallel: 'off' })}>{t('Read the original only')}</Button>}
+          {parallelActive && <Button variant="secondary" onPress={() => update({ parallel: 'off' })}>{t('Read without the companion')}</Button>}
         </View>
       )}
       {content && infoQuery.data && progress !== null && !loading && !error && (
@@ -447,7 +411,7 @@ export default function ReaderScreen() {
                 </Text>
                 <Text style={styles.readerMeta}>
                   {sourceLanguage}
-                  {parallelActive && parallelLanguage ? ` → ${parallelLanguage}` : ''}
+                  {parallelActive && companion ? ` ↔ ${editionLabel(companion)}` : ''}
                 </Text>
               </View>
               <Pressable accessibilityLabel={t('Open reader settings')} onPress={() => setSettingsVisible(true)} style={styles.toolButton}>
@@ -457,7 +421,7 @@ export default function ReaderScreen() {
             <View style={styles.headerTrack}><View style={[styles.headerBar, { width: `${progress}%` }]} /></View>
           </SafeAreaView>
           <WebView
-            key={parallelActive ? `${settings.parallel}-${parallelLanguage}` : 'single'}
+            key={parallelActive ? `${settings.parallel}-${companion?.editionSlug}` : 'single'}
             ref={webView}
             source={{ html: readerHtml(content) }}
             injectedJavaScript={`${appearanceScript(settings, fontCss, progress)}${parallelActive && parallelLanguage ? parallelScript(parallelLanguage, settings.parallel) : ''}${baseProgressScript}${selectionScript}true;`}
@@ -590,9 +554,17 @@ export default function ReaderScreen() {
             <Text style={styles.sizeLarge}>A</Text>
           </Pressable>
         </View>
-        {!!parallelLanguage && (
+        {companions.length > 0 && primarySlug && (
           <View style={styles.settingGroup}>
-            <Text style={styles.settingLabel}>{t('{language} BESIDE THE TEXT', { language: languageName(parallelLanguage).toUpperCase() })}</Text>
+            <Text style={styles.settingLabel}>{t('COMPANION EDITION')}</Text>
+            {companions.map(edition => (
+              <Pressable key={edition.id} accessibilityRole="radio" accessibilityState={{ selected: companion?.id === edition.id }}
+                onPress={() => router.setParams({ parallel: edition.editionSlug })}
+                style={[styles.option, companion?.id === edition.id && styles.optionSelected]}>
+                <View style={[styles.dot, companion?.id === edition.id && styles.dotSelected]} />
+                <Text style={styles.optionLabel}>{editionLabel(edition)}</Text>
+              </Pressable>
+            ))}
             {parallelModes.map((mode) => {
               const selected = settings.parallel === mode.value;
               return (
@@ -605,7 +577,7 @@ export default function ReaderScreen() {
                 </Pressable>
               );
             })}
-            <Text style={styles.optionNote}>{t('Read the original first. Use the translation to check, not to skip.')}</Text>
+            <Text style={styles.optionNote}>{t('Use the companion to check wording. Uncertain passages stay paragraph-aligned.')}</Text>
           </View>
         )}
         <View style={styles.settingGroup}>
