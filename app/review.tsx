@@ -352,24 +352,26 @@ function FeedbackState({ feedback, prompt, sourceContext, submitting, mistypeRec
         <Text style={styles.feedbackTitle}>{confused ? t('You wrote {entry}', { entry: confused.entry }) : feedback.outcome === 'CORRECT' ? t('You had it.') : t('This one comes back.')}</Text>
       </View>
       <View style={styles.comparisonCard}>
-        <View style={styles.comparisonMuted}>
-          <Text style={styles.comparisonLabel}>{t('WHAT YOU WROTE')}</Text>
-          <Text style={styles.comparisonEntry}>{confused?.entry || feedback.answer || t('Answer revealed')}</Text>
-          {!!confused?.meaning && <Text style={styles.comparisonMeaning}>{confused.meaning}</Text>}
-          {!!confused?.example && <Text style={styles.comparisonExample}>“{confused.example}”</Text>}
-        </View>
-        <View style={styles.comparisonAsked}>
-          <Text style={[styles.comparisonLabel, styles.comparisonLabelAsked]}>{t('WHAT WAS BEING ASKED')}</Text>
-          <Text style={[styles.comparisonEntry, styles.comparisonEntryAsked]}>{feedback.expectedAnswer}</Text>
-          <Text style={styles.comparisonMeaning}>{prompt}</Text>
-          {!!sourceContext && <Text style={styles.comparisonExample}>“{sourceContext}”</Text>}
-        </View>
-        {confused && (
-          <View style={styles.contrastPanel}>
-            <Text style={styles.contrastLabel}>{t('TELLING THEM APART')}</Text>
-            <Text style={styles.contrastCopy}>{t('Both words now stay connected in tell-apart practice. The next prompt will keep their meanings in view.')}</Text>
+        <View style={styles.comparisonClip}>
+          <View style={styles.comparisonMuted}>
+            <Text style={styles.comparisonLabel}>{t('WHAT YOU WROTE')}</Text>
+            <Text style={styles.comparisonEntry}>{confused?.entry || feedback.answer || t('Answer revealed')}</Text>
+            {!!confused?.meaning && <Text style={styles.comparisonMeaning}>{confused.meaning}</Text>}
+            {!!confused?.example && <Text style={styles.comparisonExample}>“{confused.example}”</Text>}
           </View>
-        )}
+          <View style={styles.comparisonAsked}>
+            <Text style={[styles.comparisonLabel, styles.comparisonLabelAsked]}>{t('WHAT WAS BEING ASKED')}</Text>
+            <Text style={[styles.comparisonEntry, styles.comparisonEntryAsked]}>{feedback.expectedAnswer}</Text>
+            <Text style={styles.comparisonMeaning}>{prompt}</Text>
+            {!!sourceContext && <Text style={styles.comparisonExample}>“{sourceContext}”</Text>}
+          </View>
+          {confused && (
+            <View style={styles.contrastPanel}>
+              <Text style={styles.contrastLabel}>{t('TELLING THEM APART')}</Text>
+              <Text style={styles.contrastCopy}>{t('Both words now stay connected in tell-apart practice. The next prompt will keep their meanings in view.')}</Text>
+            </View>
+          )}
+        </View>
       </View>
       {confused && <Text style={styles.confusionNote}>{t('{count, plural, =1 {First time these two have crossed.} other {# times these two have crossed.}}', { count: confused.directionCount })}</Text>}
       {feedback.leech && <Text style={styles.leechNotice}>{t('This prompt shape has paused. Review will bring the word back another way.')}</Text>}
@@ -510,7 +512,10 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   feedbackContent: { flexGrow: 1, justifyContent: 'center', gap: 14, padding: 16, paddingBottom: 30 },
   feedbackHeading: { gap: 6, paddingHorizontal: 4 },
   feedbackTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 26, lineHeight: serifLineHeight(26) },
-  comparisonCard: { overflow: 'hidden', borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
+  // Shadow and clipping live on separate views: an Android view that casts a boxShadow and also
+  // clips loses its children.
+  comparisonCard: { borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
+  comparisonClip: { overflow: 'hidden', borderRadius: 24 },
   comparisonMuted: { gap: 6, padding: 17, backgroundColor: colors.nested },
   comparisonAsked: { gap: 6, padding: 17 },
   comparisonLabel: { color: colors.metadata, fontSize: 10.5, letterSpacing: 1.2 },
