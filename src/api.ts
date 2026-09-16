@@ -222,10 +222,22 @@ export const api = {
   book: (bookId: string, language: string) =>
     request<BookDetails>(`/books/${bookId}/language/${language}`),
   bookInfo: (bookId: string) => request<BookMiniDetails>(`/books/${bookId}`),
+  // Published editions are public by slug: a guest reads them without a token, a member the same way.
+  publicBook: (editionSlug: string) => publicRequest<BookDetails>(`/public/books/${encodeURIComponent(editionSlug)}`),
+  publicBookText: async (editionSlug: string) => {
+    const response = await fetchWithTimeout(`${config.apiBaseUrl}/public/books/${encodeURIComponent(editionSlug)}/text`);
+    if (!response.ok) throw new ApiError(t('Could not load this book'), response.status);
+    return response.text();
+  },
+  publicParallelEditionText: async (editionSlug: string, companionSlug: string) => {
+    const response = await fetchWithTimeout(`${config.apiBaseUrl}${parallelEditionPath(editionSlug, companionSlug)}`);
+    if (!response.ok) throw new ApiError(await responseError(response), response.status);
+    return response.text();
+  },
   bookChapters: (editionSlug: string) =>
-    request<unknown>(`/public/books/${encodeURIComponent(editionSlug)}/chapters`).then(parseChapterEnrichments),
+    publicRequest<unknown>(`/public/books/${encodeURIComponent(editionSlug)}/chapters`).then(parseChapterEnrichments),
   bookChapterVocabulary: (editionSlug: string, sequence: number) =>
-    request<unknown>(`/public/books/${encodeURIComponent(editionSlug)}/chapters/${sequence}/vocabulary`)
+    publicRequest<unknown>(`/public/books/${encodeURIComponent(editionSlug)}/chapters/${sequence}/vocabulary`)
       .then(value => parseChapterVocabulary(value, sequence)),
   bookText: async (bookId: string) => {
     const response = await authorizedFetch(`/books/${bookId}/text`);

@@ -1,9 +1,10 @@
-import { Redirect } from 'expo-router';
+import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui';
 import { useAuth } from '@/src/auth-context';
+import { safeReturnPath } from '@/src/guest';
 import { authenticatedDestination } from '@/src/navigation';
 import { createThemedStyles, useTheme } from '@/src/theme';
 
@@ -12,6 +13,8 @@ export default function Index() {
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile, profileError, retryProfile, logOut, loading } = useAuth();
+  // A guest who signed in from a book goes back to it, once the account is ready to read.
+  const returnTo = safeReturnPath(useLocalSearchParams<{ returnTo?: string }>().returnTo);
 
   if (loading) {
     return (
@@ -34,11 +37,8 @@ export default function Index() {
     );
   }
 
-  return (
-    <Redirect
-      href={authenticatedDestination(Boolean(firebaseUser), Boolean(profile), profile?.setupStep)}
-    />
-  );
+  const destination = authenticatedDestination(Boolean(firebaseUser), Boolean(profile), profile?.setupStep);
+  return <Redirect href={returnTo && destination === '/(tabs)/home' ? (returnTo as never) : destination} />;
 }
 
 const useStyles = createThemedStyles((colors) => ({

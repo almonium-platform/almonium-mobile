@@ -92,6 +92,7 @@ function ThemedRootLayout() {
                   <Stack.Screen name="(auth)" options={{ headerShown: false }} />
                   <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                   <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+                  <Stack.Screen name="read" options={{ headerShown: false }} />
                   <Stack.Screen name="book/[bookId]" options={{ title: t('Book') }} />
                   <Stack.Screen
                     name="reader/[bookId]"

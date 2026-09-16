@@ -136,3 +136,45 @@ It verifies position/chrome reports, the chapter jump, escaped header injection,
 chapter-end rows, folding, the word-tap message and the next-chapter jump. It
 needs no backend. Native sheet layout, the chrome animation, pressed and night
 states on a device still need acceptance.
+
+## Reading without an account (2026-09-16, redesign J6–J8, J11 guest forms)
+
+The reader, the book page and a library open without signing in. Everything
+reads; only keeping needs an account, so the account ask sits where keeping
+would happen and nowhere else: the save slot of the word card and the chapter
+end. Never on arrival, never as a modal.
+
+- **Entry.** The sign-in screen links to `/read`, the public library: every
+  published edition from `GET /public/books`, grouped by language. Book cards
+  carry `editionSlug` as a `slug` param; the guest lane addresses books by it.
+- **Book page.** A guest loads `GET /public/books/{slug}`. The native header
+  keeps back navigation and shows Sign in / Read free on the right. Favorite,
+  offline download and translation orders are absent, not disabled; the
+  parallel row lists existing companions and a dashed "Request a translation"
+  chip that opens sign-in and returns here.
+- **Reader.** Text, companions, chapters and vocabulary come from the public
+  slug endpoints without a token. The top chrome is the public navbar with a
+  back chevron: wordmark, Sign in, Read free, with the 3px position bar under
+  it. The word card keeps every sense; the intents and audio go, and the save
+  slot becomes "Save to review — free account" (or "Write a meaning — free
+  account" without a sense) with "Keep 100 words, no card required. Sign in"
+  under it. The chapter end reports its visibility from the WebView; while it
+  is on screen the bottom row becomes the pinned panel: "Your place is kept on
+  this phone…", Read free, and "Continue to <next chapter>". The Words sheet
+  has no Saved marks. The card's other language is the phone's language when it
+  differs from the book's.
+- **Position.** A guest's place is stored on the device under
+  `almonium:guest-progress:{slug}` and restored on opening; nothing is synced
+  and no activity is reported.
+- **Return.** Sign in and Read free carry a `returnTo` in-app path (validated by
+  `safeReturnPath`). After sign-in the index route sends a completed account
+  back to it, so a guest lands on the same book. Returning to the exact word,
+  and saving it without a second tap, is not implemented: the reader reopens
+  at the kept place with the word sheet closed.
+
+No backend change: the public controllers already served these routes by
+slug. The chapter and vocabulary calls now use the tokenless client, which the
+backend treats the same. The Chromium fixture check also asserts the
+chapter-end visibility messages. Native acceptance still pending: the guest
+header over the WebView, the pinned panel's appearance and leave, and the
+sign-in return on a device.

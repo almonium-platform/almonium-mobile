@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { Link, router } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Linking, Platform, Text, View } from 'react-native';
@@ -9,6 +9,7 @@ import { BrandMark } from '@/components/brand-mark';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { isExpoGo, useAuth } from '@/src/auth-context';
 import { config } from '@/src/config';
+import { safeReturnPath } from '@/src/guest';
 import { useNotice } from '@/src/notice-context';
 import { createThemedStyles, gradients, useTheme } from '@/src/theme';
 
@@ -22,6 +23,8 @@ export default function SignInScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [appleAvailable, setAppleAvailable] = useState(false);
+  const returnTo = safeReturnPath(useLocalSearchParams<{ returnTo?: string }>().returnTo);
+  const home = () => router.replace(returnTo ? { pathname: '/', params: { returnTo } } : '/');
 
   useEffect(() => {
     if (Platform.OS === 'ios') {
@@ -33,7 +36,7 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await signIn(email, password);
-      router.replace('/');
+      home();
     } catch (error) {
       showNotice({ title: t('Could not sign in'), message: error instanceof Error ? error.message : t('Please try again.'), tone: 'error' });
     } finally {
@@ -45,7 +48,7 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await signInWithApple();
-      router.replace('/');
+      home();
     } catch (error) {
       if (
         error instanceof Error &&
@@ -64,7 +67,7 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await signInWithGoogle();
-      router.replace('/');
+      home();
     } catch (error) {
       if (
         error instanceof Error &&
@@ -142,10 +145,13 @@ export default function SignInScreen() {
             <Link href="/(auth)/forgot-password" style={styles.link}>
               {t('Forgot password?')}
             </Link>
-            <Link href="/(auth)/register" style={styles.link}>
+            <Link href={returnTo ? { pathname: '/(auth)/register', params: { returnTo } } : '/(auth)/register'} style={styles.link}>
               {t('Create account')}
             </Link>
           </View>
+          <Link href={(returnTo ?? '/read') as never} style={styles.browse}>
+            {returnTo ? t('Keep reading without an account') : t('Browse the library without an account')}
+          </Link>
           <Text style={styles.legal}>
             <Trans
               i18nKey="By continuing you agree to the <1>Terms</1> and <3>Privacy Policy</3>."
@@ -168,6 +174,7 @@ const useStyles = createThemedStyles((colors) => ({
   subtitle: { color: colors.muted, fontSize: 17, lineHeight: 25, maxWidth: 330 },
   links: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 2 },
   link: { color: colors.primary, fontWeight: '600' },
+  browse: { color: colors.muted, fontWeight: '600', textAlign: 'center', paddingVertical: 6 },
   expoGoHint: { color: colors.muted, fontSize: 13, lineHeight: 18, textAlign: 'center' },
   appleButton: { height: 54, width: '100%' },
   divider: { flexDirection: 'row', alignItems: 'center', gap: 10 },

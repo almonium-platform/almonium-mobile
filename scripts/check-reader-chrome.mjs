@@ -73,6 +73,11 @@ try {
   assert.notEqual(await page.evaluate(() => window.scrollY), before);
   const heading = await page.evaluate(() => Math.round(document.getElementById('chapter-3').getBoundingClientRect().top));
   assert.ok(Math.abs(heading) <= 1, `next chapter heading at the top, got ${heading}`);
+  // The chapter end reports when it is on screen, for the guest's account panel.
+  await page.waitForTimeout(150);
+  const ends = await page.evaluate(() => window.messages.filter(m => m.type === 'chapter-end'));
+  assert.ok(ends.some(m => m.chapter === 1 && m.visible === true), 'chapter end seen while scrolled past it');
+  assert.equal(ends.at(-1).visible, false, 'chapter end left the screen after the next jump');
   // The block sits before the next heading, so it belongs to its chapter.
   assert.equal(await page.evaluate(() => document.querySelector('.almonium-chapter-end').nextElementSibling.id), 'chapter-3');
   console.log('Fixture: position/chrome reports, chapter jump, header injection, chapter-end rows, fold, word tap and next jump passed.');

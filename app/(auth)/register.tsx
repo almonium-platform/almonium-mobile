@@ -1,4 +1,4 @@
-import { Link, router } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text } from 'react-native';
@@ -6,6 +6,7 @@ import { Text } from 'react-native';
 import { Screen } from '@/components/screen';
 import { Button, Card, Field, Title } from '@/components/ui';
 import { useAuth } from '@/src/auth-context';
+import { safeReturnPath } from '@/src/guest';
 import { useNotice } from '@/src/notice-context';
 import { createThemedStyles } from '@/src/theme';
 
@@ -13,6 +14,7 @@ export default function RegisterScreen() {
   const { t } = useTranslation();
   const styles = useStyles();
   const { register } = useAuth();
+  const returnTo = safeReturnPath(useLocalSearchParams<{ returnTo?: string }>().returnTo);
   const showNotice = useNotice();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +24,7 @@ export default function RegisterScreen() {
     setLoading(true);
     try {
       await register(email, password);
-      router.replace('/(auth)/sign-in');
+      router.replace(returnTo ? { pathname: '/(auth)/sign-in', params: { returnTo } } : '/(auth)/sign-in');
       showNotice({ title: t('Check your inbox'), message: t('Verify your email, then return here to sign in.'), tone: 'success' });
     } catch (error) {
       showNotice({ title: t('Could not create account'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
@@ -57,7 +59,7 @@ export default function RegisterScreen() {
           {t('Create account')}
         </Button>
       </Card>
-      <Link href="/(auth)/sign-in" style={styles.link}>
+      <Link href={returnTo ? { pathname: '/(auth)/sign-in', params: { returnTo } } : '/(auth)/sign-in'} style={styles.link}>
         {t('Back to sign in')}
       </Link>
     </Screen>

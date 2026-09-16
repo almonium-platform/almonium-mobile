@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getLocales } from 'expo-localization';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
 import { BrandMark } from '@/components/brand-mark';
+import { GuestHeader } from '@/components/guest-header';
 import { PaywallModal, type PaywallContext } from '@/components/paywall-modal';
 import { Sheet } from '@/components/sheet';
 import { Button } from '@/components/ui';
@@ -31,6 +33,7 @@ import { lightImpact, successHaptic } from '@/src/haptics';
 import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
 import { downloadedBooks, readDownloadedBook } from '@/src/offline-books';
+import { guestTranslationLanguage, readerReturnPath, readGuestProgress, writeGuestProgress } from '@/src/guest';
 import { faceStacks, readerFaceCss } from '@/src/reader-fonts';
 import {
   defaultReaderSettings,
@@ -187,10 +190,15 @@ export default function ReaderScreen() {
   const { t } = useTranslation();
   const { colors, reduceMotion } = useTheme();
   const styles = useStyles();
-  const params = useLocalSearchParams<{ bookId: string; language?: string; title?: string; parallel?: string }>();
+  const params = useLocalSearchParams<{ bookId: string; language?: string; title?: string; parallel?: string; slug?: string }>();
   const bookId = params.bookId;
   const validBookId = isUuid(bookId);
-  const { firebaseUser, profile } = useAuth();
+  const { firebaseUser, profile, loading: authLoading } = useAuth();
+  // Without an account the same reader opens the public edition by slug: everything reads, keeping asks.
+  const guest = !authLoading && !firebaseUser;
+  const slug = params.slug;
+  const canOpen = validBookId && !authLoading && (guest ? Boolean(slug) : true);
+  const returnTo = readerReturnPath(bookId, slug, params.title);
   const queryClient = useQueryClient();
   const webView = useRef<WebView>(null);
   const sync = useMemo(
@@ -209,6 +217,8 @@ export default function ReaderScreen() {
   const [wordsChapterIndex, setWordsChapterIndex] = useState<number | null>(null);
   const [revealedChapter, setRevealedChapter] = useState<number | null>(null);
   const [currentChapter, setCurrentChapter] = useState(-1);
+  const [endChapter, setEndChapter] = useState<number | null>(null);
+  const endOnScreen = useRef<number | null>(null);
   const [chapters, setChapters] = useState<ReaderChapter[]>([]);
   const [chaptersReady, setChaptersReady] = useState(false);
   const [topHeight, setTopHeight] = useState(0);
@@ -234,14 +244,18 @@ export default function ReaderScreen() {
   const night = settings.theme === 'night';
 
   const textQuery = useQuery({
-    queryKey: ['book-text', firebaseUser?.uid, bookId],
-    queryFn: async () => (await readDownloadedBook(bookId)) ?? api.bookText(bookId),
-    enabled: validBookId && Boolean(firebaseUser),
+    queryKey: guest ? ['public-book-text', slug] : ['book-text', firebaseUser?.uid, bookId],
+    queryFn: async () => (guest ? api.publicBookText(slug!) : (await readDownloadedBook(bookId)) ?? api.bookText(bookId)),
+    enabled: canOpen,
     staleTime: 10 * 60_000,
   });
   const infoQuery = useQuery({
-    queryKey: ['book-info', firebaseUser?.uid, bookId],
+    queryKey: guest ? ['public-book-info', slug] : ['book-info', firebaseUser?.uid, bookId],
     queryFn: async () => {
+      if (guest) {
+        const book = await api.publicBook(slug!);
+        return { progressPercentage: await readGuestProgress(slug!), language: book.language, languageVariants: book.languageVariants };
+      }
       try {
         return await api.bookInfo(bookId);
       } catch (error) {
@@ -254,7 +268,7 @@ export default function ReaderScreen() {
         };
       }
     },
-    enabled: validBookId && Boolean(firebaseUser),
+    enabled: canOpen,
   });
   const sourceLanguage = infoQuery.data?.language ?? '';
   const variants = infoQuery.data?.languageVariants ?? [];
@@ -271,7 +285,7 @@ export default function ReaderScreen() {
   const vocabularyQuery = useQuery({
     queryKey: vocabularyKey(wordsSequence),
     queryFn: () => api.bookChapterVocabulary(primarySlug!, wordsSequence!),
-    enabled: Boolean(wordsVisible && primarySlug && wordsSequence && firebaseUser),
+    enabled: Boolean(wordsVisible && primarySlug && wordsSequence && !authLoading),
     staleTime: 0,
     retry: false,
   });
@@ -281,14 +295,14 @@ export default function ReaderScreen() {
   const readingVocabularyQuery = useQuery({
     queryKey: vocabularyKey(readingSequence),
     queryFn: () => api.bookChapterVocabulary(primarySlug!, readingSequence!),
-    enabled: Boolean(chaptersReady && primarySlug && readingSequence && firebaseUser),
+    enabled: Boolean(chaptersReady && primarySlug && readingSequence && !authLoading),
     staleTime: 10 * 60_000,
     retry: false,
   });
   const chaptersQuery = useQuery({
     queryKey: ['book-chapters', firebaseUser?.uid, primarySlug],
     queryFn: () => api.bookChapters(primarySlug!),
-    enabled: Boolean(primarySlug && firebaseUser),
+    enabled: Boolean(primarySlug && !authLoading),
     staleTime: 10 * 60_000,
     retry: false,
   });
@@ -302,14 +316,14 @@ export default function ReaderScreen() {
   const parallelActive = settings.parallel !== 'off' && Boolean(companion?.editionSlug && primarySlug);
   const parallelQuery = useQuery({
     queryKey: ['book-parallel-edition', firebaseUser?.uid, primarySlug, companion?.editionSlug],
-    queryFn: () => api.parallelEditionText(primarySlug!, companion!.editionSlug!),
-    enabled: parallelActive && Boolean(firebaseUser),
+    queryFn: () => (guest ? api.publicParallelEditionText : api.parallelEditionText)(primarySlug!, companion!.editionSlug!),
+    enabled: parallelActive && !authLoading,
     staleTime: 10 * 60_000,
   });
   const lookupLanguage = readerLookupLanguage(selection, sourceLanguage);
-  const translationLanguage =
-    profile?.fluentLangs.find((language) => language !== lookupLanguage) ??
-    (lookupLanguage === 'EN' ? 'UK' : 'EN');
+  const translationLanguage = guest
+    ? guestTranslationLanguage(getLocales().map((locale) => locale.languageTag), lookupLanguage)
+    : profile?.fluentLangs.find((language) => language !== lookupLanguage) ?? (lookupLanguage === 'EN' ? 'UK' : 'EN');
   const selectionQuery = useQuery({
     queryKey: ['discover', selection?.entry, lookupLanguage, translationLanguage, selection?.context],
     queryFn: () => api.discover(selection!.entry, lookupLanguage, translationLanguage, selection!.context),
@@ -320,7 +334,7 @@ export default function ReaderScreen() {
     queryFn: () => api.cards(sourceLanguage),
     enabled: Boolean(firebaseUser && sourceLanguage),
   });
-  const activity = useLearningActivity('READ', sourceLanguage || null);
+  const activity = useLearningActivity('READ', guest ? null : sourceLanguage || null);
   const shelfBook = useMemo(() => {
     const shelf = queryClient.getQueryData<Bookshelf>(['bookshelf', firebaseUser?.uid, sourceLanguage]);
     return [...(shelf?.continueReading ?? []), ...(shelf?.available ?? []), ...(shelf?.favorites ?? [])].find(
@@ -353,7 +367,13 @@ export default function ReaderScreen() {
   }, [settings.face]);
 
   useEffect(() => {
-    if (!sync || !infoQuery.data) return;
+    if (!infoQuery.data) return;
+    if (!sync) {
+      // A guest's place is this phone's alone.
+      progressRef.current = infoQuery.data.progressPercentage ?? 0;
+      setProgress(progressRef.current);
+      return;
+    }
     void sync.restorePending().then((pending) => {
       const restored = pending ?? infoQuery.data.progressPercentage ?? 0;
       progressRef.current = restored;
@@ -465,7 +485,7 @@ export default function ReaderScreen() {
     if (message.startsWith('{')) {
       try {
         const payload = JSON.parse(message) as {
-          type?: string; text?: string; context?: string; chapters?: unknown; chapter?: unknown; chrome?: unknown; blockId?: unknown; lemma?: unknown;
+          type?: string; text?: string; context?: string; chapters?: unknown; chapter?: unknown; chrome?: unknown; blockId?: unknown; lemma?: unknown; visible?: unknown;
         };
         if (payload.type === 'chapters') {
           setChapters(parseReaderChapters(payload.chapters));
@@ -474,7 +494,14 @@ export default function ReaderScreen() {
         }
         if (payload.type === 'position') {
           if (Number.isInteger(payload.chapter)) setCurrentChapter(payload.chapter as number);
-          if (typeof payload.chrome === 'boolean') showChrome(payload.chrome);
+          if (typeof payload.chrome === 'boolean') showChrome(payload.chrome || endOnScreen.current !== null);
+          return;
+        }
+        if (payload.type === 'chapter-end' && Number.isInteger(payload.chapter)) {
+          // The account ask appears with the chapter end and leaves with it; never mid-text.
+          const chapter = payload.chapter as number;
+          if (payload.visible === true) { endOnScreen.current = chapter; setEndChapter(chapter); showChrome(true); }
+          else if (endOnScreen.current === chapter) { endOnScreen.current = null; setEndChapter(null); }
           return;
         }
         if (payload.type === 'chapter-word' && Number.isInteger(payload.chapter)) {
@@ -504,14 +531,18 @@ export default function ReaderScreen() {
       return;
     }
     const percentage = Number(message);
-    if (!sync || !Number.isFinite(percentage)) return;
+    if (!Number.isFinite(percentage) || (!sync && !guest)) return;
     activity.tick();
     const next = Math.max(0, Math.min(100, Math.round(percentage)));
     progressRef.current = next;
     setProgress(next);
-    void sync.record(next);
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => void flush(), 1500);
+    if (sync) {
+      void sync.record(next);
+      saveTimer.current = setTimeout(() => void flush(), 1500);
+    } else if (slug) {
+      saveTimer.current = setTimeout(() => void writeGuestProgress(slug, next), 800);
+    }
     if (next >= 99) void markFinished();
   }
 
@@ -575,7 +606,7 @@ export default function ReaderScreen() {
     }
   }
 
-  if (!validBookId) {
+  if (!validBookId || (guest && !slug)) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorTitle}>{t('This reader link is invalid.')}</Text>
@@ -584,7 +615,7 @@ export default function ReaderScreen() {
     );
   }
 
-  const loading = !settingsLoaded || textQuery.isLoading || infoQuery.isLoading || (parallelActive && parallelQuery.isLoading);
+  const loading = !settingsLoaded || authLoading || textQuery.isLoading || infoQuery.isLoading || (parallelActive && parallelQuery.isLoading);
   const error = textQuery.error || infoQuery.error || (parallelActive ? parallelQuery.error : null);
   const content = parallelActive ? parallelQuery.data : textQuery.data;
   const savedInLanguage = itemsQuery.data?.length ?? 0;
@@ -620,7 +651,7 @@ export default function ReaderScreen() {
                   {lookup.frequency ? ` · ${lookup.frequency.band}` : ''}
                 </Text>
               </View>
-              <Pressable
+              {!guest && <Pressable
                 accessibilityLabel={t('Learn about narrated audio')}
                 onPress={() => {
                   closeWords();
@@ -628,7 +659,7 @@ export default function ReaderScreen() {
                 }}
                 style={styles.sheetAudio}>
                 <Ionicons name="volume-medium-outline" size={21} color={colors.primary} />
-              </Pressable>
+              </Pressable>}
             </View>
             <View style={styles.senses}>
               {lookup.senses.length ? (
@@ -656,6 +687,18 @@ export default function ReaderScreen() {
                 <Text style={styles.status}>{t('No structured dictionary sense is available yet.')}</Text>
               )}
             </View>
+            {guest ? (
+              <>
+                <Button onPress={() => router.push({ pathname: '/(auth)/sign-in', params: { returnTo } })}>
+                  {selectedSense?.translations.length ? t('Save to review — free account') : t('Write a meaning — free account')}
+                </Button>
+                <Text style={styles.capLine}>
+                  {t('Keep 100 words, no card required.')}{' '}
+                  <Text onPress={() => router.push({ pathname: '/(auth)/sign-in', params: { returnTo } })} style={styles.capLink}>{t('Sign in')}</Text>
+                </Text>
+              </>
+            ) : (
+            <>
             <View style={styles.sheetIntents}>
               <View style={styles.sheetIntentActive}><Text style={styles.sheetIntentActiveText}>{t('Understand it')}</Text></View>
               <Pressable
@@ -676,6 +719,8 @@ export default function ReaderScreen() {
                 {t('{saved} of {limit} words kept. Free covers a hundred at a time.', { saved: savedInLanguage, limit: freeSavedItemLimit })}{' '}
                 <Text onPress={() => { closeWords(); setPaywallContext('item-cap'); }} style={styles.capLink}>{t('See what changes.')}</Text>
               </Text>
+            )}
+            </>
             )}
           </>
         ) : null}
@@ -713,7 +758,7 @@ export default function ReaderScreen() {
             ref={webView}
             source={{ html: readerHtml(content) }}
             injectedJavaScript={`${appearanceScript(settings, fontCss, progress)}${layoutScript(insets.current.top, insets.current.bottom)}${parallelActive && parallelLanguage ? parallelScript(parallelLanguage, settings.parallel) : ''}${chapterDiscoveryScript}${positionScript}${baseProgressScript}${selectionScript}true;`}
-            onLoadStart={() => { setChapters([]); setChaptersReady(false); setCurrentChapter(-1); injectedEnds.current.clear(); showChrome(true); }}
+            onLoadStart={() => { setChapters([]); setChaptersReady(false); setCurrentChapter(-1); setEndChapter(null); endOnScreen.current = null; injectedEnds.current.clear(); showChrome(true); }}
             onLoadEnd={() => webView.current?.injectJavaScript(layoutScript(insets.current.top, insets.current.bottom))}
             onMessage={onMessage}
             onShouldStartLoadWithRequest={(request) => {
@@ -728,6 +773,11 @@ export default function ReaderScreen() {
           <Animated.View
             onLayout={event => setTopHeight(event.nativeEvent.layout.height)}
             style={[styles.topChrome, { transform: [{ translateY: topTravel }] }]}>
+            {guest ? (
+              <GuestHeader onBack={() => router.back()} returnTo={returnTo} night={night}>
+                <View style={styles.headerTrack}><View style={[styles.headerBar, { width: `${progress}%` }]} /></View>
+              </GuestHeader>
+            ) : (
             <SafeAreaView edges={['top']} style={[styles.readerHeader, night && styles.toolbarNight]}>
               <View style={styles.readerHeaderRow}>
                 <Pressable accessibilityLabel={t('Back to book')} onPress={() => router.back()} style={styles.toolButton}>
@@ -747,10 +797,22 @@ export default function ReaderScreen() {
               </View>
               <View style={styles.headerTrack}><View style={[styles.headerBar, { width: `${progress}%` }]} /></View>
             </SafeAreaView>
+            )}
           </Animated.View>
           <Animated.View
             onLayout={event => setBottomHeight(event.nativeEvent.layout.height)}
             style={[styles.bottomChrome, { transform: [{ translateY: bottomTravel }] }]}>
+            {guest && endChapter !== null ? (
+              <SafeAreaView edges={['bottom']} style={[styles.endPanel, night && styles.toolbarNight]}>
+                <Text style={[styles.endPanelText, night && styles.nightText]}>{t('Your place is kept on this phone. A free account keeps it everywhere and lets you save words.')}</Text>
+                <Button onPress={() => router.push({ pathname: '/(auth)/register', params: { returnTo } })}>{t('Read free')}</Button>
+                {chapters[endChapter + 1] && (
+                  <Pressable accessibilityRole="button" onPress={() => jumpTo(chapters[endChapter + 1])} style={styles.endContinue}>
+                    <Text style={styles.done}>{t('Continue to {chapter}', { chapter: displayChapterTitle(chapters[endChapter + 1].title) || t('the next chapter') })}</Text>
+                  </Pressable>
+                )}
+              </SafeAreaView>
+            ) : (
             <SafeAreaView edges={['bottom']} style={[styles.readerBar, night && styles.toolbarNight]}>
               <ChromePill icon="list-outline" label={t('Contents')} active={contentsVisible} night={night} onPress={openContents} />
               {showWords && (
@@ -761,6 +823,7 @@ export default function ReaderScreen() {
                 <Text style={[styles.largeA, night && styles.nightText]}>Aa</Text>
               </Pressable>
             </SafeAreaView>
+            )}
           </Animated.View>
         </>
       )}
@@ -998,7 +1061,7 @@ export default function ReaderScreen() {
             <Text style={styles.certificateTitle}>{params.title || shelfBook?.title || t('This book')}</Text>
             <Text style={styles.certificateMeta}>
               {shelfBook?.author ? `${shelfBook.author} · ` : ''}
-              {t('{language} · read by @{username}', { language: languageName(sourceLanguage), username: profile?.username })}
+              {profile?.username ? t('{language} · read by @{username}', { language: languageName(sourceLanguage), username: profile.username }) : languageName(sourceLanguage)}
             </Text>
             <View style={styles.certificateRule} />
             <View style={styles.certificateNumbers}>
@@ -1015,7 +1078,9 @@ export default function ReaderScreen() {
             </View>
           </View>
         </View>
-        <Button onPress={() => { setFinished(false); router.replace('/(tabs)/books'); }}>{t('Back to your shelf')}</Button>
+        {guest
+          ? <Button onPress={() => { setFinished(false); router.push({ pathname: '/(auth)/register', params: { returnTo: '/read' } }); }}>{t('Keep your books: read free')}</Button>
+          : <Button onPress={() => { setFinished(false); router.replace('/(tabs)/books'); }}>{t('Back to your shelf')}</Button>}
         <Pressable
           accessibilityRole="button"
           onPress={() =>
@@ -1073,6 +1138,9 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   readerHeader: { backgroundColor: colors.canvas },
   readerBar: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 6, backgroundColor: colors.canvas, borderTopWidth: 1, borderTopColor: colors.line },
   barSpacer: { flex: 1 },
+  endPanel: { gap: 10, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6, backgroundColor: colors.canvas, borderTopWidth: 1, borderTopColor: colors.line },
+  endPanelText: { color: colors.muted, fontSize: 13.5, lineHeight: 19 },
+  endContinue: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   pill: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 15, borderRadius: 22, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
   pillNight: { backgroundColor: darkColors.surface, borderColor: darkColors.border },
   pillActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },

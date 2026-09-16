@@ -248,5 +248,12 @@ export function chapterEndScript(block: ChapterEndBlock) {
     var following = nodes[block.index + 1];
     if (following && following.parentNode) following.parentNode.insertBefore(root, following);
     else document.body.appendChild(root);
+    if (typeof IntersectionObserver === 'function') {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({type: 'chapter-end', chapter: block.index, visible: entry.isIntersecting}));
+        });
+      }, {threshold: 0.05}).observe(root);
+    }
   })(); true;`;
 }

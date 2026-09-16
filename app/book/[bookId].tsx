@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 import { AlignmentRow } from '@/components/alignment-request';
+import { GuestHeaderActions } from '@/components/guest-header';
 import { BookCover } from '@/components/book-cover';
 import { Screen } from '@/components/screen';
 import { Button, Card } from '@/components/ui';
@@ -15,25 +16,29 @@ import { downloadBook, downloadedBooks, formattedDownloadSize, removeDownloadedB
 import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import { isUuid } from '@/src/uuid';
 import { editionLabel } from '@/src/reader-editions';
+import type { BookDetails } from '@/src/types';
 
 export default function BookDetailsScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
-  const params = useLocalSearchParams<{ bookId: string; language?: string }>();
+  const params = useLocalSearchParams<{ bookId: string; language?: string; slug?: string }>();
   const bookId = params.bookId;
   const validBookId = isUuid(bookId);
-  const { firebaseUser, profile } = useAuth();
+  const { firebaseUser, profile, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
+  // Without an account the book is its public edition: addressed by slug, read without a token.
+  const guest = !authLoading && !firebaseUser;
+  const slug = params.slug;
   const language =
     params.language ||
     profile?.learners.find((learner) => learner.active)?.language ||
     '';
 
   const query = useQuery({
-    queryKey: ['book', firebaseUser?.uid, bookId, language],
-    queryFn: () => api.book(bookId, language),
-    enabled: validBookId && Boolean(language),
+    queryKey: guest ? ['public-book', slug] : ['book', firebaseUser?.uid, bookId, language],
+    queryFn: () => (guest ? api.publicBook(slug!) : api.book(bookId, language)),
+    enabled: guest ? Boolean(slug) : Boolean(firebaseUser) && validBookId && Boolean(language),
   });
 
   const favoriteMutation = useMutation({
@@ -62,7 +67,7 @@ export default function BookDetailsScreen() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['offline-books'] }),
   });
 
-  if (!validBookId || !language) {
+  if (guest ? !slug : !validBookId || !language) {
     return (
       <Screen contentStyle={styles.center}>
         <Text style={styles.errorTitle}>{t('This book link is invalid.')}</Text>
@@ -71,7 +76,7 @@ export default function BookDetailsScreen() {
     );
   }
 
-  if (query.isLoading) {
+  if (query.isLoading || authLoading) {
     return (
       <Screen contentStyle={styles.center}>
         <Text style={styles.loading}>{t('Opening book details…')}</Text>
@@ -94,10 +99,11 @@ export default function BookDetailsScreen() {
 
   const book = query.data;
   const pages = Math.max(1, Math.ceil(book.wordCount / 250));
+  const readerParams = { bookId: String(book.id), language: language || book.language, title: book.title, ...(book.editionSlug ? { slug: book.editionSlug } : {}) };
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: book.title }} />
+      <Stack.Screen options={{ title: book.title, headerRight: guest ? () => <GuestHeaderActions returnTo={`/book/${encodeURIComponent(bookId)}?slug=${encodeURIComponent(slug ?? '')}`} /> : undefined }} />
       <View style={styles.hero}>
         <BookCover
           title={book.title}
@@ -110,7 +116,7 @@ export default function BookDetailsScreen() {
           <Text style={styles.title}>{book.title}</Text>
           <Text style={styles.author}>{book.author}</Text>
           <Text style={styles.meta}>{book.publicationYear}</Text>
-          <Pressable
+          {!guest && <Pressable
             disabled={favoriteMutation.isPending}
             onPress={() => favoriteMutation.mutate()}
             style={styles.favorite}>
@@ -122,21 +128,15 @@ export default function BookDetailsScreen() {
             <Text style={styles.favoriteText}>
               {book.favorite ? t('Saved to favorites') : t('Save to favorites')}
             </Text>
-          </Pressable>
+          </Pressable>}
         </View>
       </View>
 
-      <Button
-        onPress={() =>
-          router.push({
-            pathname: '/reader/[bookId]',
-            params: { bookId: String(book.id), language, title: book.title },
-          })
-        }>
+      <Button onPress={() => router.push({ pathname: '/reader/[bookId]', params: readerParams })}>
         {book.progressPercentage ? t('Continue at {percentage}%', { percentage: book.progressPercentage }) : t('Start reading')}
       </Button>
 
-      {downloaded ? (
+      {guest ? null : downloaded ? (
         <View style={styles.downloadRow}>
           <View style={styles.downloadCopy}>
             <Ionicons name="checkmark-circle" size={20} color={colors.success} />
@@ -181,16 +181,15 @@ export default function BookDetailsScreen() {
       </Card>
 
       <Card>
-        <AlignmentRow
-          book={book}
-          language={language}
-          onOpenParallel={(parallel) =>
-            router.push({
-              pathname: '/reader/[bookId]',
-              params: { bookId: String(book.id), language, title: book.title, parallel },
-            })
-          }
-        />
+        {guest ? (
+          <GuestParallelRow book={book} onOpenParallel={(parallel) => router.push({ pathname: '/reader/[bookId]', params: { ...readerParams, parallel } })} />
+        ) : (
+          <AlignmentRow
+            book={book}
+            language={language}
+            onOpenParallel={(parallel) => router.push({ pathname: '/reader/[bookId]', params: { ...readerParams, parallel } })}
+          />
+        )}
         {book.languageVariants.length > 1 && (
           <>
             <Text style={styles.sectionTitle}>{t('Read it in')}</Text>
@@ -201,7 +200,7 @@ export default function BookDetailsScreen() {
                   onPress={() =>
                     router.replace({
                       pathname: '/book/[bookId]',
-                      params: { bookId: String(variant.id), language },
+                      params: { bookId: String(variant.id), language, ...(variant.editionSlug ? { slug: variant.editionSlug } : {}) },
                     })
                   }
                   style={[
@@ -232,6 +231,35 @@ export default function BookDetailsScreen() {
   );
 }
 
+/**
+ * The parallel-text row for a guest: the companions that exist open in one tap; asking for a new
+ * one is keeping, so the chip opens the auth screens and returns here.
+ */
+function GuestParallelRow({ book, onOpenParallel }: { book: BookDetails; onOpenParallel(parallel: string): void }) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useStyles();
+  const companions = book.languageVariants.filter((variant) => variant.id !== book.id && variant.editionSlug);
+  const returnTo = `/book/${encodeURIComponent(String(book.id))}?slug=${encodeURIComponent(book.editionSlug ?? '')}`;
+  return (
+    <>
+      <Text style={styles.sectionTitle}>{t('Parallel text')}</Text>
+      <View style={styles.variants}>
+        {companions.map((variant) => (
+          <Pressable key={variant.id} accessibilityRole="button" onPress={() => onOpenParallel(variant.editionSlug!)} style={styles.variant}>
+            <Text style={styles.variantText}>{editionLabel(variant)}</Text>
+          </Pressable>
+        ))}
+        <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/(auth)/sign-in', params: { returnTo } })} style={[styles.variant, styles.variantAsk]}>
+          <Ionicons name="add" size={14} color={colors.primary} />
+          <Text style={styles.variantText}>{t('Request a translation')}</Text>
+        </Pressable>
+      </View>
+      <Text style={styles.guestNote}>{t('Requesting a translation needs a free account.')}</Text>
+    </>
+  );
+}
+
 const useStyles = createThemedStyles((colors) => ({
   center: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: colors.muted, fontSize: 16 },
@@ -256,6 +284,8 @@ const useStyles = createThemedStyles((colors) => ({
   variantActive: { backgroundColor: colors.primary },
   variantText: { color: colors.ink, fontSize: 13, fontWeight: '600' },
   variantTextActive: { color: colors.onPrimary },
+  variantAsk: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.border, backgroundColor: 'transparent' },
+  guestNote: { color: colors.metadata, fontSize: 12, lineHeight: 17 },
   translator: { color: colors.primary, fontSize: 14, fontStyle: 'italic' },
   downloadRow: { minHeight: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderRadius: 20, paddingHorizontal: 15, backgroundColor: colors.successSoft },
   downloadCopy: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },

@@ -25,8 +25,8 @@ export function BookCard({
     <Pressable
       onPress={() =>
         router.push(offline
-          ? { pathname: '/reader/[bookId]', params: { bookId: String(book.id), language, title: book.title } }
-          : { pathname: '/book/[bookId]', params: { bookId: String(book.id), language } })
+          ? { pathname: '/reader/[bookId]', params: { bookId: String(book.id), language, title: book.title, ...(book.editionSlug ? { slug: book.editionSlug } : {}) } }
+          : { pathname: '/book/[bookId]', params: { bookId: String(book.id), language, ...(book.editionSlug ? { slug: book.editionSlug } : {}) } })
       }
       onLongPress={onLongPress}
       style={({ pressed }) => [styles.book, pressed && styles.pressed]}>

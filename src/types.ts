@@ -64,6 +64,8 @@ export interface Interest {
 
 export interface BookSummary {
   id: string;
+  /** The public edition identity; the guest lane addresses books by it. */
+  editionSlug?: string;
   workSlug: string;
   title: string;
   author: string;
