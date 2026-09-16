@@ -1,5 +1,6 @@
 import { auth } from '@/src/firebase';
 import { parallelEditionPath } from './reader-editions';
+import { parseChapterEnrichments } from './reader-chapters';
 import type {
   ActiveLanguagePolicy,
   AddedWordsResult,
@@ -220,6 +221,8 @@ export const api = {
   book: (bookId: string, language: string) =>
     request<BookDetails>(`/books/${bookId}/language/${language}`),
   bookInfo: (bookId: string) => request<BookMiniDetails>(`/books/${bookId}`),
+  bookChapters: (editionSlug: string) =>
+    request<unknown>(`/public/books/${encodeURIComponent(editionSlug)}/chapters`).then(parseChapterEnrichments),
   bookText: async (bookId: string) => {
     const response = await authorizedFetch(`/books/${bookId}/text`);
     if (!response.ok) throw new ApiError(t('Could not load this book'), response.status);

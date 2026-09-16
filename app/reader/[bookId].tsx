@@ -44,6 +44,7 @@ import { useLearningActivity } from '@/src/use-activity';
 import { isUuid } from '@/src/uuid';
 import { chooseCompanion, companionEditions, editionLabel, isOtherEditionTranslation } from '@/src/reader-editions';
 import { parallelScript } from '@/src/reader-parallel';
+import { chapterDiscoveryScript, chapterEnrichment, chapterJumpScript, parseReaderChapters, type ReaderChapter } from '@/src/reader-chapters';
 
 const baseProgressScript = `
   (function () {
@@ -155,6 +156,9 @@ export default function ReaderScreen() {
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [fontCss, setFontCss] = useState('');
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [chaptersVisible, setChaptersVisible] = useState(false);
+  const [chapters, setChapters] = useState<ReaderChapter[]>([]);
+  const [chaptersReady, setChaptersReady] = useState(false);
   const [paywallContext, setPaywallContext] = useState<PaywallContext | null>(null);
   const [selection, setSelection] = useState<{ entry: string; context: string } | null>(null);
   const [senseIndex, setSenseIndex] = useState(0);
@@ -194,6 +198,13 @@ export default function ReaderScreen() {
   const variants = infoQuery.data?.languageVariants ?? [];
   const primaryEdition = variants.find(variant => variant.id === bookId);
   const primarySlug = primaryEdition?.editionSlug;
+  const chaptersQuery = useQuery({
+    queryKey: ['book-chapters', firebaseUser?.uid, primarySlug],
+    queryFn: () => api.bookChapters(primarySlug!),
+    enabled: Boolean(primarySlug && firebaseUser),
+    staleTime: 10 * 60_000,
+    retry: false,
+  });
   const [includeOtherEditionTranslations, setIncludeOtherEditionTranslations] = useState(true);
   const allCompanions = companionEditions(variants, bookId);
   const hasOtherEditionTranslations = allCompanions.some(edition => isOtherEditionTranslation(edition, primaryEdition));
@@ -306,7 +317,12 @@ export default function ReaderScreen() {
     const message = event.nativeEvent.data;
     if (message.startsWith('{')) {
       try {
-        const payload = JSON.parse(message) as { type?: string; text?: string; context?: string };
+        const payload = JSON.parse(message) as { type?: string; text?: string; context?: string; chapters?: unknown };
+        if (payload.type === 'chapters') {
+          setChapters(parseReaderChapters(payload.chapters));
+          setChaptersReady(true);
+          return;
+        }
         if (payload.type === 'selection' && payload.text) {
           const entry = normalizedLookupEntry(payload.text);
           if (entry) {
@@ -419,6 +435,9 @@ export default function ReaderScreen() {
                   {parallelActive && companion ? ` ↔ ${editionLabel(companion, primaryEdition)}` : ''}
                 </Text>
               </View>
+              <Pressable accessibilityLabel={t('Open chapters')} onPress={() => setChaptersVisible(true)} style={styles.toolButton}>
+                <Ionicons name="list-outline" size={24} color={night ? colors.white : colors.primary} />
+              </Pressable>
               <Pressable accessibilityLabel={t('Open reader settings')} onPress={() => setSettingsVisible(true)} style={styles.toolButton}>
                 <Text style={[styles.largeA, night && styles.nightText]}>Aa</Text>
               </Pressable>
@@ -429,7 +448,8 @@ export default function ReaderScreen() {
             key={parallelActive ? `${settings.parallel}-${companion?.editionSlug}` : 'single'}
             ref={webView}
             source={{ html: readerHtml(content) }}
-            injectedJavaScript={`${appearanceScript(settings, fontCss, progress)}${parallelActive && parallelLanguage ? parallelScript(parallelLanguage, settings.parallel) : ''}${baseProgressScript}${selectionScript}true;`}
+            injectedJavaScript={`${appearanceScript(settings, fontCss, progress)}${parallelActive && parallelLanguage ? parallelScript(parallelLanguage, settings.parallel) : ''}${chapterDiscoveryScript}${baseProgressScript}${selectionScript}true;`}
+            onLoadStart={() => { setChapters([]); setChaptersReady(false); }}
             onMessage={onMessage}
             onShouldStartLoadWithRequest={(request) => {
               if (request.url.startsWith('about:blank')) return true;
@@ -441,6 +461,31 @@ export default function ReaderScreen() {
           />
         </>
       )}
+
+      <Sheet visible={chaptersVisible} onClose={() => setChaptersVisible(false)}>
+        <View style={styles.settingsHeading}>
+          <Text style={styles.settingsTitle}>{t('Chapters')}</Text>
+          <Pressable accessibilityLabel={t('Close chapters')} onPress={() => setChaptersVisible(false)} hitSlop={8}>
+            <Text style={styles.done}>{t('Done')}</Text>
+          </Pressable>
+        </View>
+        {!chaptersReady && <Text style={styles.status}>{t('Loading chapter navigation…')}</Text>}
+        {chaptersReady && chapters.length === 0 && <Text style={styles.status}>{t('This edition has no chapter headings. You can keep reading normally.')}</Text>}
+        {chaptersQuery.isError && <Text style={styles.optionNote}>{t('Chapter estimates are unavailable. Navigation still works.')}</Text>}
+        {chapters.map(chapter => {
+          const detail = chapterEnrichment(chapter, chaptersQuery.data);
+          return (
+            <Pressable key={chapter.index} accessibilityRole="button" style={[styles.option, styles.chapterOption]}
+              onPress={() => { webView.current?.injectJavaScript(chapterJumpScript(chapter.index)); setChaptersVisible(false); }}>
+              <View style={styles.optionCopy}>
+                <Text style={styles.optionLabel}>{chapter.title || t('Untitled chapter')}</Text>
+                {!!detail?.cefrEstimate && <Text style={styles.optionNote}>{t('Estimated')} {detail.cefrEstimate}</Text>}
+                {detail?.descriptions.map((description, index) => <Text key={index} style={styles.optionNote}>{description}</Text>)}
+              </View>
+            </Pressable>
+          );
+        })}
+      </Sheet>
 
       {/* The word sheet: Discover's plate, with the reader dimmed behind it and never dismissed. */}
       <Sheet visible={Boolean(selection)} onClose={() => setSelection(null)}>
@@ -712,6 +757,7 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   settingGroup: { gap: 4 },
   settingLabel: { color: colors.metadata, fontSize: 10, fontWeight: '600', letterSpacing: 1.3, paddingBottom: 4 },
   option: { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 11 },
+  chapterOption: { minHeight: 44 },
   optionSelected: { backgroundColor: colors.accentSoft },
   dot: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: colors.border },
   dotSelected: { borderWidth: 6, borderColor: colors.primary },

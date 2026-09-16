@@ -26,9 +26,9 @@ export const readerFaces: { value: ReaderFace; label: string; note?: string }[] 
 ];
 
 export const parallelModes: { value: ParallelMode; label: string; note: string }[] = [
-  { value: 'off', label: msg('Original only'), note: msg('No translation on the page.') },
-  { value: 'on-demand', label: msg('On demand'), note: msg('Tap a sentence; its translation opens under that line.') },
-  { value: 'inline', label: msg('Inline'), note: msg('Whole paragraph, then its translation, one size down.') },
+  { value: 'off', label: msg('This edition only'), note: msg('No companion on the page.') },
+  { value: 'on-demand', label: msg('On demand'), note: msg('Tap a passage to open its companion paragraph. Marked sentences highlight their counterparts.') },
+  { value: 'inline', label: msg('Inline'), note: msg('Whole paragraph, then its companion, one size down.') },
 ];
 
 export const defaultReaderSettings: ReaderSettings = {
