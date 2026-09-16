@@ -42,7 +42,7 @@ import { colors as lightColors, createThemedStyles, darkColors, fonts, serifLine
 import type { Bookshelf } from '@/src/types';
 import { useLearningActivity } from '@/src/use-activity';
 import { isUuid } from '@/src/uuid';
-import { chooseCompanion, companionEditions, editionLabel } from '@/src/reader-editions';
+import { chooseCompanion, companionEditions, editionLabel, isOtherEditionTranslation } from '@/src/reader-editions';
 import { parallelScript } from '@/src/reader-parallel';
 
 const baseProgressScript = `
@@ -192,9 +192,14 @@ export default function ReaderScreen() {
   });
   const sourceLanguage = infoQuery.data?.language ?? '';
   const variants = infoQuery.data?.languageVariants ?? [];
-  const primarySlug = variants.find(variant => variant.id === bookId)?.editionSlug;
-  const companions = companionEditions(variants, bookId);
-  const companion = chooseCompanion(variants, bookId, params.parallel, profile?.fluentLangs ?? []);
+  const primaryEdition = variants.find(variant => variant.id === bookId);
+  const primarySlug = primaryEdition?.editionSlug;
+  const [includeOtherEditionTranslations, setIncludeOtherEditionTranslations] = useState(true);
+  const allCompanions = companionEditions(variants, bookId);
+  const hasOtherEditionTranslations = allCompanions.some(edition => isOtherEditionTranslation(edition, primaryEdition));
+  const visibleVariants = variants.filter(edition => includeOtherEditionTranslations || !isOtherEditionTranslation(edition, primaryEdition));
+  const companions = companionEditions(visibleVariants, bookId);
+  const companion = chooseCompanion(visibleVariants, bookId, params.parallel, profile?.fluentLangs ?? []);
   const parallelLanguage = companion?.language;
   const parallelActive = settings.parallel !== 'off' && Boolean(companion?.editionSlug && primarySlug);
   const parallelQuery = useQuery({
@@ -411,7 +416,7 @@ export default function ReaderScreen() {
                 </Text>
                 <Text style={styles.readerMeta}>
                   {sourceLanguage}
-                  {parallelActive && companion ? ` ↔ ${editionLabel(companion)}` : ''}
+                  {parallelActive && companion ? ` ↔ ${editionLabel(companion, primaryEdition)}` : ''}
                 </Text>
               </View>
               <Pressable accessibilityLabel={t('Open reader settings')} onPress={() => setSettingsVisible(true)} style={styles.toolButton}>
@@ -554,15 +559,29 @@ export default function ReaderScreen() {
             <Text style={styles.sizeLarge}>A</Text>
           </Pressable>
         </View>
-        {companions.length > 0 && primarySlug && (
+        {allCompanions.length > 0 && primarySlug && (
           <View style={styles.settingGroup}>
             <Text style={styles.settingLabel}>{t('COMPANION EDITION')}</Text>
+            {hasOtherEditionTranslations && (
+              <Pressable accessibilityRole="switch" accessibilityState={{ checked: includeOtherEditionTranslations }}
+                onPress={() => {
+                  if (includeOtherEditionTranslations && companion && isOtherEditionTranslation(companion, primaryEdition)) {
+                    update({ parallel: 'off' });
+                  }
+                  setIncludeOtherEditionTranslations(value => !value);
+                }} style={styles.option}>
+                <View style={styles.optionCopy}>
+                  <Text style={styles.optionLabel}>{t('Include translations of other editions')}: {includeOtherEditionTranslations ? t('On') : t('Off')}</Text>
+                  <Text style={styles.optionNote}>{t('These translations may use more literary wording than this adaptation.')}</Text>
+                </View>
+              </Pressable>
+            )}
             {companions.map(edition => (
               <Pressable key={edition.id} accessibilityRole="radio" accessibilityState={{ selected: companion?.id === edition.id }}
                 onPress={() => router.setParams({ parallel: edition.editionSlug })}
                 style={[styles.option, companion?.id === edition.id && styles.optionSelected]}>
                 <View style={[styles.dot, companion?.id === edition.id && styles.dotSelected]} />
-                <Text style={styles.optionLabel}>{editionLabel(edition)}</Text>
+                <Text style={styles.optionLabel}>{editionLabel(edition, primaryEdition)}</Text>
               </Pressable>
             ))}
             {parallelModes.map((mode) => {

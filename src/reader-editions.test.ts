@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chooseCompanion, companionEditions, editionLabel, parallelEditionPath } from './reader-editions';
+import { chooseCompanion, companionEditions, editionLabel, isOtherEditionTranslation, parallelEditionPath } from './reader-editions';
 import { parallelScript } from './reader-parallel';
 import type { BookEditionVariant } from './types';
 
@@ -8,6 +8,16 @@ const adapted: BookEditionVariant = {id: 'two', editionSlug: 'b2', language: 'EN
 const ukrainian: BookEditionVariant = {id: 'three', editionSlug: 'uk', language: 'UK', cefrLevel: 'C1', editionType: 'machine_translation'};
 
 describe('edition-addressed reading', () => {
+  it('distinguishes original-derived translations from ones made for the adaptation', () => {
+    const inherited = {...ukrainian, sourceEditionSlug: 'original'};
+    const direct = {...ukrainian, sourceEditionSlug: 'b2'};
+    expect(isOtherEditionTranslation(inherited, adapted)).toBe(true);
+    expect(isOtherEditionTranslation(direct, adapted)).toBe(false);
+    expect(isOtherEditionTranslation(original, adapted)).toBe(false);
+    expect(isOtherEditionTranslation(inherited, original)).toBe(false);
+    expect(editionLabel(inherited, adapted)).toContain('not this adaptation');
+    expect(editionLabel(direct, adapted)).not.toContain('not this adaptation');
+  });
   it('allows an explicit same-language companion without selecting the primary', () => {
     expect(companionEditions([original, adapted, ukrainian], 'two')).toEqual([original, ukrainian]);
     expect(chooseCompanion([original, adapted, ukrainian], 'two', 'original', ['UK'])).toEqual(original);

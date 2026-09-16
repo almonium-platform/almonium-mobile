@@ -12,8 +12,16 @@ export function chooseCompanion(variants: BookEditionVariant[], primaryId: strin
     ?? choices.find(variant => fluentLanguages.includes(variant.language));
 }
 
-export function editionLabel(variant: BookEditionVariant) {
-  return [variant.language, variant.cefrLevel, variant.editionType?.replaceAll('_', ' ')].filter(Boolean).join(' · ');
+export function isOtherEditionTranslation(variant: BookEditionVariant, primary?: BookEditionVariant) {
+  return primary?.editionType === 'adaptation'
+    && ['machine_translation', 'human_translation'].includes(variant.editionType ?? '')
+    && Boolean(variant.sourceEditionSlug) && variant.sourceEditionSlug !== primary.editionSlug;
+}
+
+export function editionLabel(variant: BookEditionVariant, primary?: BookEditionVariant) {
+  return [variant.language, variant.cefrLevel, variant.editionType?.replaceAll('_', ' '),
+    isOtherEditionTranslation(variant, primary) ? 'based on another edition, not this adaptation' : null,
+  ].filter(Boolean).join(' · ');
 }
 
 export function parallelEditionPath(primarySlug: string, companionSlug: string) {
