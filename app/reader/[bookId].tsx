@@ -48,8 +48,9 @@ import { colors as lightColors, createThemedStyles, darkColors, fonts, serifLine
 import type { Bookshelf } from '@/src/types';
 import { useLearningActivity } from '@/src/use-activity';
 import { isUuid } from '@/src/uuid';
-import { chooseCompanion, companionEditions, editionLabel, isOtherEditionTranslation } from '@/src/reader-editions';
-import { parallelScript } from '@/src/reader-parallel';
+import { editionCode, editionName, editionTypeLabel, loadCompanionChoice, noCompanion, saveCompanionChoice } from '@/src/reader-companion';
+import { chooseCompanion, companionEditions } from '@/src/reader-editions';
+import { parallelModeScript, parallelScript } from '@/src/reader-parallel';
 import {
   chapterDiscoveryScript, chapterEndScript, chapterEnrichment, chapterHeaderScript, chapterJumpScript, chapterLevelRange,
   chapterNumber, displayChapterTitle, parseReaderChapters, positionScript, type ReaderChapter,
@@ -84,12 +85,16 @@ const selectionScript = `
       if (!text || text.length > 80) return;
       let node = selection.anchorNode;
       if (node && node.nodeType === Node.TEXT_NODE) node = node.parentElement;
-      const paragraph = node && node.closest ? node.closest('p') : null;
-      window.ReactNativeWebView.postMessage(JSON.stringify({
-        type: 'selection',
-        text: text,
-        context: paragraph ? paragraph.innerText.trim().slice(0, 500) : text
-      }));
+      // A word in companion text is looked up in the companion's language; the context is one edition's text only.
+      const companion = Boolean(node && node.closest && node.closest('.almonium-companion, .almonium-companion-paragraph, .almonium-demand'));
+      const paragraph = node && node.closest ? node.closest(companion ? '.almonium-companion, .almonium-companion-paragraph, .almonium-demand' : 'p, h3, blockquote') : null;
+      let context = text;
+      if (paragraph) {
+        const copy = paragraph.cloneNode(true);
+        copy.querySelectorAll('.almonium-secondary, .almonium-companion, .almonium-demand').forEach(function (part) { part.remove(); });
+        context = copy.textContent.replace(/\\s+/g, ' ').trim().slice(0, 500) || text;
+      }
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'selection', text: text, context: context, companion: companion }));
     }
     document.addEventListener('selectionchange', function () {
       clearTimeout(window.__almoniumSelectionTimer);
@@ -131,11 +136,17 @@ function appearanceScript(settings: ReaderSettings, fontCss: string, progress: n
         p { margin: 0 0 1.1em !important; }
         img { max-width: 100% !important; height: auto !important; }
         a { color: ${lightColors.raspberry} !important; }
-        .almonium-fluent { display: none; }
-        .almonium-aligned-active { outline: 1px solid ${muted}; border-radius: 3px; }
-        .almonium-open .almonium-fluent { display: block; color: ${muted}; font-size: 0.92em; margin: 0.3em 0 0.6em; padding-left: 0.9em; border-left: 2px solid ${line}; }
-        p.almonium-inline { color: ${muted}; font-size: 0.9em; margin-top: -0.55em !important; }
-        p.almonium-inline .almonium-fluent { display: inline; }
+        /* Alignment is invisible until asked for: sentence spans have no paint at rest. */
+        .almonium-secondary { display: none !important; }
+        .aligned-sentence { background: none; outline: none; }
+        .almonium-lit { background: ${tint}; -webkit-box-decoration-break: clone; box-decoration-break: clone; border-radius: 2px; padding: 1px 0; }
+        .almonium-selected { border-bottom: 2px solid ${accent}; }
+        .almonium-head { margin-bottom: 0 !important; }
+        .almonium-demand { margin: 0.4em 0 1.1em; }
+        .almonium-demand-inner { font-size: 0.82em; line-height: 1.55; color: ${muted}; padding-left: 14px; border-left: 2px solid ${line}; }
+        .almonium-mixed { line-height: 1.75 !important; }
+        .almonium-companion { font-size: 0.84em; color: ${muted}; }
+        p.almonium-companion-paragraph { font-size: 0.84em; color: ${muted}; margin-top: -0.6em !important; }
         .almonium-chapter-head { margin: -0.3em 0 1.5em; }
         .almonium-chapter-meta { font-family: ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: 0.3px; color: ${metadata}; margin-bottom: 8px; }
         .almonium-chapter-desc { color: ${muted} !important; font-size: 0.88em !important; line-height: 1.5 !important; margin: 0 !important; }
@@ -315,14 +326,15 @@ export default function ReaderScreen() {
     staleTime: 10 * 60_000,
     retry: false,
   });
-  const [includeOtherEditionTranslations, setIncludeOtherEditionTranslations] = useState(true);
-  const allCompanions = companionEditions(variants, bookId);
-  const hasOtherEditionTranslations = allCompanions.some(edition => isOtherEditionTranslation(edition, primaryEdition));
-  const visibleVariants = variants.filter(edition => includeOtherEditionTranslations || !isOtherEditionTranslation(edition, primaryEdition));
-  const companions = companionEditions(visibleVariants, bookId);
-  const companion = chooseCompanion(visibleVariants, bookId, params.parallel, profile?.fluentLangs ?? []);
+  // Which companion this book opens with, remembered per book: a slug, "none", or null for the fluent-language default.
+  const [companionChoice, setCompanionChoice] = useState<string | null | undefined>(undefined);
+  const [companionVisible, setCompanionVisible] = useState(false);
+  const companions = companionEditions(variants, bookId);
+  const companion = companionChoice === noCompanion ? undefined
+    : chooseCompanion(variants, bookId, companionChoice ?? params.parallel, profile?.fluentLangs ?? []);
   const parallelLanguage = companion?.language;
   const parallelActive = settings.parallel !== 'off' && Boolean(companion?.editionSlug && primarySlug);
+  const parallelMode = parallelModes.find(mode => mode.value === settings.parallel);
   const parallelQuery = useQuery({
     queryKey: ['book-parallel-edition', primarySlug, companion?.editionSlug],
     queryFn: () => api.publicParallelEditionText(primarySlug!, companion!.editionSlug!),
@@ -363,7 +375,23 @@ export default function ReaderScreen() {
     void AsyncStorage.getItem(finishedKey(bookId)).then((value) => {
       finishedShown.current = value === 'true';
     });
+    // A companion named by the link (the book page's parallel row) becomes this book's remembered one.
+    setCompanionChoice(undefined);
+    setCompanionVisible(false);
+    if (params.parallel) {
+      setCompanionChoice(params.parallel);
+      void saveCompanionChoice(bookId, params.parallel);
+    } else {
+      void loadCompanionChoice(bookId).then(stored => setCompanionChoice(stored));
+    }
+    // The link's choice is read once; the sheet owns it from here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookId]);
+
+  // A mode change is applied on the page; only a different companion reloads it.
+  useEffect(() => {
+    webView.current?.injectJavaScript(parallelModeScript(settings.parallel));
+  }, [settings.parallel]);
 
   useEffect(() => {
     let active = true;
@@ -508,7 +536,7 @@ export default function ReaderScreen() {
     if (message.startsWith('{')) {
       try {
         const payload = JSON.parse(message) as {
-          type?: string; text?: string; context?: string; chapters?: unknown; chapter?: unknown; chrome?: unknown; blockId?: unknown; lemma?: unknown; visible?: unknown;
+          type?: string; text?: string; context?: string; companion?: unknown; chapters?: unknown; chapter?: unknown; chrome?: unknown; blockId?: unknown; lemma?: unknown; visible?: unknown;
         };
         if (payload.type === 'chapters') {
           const found = parseReaderChapters(payload.chapters);
@@ -553,7 +581,8 @@ export default function ReaderScreen() {
             setWordSaveError('');
             setProduceSelected(false);
             setSenseIndex(0);
-            setSelection({ entry, context: payload.context || entry });
+            const language = payload.companion === true && parallelActive ? parallelLanguage : undefined;
+            setSelection({ entry, context: payload.context || entry, ...(language ? { language } : {}) });
           }
         }
       } catch {
@@ -593,6 +622,13 @@ export default function ReaderScreen() {
     webView.current?.injectJavaScript(chapterJumpScript(chapter.index));
     showChrome(true);
     setContentsVisible(false);
+  }
+
+  /** A row in the companion sheet: an edition, or none. Picking an edition also wakes a device set to read alone. */
+  function chooseCompanionEdition(choice: string) {
+    setCompanionChoice(choice);
+    void saveCompanionChoice(bookId, choice);
+    if (choice !== noCompanion && settings.parallel === 'off') update({ parallel: 'on-demand' });
   }
 
   function askAccount(reason: AuthReason, then?: () => void) {
@@ -655,7 +691,7 @@ export default function ReaderScreen() {
     );
   }
 
-  const loading = !settingsLoaded || authLoading || textQuery.isLoading || infoQuery.isLoading || (parallelActive && parallelQuery.isLoading);
+  const loading = !settingsLoaded || companionChoice === undefined || authLoading || textQuery.isLoading || infoQuery.isLoading || (parallelActive && parallelQuery.isLoading);
   const error = textQuery.error || infoQuery.error || (parallelActive ? parallelQuery.error : null);
   const content = parallelActive ? parallelQuery.data : textQuery.data;
   const savedInLanguage = itemsQuery.data?.length ?? 0;
@@ -789,16 +825,16 @@ export default function ReaderScreen() {
             }}>
             {t('Try again')}
           </Button>
-          {parallelActive && <Button variant="secondary" onPress={() => update({ parallel: 'off' })}>{t('Read without the companion')}</Button>}
+          {parallelActive && <Button variant="secondary" onPress={() => chooseCompanionEdition(noCompanion)}>{t('Read without a companion')}</Button>}
         </View>
       )}
       {content && infoQuery.data && progress !== null && !loading && !error && (
         <>
           <WebView
-            key={parallelActive ? `${settings.parallel}-${companion?.editionSlug}` : 'single'}
+            key={parallelActive ? `companion-${companion?.editionSlug}` : 'single'}
             ref={webView}
             source={{ html: readerHtml(content) }}
-            injectedJavaScript={`${appearanceScript(settings, fontCss, progress)}${layoutScript(insets.current.top, insets.current.bottom)}${parallelActive && parallelLanguage ? parallelScript(parallelLanguage, settings.parallel) : ''}${chapterDiscoveryScript}${positionScript}${baseProgressScript}${selectionScript}true;`}
+            injectedJavaScript={`${appearanceScript(settings, fontCss, progress)}${layoutScript(insets.current.top, insets.current.bottom)}${parallelActive && parallelLanguage ? parallelScript(parallelLanguage, settings.parallel, reduceMotion) : ''}${chapterDiscoveryScript}${positionScript}${baseProgressScript}${selectionScript}true;`}
             onLoadStart={() => { setChapters([]); setChaptersReady(false); setCurrentChapter(-1); setEndChapter(null); endOnScreen.current = null; injectedEnds.current.clear(); showChrome(true); }}
             onLoadEnd={() => webView.current?.injectJavaScript(layoutScript(insets.current.top, insets.current.bottom))}
             onMessage={onMessage}
@@ -817,6 +853,14 @@ export default function ReaderScreen() {
             {guest ? (
               <GuestHeader onBack={() => router.back()} night={night}
                 onSignIn={() => askAccount({ kind: 'signin' })} onReadFree={() => askAccount({ kind: 'place', book: bookTitle })}>
+                {parallelActive && companion && (
+                  <View style={styles.provenanceRow}>
+                    <Text numberOfLines={1} style={styles.provenance}>{editionCode(primaryEdition) || sourceLanguage} ↔ {editionCode(companion)}</Text>
+                    <Pressable accessibilityRole="button" accessibilityLabel={t('Change companion mode')} onPress={() => setCompanionVisible(true)} hitSlop={8} style={styles.modeLink}>
+                      <Text style={styles.modeLinkText}>{parallelMode ? t(parallelMode.label) : ''}</Text>
+                    </Pressable>
+                  </View>
+                )}
                 <View style={styles.headerTrack}><View style={[styles.headerBar, { width: `${progress}%` }]} /></View>
               </GuestHeader>
             ) : (
@@ -825,17 +869,28 @@ export default function ReaderScreen() {
                 <Pressable accessibilityLabel={t('Back to book')} onPress={() => router.back()} style={styles.toolButton}>
                   <Ionicons name="chevron-back" size={24} color={night ? colors.white : colors.primary} />
                 </Pressable>
-                <View style={styles.readerTitleCopy}>
-                  <Text numberOfLines={1} style={[styles.readerTitle, night && styles.nightText]}>
-                    {params.title || shelfBook?.title || t('Reader')}
-                  </Text>
-                  <Text numberOfLines={1} style={styles.readerMeta}>
-                    {readingChapter ? `${displayChapterTitle(readingChapter.title)} · ` : ''}
-                    {sourceLanguage}
-                    {parallelActive && companion ? ` ↔ ${editionLabel(companion, primaryEdition)}` : ''}
-                  </Text>
-                </View>
-                <View style={styles.toolButton} />
+                {parallelActive && companion ? (
+                  // With a companion open the line is provenance: the codes either side of the arrow, and the mode.
+                  <View style={styles.provenanceRow}>
+                    <Text numberOfLines={1} style={styles.provenance}>{editionCode(primaryEdition) || sourceLanguage} ↔ {editionCode(companion)}</Text>
+                    <Pressable accessibilityRole="button" accessibilityLabel={t('Change companion mode')} onPress={() => setCompanionVisible(true)} hitSlop={8} style={styles.modeLink}>
+                      <Text style={styles.modeLinkText}>{parallelMode ? t(parallelMode.label) : ''}</Text>
+                    </Pressable>
+                  </View>
+                ) : (
+                  <>
+                    <View style={styles.readerTitleCopy}>
+                      <Text numberOfLines={1} style={[styles.readerTitle, night && styles.nightText]}>
+                        {params.title || shelfBook?.title || t('Reader')}
+                      </Text>
+                      <Text numberOfLines={1} style={styles.readerMeta}>
+                        {readingChapter ? `${displayChapterTitle(readingChapter.title)} · ` : ''}
+                        {sourceLanguage}
+                      </Text>
+                    </View>
+                    <View style={styles.toolButton} />
+                  </>
+                )}
               </View>
               <View style={styles.headerTrack}><View style={[styles.headerBar, { width: `${progress}%` }]} /></View>
             </SafeAreaView>
@@ -861,7 +916,18 @@ export default function ReaderScreen() {
                 <ChromePill icon="bookmarks-outline" label={t('Words')} active={wordsVisible} night={night} onPress={openWords} />
               )}
               <View style={styles.barSpacer} />
-              <Pressable accessibilityLabel={t('Open reader settings')} onPress={() => setSettingsVisible(true)} style={styles.toolButton}>
+              {companions.length > 0 && primarySlug && (
+                // Filled with the companion's code while one is open; outlined when the book is read alone.
+                <Pressable accessibilityRole="button" accessibilityLabel={t('Companion edition')} accessibilityState={{ expanded: companionVisible }}
+                  onPress={() => setCompanionVisible(true)}
+                  style={({ pressed }) => [styles.circle, night && styles.circleNight, parallelActive && companion && styles.circleFilled, pressed && styles.pillPressed]}>
+                  {parallelActive && companion
+                    ? <Text style={styles.circleCode}>{companion.language.toUpperCase()}</Text>
+                    : <Ionicons name="swap-horizontal" size={19} color={night ? colors.white : colors.ink} />}
+                </Pressable>
+              )}
+              <Pressable accessibilityLabel={t('Open reader settings')} onPress={() => setSettingsVisible(true)}
+                style={({ pressed }) => [styles.circle, night && styles.circleNight, pressed && styles.pillPressed]}>
                 <Text style={[styles.largeA, night && styles.nightText]}>Aa</Text>
               </Pressable>
             </SafeAreaView>
@@ -1045,52 +1111,55 @@ export default function ReaderScreen() {
             <Text style={styles.sizeLarge}>A</Text>
           </Pressable>
         </View>
-        {allCompanions.length > 0 && primarySlug && (
-          <View style={styles.settingGroup}>
-            <Text style={styles.settingLabel}>{t('COMPANION EDITION')}</Text>
-            {hasOtherEditionTranslations && (
-              <Pressable accessibilityRole="switch" accessibilityState={{ checked: includeOtherEditionTranslations }}
-                onPress={() => {
-                  if (includeOtherEditionTranslations && companion && isOtherEditionTranslation(companion, primaryEdition)) {
-                    update({ parallel: 'off' });
-                  }
-                  setIncludeOtherEditionTranslations(value => !value);
-                }} style={styles.option}>
-                <View style={styles.optionCopy}>
-                  <Text style={styles.optionLabel}>{t('Include translations of other editions')}: {includeOtherEditionTranslations ? t('On') : t('Off')}</Text>
-                  <Text style={styles.optionNote}>{t('These translations may use more literary wording than this adaptation.')}</Text>
-                </View>
-              </Pressable>
-            )}
-            {companions.map(edition => (
-              <Pressable key={edition.id} accessibilityRole="radio" accessibilityState={{ selected: companion?.id === edition.id }}
-                onPress={() => router.setParams({ parallel: edition.editionSlug })}
-                style={[styles.option, companion?.id === edition.id && styles.optionSelected]}>
-                <View style={[styles.dot, companion?.id === edition.id && styles.dotSelected]} />
-                <Text style={styles.optionLabel}>{editionLabel(edition, primaryEdition)}</Text>
-              </Pressable>
-            ))}
-            {parallelModes.map((mode) => {
-              const selected = settings.parallel === mode.value;
-              return (
-                <Pressable key={mode.value} accessibilityRole="radio" accessibilityState={{ selected }} onPress={() => update({ parallel: mode.value })} style={[styles.option, selected && styles.optionSelected]}>
-                  <View style={[styles.dot, selected && styles.dotSelected]} />
-                  <View style={styles.optionCopy}>
-                    <Text style={styles.optionLabel}>{t(mode.label)}</Text>
-                    <Text style={styles.optionNote}>{t(mode.note)}</Text>
-                  </View>
-                </Pressable>
-              );
-            })}
-            <Text style={styles.optionNote}>{t('Use the companion to check wording. Uncertain passages stay paragraph-aligned.')}</Text>
-          </View>
-        )}
         <View style={styles.settingGroup}>
           <Text style={styles.settingLabel}>{t('PAGE')}</Text>
           <View style={styles.optionRow}>
             <ReaderOption label={t('Paper')} selected={!night} onPress={() => update({ theme: 'paper' })} />
             <ReaderOption label={t('Night')} selected={night} onPress={() => update({ theme: 'night' })} />
           </View>
+        </View>
+      </Sheet>
+
+      {/* Companion: mode and edition in one sheet, since on a phone two sheets for one decision is one too many. */}
+      <Sheet visible={companionVisible} onClose={() => setCompanionVisible(false)}>
+        <Text style={styles.settingsTitle}>{t('COMPANION')}</Text>
+        <View style={styles.rows}>
+          {parallelModes.filter(mode => mode.value !== 'off').map(mode => {
+            const selected = settings.parallel === mode.value;
+            return (
+              <Pressable key={mode.value} accessibilityRole="radio" accessibilityState={{ selected }}
+                onPress={() => update({ parallel: mode.value })}
+                style={({ pressed }) => [styles.modeRow, selected && styles.rowRaised, pressed && styles.optionSelected]}>
+                <ModeDiagram mode={mode.value} />
+                <View style={styles.optionCopy}>
+                  <Text style={[styles.rowTitle, selected && styles.rowTitleSelected]}>{t(mode.label)}</Text>
+                  <Text style={styles.rowNote}>{t(mode.note)}</Text>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+        <View style={styles.hairline} />
+        <View style={styles.rows}>
+          {companions.map(edition => {
+            const selected = parallelActive && companion?.id === edition.id;
+            return (
+              <Pressable key={edition.id} accessibilityRole="radio" accessibilityState={{ selected }}
+                onPress={() => chooseCompanionEdition(edition.editionSlug!)}
+                style={({ pressed }) => [styles.editionRow, selected && styles.rowRaised, pressed && styles.optionSelected]}>
+                <View style={styles.optionCopy}>
+                  <Text style={styles.rowTitle}>{editionName(edition)}</Text>
+                  <Text style={styles.rowNote}>{editionTypeLabel(edition, primaryEdition)}</Text>
+                </View>
+                <Text style={[styles.rowCode, selected && styles.rowCodeSelected]}>{edition.language.toUpperCase()}</Text>
+              </Pressable>
+            );
+          })}
+          <Pressable accessibilityRole="radio" accessibilityState={{ selected: !parallelActive }}
+            onPress={() => { chooseCompanionEdition(noCompanion); setCompanionVisible(false); }}
+            style={({ pressed }) => [styles.editionRow, !parallelActive && styles.rowRaised, pressed && styles.optionSelected]}>
+            <Text style={styles.rowPlain}>{t('Read without a companion')}</Text>
+          </Pressable>
         </View>
       </Sheet>
 
@@ -1160,6 +1229,29 @@ function ChromePill({ icon, label, active, night, onPress }: {
   );
 }
 
+/** The mode row's ink-and-grey drawing: a companion line under a sentence, or a paragraph of alternating weights. */
+function ModeDiagram({ mode }: { mode: ReaderSettings['parallel'] }) {
+  const styles = useStyles();
+  if (mode === 'inline') {
+    return (
+      <View style={styles.diagram}>
+        <View style={[styles.bar, styles.barInk]} />
+        <View style={[styles.barThin, { width: '85%' }]} />
+        <View style={[styles.bar, styles.barInk]} />
+        <View style={[styles.barThin, { width: '70%' }]} />
+      </View>
+    );
+  }
+  return (
+    <View style={styles.diagram}>
+      <View style={styles.bar} />
+      <View style={[styles.bar, styles.barAccent]} />
+      <View style={[styles.bar, { width: '60%', marginLeft: 8 }]} />
+      <View style={styles.bar} />
+    </View>
+  );
+}
+
 function ReaderOption({ label, selected, onPress }: { label: string; selected: boolean; onPress(): void }) {
   const styles = useStyles();
   return (
@@ -1217,6 +1309,30 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   wordExcerpt: { color: colors.muted, fontSize: 13.5, lineHeight: 19 },
   wordMatch: { backgroundColor: colors.accentSoft, color: colors.ink },
   readerHeaderRow: { minHeight: 54, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8 },
+  provenanceRow: { flex: 1, minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 12, paddingHorizontal: 8 },
+  provenance: { flexShrink: 1, color: colors.muted, fontFamily: fonts.mono, fontSize: 11 },
+  modeLink: { minHeight: 44, justifyContent: 'center' },
+  modeLinkText: { color: colors.primary, fontFamily: fonts.sansMedium, fontSize: 12.5 },
+  circle: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 22, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
+  circleNight: { backgroundColor: darkColors.surface, borderColor: darkColors.border },
+  circleFilled: { borderColor: colors.primary, backgroundColor: colors.primary },
+  circleCode: { color: colors.onPrimary, fontFamily: fonts.mono, fontSize: 11, fontWeight: '500' },
+  rows: { gap: 2 },
+  modeRow: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 12, paddingVertical: 12, borderRadius: 16 },
+  editionRow: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 12, paddingVertical: 12, borderRadius: 16 },
+  rowRaised: { backgroundColor: colors.surface, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },
+  rowTitle: { color: colors.ink, fontFamily: fonts.sansSemibold, fontSize: 15 },
+  rowTitleSelected: { color: colors.primary },
+  rowNote: { color: colors.muted, fontSize: 13, lineHeight: 19 },
+  rowCode: { color: colors.metadata, fontFamily: fonts.mono, fontSize: 11 },
+  rowCodeSelected: { color: colors.primary },
+  rowPlain: { color: colors.muted, fontSize: 14.5 },
+  hairline: { height: 1, backgroundColor: colors.line },
+  diagram: { width: 56, gap: 4 },
+  bar: { height: 3, borderRadius: 2, backgroundColor: colors.border },
+  barThin: { height: 2, borderRadius: 2, backgroundColor: colors.border },
+  barInk: { backgroundColor: colors.ink },
+  barAccent: { backgroundColor: colors.primary },
   readerTitleCopy: { flex: 1, alignItems: 'center', gap: 1 },
   readerTitle: { color: colors.ink, fontFamily: fonts.sansMedium, fontSize: 12.5 },
   readerMeta: { color: colors.metadata, fontSize: 10.5 },

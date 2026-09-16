@@ -59,7 +59,7 @@ export const chapterDiscoveryScript = `
     if (!headings.length) headings = Array.from(document.querySelectorAll('h1, h2'));
     var seen = new Set();
     window.__almoniumChapters = headings.filter(function (node) {
-      if (node.closest('[data-side="secondary"], .almonium-fluent, .sbs-column-secondary')) return false;
+      if (node.closest('[data-side="secondary"], .almonium-secondary, .almonium-companion-paragraph, .sbs-column-secondary')) return false;
       if (node.id && seen.has(node.id)) return false;
       if (node.id) seen.add(node.id);
       return true;

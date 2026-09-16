@@ -9,7 +9,10 @@ import { msg } from './i18n';
 export type ReaderTheme = 'paper' | 'night';
 /** Three presets, not a font menu. The third exists for people who confuse letterforms. */
 export type ReaderFace = 'literata' | 'plex' | 'atkinson';
-/** Side-by-side is dropped below 600pt: two columns of Literata at 19pt do not fit. */
+/**
+ * Side by side is dropped below 600pt: two columns of Literata at 19pt do not fit. The mode is a
+ * device setting; which companion, if any, a book opens with is remembered per book.
+ */
 export type ParallelMode = 'off' | 'on-demand' | 'inline';
 
 export interface ReaderSettings {
@@ -25,10 +28,11 @@ export const readerFaces: { value: ReaderFace; label: string; note?: string }[] 
   { value: 'atkinson', label: 'Atkinson Hyperlegible', note: msg('easier to tell letters apart') },
 ];
 
+/** The two phone modes first; "off" is the device default of opening a book on its own. */
 export const parallelModes: { value: ParallelMode; label: string; note: string }[] = [
+  { value: 'on-demand', label: msg('On demand'), note: msg('Tap a sentence to open its companion under it.') },
+  { value: 'inline', label: msg('Inline'), note: msg('Every sentence followed by its companion, in smaller grey.') },
   { value: 'off', label: msg('This edition only'), note: msg('No companion on the page.') },
-  { value: 'on-demand', label: msg('On demand'), note: msg('Tap a passage to open its companion paragraph. Marked sentences highlight their counterparts.') },
-  { value: 'inline', label: msg('Inline'), note: msg('Whole paragraph, then its companion, one size down.') },
 ];
 
 export const defaultReaderSettings: ReaderSettings = {
