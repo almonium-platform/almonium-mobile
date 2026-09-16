@@ -178,3 +178,49 @@ backend treats the same. The Chromium fixture check also asserts the
 chapter-end visibility messages. Native acceptance still pending: the guest
 header over the WebView, the pinned panel's appearance and leave, and the
 sign-in return on a device.
+
+## The library is the front door (2026-09-17, Mobile Guest K1–K6)
+
+The guest lane now follows the "Almonium Mobile - Guest" page rather than the
+sign-in-first order of the day before.
+
+- **Entry.** A cold open without a session lands on `/read`; the tabs group
+  and the index route send a guest there too. The sign-in route stays for
+  password reset, deep links and OAuth, and keeps its "Browse the library"
+  link as the way back out. Sign-in everywhere else is a sheet.
+- **Library (K1, K2).** Public navbar with the design's wordmark (drawn with
+  `react-native-svg`), one line of promise and one of proof, a horizontal
+  language chip filter (default: the phone's language when the list has it,
+  else the language with most editions), and book rows with cover, title,
+  author, the editorial level as the only badge and "Parallel text" when a
+  companion exists. The public list has no chapter count, so none is shown.
+  When the device holds a position, the promise gives way to one dark Continue
+  card for the most recent book (title, chapter, percentage, bar), and that
+  book leaves the list. The card comes from `almonium:guest-last-read`, which
+  the reader writes alongside the percentage.
+- **Book page (K3).** As before, plus the J1 contents under the parallel row:
+  number, title, one line of description and the estimate in mono, eight rows
+  then "All N chapters" in place. Titles come from the public chapter
+  projection, which now carries `title`. A row opens the reader with a
+  `chapter` sequence that is jumped to once the headings are known. The
+  primary button reads "Continue reading" when the device holds a position.
+  The request chip opens the auth sheet with "Ask for {Book} in {Language}".
+- **Auth sheet (K5).** One sheet over the current screen: eyebrow, a title
+  that says why it opened ("Keep {word} and your place in {Book}", "Keep your
+  place in {Book}", "Ask for {Book} in {Language}", "Welcome back"), Apple and
+  Google above, then email and password with a single toggle line between
+  sign in and create account. The one-email-field flow with a code waits on an
+  exists-check endpoint, as the page allows. The screen behind stays; the word
+  sheet hides while the auth sheet is up and returns with its state.
+- **Completed action (K4).** In the reader the pending action runs once the
+  account exists: "Save to review — free account" keeps the word and the word
+  sheet shows Kept without a second tap. The device position is carried into
+  the account (recorded and flushed) instead of the server's zero, and the
+  text does not reload because published text is fetched by slug for guests
+  and members alike. Creating an account still needs email verification
+  first, so that path ends in the sign-in step with a notice.
+
+Checks: TypeScript, ESLint (only the generated `.expo` warning), 114 Vitest
+tests, Android export and the Chromium fixture check. Device acceptance
+pending: the auth sheet over the reader, the sheet swap on save, the carried
+position after sign-in, and the library's Continue card.

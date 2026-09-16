@@ -20,6 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
 import { BrandMark } from '@/components/brand-mark';
+import { AuthSheet, type AuthReason } from '@/components/auth-sheet';
 import { GuestHeader } from '@/components/guest-header';
 import { PaywallModal, type PaywallContext } from '@/components/paywall-modal';
 import { Sheet } from '@/components/sheet';
@@ -33,7 +34,7 @@ import { lightImpact, successHaptic } from '@/src/haptics';
 import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
 import { downloadedBooks, readDownloadedBook } from '@/src/offline-books';
-import { guestTranslationLanguage, readerReturnPath, readGuestProgress, writeGuestProgress } from '@/src/guest';
+import { guestTranslationLanguage, readGuestProgress, writeGuestLastRead, writeGuestProgress } from '@/src/guest';
 import { faceStacks, readerFaceCss } from '@/src/reader-fonts';
 import {
   defaultReaderSettings,
@@ -190,7 +191,7 @@ export default function ReaderScreen() {
   const { t } = useTranslation();
   const { colors, reduceMotion } = useTheme();
   const styles = useStyles();
-  const params = useLocalSearchParams<{ bookId: string; language?: string; title?: string; parallel?: string; slug?: string }>();
+  const params = useLocalSearchParams<{ bookId: string; language?: string; title?: string; parallel?: string; slug?: string; chapter?: string }>();
   const bookId = params.bookId;
   const validBookId = isUuid(bookId);
   const { firebaseUser, profile, loading: authLoading } = useAuth();
@@ -198,7 +199,14 @@ export default function ReaderScreen() {
   const guest = !authLoading && !firebaseUser;
   const slug = params.slug;
   const canOpen = validBookId && !authLoading && (guest ? Boolean(slug) : true);
-  const returnTo = readerReturnPath(bookId, slug, params.title);
+  // Sign-in is a sheet over the reader; what it was opened for runs once the account exists.
+  const [auth, setAuth] = useState<AuthReason | null>(null);
+  const afterAuth = useRef<(() => void) | null>(null);
+  // A guest who signs in mid-book keeps the place: it goes to the account instead of the server's zero.
+  const carried = useRef<number | null>(null);
+  const wasGuest = useRef(false);
+  // A chapter asked for by the book page: jumped to once the headings are known, instead of the kept place.
+  const startChapter = useRef<number | null>(/^\d+$/.test(params.chapter ?? '') ? Number(params.chapter) : null);
   const queryClient = useQueryClient();
   const webView = useRef<WebView>(null);
   const sync = useMemo(
@@ -244,8 +252,9 @@ export default function ReaderScreen() {
   const night = settings.theme === 'night';
 
   const textQuery = useQuery({
-    queryKey: guest ? ['public-book-text', slug] : ['book-text', firebaseUser?.uid, bookId],
-    queryFn: async () => (guest ? api.publicBookText(slug!) : (await readDownloadedBook(bookId)) ?? api.bookText(bookId)),
+    // A published edition's text is public by slug for guest and member alike, so signing in mid-book never reloads it.
+    queryKey: slug ? ['public-book-text', slug] : ['book-text', firebaseUser?.uid, bookId],
+    queryFn: async () => (await readDownloadedBook(bookId)) ?? (slug ? api.publicBookText(slug) : api.bookText(bookId)),
     enabled: canOpen,
     staleTime: 10 * 60_000,
   });
@@ -315,8 +324,8 @@ export default function ReaderScreen() {
   const parallelLanguage = companion?.language;
   const parallelActive = settings.parallel !== 'off' && Boolean(companion?.editionSlug && primarySlug);
   const parallelQuery = useQuery({
-    queryKey: ['book-parallel-edition', firebaseUser?.uid, primarySlug, companion?.editionSlug],
-    queryFn: () => (guest ? api.publicParallelEditionText : api.parallelEditionText)(primarySlug!, companion!.editionSlug!),
+    queryKey: ['book-parallel-edition', primarySlug, companion?.editionSlug],
+    queryFn: () => api.publicParallelEditionText(primarySlug!, companion!.editionSlug!),
     enabled: parallelActive && !authLoading,
     staleTime: 10 * 60_000,
   });
@@ -367,6 +376,17 @@ export default function ReaderScreen() {
   }, [settings.face]);
 
   useEffect(() => {
+    if (guest) { wasGuest.current = true; return; }
+    if (!wasGuest.current || !firebaseUser) return;
+    wasGuest.current = false;
+    carried.current = progressRef.current;
+    const pending = afterAuth.current;
+    afterAuth.current = null;
+    setAuth(null);
+    if (pending) setTimeout(pending, 0);
+  }, [firebaseUser, guest]);
+
+  useEffect(() => {
     if (!infoQuery.data) return;
     if (!sync) {
       // A guest's place is this phone's alone.
@@ -375,10 +395,13 @@ export default function ReaderScreen() {
       return;
     }
     void sync.restorePending().then((pending) => {
-      const restored = pending ?? infoQuery.data.progressPercentage ?? 0;
+      const restored = carried.current ?? pending ?? infoQuery.data.progressPercentage ?? 0;
       progressRef.current = restored;
       setProgress(restored);
-      if (pending !== null) void sync.flush().catch(() => undefined);
+      if (carried.current !== null) {
+        carried.current = null;
+        void sync.record(restored).then(() => sync.flush()).catch(() => undefined);
+      } else if (pending !== null) void sync.flush().catch(() => undefined);
     });
   }, [sync, infoQuery.data]);
 
@@ -488,8 +511,16 @@ export default function ReaderScreen() {
           type?: string; text?: string; context?: string; chapters?: unknown; chapter?: unknown; chrome?: unknown; blockId?: unknown; lemma?: unknown; visible?: unknown;
         };
         if (payload.type === 'chapters') {
-          setChapters(parseReaderChapters(payload.chapters));
+          const found = parseReaderChapters(payload.chapters);
+          setChapters(found);
           setChaptersReady(true);
+          const wanted = startChapter.current;
+          if (wanted !== null) {
+            startChapter.current = null;
+            const target = found.find(chapter => chapter.anchor === `chapter-${wanted}`);
+            // After the kept-place scroll the page performs on load, so the jump is the last word.
+            if (target) setTimeout(() => webView.current?.injectJavaScript(chapterJumpScript(target.index)), 450);
+          }
           return;
         }
         if (payload.type === 'position') {
@@ -541,7 +572,11 @@ export default function ReaderScreen() {
       void sync.record(next);
       saveTimer.current = setTimeout(() => void flush(), 1500);
     } else if (slug) {
-      saveTimer.current = setTimeout(() => void writeGuestProgress(slug, next), 800);
+      saveTimer.current = setTimeout(() => {
+        void writeGuestProgress(slug, next);
+        void writeGuestLastRead({ slug, bookId, title: bookTitle, language: sourceLanguage, percentage: next,
+          chapterTitle: readingChapter ? displayChapterTitle(readingChapter.title) : '' });
+      }, 800);
     }
     if (next >= 99) void markFinished();
   }
@@ -558,6 +593,11 @@ export default function ReaderScreen() {
     webView.current?.injectJavaScript(chapterJumpScript(chapter.index));
     showChrome(true);
     setContentsVisible(false);
+  }
+
+  function askAccount(reason: AuthReason, then?: () => void) {
+    afterAuth.current = then ?? null;
+    setAuth(reason);
   }
 
   function openContents() {
@@ -689,12 +729,13 @@ export default function ReaderScreen() {
             </View>
             {guest ? (
               <>
-                <Button onPress={() => router.push({ pathname: '/(auth)/sign-in', params: { returnTo } })}>
+                <Button onPress={() => askAccount({ kind: 'save', word: selectedSense?.headword || lookup.entry, book: bookTitle },
+                  selectedSense?.translations.length ? () => void keepSelectedWord() : undefined)}>
                   {selectedSense?.translations.length ? t('Save to review — free account') : t('Write a meaning — free account')}
                 </Button>
                 <Text style={styles.capLine}>
                   {t('Keep 100 words, no card required.')}{' '}
-                  <Text onPress={() => router.push({ pathname: '/(auth)/sign-in', params: { returnTo } })} style={styles.capLink}>{t('Sign in')}</Text>
+                  <Text onPress={() => askAccount({ kind: 'signin' }, selectedSense?.translations.length ? () => void keepSelectedWord() : undefined)} style={styles.capLink}>{t('Sign in')}</Text>
                 </Text>
               </>
             ) : (
@@ -774,7 +815,8 @@ export default function ReaderScreen() {
             onLayout={event => setTopHeight(event.nativeEvent.layout.height)}
             style={[styles.topChrome, { transform: [{ translateY: topTravel }] }]}>
             {guest ? (
-              <GuestHeader onBack={() => router.back()} returnTo={returnTo} night={night}>
+              <GuestHeader onBack={() => router.back()} night={night}
+                onSignIn={() => askAccount({ kind: 'signin' })} onReadFree={() => askAccount({ kind: 'place', book: bookTitle })}>
                 <View style={styles.headerTrack}><View style={[styles.headerBar, { width: `${progress}%` }]} /></View>
               </GuestHeader>
             ) : (
@@ -805,7 +847,7 @@ export default function ReaderScreen() {
             {guest && endChapter !== null ? (
               <SafeAreaView edges={['bottom']} style={[styles.endPanel, night && styles.toolbarNight]}>
                 <Text style={[styles.endPanelText, night && styles.nightText]}>{t('Your place is kept on this phone. A free account keeps it everywhere and lets you save words.')}</Text>
-                <Button onPress={() => router.push({ pathname: '/(auth)/register', params: { returnTo } })}>{t('Read free')}</Button>
+                <Button onPress={() => askAccount({ kind: 'place', book: bookTitle })}>{t('Read free')}</Button>
                 {chapters[endChapter + 1] && (
                   <Pressable accessibilityRole="button" onPress={() => jumpTo(chapters[endChapter + 1])} style={styles.endContinue}>
                     <Text style={styles.done}>{t('Continue to {chapter}', { chapter: displayChapterTitle(chapters[endChapter + 1].title) || t('the next chapter') })}</Text>
@@ -882,7 +924,7 @@ export default function ReaderScreen() {
       </Sheet>
 
       {/* Words: the chapter's list, which swaps to the word itself when a row is tapped. */}
-      <Sheet visible={wordsVisible} onClose={closeWords}>
+      <Sheet visible={wordsVisible && !auth} onClose={closeWords}>
         {wordFromList && selection ? (
           <>
             <Pressable accessibilityRole="button" onPress={() => setSelection(null)} style={styles.backRow} hitSlop={8}>
@@ -963,7 +1005,7 @@ export default function ReaderScreen() {
       </Sheet>
 
       {/* The word sheet: Discover's plate, with the reader dimmed behind it and never dismissed. */}
-      <Sheet visible={Boolean(selection) && !wordFromList} onClose={() => setSelection(null)}>
+      <Sheet visible={Boolean(selection) && !wordFromList && !auth} onClose={() => setSelection(null)}>
         {wordCard}
       </Sheet>
 
@@ -1079,7 +1121,7 @@ export default function ReaderScreen() {
           </View>
         </View>
         {guest
-          ? <Button onPress={() => { setFinished(false); router.push({ pathname: '/(auth)/register', params: { returnTo: '/read' } }); }}>{t('Keep your books: read free')}</Button>
+          ? <Button onPress={() => { setFinished(false); askAccount({ kind: 'place', book: bookTitle }); }}>{t('Keep your books: read free')}</Button>
           : <Button onPress={() => { setFinished(false); router.replace('/(tabs)/books'); }}>{t('Back to your shelf')}</Button>}
         <Pressable
           accessibilityRole="button"
@@ -1097,6 +1139,7 @@ export default function ReaderScreen() {
       </Sheet>
 
       <PaywallModal context={paywallContext ?? 'general'} visible={Boolean(paywallContext)} onClose={() => setPaywallContext(null)} />
+      <AuthSheet reason={auth} onClose={() => { afterAuth.current = null; setAuth(null); }} onSignedIn={() => undefined} />
     </View>
   );
 }

@@ -5,7 +5,8 @@ export function authenticatedDestination(
   hasProfile: boolean,
   setupStep?: SetupStep,
 ) {
-  if (!hasFirebaseUser || !hasProfile) return '/(auth)/sign-in' as const;
+  if (!hasFirebaseUser) return '/read' as const;
+  if (!hasProfile) return '/(auth)/sign-in' as const;
   if (setupStep !== 'COMPLETED') return '/onboarding' as const;
   return '/(tabs)/home' as const;
 }

@@ -20,3 +20,13 @@ describe('guest reading', () => {
     expect(readerReturnPath('id-1', undefined, undefined)).toBe('/reader/id-1');
   });
 });
+
+describe('guest library', () => {
+  it('opens on the phone language when the library has it, else the fullest shelf', async () => {
+    const { defaultGuestLanguage } = await import('./guest');
+    const counts = new Map([['EN', 4], ['DE', 7], ['FR', 2]]);
+    expect(defaultGuestLanguage(counts, ['fr-CA', 'en-US'])).toBe('FR');
+    expect(defaultGuestLanguage(counts, ['ja-JP'])).toBe('DE');
+    expect(defaultGuestLanguage(new Map(), ['en'])).toBeNull();
+  });
+});

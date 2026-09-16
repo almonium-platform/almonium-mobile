@@ -19,7 +19,7 @@ export default function TabsLayout() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { firebaseUser, profile, loading } = useAuth();
-  if (!loading && !firebaseUser) return <Redirect href="/(auth)/sign-in" />;
+  if (!loading && !firebaseUser) return <Redirect href="/read" />;
   if (!loading && !profile) return <Redirect href="/" />;
   if (!loading && profile?.setupStep !== 'COMPLETED') return <Redirect href="/onboarding" />;
 

@@ -41,3 +41,48 @@ export function readerReturnPath(bookId: string, slug: string | undefined, title
   const search = query.toString();
   return `/reader/${encodeURIComponent(bookId)}${search ? `?${search}` : ''}`;
 }
+
+/** The most recently read book on this device: the library's one Continue card. */
+export interface GuestLastRead {
+  slug: string;
+  bookId: string;
+  title: string;
+  language: string;
+  chapterTitle: string;
+  percentage: number;
+}
+
+const lastReadKey = 'almonium:guest-last-read';
+
+export async function readGuestLastRead(): Promise<GuestLastRead | null> {
+  try {
+    const raw = await AsyncStorage.getItem(lastReadKey);
+    const value = raw ? (JSON.parse(raw) as Partial<GuestLastRead>) : null;
+    if (!value || typeof value.slug !== 'string' || typeof value.bookId !== 'string' || typeof value.title !== 'string') return null;
+    return {
+      slug: value.slug, bookId: value.bookId, title: value.title,
+      language: typeof value.language === 'string' ? value.language : '',
+      chapterTitle: typeof value.chapterTitle === 'string' ? value.chapterTitle : '',
+      percentage: typeof value.percentage === 'number' && Number.isFinite(value.percentage) ? Math.max(0, Math.min(100, value.percentage)) : 0,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function writeGuestLastRead(value: GuestLastRead) {
+  return AsyncStorage.setItem(lastReadKey, JSON.stringify(value)).catch(() => undefined);
+}
+
+/** The library's default chip: the phone's language when the list has it, else the language with most editions. */
+export function defaultGuestLanguage(counts: ReadonlyMap<string, number>, deviceLanguages: readonly string[]) {
+  const device = deviceLanguages
+    .map((tag) => tag.split(/[-_]/)[0].toUpperCase())
+    .find((code) => counts.has(code));
+  if (device) return device;
+  let best: string | null = null;
+  for (const [language, count] of counts) {
+    if (best === null || count > (counts.get(best) ?? 0)) best = language;
+  }
+  return best;
+}

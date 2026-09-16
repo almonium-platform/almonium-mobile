@@ -6,6 +6,8 @@ export interface ReaderChapter {
 
 export interface ChapterEnrichment {
   sequence: number;
+  /** The processor's heading text; the book page lists chapters from it before any text is loaded. */
+  title: string;
   analysisStatus: string;
   cefrEstimate: string | null;
   descriptions: string[];
@@ -19,6 +21,7 @@ export function parseChapterEnrichments(value: unknown): ChapterEnrichment[] {
     if (!Number.isInteger(row.sequence) || typeof row.analysisStatus !== 'string') return [];
     return [{
       sequence: row.sequence as number,
+      title: typeof row.title === 'string' ? row.title.slice(0, 300) : '',
       analysisStatus: row.analysisStatus,
       cefrEstimate: typeof row.cefrEstimate === 'string' && /^(A1|A2|B1|B2|C1|C2)$/.test(row.cefrEstimate) ? row.cefrEstimate : null,
       descriptions: Array.isArray(row.descriptions) ? row.descriptions.filter((text): text is string => typeof text === 'string') : [],

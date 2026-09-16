@@ -4,7 +4,8 @@ import { authenticatedDestination } from './navigation';
 
 describe('authenticatedDestination', () => {
   it('sends signed-out sessions to auth', () => {
-    expect(authenticatedDestination(false, false)).toBe('/(auth)/sign-in');
+    expect(authenticatedDestination(false, false)).toBe('/read');
+    expect(authenticatedDestination(true, false)).toBe('/(auth)/sign-in');
   });
 
   it('resumes onboarding at any incomplete step', () => {

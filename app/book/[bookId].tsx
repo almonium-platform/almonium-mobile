@@ -1,10 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getLocales } from 'expo-localization';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 import { AlignmentRow } from '@/components/alignment-request';
+import { AuthSheet, type AuthReason } from '@/components/auth-sheet';
 import { GuestHeaderActions } from '@/components/guest-header';
 import { BookCover } from '@/components/book-cover';
 import { Screen } from '@/components/screen';
@@ -15,6 +18,8 @@ import { languageName } from '@/src/languages';
 import { downloadBook, downloadedBooks, formattedDownloadSize, removeDownloadedBook } from '@/src/offline-books';
 import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import { isUuid } from '@/src/uuid';
+import { readGuestProgress } from '@/src/guest';
+import { chapterLevelRange, displayChapterTitle, type ChapterEnrichment } from '@/src/reader-chapters';
 import { editionLabel } from '@/src/reader-editions';
 import type { BookDetails } from '@/src/types';
 
@@ -35,6 +40,11 @@ export default function BookDetailsScreen() {
     profile?.learners.find((learner) => learner.active)?.language ||
     '';
 
+  const [auth, setAuth] = useState<AuthReason | null>(null);
+  const [devicePosition, setDevicePosition] = useState(0);
+  useEffect(() => {
+    if (guest && slug) void readGuestProgress(slug).then(setDevicePosition);
+  }, [guest, slug]);
   const query = useQuery({
     queryKey: guest ? ['public-book', slug] : ['book', firebaseUser?.uid, bookId, language],
     queryFn: () => (guest ? api.publicBook(slug!) : api.book(bookId, language)),
@@ -52,6 +62,15 @@ export default function BookDetailsScreen() {
         queryClient.invalidateQueries({ queryKey: ['bookshelf', firebaseUser?.uid] }),
       ]);
     },
+  });
+  // The contents (J1): titles, levels and one-line descriptions from the public chapter projection.
+  const editionSlug = query.data?.editionSlug ?? slug;
+  const chaptersQuery = useQuery({
+    queryKey: ['book-chapters', undefined, editionSlug],
+    queryFn: () => api.bookChapters(editionSlug!),
+    enabled: Boolean(editionSlug),
+    staleTime: 10 * 60_000,
+    retry: false,
   });
   const downloadsQuery = useQuery({ queryKey: ['offline-books'], queryFn: downloadedBooks });
   const downloaded = downloadsQuery.data?.find((entry) => entry.id === bookId);
@@ -103,7 +122,7 @@ export default function BookDetailsScreen() {
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: book.title, headerRight: guest ? () => <GuestHeaderActions returnTo={`/book/${encodeURIComponent(bookId)}?slug=${encodeURIComponent(slug ?? '')}`} /> : undefined }} />
+      <Stack.Screen options={{ title: book.title, headerRight: guest ? () => <GuestHeaderActions onSignIn={() => setAuth({ kind: 'signin' })} onReadFree={() => setAuth({ kind: 'place', book: book.title })} /> : undefined }} />
       <View style={styles.hero}>
         <BookCover
           title={book.title}
@@ -133,7 +152,9 @@ export default function BookDetailsScreen() {
       </View>
 
       <Button onPress={() => router.push({ pathname: '/reader/[bookId]', params: readerParams })}>
-        {book.progressPercentage ? t('Continue at {percentage}%', { percentage: book.progressPercentage }) : t('Start reading')}
+        {guest
+          ? devicePosition > 0 ? t('Continue reading') : t('Start reading')
+          : book.progressPercentage ? t('Continue at {percentage}%', { percentage: book.progressPercentage }) : t('Start reading')}
       </Button>
 
       {guest ? null : downloaded ? (
@@ -182,7 +203,11 @@ export default function BookDetailsScreen() {
 
       <Card>
         {guest ? (
-          <GuestParallelRow book={book} onOpenParallel={(parallel) => router.push({ pathname: '/reader/[bookId]', params: { ...readerParams, parallel } })} />
+          <GuestParallelRow
+            book={book}
+            onOpenParallel={(parallel) => router.push({ pathname: '/reader/[bookId]', params: { ...readerParams, parallel } })}
+            onRequest={(target) => setAuth({ kind: 'translation', book: book.title, language: target })}
+          />
         ) : (
           <AlignmentRow
             book={book}
@@ -227,7 +252,52 @@ export default function BookDetailsScreen() {
           <Text style={styles.translator}>{t('Translated by {translator}', { translator: book.translator })}</Text>
         </Card>
       )}
+
+      {chaptersQuery.data && chaptersQuery.data.length > 0 && (
+        <Contents chapters={chaptersQuery.data} onOpen={(sequence) => router.push({ pathname: '/reader/[bookId]', params: { ...readerParams, chapter: String(sequence) } })} />
+      )}
+
+      <AuthSheet reason={auth} onClose={() => setAuth(null)} onSignedIn={() => setAuth(null)} />
     </Screen>
+  );
+}
+
+/**
+ * The contents under the parallel row (J1): number, title, one line of description and the
+ * chapter's estimate in mono. Eight rows, then the rest in place. A row opens the reader there.
+ */
+function Contents({ chapters, onOpen }: { chapters: ChapterEnrichment[]; onOpen(sequence: number): void }) {
+  const { t } = useTranslation();
+  const styles = useStyles();
+  const [all, setAll] = useState(false);
+  const range = chapterLevelRange(chapters.map((row) => ({ index: row.sequence - 1, anchor: `chapter-${row.sequence}`, title: row.title })), chapters);
+  const rows = all ? chapters : chapters.slice(0, 8);
+  return (
+    <View style={styles.contents}>
+      <View style={styles.contentsHead}>
+        <Text style={styles.contentsEyebrow}>{t('CONTENTS')}</Text>
+        {!!range && <Text style={styles.contentsRange}>{range}</Text>}
+      </View>
+      {rows.map((row) => {
+        const complete = row.analysisStatus === 'complete';
+        const description = complete ? row.descriptions.join(' ') : '';
+        return (
+          <Pressable key={row.sequence} accessibilityRole="button" onPress={() => onOpen(row.sequence)} style={({ pressed }) => [styles.contentsRow, pressed && styles.contentsRowPressed]}>
+            <Text style={styles.contentsNumber}>{row.sequence}</Text>
+            <View style={styles.contentsCopy}>
+              <Text style={[styles.contentsTitle, !description && styles.contentsTitleFront]}>{displayChapterTitle(row.title) || t('Untitled chapter')}</Text>
+              {!!description && <Text style={styles.contentsDescription} numberOfLines={1}>{description}</Text>}
+            </View>
+            <Text style={styles.contentsLevel}>{row.cefrEstimate ?? (complete ? '' : '–')}</Text>
+          </Pressable>
+        );
+      })}
+      {!all && chapters.length > rows.length && (
+        <Pressable accessibilityRole="button" onPress={() => setAll(true)} style={styles.contentsMore}>
+          <Text style={styles.contentsMoreText}>{t('All {count} chapters', { count: chapters.length })}</Text>
+        </Pressable>
+      )}
+    </View>
   );
 }
 
@@ -235,12 +305,13 @@ export default function BookDetailsScreen() {
  * The parallel-text row for a guest: the companions that exist open in one tap; asking for a new
  * one is keeping, so the chip opens the auth screens and returns here.
  */
-function GuestParallelRow({ book, onOpenParallel }: { book: BookDetails; onOpenParallel(parallel: string): void }) {
+function GuestParallelRow({ book, onOpenParallel, onRequest }: { book: BookDetails; onOpenParallel(parallel: string): void; onRequest(language: string): void }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const companions = book.languageVariants.filter((variant) => variant.id !== book.id && variant.editionSlug);
-  const returnTo = `/book/${encodeURIComponent(String(book.id))}?slug=${encodeURIComponent(book.editionSlug ?? '')}`;
+  // The ask names a language: the phone's, unless the book is already in it.
+  const target = getLocales().map((locale) => locale.languageCode?.toUpperCase() ?? '').find((code) => code && code !== book.language) ?? (book.language === 'EN' ? 'UK' : 'EN');
   return (
     <>
       <Text style={styles.sectionTitle}>{t('Parallel text')}</Text>
@@ -250,12 +321,12 @@ function GuestParallelRow({ book, onOpenParallel }: { book: BookDetails; onOpenP
             <Text style={styles.variantText}>{editionLabel(variant)}</Text>
           </Pressable>
         ))}
-        <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/(auth)/sign-in', params: { returnTo } })} style={[styles.variant, styles.variantAsk]}>
+        <Pressable accessibilityRole="button" onPress={() => onRequest(target)} style={[styles.variant, styles.variantAsk]}>
           <Ionicons name="add" size={14} color={colors.primary} />
           <Text style={styles.variantText}>{t('Request a translation')}</Text>
         </Pressable>
       </View>
-      <Text style={styles.guestNote}>{t('Requesting a translation needs a free account.')}</Text>
+
     </>
   );
 }
@@ -285,7 +356,20 @@ const useStyles = createThemedStyles((colors) => ({
   variantText: { color: colors.ink, fontSize: 13, fontWeight: '600' },
   variantTextActive: { color: colors.onPrimary },
   variantAsk: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.border, backgroundColor: 'transparent' },
-  guestNote: { color: colors.metadata, fontSize: 12, lineHeight: 17 },
+  contents: { gap: 2 },
+  contentsHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: 4, paddingBottom: 6 },
+  contentsEyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
+  contentsRange: { color: colors.muted, fontFamily: fonts.mono, fontSize: 12 },
+  contentsRow: { minHeight: 44, flexDirection: 'row', alignItems: 'baseline', gap: 12, paddingHorizontal: 4, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.line },
+  contentsRowPressed: { backgroundColor: colors.accentSoft },
+  contentsNumber: { width: 24, color: colors.metadata, fontFamily: fonts.mono, fontSize: 11 },
+  contentsCopy: { flex: 1, gap: 2 },
+  contentsTitle: { color: colors.ink, fontFamily: fonts.serifRegular, fontSize: 15 },
+  contentsTitleFront: { color: colors.muted },
+  contentsDescription: { color: colors.muted, fontSize: 12.5 },
+  contentsLevel: { minWidth: 18, color: colors.muted, fontFamily: fonts.mono, fontSize: 11, textAlign: 'right' },
+  contentsMore: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 },
+  contentsMoreText: { color: colors.primary, fontSize: 14, fontWeight: '600' },
   translator: { color: colors.primary, fontSize: 14, fontStyle: 'italic' },
   downloadRow: { minHeight: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderRadius: 20, paddingHorizontal: 15, backgroundColor: colors.successSoft },
   downloadCopy: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },

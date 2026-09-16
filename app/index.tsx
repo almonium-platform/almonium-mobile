@@ -37,6 +37,8 @@ export default function Index() {
     );
   }
 
+  // The library is the front door: a cold open without a session reads, and sign-in is a sheet on demand.
+  if (!firebaseUser) return <Redirect href="/read" />;
   const destination = authenticatedDestination(Boolean(firebaseUser), Boolean(profile), profile?.setupStep);
   return <Redirect href={returnTo && destination === '/(tabs)/home' ? (returnTo as never) : destination} />;
 }

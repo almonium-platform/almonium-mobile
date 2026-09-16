@@ -8,7 +8,8 @@ describe('reader chapter navigation', () => {
   it('tolerates absent or malformed optional enrichment', () => {
     expect(parseChapterEnrichments({error: 'unavailable'})).toEqual([]);
     expect(parseChapterEnrichments([null, {sequence: 11, analysisStatus: 'complete', cefrEstimate: 'D3', descriptions: [42, 'Opening.']}]))
-      .toEqual([{sequence: 11, analysisStatus: 'complete', cefrEstimate: null, descriptions: ['Opening.']}]);
+      .toEqual([{sequence: 11, title: '', analysisStatus: 'complete', cefrEstimate: null, descriptions: ['Opening.']}]);
+    expect(parseChapterEnrichments([{sequence: 1, title: 'CHAPTER I.', analysisStatus: 'pending'}])[0].title).toBe('CHAPTER I.');
   });
   it('accepts local heading metadata but ignores malformed messages', () => {
     const valid = {index: 0, anchor: 'chapter-11', title: 'Chapter V'};
@@ -17,7 +18,7 @@ describe('reader chapter navigation', () => {
   });
   it('uses stable chapter sequence, not array position, and excludes stale estimates', () => {
     const chapter = {index: 0, anchor: 'chapter-11', title: 'V'};
-    const enrichment = {sequence: 11, analysisStatus: 'complete', cefrEstimate: 'B2', descriptions: ['An experiment.']};
+    const enrichment = {sequence: 11, title: 'V', analysisStatus: 'complete', cefrEstimate: 'B2', descriptions: ['An experiment.']};
     expect(chapterEnrichment(chapter, [enrichment])).toEqual(enrichment);
     expect(chapterEnrichment({...chapter, anchor: 'legacy-11'}, [enrichment])).toBeUndefined();
     expect(chapterEnrichment(chapter, [{...enrichment, analysisStatus: 'stale'}])).toBeUndefined();
@@ -41,9 +42,9 @@ describe('chapter page presentation', () => {
   it('ranges the estimated levels over body chapters only', () => {
     const chapters = [{ index: 0, anchor: 'chapter-1', title: 'Intro' }, { index: 1, anchor: 'chapter-2', title: 'I' }, { index: 2, anchor: 'chapter-3', title: 'II' }];
     const data = [
-      { sequence: 1, analysisStatus: 'complete', cefrEstimate: null, descriptions: [] },
-      { sequence: 2, analysisStatus: 'complete', cefrEstimate: 'C1', descriptions: [] },
-      { sequence: 3, analysisStatus: 'complete', cefrEstimate: 'B1', descriptions: [] },
+      { sequence: 1, title: '', analysisStatus: 'complete', cefrEstimate: null, descriptions: [] },
+      { sequence: 2, title: '', analysisStatus: 'complete', cefrEstimate: 'C1', descriptions: [] },
+      { sequence: 3, title: '', analysisStatus: 'complete', cefrEstimate: 'B1', descriptions: [] },
     ];
     expect(chapterLevelRange(chapters, data)).toBe('B1–C1');
     expect(chapterLevelRange(chapters.slice(1, 2), data)).toBe('C1');
