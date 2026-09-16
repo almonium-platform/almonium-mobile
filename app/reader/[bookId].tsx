@@ -45,6 +45,7 @@ import { isUuid } from '@/src/uuid';
 import { chooseCompanion, companionEditions, editionLabel, isOtherEditionTranslation } from '@/src/reader-editions';
 import { parallelScript } from '@/src/reader-parallel';
 import { chapterDiscoveryScript, chapterEnrichment, chapterJumpScript, parseReaderChapters, type ReaderChapter } from '@/src/reader-chapters';
+import { readerLookupLanguage, vocabularyLookup, vocabularySequence, vocabularyState, type ReaderLookupSelection } from '@/src/reader-vocabulary';
 
 const baseProgressScript = `
   (function () {
@@ -157,10 +158,11 @@ export default function ReaderScreen() {
   const [fontCss, setFontCss] = useState('');
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [chaptersVisible, setChaptersVisible] = useState(false);
+  const [vocabularyChapter, setVocabularyChapter] = useState<ReaderChapter | null>(null);
   const [chapters, setChapters] = useState<ReaderChapter[]>([]);
   const [chaptersReady, setChaptersReady] = useState(false);
   const [paywallContext, setPaywallContext] = useState<PaywallContext | null>(null);
-  const [selection, setSelection] = useState<{ entry: string; context: string } | null>(null);
+  const [selection, setSelection] = useState<ReaderLookupSelection | null>(null);
   const [senseIndex, setSenseIndex] = useState(0);
   const [savingWord, setSavingWord] = useState(false);
   const [wordSaved, setWordSaved] = useState(false);
@@ -198,6 +200,16 @@ export default function ReaderScreen() {
   const variants = infoQuery.data?.languageVariants ?? [];
   const primaryEdition = variants.find(variant => variant.id === bookId);
   const primarySlug = primaryEdition?.editionSlug;
+  const vocabularyChapterSequence = vocabularyChapter ? vocabularySequence(vocabularyChapter) : undefined;
+  const vocabularyQuery = useQuery({
+    queryKey: ['book-chapter-vocabulary', firebaseUser?.uid, primarySlug, vocabularyChapterSequence],
+    queryFn: () => api.bookChapterVocabulary(primarySlug!, vocabularyChapterSequence!),
+    enabled: Boolean(chaptersVisible && primarySlug && vocabularyChapterSequence && firebaseUser),
+    staleTime: 0,
+    retry: false,
+  });
+  const wordListState = vocabularyState(vocabularyQuery.data, vocabularyQuery.isPaused,
+    vocabularyQuery.isError, vocabularyQuery.isFetching);
   const chaptersQuery = useQuery({
     queryKey: ['book-chapters', firebaseUser?.uid, primarySlug],
     queryFn: () => api.bookChapters(primarySlug!),
@@ -219,13 +231,14 @@ export default function ReaderScreen() {
     enabled: parallelActive && Boolean(firebaseUser),
     staleTime: 10 * 60_000,
   });
+  const lookupLanguage = readerLookupLanguage(selection, sourceLanguage);
   const translationLanguage =
-    profile?.fluentLangs.find((language) => language !== sourceLanguage) ??
-    (sourceLanguage === 'EN' ? 'UK' : 'EN');
+    profile?.fluentLangs.find((language) => language !== lookupLanguage) ??
+    (lookupLanguage === 'EN' ? 'UK' : 'EN');
   const selectionQuery = useQuery({
-    queryKey: ['discover', selection?.entry, sourceLanguage, translationLanguage, selection?.context],
-    queryFn: () => api.discover(selection!.entry, sourceLanguage, translationLanguage, selection!.context),
-    enabled: Boolean(selection && sourceLanguage),
+    queryKey: ['discover', selection?.entry, lookupLanguage, translationLanguage, selection?.context],
+    queryFn: () => api.discover(selection!.entry, lookupLanguage, translationLanguage, selection!.context),
+    enabled: Boolean(selection && lookupLanguage),
   });
   const itemsQuery = useQuery({
     queryKey: ['cards', firebaseUser?.uid, sourceLanguage],
@@ -241,6 +254,9 @@ export default function ReaderScreen() {
   }, [bookId, firebaseUser?.uid, queryClient, sourceLanguage]);
 
   useEffect(() => {
+    setVocabularyChapter(null);
+    setChaptersVisible(false);
+    setSelection(null);
     void loadReaderSettings().then((loaded) => {
       setSettings(loaded);
       setSettingsLoaded(true);
@@ -435,7 +451,7 @@ export default function ReaderScreen() {
                   {parallelActive && companion ? ` ↔ ${editionLabel(companion, primaryEdition)}` : ''}
                 </Text>
               </View>
-              <Pressable accessibilityLabel={t('Open chapters')} onPress={() => setChaptersVisible(true)} style={styles.toolButton}>
+              <Pressable accessibilityLabel={t('Open chapters')} onPress={() => { setVocabularyChapter(null); setChaptersVisible(true); }} style={styles.toolButton}>
                 <Ionicons name="list-outline" size={24} color={night ? colors.white : colors.primary} />
               </Pressable>
               <Pressable accessibilityLabel={t('Open reader settings')} onPress={() => setSettingsVisible(true)} style={styles.toolButton}>
@@ -464,18 +480,50 @@ export default function ReaderScreen() {
 
       <Sheet visible={chaptersVisible} onClose={() => setChaptersVisible(false)}>
         <View style={styles.settingsHeading}>
-          <Text style={styles.settingsTitle}>{t('Chapters')}</Text>
+          <Text style={styles.settingsTitle}>{vocabularyChapter ? t('Chapter vocabulary') : t('Chapters')}</Text>
           <Pressable accessibilityLabel={t('Close chapters')} onPress={() => setChaptersVisible(false)} hitSlop={8}>
             <Text style={styles.done}>{t('Done')}</Text>
           </Pressable>
         </View>
+        {vocabularyChapter ? <>
+          <Pressable accessibilityRole="button" style={styles.chapterOption} onPress={() => setVocabularyChapter(null)}>
+            <Text style={styles.done}>{t('Back to chapters')}</Text>
+          </Pressable>
+          <Text style={styles.optionLabel}>{vocabularyChapter.title}</Text>
+          <Text style={styles.optionNote}>{t("A curated selection from this book’s useful words, not every word in the chapter. Each example comes from the text.")}</Text>
+          {wordListState === 'loading' && <ActivityIndicator accessibilityLabel={t('Loading vocabulary')} color={colors.primary} />}
+          {wordListState === 'offline' && <Text style={styles.status}>{t('Vocabulary is unavailable offline. You can keep reading and try again when connected.')}</Text>}
+          {wordListState === 'error' && <>
+            <Text style={styles.status}>{t('Vocabulary could not be loaded. This edition may not have it yet, or you may be offline. Reading still works.')}</Text>
+            <Button onPress={() => vocabularyQuery.refetch()}>{t('Try again')}</Button>
+          </>}
+          {wordListState === 'unavailable' && <Text style={styles.status}>{t('Current vocabulary is not available for this chapter. You can keep reading normally.')}</Text>}
+          {wordListState === 'empty' && <Text style={styles.status}>{t('No selected useful words occur in this chapter.')}</Text>}
+          {wordListState === 'ready' && vocabularyQuery.data?.words.map(word => (
+            <View key={`${word.blockId}:${word.lemma}`} style={styles.vocabularyWord}>
+              <Text style={styles.sheetEntry}>{word.lemma}</Text>
+              <Text style={styles.optionNote}>{t('In the text:')} {word.surface}</Text>
+              <Text style={styles.sourceContext}>{word.context}</Text>
+              <Pressable accessibilityRole="button" style={({ pressed }) => [styles.vocabularyAction, pressed && styles.optionSelected]}
+                onPress={() => {
+                  setWordSaved(false); setWordSaveError(''); setProduceSelected(false); setSenseIndex(0);
+                  setSelection(vocabularyLookup(word, vocabularyQuery.data!, primarySlug!,
+                    params.title || shelfBook?.title || t('This book'), vocabularyChapter.title));
+                  setChaptersVisible(false);
+                }}>
+                <Text style={styles.done}>{t('Look up')} {word.lemma}</Text>
+              </Pressable>
+            </View>
+          ))}
+        </> : <>
         {!chaptersReady && <Text style={styles.status}>{t('Loading chapter navigation…')}</Text>}
         {chaptersReady && chapters.length === 0 && <Text style={styles.status}>{t('This edition has no chapter headings. You can keep reading normally.')}</Text>}
         {chaptersQuery.isError && <Text style={styles.optionNote}>{t('Chapter estimates are unavailable. Navigation still works.')}</Text>}
         {chapters.map(chapter => {
           const detail = chapterEnrichment(chapter, chaptersQuery.data);
           return (
-            <Pressable key={chapter.index} accessibilityRole="button" style={[styles.option, styles.chapterOption]}
+            <View key={chapter.index}>
+            <Pressable accessibilityRole="button" style={[styles.option, styles.chapterOption]}
               onPress={() => { webView.current?.injectJavaScript(chapterJumpScript(chapter.index)); setChaptersVisible(false); }}>
               <View style={styles.optionCopy}>
                 <Text style={styles.optionLabel}>{chapter.title || t('Untitled chapter')}</Text>
@@ -483,13 +531,27 @@ export default function ReaderScreen() {
                 {detail?.descriptions.map((description, index) => <Text key={index} style={styles.optionNote}>{description}</Text>)}
               </View>
             </Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel={`${t('Vocabulary')}: ${chapter.title}`}
+              style={({ pressed }) => [styles.vocabularyAction, pressed && styles.optionSelected]}
+              onPress={() => setVocabularyChapter(chapter)}>
+              <Text style={styles.done}>{t('Vocabulary')}</Text>
+            </Pressable>
+            </View>
           );
         })}
+        </>}
       </Sheet>
 
       {/* The word sheet: Discover's plate, with the reader dimmed behind it and never dismissed. */}
       <Sheet visible={Boolean(selection)} onClose={() => setSelection(null)}>
-        {selectionQuery.isLoading ? (
+        {selection?.source && <View style={styles.settingGroup}>
+          <Text style={styles.optionLabel}>{selection.source.bookTitle} · {selection.source.chapterTitle} · {lookupLanguage}</Text>
+          <Text style={styles.sourceContext}>{selection.context}</Text>
+          <Pressable accessibilityRole="button" style={styles.vocabularyAction} onPress={() => { setSelection(null); setChaptersVisible(true); }}>
+            <Text style={styles.done}>{t('Back to vocabulary')}</Text>
+          </Pressable>
+        </View>}
+        {selectionQuery.isPaused ? <Text style={styles.status}>{t('Word lookup is unavailable offline. You can return to the book and keep reading.')}</Text> : selectionQuery.isLoading ? (
           <View style={styles.sheetLoading}><ActivityIndicator color={colors.primary} /><Text style={styles.status}>{t('Opening the entry…')}</Text></View>
         ) : selectionQuery.isError ? (
           <View style={styles.sheetLoading}>
@@ -758,6 +820,8 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   settingLabel: { color: colors.metadata, fontSize: 10, fontWeight: '600', letterSpacing: 1.3, paddingBottom: 4 },
   option: { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 11 },
   chapterOption: { minHeight: 44 },
+  vocabularyAction: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 12, borderRadius: 20 },
+  vocabularyWord: { gap: 8, paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.line },
   optionSelected: { backgroundColor: colors.accentSoft },
   dot: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: colors.border },
   dotSelected: { borderWidth: 6, borderColor: colors.primary },

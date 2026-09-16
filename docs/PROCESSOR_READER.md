@@ -50,3 +50,43 @@ Next: device tests of selection, dark mode, companion failure and offline readin
 verify the fully published real
 Frankenstein B2/original/Ukrainian trio. Publication remains a processor review
 workflow and is not bypassed by this client.
+
+## Chapter vocabulary (2026-09-16)
+
+On an updated mobile build, open the published original Frankenstein, tap the
+header's chapter-list button, then **Vocabulary** under **CHAPTER V.** Expect 21
+curated entries including `countenance` and `endeavour` / `endeavoured`. Each row
+shows the actual source excerpt. **Look up** opens the existing in-reader word
+sheet, with book/chapter attribution, the excerpt and English lookup language.
+**Back to vocabulary** returns to the list; dismissing the sheet preserves reading
+position. A different learner language does not override the book's language.
+
+The lazy, owner/edition/chapter-keyed request uses the existing Firebase bearer
+client: `GET /public/books/{slug}/chapters/{sequence}/vocabulary`. The sequence
+comes from the processor heading anchor, never its list position or title. The
+client consumes the existing typed contract, not a new NLP or AI stage. Only
+ready, source-attested examples display; this is not an exhaustive word list.
+Old headings without processor IDs, editions without slugs, missing/stale
+artifacts, failed requests and paused offline requests keep chapter navigation
+and base reading available. Vocabulary revalidates on opening; failed/offline
+refreshes do not present cached examples as freshly verified. Word lookup also
+has an explicit paused/offline message rather than an empty sheet.
+
+Checks for this slice: TypeScript, 103 Vitest tests, ESLint (only the existing
+generated `.expo` warning) and Android export. The tests exercise contract
+validation, source context/language and loading/empty/stale/error/offline states;
+they do not mount the native reader. Android export is a build, not an installation.
+
+Re-run the read-only WebView check with the local backend running:
+
+```bash
+node scripts/check-reader-vocabulary.mjs
+```
+
+It uses Chromium from the sibling web checkout, tests primary-only chapter
+navigation in three fixture layouts, and checks the real original's 30 headings,
+Chapter V jump and vocabulary-to-lookup context. It never requests a generated
+definition or publishes anything. Native bottom-sheet transitions, pressed/dark
+states, real offline mode and saving the looked-up word still need device
+acceptance. Book/chapter attribution is retained in the lookup visit; this slice
+does not add persistent source-edition fields to saved cards.
