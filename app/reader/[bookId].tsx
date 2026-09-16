@@ -2,13 +2,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Animated,
   AppState,
   Linking,
   Pressable,
+  ScrollView,
   Share,
   Text,
   View,
@@ -44,8 +46,14 @@ import { useLearningActivity } from '@/src/use-activity';
 import { isUuid } from '@/src/uuid';
 import { chooseCompanion, companionEditions, editionLabel, isOtherEditionTranslation } from '@/src/reader-editions';
 import { parallelScript } from '@/src/reader-parallel';
-import { chapterDiscoveryScript, chapterEnrichment, chapterJumpScript, parseReaderChapters, type ReaderChapter } from '@/src/reader-chapters';
-import { readerLookupLanguage, vocabularyLookup, vocabularySequence, vocabularyState, type ReaderLookupSelection } from '@/src/reader-vocabulary';
+import {
+  chapterDiscoveryScript, chapterEndScript, chapterEnrichment, chapterHeaderScript, chapterJumpScript, chapterLevelRange,
+  chapterNumber, displayChapterTitle, parseReaderChapters, positionScript, type ReaderChapter,
+} from '@/src/reader-chapters';
+import {
+  excerptParts, isSavedWord, readerLookupLanguage, savedLemmas, vocabularyLookup, vocabularySequence, vocabularyState,
+  wordsAvailable, type ChapterVocabulary, type ReaderLookupSelection,
+} from '@/src/reader-vocabulary';
 
 const baseProgressScript = `
   (function () {
@@ -91,7 +99,12 @@ function appearanceScript(settings: ReaderSettings, fontCss: string, progress: n
   const background = night ? darkColors.canvas : lightColors.canvas;
   const foreground = night ? darkColors.ink : lightColors.ink;
   const muted = night ? darkColors.muted : lightColors.muted;
+  const metadata = night ? darkColors.metadata : lightColors.metadata;
   const line = night ? darkColors.border : lightColors.border;
+  const surface = night ? darkColors.surface : lightColors.surface;
+  const tint = night ? darkColors.accentSoft : lightColors.accentSoft;
+  const accent = night ? darkColors.primary : lightColors.primary;
+  const sans = faceStacks.plex;
   return `
     (function () {
       let style = document.getElementById('almonium-reader-style');
@@ -119,12 +132,45 @@ function appearanceScript(settings: ReaderSettings, fontCss: string, progress: n
         .almonium-open .almonium-fluent { display: block; color: ${muted}; font-size: 0.92em; margin: 0.3em 0 0.6em; padding-left: 0.9em; border-left: 2px solid ${line}; }
         p.almonium-inline { color: ${muted}; font-size: 0.9em; margin-top: -0.55em !important; }
         p.almonium-inline .almonium-fluent { display: inline; }
+        .almonium-chapter-head { margin: -0.3em 0 1.5em; }
+        .almonium-chapter-meta { font-family: ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: 0.3px; color: ${metadata}; margin-bottom: 8px; }
+        .almonium-chapter-desc { color: ${muted} !important; font-size: 0.88em !important; line-height: 1.5 !important; margin: 0 !important; }
+        .almonium-chapter-end { margin: 2.4em 0 3em; padding-top: 1.4em; border-top: 1px solid ${line}; font-family: ${sans}; }
+        .almonium-words-title { font-size: 15px; font-weight: 600; color: ${foreground}; }
+        .almonium-words-note { font-size: 13px; line-height: 1.45; color: ${muted}; margin: 4px 0 8px; }
+        .almonium-word { display: block; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid ${line}; padding: 12px 0; margin: 0; color: ${foreground}; font: inherit; }
+        .almonium-word-head { display: flex; align-items: baseline; gap: 10px; }
+        .almonium-word-lemma { font-family: ${faceStacks.literata}; font-size: 18px; }
+        .almonium-word-surface { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: ${metadata}; }
+        .almonium-word-excerpt { font-size: 13.5px; line-height: 1.5; color: ${muted}; margin-top: 4px; }
+        .almonium-word-excerpt mark { background: ${tint}; color: inherit; border-radius: 3px; padding: 0 2px; }
+        .almonium-words-all { display: block; background: none; border: 0; padding: 12px 0; margin: 0; color: ${accent}; font: inherit; font-size: 14px; font-weight: 600; }
+        .almonium-next { display: block; width: 100%; text-align: left; margin-top: 1.4em; padding: 16px 18px; border: 1px solid ${line}; border-radius: 20px; background: ${surface}; color: ${foreground}; font: inherit; }
+        .almonium-next-meta { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: ${metadata}; }
+        .almonium-next-title { font-family: ${faceStacks.literata}; font-size: 20px; margin-top: 4px; }
+        .almonium-next-desc { font-size: 13.5px; line-height: 1.5; color: ${muted}; margin-top: 6px; }
       \`;
       document.documentElement.style.background = '${background}';
       setTimeout(function () {
         const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        window.__almoniumScrollReset = true;
         window.scrollTo(0, max * ${Math.max(0, Math.min(100, progress)) / 100});
       }, 250);
+      true;
+    })();
+  `;
+}
+
+/** The chrome floats over the page, so the text starts under it and a chapter jump lands below it. */
+function layoutScript(top: number, bottom: number) {
+  const above = Math.max(0, Math.round(top));
+  const below = Math.max(0, Math.round(bottom));
+  return `
+    (function () {
+      let style = document.getElementById('almonium-reader-layout');
+      if (!style) { style = document.createElement('style'); style.id = 'almonium-reader-layout'; }
+      style.textContent = 'body { padding-top: ${above + 20}px !important; padding-bottom: ${below + 48}px !important; } .chapter-title, h1, h2 { scroll-margin-top: ${above + 12}px; }';
+      document.head.appendChild(style);
       true;
     })();
   `;
@@ -139,7 +185,7 @@ const finishedKey = (bookId: string) => `almonium:finished:${bookId}`;
 
 export default function ReaderScreen() {
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, reduceMotion } = useTheme();
   const styles = useStyles();
   const params = useLocalSearchParams<{ bookId: string; language?: string; title?: string; parallel?: string }>();
   const bookId = params.bookId;
@@ -157,10 +203,24 @@ export default function ReaderScreen() {
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [fontCss, setFontCss] = useState('');
   const [settingsVisible, setSettingsVisible] = useState(false);
-  const [chaptersVisible, setChaptersVisible] = useState(false);
-  const [vocabularyChapter, setVocabularyChapter] = useState<ReaderChapter | null>(null);
+  const [contentsVisible, setContentsVisible] = useState(false);
+  const [wordsVisible, setWordsVisible] = useState(false);
+  // The Words sheet follows the chapter being read until its arrows move it; null means follow.
+  const [wordsChapterIndex, setWordsChapterIndex] = useState<number | null>(null);
+  const [revealedChapter, setRevealedChapter] = useState<number | null>(null);
+  const [currentChapter, setCurrentChapter] = useState(-1);
   const [chapters, setChapters] = useState<ReaderChapter[]>([]);
   const [chaptersReady, setChaptersReady] = useState(false);
+  const [topHeight, setTopHeight] = useState(0);
+  const [bottomHeight, setBottomHeight] = useState(0);
+  const chromeShown = useRef(new Animated.Value(1)).current;
+  const chromeState = useRef(true);
+  const insets = useRef({ top: 0, bottom: 0 });
+  const injectedEnds = useRef(new Set<number>());
+  const contentsScroll = useRef<ScrollView>(null);
+  // The contents list's offset inside the sheet, and whether this opening has already scrolled to the current chapter.
+  const contentsListTop = useRef(0);
+  const contentsScrolled = useRef(false);
   const [paywallContext, setPaywallContext] = useState<PaywallContext | null>(null);
   const [selection, setSelection] = useState<ReaderLookupSelection | null>(null);
   const [senseIndex, setSenseIndex] = useState(0);
@@ -200,16 +260,31 @@ export default function ReaderScreen() {
   const variants = infoQuery.data?.languageVariants ?? [];
   const primaryEdition = variants.find(variant => variant.id === bookId);
   const primarySlug = primaryEdition?.editionSlug;
-  const vocabularyChapterSequence = vocabularyChapter ? vocabularySequence(vocabularyChapter) : undefined;
+  // Chapters that can carry a list: processor anchors only. The arrows in the Words sheet walk these.
+  const wordChapters = useMemo(() => chapters.filter(chapter => vocabularySequence(chapter)), [chapters]);
+  const readingChapter = chapters[currentChapter] as ReaderChapter | undefined;
+  const readingSequence = readingChapter ? vocabularySequence(readingChapter) : undefined;
+  const wordsChapter = (wordsChapterIndex === null ? undefined : chapters[wordsChapterIndex])
+    ?? (readingSequence ? readingChapter : wordChapters[0]);
+  const wordsSequence = wordsChapter ? vocabularySequence(wordsChapter) : undefined;
+  const vocabularyKey = (sequence: number | undefined) => ['book-chapter-vocabulary', firebaseUser?.uid, primarySlug, sequence];
   const vocabularyQuery = useQuery({
-    queryKey: ['book-chapter-vocabulary', firebaseUser?.uid, primarySlug, vocabularyChapterSequence],
-    queryFn: () => api.bookChapterVocabulary(primarySlug!, vocabularyChapterSequence!),
-    enabled: Boolean(chaptersVisible && primarySlug && vocabularyChapterSequence && firebaseUser),
+    queryKey: vocabularyKey(wordsSequence),
+    queryFn: () => api.bookChapterVocabulary(primarySlug!, wordsSequence!),
+    enabled: Boolean(wordsVisible && primarySlug && wordsSequence && firebaseUser),
     staleTime: 0,
     retry: false,
   });
   const wordListState = vocabularyState(vocabularyQuery.data, vocabularyQuery.isPaused,
     vocabularyQuery.isError, vocabularyQuery.isFetching);
+  // The chapter being read: its words go to the chapter end, and its status decides whether Words shows at all.
+  const readingVocabularyQuery = useQuery({
+    queryKey: vocabularyKey(readingSequence),
+    queryFn: () => api.bookChapterVocabulary(primarySlug!, readingSequence!),
+    enabled: Boolean(chaptersReady && primarySlug && readingSequence && firebaseUser),
+    staleTime: 10 * 60_000,
+    retry: false,
+  });
   const chaptersQuery = useQuery({
     queryKey: ['book-chapters', firebaseUser?.uid, primarySlug],
     queryFn: () => api.bookChapters(primarySlug!),
@@ -254,8 +329,9 @@ export default function ReaderScreen() {
   }, [bookId, firebaseUser?.uid, queryClient, sourceLanguage]);
 
   useEffect(() => {
-    setVocabularyChapter(null);
-    setChaptersVisible(false);
+    setWordsChapterIndex(null);
+    setWordsVisible(false);
+    setContentsVisible(false);
     setSelection(null);
     void loadReaderSettings().then((loaded) => {
       setSettings(loaded);
@@ -316,6 +392,61 @@ export default function ReaderScreen() {
     webView.current?.injectJavaScript(appearanceScript(settings, fontCss, progressRef.current));
   }, [fontCss, settings]);
 
+  useEffect(() => {
+    insets.current = { top: topHeight, bottom: bottomHeight };
+    webView.current?.injectJavaScript(layoutScript(topHeight, bottomHeight));
+  }, [topHeight, bottomHeight]);
+
+  const showChrome = useCallback((shown: boolean) => {
+    if (chromeState.current === shown) return;
+    chromeState.current = shown;
+    Animated.timing(chromeShown, { toValue: shown ? 1 : 0, duration: reduceMotion ? 0 : 200, useNativeDriver: true }).start();
+  }, [chromeShown, reduceMotion]);
+
+  const bookTitle = params.title || shelfBook?.title || t('This book');
+  const enrichment = chaptersQuery.data;
+  const chapterMeta = useCallback((chapter: ReaderChapter) => {
+    const detail = chapterEnrichment(chapter, enrichment);
+    const count = t('Chapter {number} of {total}', { number: chapterNumber(chapter), total: chapters.length });
+    return detail?.cefrEstimate ? `${count} · ${t('Estimated')} ${detail.cefrEstimate}` : count;
+  }, [chapters.length, enrichment, t]);
+
+  // The chapter header: the mono line and the description under each heading that has them.
+  useEffect(() => {
+    if (!chaptersReady || !enrichment?.length) return;
+    const headers = chapters.flatMap(chapter => {
+      const detail = chapterEnrichment(chapter, enrichment);
+      if (!detail) return [];
+      return [{ index: chapter.index, meta: chapterMeta(chapter), description: detail.descriptions.join(' ') }];
+    });
+    if (headers.length) webView.current?.injectJavaScript(chapterHeaderScript(headers));
+  }, [chapterMeta, chapters, chaptersReady, enrichment]);
+
+  // The chapter end for the chapter being read, once its words have answered one way or the other.
+  useEffect(() => {
+    if (!chaptersReady || !readingChapter || readingVocabularyQuery.isFetching || chaptersQuery.isFetching || injectedEnds.current.has(readingChapter.index)) return;
+    if (readingSequence && !readingVocabularyQuery.data && !readingVocabularyQuery.isError && !readingVocabularyQuery.isPaused) return;
+    injectedEnds.current.add(readingChapter.index);
+    const words = readingVocabularyQuery.data?.status === 'ready' ? readingVocabularyQuery.data.words : [];
+    const following = chapters[readingChapter.index + 1];
+    const nextDetail = following ? chapterEnrichment(following, enrichment) : undefined;
+    webView.current?.injectJavaScript(chapterEndScript({
+      index: readingChapter.index,
+      title: t('Words from this chapter'),
+      note: t('{count, plural, one {# of the book’s useful words occurs here.} other {# of the book’s useful words occur here.}} Each example is from the text.', { count: words.length }),
+      words,
+      shown: 3,
+      allLabel: t('All {count} words', { count: words.length }),
+      next: following ? {
+        index: following.index,
+        meta: nextDetail?.cefrEstimate ? `${t('Next')} · ${t('Estimated')} ${nextDetail.cefrEstimate}` : t('Next'),
+        title: displayChapterTitle(following.title) || t('Untitled chapter'),
+        description: nextDetail?.descriptions.join(' ') ?? '',
+      } : null,
+    }));
+  }, [chapters, chaptersQuery.isFetching, chaptersReady, enrichment, readingChapter, readingSequence, readingVocabularyQuery.data,
+    readingVocabularyQuery.isError, readingVocabularyQuery.isFetching, readingVocabularyQuery.isPaused, t]);
+
   function update(patch: Partial<ReaderSettings>) {
     setSettings((current) => ({ ...current, ...patch }));
   }
@@ -333,10 +464,28 @@ export default function ReaderScreen() {
     const message = event.nativeEvent.data;
     if (message.startsWith('{')) {
       try {
-        const payload = JSON.parse(message) as { type?: string; text?: string; context?: string; chapters?: unknown };
+        const payload = JSON.parse(message) as {
+          type?: string; text?: string; context?: string; chapters?: unknown; chapter?: unknown; chrome?: unknown; blockId?: unknown; lemma?: unknown;
+        };
         if (payload.type === 'chapters') {
           setChapters(parseReaderChapters(payload.chapters));
           setChaptersReady(true);
+          return;
+        }
+        if (payload.type === 'position') {
+          if (Number.isInteger(payload.chapter)) setCurrentChapter(payload.chapter as number);
+          if (typeof payload.chrome === 'boolean') showChrome(payload.chrome);
+          return;
+        }
+        if (payload.type === 'chapter-word' && Number.isInteger(payload.chapter)) {
+          // A row at the chapter end: open the word from the list already fetched for that chapter.
+          const chapter = chapters[payload.chapter as number];
+          const data = chapter && primarySlug ? queryClient.getQueryData<ChapterVocabulary>(vocabularyKey(vocabularySequence(chapter))) : undefined;
+          const word = data?.words.find(row => row.blockId === payload.blockId && row.lemma === payload.lemma);
+          if (!chapter || !data || !word) return;
+          openWord(vocabularyLookup(word, data, primarySlug!, bookTitle, displayChapterTitle(chapter.title)));
+          setWordsChapterIndex(chapter.index);
+          setWordsVisible(true);
           return;
         }
         if (payload.type === 'selection' && payload.text) {
@@ -366,12 +515,43 @@ export default function ReaderScreen() {
     if (next >= 99) void markFinished();
   }
 
+  function openWord(next: ReaderLookupSelection) {
+    setWordSaved(false);
+    setWordSaveError('');
+    setProduceSelected(false);
+    setSenseIndex(0);
+    setSelection(next);
+  }
+
+  function jumpTo(chapter: ReaderChapter) {
+    webView.current?.injectJavaScript(chapterJumpScript(chapter.index));
+    showChrome(true);
+    setContentsVisible(false);
+  }
+
+  function openContents() {
+    setRevealedChapter(null);
+    contentsScrolled.current = false;
+    setContentsVisible(true);
+  }
+
+  function openWords() {
+    setWordsChapterIndex(null);
+    setSelection(null);
+    setWordsVisible(true);
+  }
+
+  function closeWords() {
+    setWordsVisible(false);
+    setSelection(null);
+  }
+
   async function keepSelectedWord() {
     const lookup = selectionQuery.data;
     const sense = lookup?.senses[senseIndex] ?? lookup?.senses[0];
     if (!lookup || !sense?.translations.length || savingWord) return;
     if (!profile?.premium && (itemsQuery.data?.length ?? 0) >= freeSavedItemLimit) {
-      setSelection(null);
+      closeWords();
       setPaywallContext('item-cap');
       return;
     }
@@ -410,148 +590,19 @@ export default function ReaderScreen() {
   const savedInLanguage = itemsQuery.data?.length ?? 0;
   const lookup = selectionQuery.data;
   const selectedSense = lookup?.senses[senseIndex] ?? lookup?.senses[0];
+  const saved = savedLemmas(itemsQuery.data);
+  const showWords = wordsAvailable(chapters, primarySlug, readingVocabularyQuery.data);
+  const levelRange = chapterLevelRange(chapters, enrichment);
+  const wordsPosition = wordsChapter ? wordChapters.findIndex(chapter => chapter.index === wordsChapter.index) : -1;
+  const wordsDetail = wordsChapter ? chapterEnrichment(wordsChapter, enrichment) : undefined;
+  // A word opened from a list keeps the list behind it; a word selected in the text stands alone.
+  const wordFromList = Boolean(selection?.source);
+  const topTravel = chromeShown.interpolate({ inputRange: [0, 1], outputRange: [-(topHeight || 120), 0] });
+  const bottomTravel = chromeShown.interpolate({ inputRange: [0, 1], outputRange: [bottomHeight || 120, 0] });
 
-  return (
-    <View style={[styles.container, night && styles.containerNight]}>
-      <Stack.Screen options={{ headerShown: false }} />
-      {loading && (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.status}>{t('Opening at your last page…')}</Text>
-        </View>
-      )}
-      {error && (
-        <View style={styles.center}>
-          <Text style={styles.errorTitle}>{t('This page would not open.')}</Text>
-          <Text style={styles.status}>{error instanceof Error ? error.message : t('Please try again.')}</Text>
-          <Button
-            onPress={() => {
-              void textQuery.refetch();
-              void infoQuery.refetch();
-              if (parallelActive) void parallelQuery.refetch();
-            }}>
-            {t('Try again')}
-          </Button>
-          {parallelActive && <Button variant="secondary" onPress={() => update({ parallel: 'off' })}>{t('Read without the companion')}</Button>}
-        </View>
-      )}
-      {content && infoQuery.data && progress !== null && !loading && !error && (
-        <>
-          <SafeAreaView edges={['top']} style={[styles.readerHeader, night && styles.toolbarNight]}>
-            <View style={styles.readerHeaderRow}>
-              <Pressable accessibilityLabel={t('Back to book')} onPress={() => router.back()} style={styles.toolButton}>
-                <Ionicons name="chevron-back" size={24} color={night ? colors.white : colors.primary} />
-              </Pressable>
-              <View style={styles.readerTitleCopy}>
-                <Text numberOfLines={1} style={[styles.readerTitle, night && styles.nightText]}>
-                  {params.title || shelfBook?.title || t('Reader')}
-                </Text>
-                <Text style={styles.readerMeta}>
-                  {sourceLanguage}
-                  {parallelActive && companion ? ` ↔ ${editionLabel(companion, primaryEdition)}` : ''}
-                </Text>
-              </View>
-              <Pressable accessibilityLabel={t('Open chapters')} onPress={() => { setVocabularyChapter(null); setChaptersVisible(true); }} style={styles.toolButton}>
-                <Ionicons name="list-outline" size={24} color={night ? colors.white : colors.primary} />
-              </Pressable>
-              <Pressable accessibilityLabel={t('Open reader settings')} onPress={() => setSettingsVisible(true)} style={styles.toolButton}>
-                <Text style={[styles.largeA, night && styles.nightText]}>Aa</Text>
-              </Pressable>
-            </View>
-            <View style={styles.headerTrack}><View style={[styles.headerBar, { width: `${progress}%` }]} /></View>
-          </SafeAreaView>
-          <WebView
-            key={parallelActive ? `${settings.parallel}-${companion?.editionSlug}` : 'single'}
-            ref={webView}
-            source={{ html: readerHtml(content) }}
-            injectedJavaScript={`${appearanceScript(settings, fontCss, progress)}${parallelActive && parallelLanguage ? parallelScript(parallelLanguage, settings.parallel) : ''}${chapterDiscoveryScript}${baseProgressScript}${selectionScript}true;`}
-            onLoadStart={() => { setChapters([]); setChaptersReady(false); }}
-            onMessage={onMessage}
-            onShouldStartLoadWithRequest={(request) => {
-              if (request.url.startsWith('about:blank')) return true;
-              if (/^https?:|^mailto:/i.test(request.url)) void Linking.openURL(request.url);
-              return false;
-            }}
-            originWhitelist={['about:*']}
-            style={styles.webview}
-          />
-        </>
-      )}
-
-      <Sheet visible={chaptersVisible} onClose={() => setChaptersVisible(false)}>
-        <View style={styles.settingsHeading}>
-          <Text style={styles.settingsTitle}>{vocabularyChapter ? t('Chapter vocabulary') : t('Chapters')}</Text>
-          <Pressable accessibilityLabel={t('Close chapters')} onPress={() => setChaptersVisible(false)} hitSlop={8}>
-            <Text style={styles.done}>{t('Done')}</Text>
-          </Pressable>
-        </View>
-        {vocabularyChapter ? <>
-          <Pressable accessibilityRole="button" style={styles.chapterOption} onPress={() => setVocabularyChapter(null)}>
-            <Text style={styles.done}>{t('Back to chapters')}</Text>
-          </Pressable>
-          <Text style={styles.optionLabel}>{vocabularyChapter.title}</Text>
-          <Text style={styles.optionNote}>{t("A curated selection from this book’s useful words, not every word in the chapter. Each example comes from the text.")}</Text>
-          {wordListState === 'loading' && <ActivityIndicator accessibilityLabel={t('Loading vocabulary')} color={colors.primary} />}
-          {wordListState === 'offline' && <Text style={styles.status}>{t('Vocabulary is unavailable offline. You can keep reading and try again when connected.')}</Text>}
-          {wordListState === 'error' && <>
-            <Text style={styles.status}>{t('Vocabulary could not be loaded. This edition may not have it yet, or you may be offline. Reading still works.')}</Text>
-            <Button onPress={() => vocabularyQuery.refetch()}>{t('Try again')}</Button>
-          </>}
-          {wordListState === 'unavailable' && <Text style={styles.status}>{t('Current vocabulary is not available for this chapter. You can keep reading normally.')}</Text>}
-          {wordListState === 'empty' && <Text style={styles.status}>{t('No selected useful words occur in this chapter.')}</Text>}
-          {wordListState === 'ready' && vocabularyQuery.data?.words.map(word => (
-            <View key={`${word.blockId}:${word.lemma}`} style={styles.vocabularyWord}>
-              <Text style={styles.sheetEntry}>{word.lemma}</Text>
-              <Text style={styles.optionNote}>{t('In the text:')} {word.surface}</Text>
-              <Text style={styles.sourceContext}>{word.context}</Text>
-              <Pressable accessibilityRole="button" style={({ pressed }) => [styles.vocabularyAction, pressed && styles.optionSelected]}
-                onPress={() => {
-                  setWordSaved(false); setWordSaveError(''); setProduceSelected(false); setSenseIndex(0);
-                  setSelection(vocabularyLookup(word, vocabularyQuery.data!, primarySlug!,
-                    params.title || shelfBook?.title || t('This book'), vocabularyChapter.title));
-                  setChaptersVisible(false);
-                }}>
-                <Text style={styles.done}>{t('Look up')} {word.lemma}</Text>
-              </Pressable>
-            </View>
-          ))}
-        </> : <>
-        {!chaptersReady && <Text style={styles.status}>{t('Loading chapter navigation…')}</Text>}
-        {chaptersReady && chapters.length === 0 && <Text style={styles.status}>{t('This edition has no chapter headings. You can keep reading normally.')}</Text>}
-        {chaptersQuery.isError && <Text style={styles.optionNote}>{t('Chapter estimates are unavailable. Navigation still works.')}</Text>}
-        {chapters.map(chapter => {
-          const detail = chapterEnrichment(chapter, chaptersQuery.data);
-          return (
-            <View key={chapter.index}>
-            <Pressable accessibilityRole="button" style={[styles.option, styles.chapterOption]}
-              onPress={() => { webView.current?.injectJavaScript(chapterJumpScript(chapter.index)); setChaptersVisible(false); }}>
-              <View style={styles.optionCopy}>
-                <Text style={styles.optionLabel}>{chapter.title || t('Untitled chapter')}</Text>
-                {!!detail?.cefrEstimate && <Text style={styles.optionNote}>{t('Estimated')} {detail.cefrEstimate}</Text>}
-                {detail?.descriptions.map((description, index) => <Text key={index} style={styles.optionNote}>{description}</Text>)}
-              </View>
-            </Pressable>
-            <Pressable accessibilityRole="button" accessibilityLabel={`${t('Vocabulary')}: ${chapter.title}`}
-              style={({ pressed }) => [styles.vocabularyAction, pressed && styles.optionSelected]}
-              onPress={() => setVocabularyChapter(chapter)}>
-              <Text style={styles.done}>{t('Vocabulary')}</Text>
-            </Pressable>
-            </View>
-          );
-        })}
-        </>}
-      </Sheet>
-
-      {/* The word sheet: Discover's plate, with the reader dimmed behind it and never dismissed. */}
-      <Sheet visible={Boolean(selection)} onClose={() => setSelection(null)}>
-        {selection?.source && <View style={styles.settingGroup}>
-          <Text style={styles.optionLabel}>{selection.source.bookTitle} · {selection.source.chapterTitle} · {lookupLanguage}</Text>
-          <Text style={styles.sourceContext}>{selection.context}</Text>
-          <Pressable accessibilityRole="button" style={styles.vocabularyAction} onPress={() => { setSelection(null); setChaptersVisible(true); }}>
-            <Text style={styles.done}>{t('Back to vocabulary')}</Text>
-          </Pressable>
-        </View>}
-        {selectionQuery.isPaused ? <Text style={styles.status}>{t('Word lookup is unavailable offline. You can return to the book and keep reading.')}</Text> : selectionQuery.isLoading ? (
+  const wordCard = (
+    <>
+      {selectionQuery.isPaused ? <Text style={styles.status}>{t('Word lookup is unavailable offline. You can return to the book and keep reading.')}</Text> : selectionQuery.isLoading ? (
           <View style={styles.sheetLoading}><ActivityIndicator color={colors.primary} /><Text style={styles.status}>{t('Opening the entry…')}</Text></View>
         ) : selectionQuery.isError ? (
           <View style={styles.sheetLoading}>
@@ -572,7 +623,7 @@ export default function ReaderScreen() {
               <Pressable
                 accessibilityLabel={t('Learn about narrated audio')}
                 onPress={() => {
-                  setSelection(null);
+                  closeWords();
                   setPaywallContext('audio');
                 }}
                 style={styles.sheetAudio}>
@@ -623,11 +674,234 @@ export default function ReaderScreen() {
             {!profile?.premium && (
               <Text style={styles.capLine}>
                 {t('{saved} of {limit} words kept. Free covers a hundred at a time.', { saved: savedInLanguage, limit: freeSavedItemLimit })}{' '}
-                <Text onPress={() => { setSelection(null); setPaywallContext('item-cap'); }} style={styles.capLink}>{t('See what changes.')}</Text>
+                <Text onPress={() => { closeWords(); setPaywallContext('item-cap'); }} style={styles.capLink}>{t('See what changes.')}</Text>
               </Text>
             )}
           </>
         ) : null}
+    </>
+  );
+
+  return (
+    <View style={[styles.container, night && styles.containerNight]}>
+      <Stack.Screen options={{ headerShown: false }} />
+      {loading && (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.status}>{t('Opening at your last page…')}</Text>
+        </View>
+      )}
+      {error && (
+        <View style={styles.center}>
+          <Text style={styles.errorTitle}>{t('This page would not open.')}</Text>
+          <Text style={styles.status}>{error instanceof Error ? error.message : t('Please try again.')}</Text>
+          <Button
+            onPress={() => {
+              void textQuery.refetch();
+              void infoQuery.refetch();
+              if (parallelActive) void parallelQuery.refetch();
+            }}>
+            {t('Try again')}
+          </Button>
+          {parallelActive && <Button variant="secondary" onPress={() => update({ parallel: 'off' })}>{t('Read without the companion')}</Button>}
+        </View>
+      )}
+      {content && infoQuery.data && progress !== null && !loading && !error && (
+        <>
+          <WebView
+            key={parallelActive ? `${settings.parallel}-${companion?.editionSlug}` : 'single'}
+            ref={webView}
+            source={{ html: readerHtml(content) }}
+            injectedJavaScript={`${appearanceScript(settings, fontCss, progress)}${layoutScript(insets.current.top, insets.current.bottom)}${parallelActive && parallelLanguage ? parallelScript(parallelLanguage, settings.parallel) : ''}${chapterDiscoveryScript}${positionScript}${baseProgressScript}${selectionScript}true;`}
+            onLoadStart={() => { setChapters([]); setChaptersReady(false); setCurrentChapter(-1); injectedEnds.current.clear(); showChrome(true); }}
+            onLoadEnd={() => webView.current?.injectJavaScript(layoutScript(insets.current.top, insets.current.bottom))}
+            onMessage={onMessage}
+            onShouldStartLoadWithRequest={(request) => {
+              if (request.url.startsWith('about:blank')) return true;
+              if (/^https?:|^mailto:/i.test(request.url)) void Linking.openURL(request.url);
+              return false;
+            }}
+            originWhitelist={['about:*']}
+            style={styles.webview}
+          />
+          {/* The chrome floats over the page and leaves on a scroll down; the text is the surface. */}
+          <Animated.View
+            onLayout={event => setTopHeight(event.nativeEvent.layout.height)}
+            style={[styles.topChrome, { transform: [{ translateY: topTravel }] }]}>
+            <SafeAreaView edges={['top']} style={[styles.readerHeader, night && styles.toolbarNight]}>
+              <View style={styles.readerHeaderRow}>
+                <Pressable accessibilityLabel={t('Back to book')} onPress={() => router.back()} style={styles.toolButton}>
+                  <Ionicons name="chevron-back" size={24} color={night ? colors.white : colors.primary} />
+                </Pressable>
+                <View style={styles.readerTitleCopy}>
+                  <Text numberOfLines={1} style={[styles.readerTitle, night && styles.nightText]}>
+                    {params.title || shelfBook?.title || t('Reader')}
+                  </Text>
+                  <Text numberOfLines={1} style={styles.readerMeta}>
+                    {readingChapter ? `${displayChapterTitle(readingChapter.title)} · ` : ''}
+                    {sourceLanguage}
+                    {parallelActive && companion ? ` ↔ ${editionLabel(companion, primaryEdition)}` : ''}
+                  </Text>
+                </View>
+                <View style={styles.toolButton} />
+              </View>
+              <View style={styles.headerTrack}><View style={[styles.headerBar, { width: `${progress}%` }]} /></View>
+            </SafeAreaView>
+          </Animated.View>
+          <Animated.View
+            onLayout={event => setBottomHeight(event.nativeEvent.layout.height)}
+            style={[styles.bottomChrome, { transform: [{ translateY: bottomTravel }] }]}>
+            <SafeAreaView edges={['bottom']} style={[styles.readerBar, night && styles.toolbarNight]}>
+              <ChromePill icon="list-outline" label={t('Contents')} active={contentsVisible} night={night} onPress={openContents} />
+              {showWords && (
+                <ChromePill icon="bookmarks-outline" label={t('Words')} active={wordsVisible} night={night} onPress={openWords} />
+              )}
+              <View style={styles.barSpacer} />
+              <Pressable accessibilityLabel={t('Open reader settings')} onPress={() => setSettingsVisible(true)} style={styles.toolButton}>
+                <Text style={[styles.largeA, night && styles.nightText]}>Aa</Text>
+              </Pressable>
+            </SafeAreaView>
+          </Animated.View>
+        </>
+      )}
+
+      {/* Contents: title and level per row; the description on the chapter being read, or on a row tapped once. */}
+      <Sheet visible={contentsVisible} onClose={() => setContentsVisible(false)} scrollRef={contentsScroll}>
+        <View style={styles.settingsHeading}>
+          <View style={styles.sheetHeadingCopy}>
+            <Text style={styles.sheetTitle}>{t('Contents')}</Text>
+            {chaptersReady && chapters.length > 0 && (
+              <Text style={styles.sheetSubtitle}>
+                {t('{count, plural, one {# chapter} other {# chapters}}', { count: chapters.length })}
+                {levelRange ? ` · ${levelRange}` : ''}
+              </Text>
+            )}
+          </View>
+          <Pressable accessibilityLabel={t('Close contents')} onPress={() => setContentsVisible(false)} hitSlop={8} style={styles.sheetClose}>
+            <Ionicons name="close" size={20} color={colors.muted} />
+          </Pressable>
+        </View>
+        {!chaptersReady && <Text style={styles.status}>{t('Loading chapter navigation…')}</Text>}
+        {chaptersReady && chapters.length === 0 && <Text style={styles.status}>{t('This edition has no chapter headings. You can keep reading normally.')}</Text>}
+        {chaptersQuery.isError && <Text style={styles.optionNote}>{t('Chapter estimates are unavailable. Navigation still works.')}</Text>}
+        <View style={styles.contentsList} onLayout={event => { contentsListTop.current = event.nativeEvent.layout.y; }}>
+          {chapters.map(chapter => {
+            const detail = chapterEnrichment(chapter, enrichment);
+            const description = detail?.descriptions.join(' ') ?? '';
+            const current = chapter.index === currentChapter;
+            const open = current || chapter.index === revealedChapter;
+            return (
+              <Pressable
+                key={chapter.index}
+                accessibilityRole="button"
+                accessibilityState={{ selected: current }}
+                accessibilityHint={description && !open ? t('Tap once for the description, twice to go') : undefined}
+                onLayout={current && contentsVisible ? event => {
+                  if (contentsScrolled.current) return;
+                  contentsScrolled.current = true;
+                  const y = contentsListTop.current + event.nativeEvent.layout.y;
+                  contentsScroll.current?.scrollTo({ y: Math.max(0, y - 120), animated: false });
+                } : undefined}
+                onPress={() => {
+                  if (description && !open) { setRevealedChapter(chapter.index); return; }
+                  jumpTo(chapter);
+                }}
+                style={({ pressed }) => [styles.contentsRow, open && description ? styles.contentsRowOpen : null, current && styles.contentsRowCurrent, pressed && styles.optionSelected]}>
+                <View style={styles.contentsRowHead}>
+                  <Text style={[styles.contentsTitle, current && styles.contentsTitleCurrent]}>{displayChapterTitle(chapter.title) || t('Untitled chapter')}</Text>
+                  {!!detail?.cefrEstimate && <Text style={styles.levelTag}>{detail.cefrEstimate}</Text>}
+                </View>
+                {open && !!description && <Text style={styles.contentsDescription}>{description}</Text>}
+              </Pressable>
+            );
+          })}
+        </View>
+      </Sheet>
+
+      {/* Words: the chapter's list, which swaps to the word itself when a row is tapped. */}
+      <Sheet visible={wordsVisible} onClose={closeWords}>
+        {wordFromList && selection ? (
+          <>
+            <Pressable accessibilityRole="button" onPress={() => setSelection(null)} style={styles.backRow} hitSlop={8}>
+              <Ionicons name="arrow-back" size={18} color={colors.primary} />
+              <Text style={styles.done}>{t('Words')}</Text>
+            </Pressable>
+            <Text style={styles.optionNote}>{selection.source!.bookTitle} · {selection.source!.chapterTitle} · {lookupLanguage}</Text>
+            {wordCard}
+          </>
+        ) : (
+          <>
+            <View style={styles.settingsHeading}>
+              <Text style={styles.settingsTitle}>{t('WORDS FROM THIS CHAPTER')}</Text>
+              <Pressable accessibilityLabel={t('Close words')} onPress={closeWords} hitSlop={8} style={styles.sheetClose}>
+                <Ionicons name="close" size={20} color={colors.muted} />
+              </Pressable>
+            </View>
+            {wordsChapter ? (
+              <View style={styles.wordsHead}>
+                <View style={styles.sheetHeadingCopy}>
+                  <Text style={styles.wordsChapter}>{displayChapterTitle(wordsChapter.title) || t('Untitled chapter')}</Text>
+                  <Text style={styles.sheetSubtitle}>
+                    {wordListState === 'ready' ? t('{count, plural, one {# word} other {# words}}', { count: vocabularyQuery.data?.words.length ?? 0 }) : ''}
+                    {wordListState === 'ready' && wordsDetail?.cefrEstimate ? ' · ' : ''}
+                    {wordsDetail?.cefrEstimate ? `${t('Estimated')} ${wordsDetail.cefrEstimate}` : ''}
+                  </Text>
+                </View>
+                <Pressable accessibilityLabel={t('Previous chapter’s words')} disabled={wordsPosition <= 0}
+                  onPress={() => setWordsChapterIndex(wordChapters[wordsPosition - 1].index)}
+                  style={[styles.arrowButton, wordsPosition <= 0 && styles.arrowDisabled]}>
+                  <Ionicons name="chevron-back" size={20} color={colors.ink} />
+                </Pressable>
+                <Pressable accessibilityLabel={t('Next chapter’s words')} disabled={wordsPosition < 0 || wordsPosition >= wordChapters.length - 1}
+                  onPress={() => setWordsChapterIndex(wordChapters[wordsPosition + 1].index)}
+                  style={[styles.arrowButton, (wordsPosition < 0 || wordsPosition >= wordChapters.length - 1) && styles.arrowDisabled]}>
+                  <Ionicons name="chevron-forward" size={20} color={colors.ink} />
+                </Pressable>
+              </View>
+            ) : (
+              <Text style={styles.status}>{t('This edition has no chapter word lists yet.')}</Text>
+            )}
+            {wordListState === 'loading' && <ActivityIndicator accessibilityLabel={t('Loading vocabulary')} color={colors.primary} />}
+            {wordListState === 'offline' && <Text style={styles.status}>{t('Words are unavailable offline. You can keep reading and try again when connected.')}</Text>}
+            {wordListState === 'error' && <>
+              <Text style={styles.status}>{t('Words could not be loaded. Reading still works.')}</Text>
+              <Button variant="secondary" onPress={() => vocabularyQuery.refetch()}>{t('Try again')}</Button>
+            </>}
+            {wordsChapter && wordListState === 'unavailable' && <Text style={styles.status}>{t('Words for this chapter aren’t ready yet.')}</Text>}
+            {wordListState === 'empty' && <Text style={styles.status}>{t('No selected useful words occur in this chapter.')}</Text>}
+            {wordListState === 'ready' && (
+              <View style={styles.wordsList}>
+                {vocabularyQuery.data?.words.map(word => {
+                  const [before, match, after] = excerptParts(word.context, word.surface);
+                  const first = word === vocabularyQuery.data?.words[0];
+                  return (
+                    <Pressable
+                      key={`${word.blockId}:${word.lemma}`}
+                      accessibilityRole="button"
+                      accessibilityLabel={word.lemma}
+                      onPress={() => openWord(vocabularyLookup(word, vocabularyQuery.data!, primarySlug!, bookTitle, displayChapterTitle(wordsChapter!.title)))}
+                      style={({ pressed }) => [styles.wordRow, first && styles.wordRowFirst, pressed && styles.optionSelected]}>
+                      <View style={styles.wordHead}>
+                        <Text style={styles.wordLemma}>{word.lemma}</Text>
+                        {word.surface !== word.lemma && <Text style={styles.wordSurface}>{word.surface}</Text>}
+                        <View style={styles.barSpacer} />
+                        {isSavedWord(word, saved) && <Text style={styles.savedMark}>{t('Saved')}</Text>}
+                      </View>
+                      <Text style={styles.wordExcerpt}>
+                        {before}{!!match && <Text style={styles.wordMatch}>{match}</Text>}{after}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+          </>
+        )}
+      </Sheet>
+
+      {/* The word sheet: Discover's plate, with the reader dimmed behind it and never dismissed. */}
+      <Sheet visible={Boolean(selection) && !wordFromList} onClose={() => setSelection(null)}>
+        {wordCard}
       </Sheet>
 
       {/* Reader type: three presets, size, translation mode, page. */}
@@ -762,6 +1036,22 @@ export default function ReaderScreen() {
   );
 }
 
+/** A bottom-bar toggle: icon and label in a pill, tinted while its sheet is open. */
+function ChromePill({ icon, label, active, night, onPress }: {
+  icon: React.ComponentProps<typeof Ionicons>['name']; label: string; active: boolean; night: boolean; onPress(): void;
+}) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+  const ink = active ? (night ? darkColors.primary : colors.primary) : night ? colors.white : colors.ink;
+  return (
+    <Pressable accessibilityRole="button" accessibilityState={{ expanded: active }} onPress={onPress}
+      style={({ pressed }) => [styles.pill, night && styles.pillNight, active && (night ? styles.pillActiveNight : styles.pillActive), pressed && styles.pillPressed]}>
+      <Ionicons name={icon} size={17} color={ink} />
+      <Text style={[styles.pillText, { color: ink }]}>{label}</Text>
+    </Pressable>
+  );
+}
+
 function ReaderOption({ label, selected, onPress }: { label: string; selected: boolean; onPress(): void }) {
   const styles = useStyles();
   return (
@@ -778,7 +1068,43 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32, backgroundColor: colors.canvas },
   status: { color: colors.muted, fontSize: 15, textAlign: 'center' },
   errorTitle: { color: colors.ink, fontSize: 20, fontWeight: '600', textAlign: 'center' },
+  topChrome: { position: 'absolute', top: 0, left: 0, right: 0 },
+  bottomChrome: { position: 'absolute', bottom: 0, left: 0, right: 0 },
   readerHeader: { backgroundColor: colors.canvas },
+  readerBar: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 6, backgroundColor: colors.canvas, borderTopWidth: 1, borderTopColor: colors.line },
+  barSpacer: { flex: 1 },
+  pill: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 15, borderRadius: 22, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
+  pillNight: { backgroundColor: darkColors.surface, borderColor: darkColors.border },
+  pillActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
+  pillActiveNight: { borderColor: darkColors.primary, backgroundColor: darkColors.accentSoft },
+  pillPressed: { opacity: 0.75 },
+  pillText: { fontFamily: fonts.sansMedium, fontSize: 13.5 },
+  sheetTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 22, lineHeight: serifLineHeight(22) },
+  sheetSubtitle: { color: colors.metadata, fontFamily: fonts.mono, fontSize: 12, marginTop: 2 },
+  sheetClose: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 18 },
+  contentsList: { gap: 2 },
+  contentsRow: { minHeight: 44, justifyContent: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16 },
+  contentsRowOpen: { backgroundColor: colors.accentSoft },
+  contentsRowCurrent: { backgroundColor: colors.surface, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },
+  contentsRowHead: { flexDirection: 'row', alignItems: 'baseline', gap: 12 },
+  contentsTitle: { flex: 1, color: colors.ink, fontSize: 15.5 },
+  contentsTitleCurrent: { fontFamily: fonts.sansSemibold, color: colors.primary },
+  levelTag: { color: colors.metadata, fontFamily: fonts.mono, fontSize: 12 },
+  contentsDescription: { color: colors.muted, fontSize: 13.5, lineHeight: 19 },
+  backRow: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
+  wordsHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  wordsChapter: { color: colors.ink, fontFamily: fonts.serif, fontSize: 20, lineHeight: serifLineHeight(20) },
+  arrowButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 22, borderWidth: 1, borderColor: colors.border },
+  arrowDisabled: { opacity: 0.35 },
+  wordsList: { borderRadius: 20, paddingHorizontal: 4, backgroundColor: colors.surface, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },
+  wordRow: { gap: 5, paddingHorizontal: 12, paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.line, borderRadius: 14 },
+  wordRowFirst: { borderTopWidth: 0 },
+  wordHead: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
+  wordLemma: { color: colors.ink, fontFamily: fonts.serif, fontSize: 18, lineHeight: serifLineHeight(18) },
+  wordSurface: { color: colors.metadata, fontFamily: fonts.mono, fontSize: 12 },
+  savedMark: { color: colors.metadata, fontSize: 11.5, fontFamily: fonts.sansMedium },
+  wordExcerpt: { color: colors.muted, fontSize: 13.5, lineHeight: 19 },
+  wordMatch: { backgroundColor: colors.accentSoft, color: colors.ink },
   readerHeaderRow: { minHeight: 54, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8 },
   readerTitleCopy: { flex: 1, alignItems: 'center', gap: 1 },
   readerTitle: { color: colors.ink, fontFamily: fonts.sansMedium, fontSize: 12.5 },
@@ -819,9 +1145,6 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   settingGroup: { gap: 4 },
   settingLabel: { color: colors.metadata, fontSize: 10, fontWeight: '600', letterSpacing: 1.3, paddingBottom: 4 },
   option: { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 11 },
-  chapterOption: { minHeight: 44 },
-  vocabularyAction: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 12, borderRadius: 20 },
-  vocabularyWord: { gap: 8, paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.line },
   optionSelected: { backgroundColor: colors.accentSoft },
   dot: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: colors.border },
   dotSelected: { borderWidth: 6, borderColor: colors.primary },

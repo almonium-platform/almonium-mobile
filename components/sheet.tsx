@@ -1,4 +1,4 @@
-import { type PropsWithChildren, useEffect, useRef, useState } from 'react';
+import { type PropsWithChildren, type RefObject, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,12 +23,15 @@ export function Sheet({
   scroll = true,
   contentStyle,
   maxHeight = '88%',
+  scrollRef,
 }: PropsWithChildren<{
   visible: boolean;
   onClose(): void;
   scroll?: boolean;
   contentStyle?: ViewStyle;
   maxHeight?: ViewStyle['maxHeight'];
+  /** For a sheet that opens on a row deep in its list, such as the contents at the current chapter. */
+  scrollRef?: RefObject<ScrollView | null>;
 }>) {
   const { t } = useTranslation();
   const { reduceMotion } = useTheme();
@@ -86,7 +89,7 @@ export function Sheet({
         <SafeAreaView edges={['bottom']} style={styles.sheet}>
           <View style={styles.grabber} />
           {scroll ? (
-            <ScrollView contentContainerStyle={[styles.content, contentStyle]} keyboardShouldPersistTaps="handled">
+            <ScrollView ref={scrollRef} contentContainerStyle={[styles.content, contentStyle]} keyboardShouldPersistTaps="handled">
               {children}
             </ScrollView>
           ) : (

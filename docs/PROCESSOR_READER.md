@@ -90,3 +90,49 @@ definition or publishes anything. Native bottom-sheet transitions, pressed/dark
 states, real offline mode and saving the looked-up word still need device
 acceptance. Book/chapter attribution is retained in the lookup visit; this slice
 does not add persistent source-edition fields to saved cards.
+
+## Chapter page on the phone (2026-09-16, redesign J8–J11)
+
+The reader now follows the mobile section of the Chapters redesign. The chrome is
+two floating bars: the back-chevron header with the book title, the chapter being
+read and the 3px position bar on top; Contents and Words pills with Aa on a bottom
+row. Both leave on a scroll down and return on a scroll up, or on any chapter jump.
+The WebView reports the chapter holding the viewport (`position` messages), and
+the page gets body padding and `scroll-margin-top` so a jump lands under the bar.
+
+Each chapter with a complete estimate gets its header under the heading: a mono
+"Chapter n of N · Estimated X" line and the descriptions as one paragraph.
+Titles display as "Chapter V" rather than "CHAPTER V." in the rails and headers
+only; anchors and the text keep the source form.
+
+**Contents sheet (J9):** title plus two-letter level per row, the description only
+on the current chapter (raised card, scrolled into view on opening) or on a row
+tapped once; a second tap goes. Rows without a description go on the first tap.
+The subtitle is the chapter count and the B1–C1 range over estimated chapters.
+
+**Words sheet (J10):** the chapter being read, with ‹ › moving the list between
+processor chapters without moving the text. Rows show the lemma, the observed
+form only when it differs, the excerpt with the form tinted, and "Saved" for
+lemmas already in review. A tap swaps the same sheet to the word card with
+"← Words" at the top; closing returns to the reader. Pending/stale is one grey
+line; an `unavailable` list hides the Words pill instead of disabling it.
+
+**Chapter end (J11, member form):** when the chapter being read has answered
+its vocabulary request, the WebView gets a block before the next heading: the
+first three words with "All N words" expanding in place, then the next chapter
+as a full-width row with its level and description. A row tap opens the same
+Words sheet on that word; the next row scrolls locally. The guest chrome,
+account panel and "Read free" states do not apply: this client requires a
+signed-in account to open the reader.
+
+Checks: TypeScript, 110 Vitest tests, ESLint (only the generated `.expo`
+warning), Android export, and the Chromium fixture check of the WebView scripts:
+
+```bash
+node scripts/check-reader-chrome.mjs
+```
+
+It verifies position/chrome reports, the chapter jump, escaped header injection,
+chapter-end rows, folding, the word-tap message and the next-chapter jump. It
+needs no backend. Native sheet layout, the chrome animation, pressed and night
+states on a device still need acceptance.

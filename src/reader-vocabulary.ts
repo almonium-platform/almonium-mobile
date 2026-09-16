@@ -63,3 +63,25 @@ export function vocabularyState(data: ChapterVocabulary | undefined, paused: boo
   if (!data || data.status !== 'ready') return 'unavailable';
   return data.words.length ? 'ready' : 'empty';
 }
+
+/** The excerpt around the observed form, for highlighting it: before, the surface, after. */
+export function excerptParts(context: string, surface: string): [string, string, string] {
+  const at = surface ? context.indexOf(surface) : -1;
+  if (at < 0) return [context, '', ''];
+  return [context.slice(0, at), surface, context.slice(at + surface.length)];
+}
+
+/** Lemmas already in review, matched without case: the "Saved" mark on a vocabulary row. */
+export function savedLemmas(cards: { entry: string }[] | undefined) {
+  return new Set((cards ?? []).map(card => card.entry.trim().toLocaleLowerCase()));
+}
+
+export function isSavedWord(word: ChapterWord, saved: Set<string>) {
+  return saved.has(word.lemma.trim().toLocaleLowerCase());
+}
+
+/** The Words control is only for editions that can have a list; a private import hides it rather than disabling it. */
+export function wordsAvailable(chapters: ReaderChapter[], editionSlug: string | undefined, current: ChapterVocabulary | undefined) {
+  if (!editionSlug || !chapters.some(chapter => vocabularySequence(chapter))) return false;
+  return current?.status !== 'unavailable';
+}

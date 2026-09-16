@@ -243,6 +243,8 @@ export const fonts = {
   sans: 'IBMPlexSans_400Regular',
   sansMedium: 'IBMPlexSans_500Medium',
   sansSemibold: 'IBMPlexSans_600SemiBold',
+  /** Data that lines up: chapter levels and "n of N" lines. The platform's own mono; no bundled face. */
+  mono: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }) as string,
 } as const;
 
 /**
