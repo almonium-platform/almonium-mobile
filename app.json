@@ -4,7 +4,7 @@
     "slug": "almonium",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/almonium-logo.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "almonium",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -25,7 +25,8 @@
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#F9F6F5",
-        "foregroundImage": "./assets/images/almonium-logo.png"
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
