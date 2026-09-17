@@ -5,6 +5,9 @@ const localApiHost = Platform.OS === 'android' ? 'http://10.0.2.2:9998' : 'http:
 export const config = {
   apiBaseUrl: `${process.env.EXPO_PUBLIC_API_URL || localApiHost}/api/v1`,
   webBaseUrl: process.env.EXPO_PUBLIC_WEB_URL || 'https://almonium.com',
+  // The address the stores list as support and the app offers under Legal; readers of each
+  // other's words need a way to reach a person.
+  supportEmail: 'support@almonium.com',
   // Stamped by CI on every update and build; empty for a local bundle.
   gitSha: process.env.EXPO_PUBLIC_GIT_SHA || '',
   // Whether a native build may show web prices and send the reader to almonium.com to buy or

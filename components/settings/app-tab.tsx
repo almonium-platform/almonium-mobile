@@ -327,6 +327,9 @@ export function AppTab() {
         <Row label={t('Terms of use')} onPress={() => void Linking.openURL(`${config.webBaseUrl}/terms-of-use`)}>
           <Ionicons name="open-outline" size={18} color={colors.muted} />
         </Row>
+        <Row label={t('Contact us')} detail={config.supportEmail} onPress={() => void Linking.openURL(`mailto:${config.supportEmail}`)}>
+          <Ionicons name="mail-outline" size={18} color={colors.muted} />
+        </Row>
       </Section>
 
       <Section eyebrow={t('ABOUT')}>
