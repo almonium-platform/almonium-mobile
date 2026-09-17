@@ -1,7 +1,14 @@
 import type { BookEditionVariant } from './types';
 
+/**
+ * The editions a book can be read with (design L): only ones in another language than the primary.
+ * Same-language editions (the original, an adaptation) are switched on the book page, never from
+ * inside the reader. Without the primary among the variants, language is unknown and the rest stay.
+ */
 export function companionEditions(variants: BookEditionVariant[], primaryId: string) {
-  return variants.filter(variant => variant.id !== primaryId && Boolean(variant.editionSlug));
+  const language = variants.find(variant => variant.id === primaryId)?.language;
+  return variants.filter(variant => variant.id !== primaryId && Boolean(variant.editionSlug)
+    && (!language || variant.language !== language));
 }
 
 export function chooseCompanion(variants: BookEditionVariant[], primaryId: string, requested: string | undefined, fluentLanguages: string[]) {

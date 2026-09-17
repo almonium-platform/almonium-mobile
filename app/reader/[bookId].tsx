@@ -113,6 +113,7 @@ function appearanceScript(settings: ReaderSettings, fontCss: string, progress: n
   const surface = night ? darkColors.surface : lightColors.surface;
   const tint = night ? darkColors.accentSoft : lightColors.accentSoft;
   const accent = night ? darkColors.primary : lightColors.primary;
+  const companion = night ? darkColors.companion : lightColors.companion;
   const sans = faceStacks.plex;
   return `
     (function () {
@@ -138,15 +139,17 @@ function appearanceScript(settings: ReaderSettings, fontCss: string, progress: n
         a { color: ${lightColors.raspberry} !important; }
         /* Alignment is invisible until asked for: sentence spans have no paint at rest. */
         .almonium-secondary { display: none !important; }
-        .aligned-sentence { background: none; outline: none; }
+        .aligned-sentence, .segment, .almonium-companion { background: none; outline: none !important; -webkit-tap-highlight-color: transparent; }
         .almonium-lit { background: ${tint}; -webkit-box-decoration-break: clone; box-decoration-break: clone; border-radius: 2px; padding: 1px 0; }
         .almonium-selected { border-bottom: 2px solid ${accent}; }
         .almonium-head { margin-bottom: 0 !important; }
-        .almonium-demand { margin: 0.4em 0 1.1em; }
+        .almonium-demand { margin: 0.45em 0 1.1em; }
+        /* A paragraph split around the block continues under it, so the gap is a line's, not a paragraph's. */
+        .almonium-demand.almonium-split { margin-bottom: 0.5em; }
         .almonium-demand-inner { font-size: 0.82em; line-height: 1.55; color: ${muted}; padding-left: 14px; border-left: 2px solid ${line}; }
         .almonium-mixed { line-height: 1.75 !important; }
-        .almonium-companion { font-size: 0.84em; color: ${muted}; }
-        p.almonium-companion-paragraph { font-size: 0.84em; color: ${muted}; margin-top: -0.6em !important; }
+        .almonium-companion { font-size: 0.84em; color: ${companion}; }
+        p.almonium-companion-paragraph { font-size: 0.84em; color: ${companion}; margin-top: -0.6em !important; }
         .almonium-chapter-head { margin: -0.3em 0 1.5em; }
         .almonium-chapter-meta { font-family: ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: 0.3px; color: ${metadata}; margin-bottom: 8px; }
         .almonium-chapter-desc { color: ${muted} !important; font-size: 0.88em !important; line-height: 1.5 !important; margin: 0 !important; }

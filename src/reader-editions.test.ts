@@ -18,10 +18,11 @@ describe('edition-addressed reading', () => {
     expect(editionLabel(inherited, adapted)).toContain('not this adaptation');
     expect(editionLabel(direct, adapted)).not.toContain('not this adaptation');
   });
-  it('allows an explicit same-language companion without selecting the primary', () => {
-    expect(companionEditions([original, adapted, ukrainian], 'two')).toEqual([original, ukrainian]);
-    expect(chooseCompanion([original, adapted, ukrainian], 'two', 'original', ['UK'])).toEqual(original);
+  it('offers only other-language editions as companions; same-language ones belong to the book page', () => {
+    expect(companionEditions([original, adapted, ukrainian], 'two')).toEqual([ukrainian]);
+    expect(chooseCompanion([original, adapted, ukrainian], 'two', 'original', ['UK'])).toEqual(ukrainian);
     expect(chooseCompanion([original, adapted, ukrainian], 'two', undefined, ['UK'])).toEqual(ukrainian);
+    expect(chooseCompanion([original, adapted, ukrainian], 'two', undefined, [])).toBeUndefined();
   });
   it('keeps downloaded-only metadata readable without inventing a companion slug', () => {
     expect(companionEditions([{id: 'one', language: 'EN'}], 'one')).toEqual([]);

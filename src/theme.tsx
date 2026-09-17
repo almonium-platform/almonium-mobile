@@ -55,6 +55,9 @@ export const colors = {
   success: '#16BA7F',
   successSoft: '#E7F8F2',
   reader: '#33292E',
+  // Companion text in the reader (design L4): a translation that sits inline with the sentence it
+  // follows, two steps of ink under the body so the eye reads the primary first.
+  companion: '#7E7E7E',
   languageRail: '#6C7FA8',
   languageRailSoft: '#CDD4E2',
   onPrimary: '#FFFFFF',
@@ -95,6 +98,7 @@ export const darkColors: ThemeColors = {
   success: '#3DD69B',
   successSoft: '#12332A',
   reader: '#E4DAE2',
+  companion: '#B9B0B7',
   languageRail: '#7D5C93',
   languageRailSoft: '#453D51',
   onPrimary: '#14111A',

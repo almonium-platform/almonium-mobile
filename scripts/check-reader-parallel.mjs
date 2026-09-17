@@ -52,7 +52,7 @@ try {
   assert.ok(await page.locator('#one').evaluate(p => p.classList.contains('almonium-head')));
   assert.equal(await page.locator('#one').evaluate(p => p.innerText.replace(/\s+/g, " ").trim()), 'First sentence.');
   assert.equal(await page.locator('.almonium-tail').evaluate(p => p.innerText.replace(/\s+/g, " ").trim()), 'Second sentence, which is longer. Third, unaligned.');
-  assert.deepEqual(await page.evaluate(() => Array.from(document.querySelectorAll('#one ~ *')).slice(0, 2).map(n => n.className)), ['almonium-demand', 'almonium-tail']);
+  assert.deepEqual(await page.evaluate(() => Array.from(document.querySelectorAll('#one ~ *')).slice(0, 2).map(n => n.className)), ['almonium-demand almonium-split', 'almonium-tail'], 'a split block is marked so the paragraph continues under it');
   // The companion copy carries no alignment ids, so it can never be hit-tested as a sentence.
   assert.equal(await page.locator('.almonium-demand [data-alignment]').count(), 0);
 

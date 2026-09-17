@@ -20,7 +20,7 @@ import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/them
 import { isUuid } from '@/src/uuid';
 import { readGuestProgress } from '@/src/guest';
 import { chapterLevelRange, displayChapterTitle, type ChapterEnrichment } from '@/src/reader-chapters';
-import { editionLabel } from '@/src/reader-editions';
+import { companionEditions, editionLabel } from '@/src/reader-editions';
 import type { BookDetails } from '@/src/types';
 
 export default function BookDetailsScreen() {
@@ -309,7 +309,7 @@ function GuestParallelRow({ book, onOpenParallel, onRequest }: { book: BookDetai
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
-  const companions = book.languageVariants.filter((variant) => variant.id !== book.id && variant.editionSlug);
+  const companions = companionEditions(book.languageVariants, book.id);
   // The ask names a language: the phone's, unless the book is already in it.
   const target = getLocales().map((locale) => locale.languageCode?.toUpperCase() ?? '').find((code) => code && code !== book.language) ?? (book.language === 'EN' ? 'UK' : 'EN');
   return (

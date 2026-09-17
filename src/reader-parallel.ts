@@ -146,6 +146,7 @@ export function parallelScript(fluent: string, mode: ParallelMode, reduceMotion 
               tail.__almoniumOrigin = block;
               tail.appendChild(rest);
               block.classList.add('almonium-head');
+              node.classList.add('almonium-split');
               block.after(node, tail);
             }
           }
