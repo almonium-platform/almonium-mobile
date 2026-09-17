@@ -27,7 +27,9 @@ function money(value: number) {
 /**
  * One route, two states, decided by the entitlement. Free is your usage against the limits and
  * the paid lines with one resolved price; paid is a receipt you can read. Purchases here route to
- * the web until store billing ships: the app explains, it does not transact.
+ * the web until store billing ships: the app explains, it does not transact. A store build goes
+ * one step further and does not even point at the web (`config.externalPurchaseLinks`): no
+ * prices, no button, no portal, only what membership adds and where it is looked after.
  */
 export default function MembershipScreen() {
   const { t } = useTranslation();
@@ -119,7 +121,11 @@ export default function MembershipScreen() {
                 ]}
               />
               {planDescribesMembership(subscription) && subscription?.type !== 'LIFETIME' && (
-                <Button loading={openingPortal} onPress={() => void openPortal()}>{t('Manage plan, card and invoices')}</Button>
+                config.externalPurchaseLinks ? (
+                  <Button loading={openingPortal} onPress={() => void openPortal()}>{t('Manage plan, card and invoices')}</Button>
+                ) : (
+                  <Text style={styles.footnote}>{t('Your plan, card and invoices are managed where the membership was bought.')}</Text>
+                )
               )}
             </View>
             <View style={styles.card}>
@@ -144,7 +150,7 @@ export default function MembershipScreen() {
             </View>
 
             <View style={styles.card}>
-              <Text style={styles.eyebrow}>{founderAvailable ? t('FOUNDING MEMBER') : t('PREMIUM')}</Text>
+              <Text style={styles.eyebrow}>{founderAvailable && config.externalPurchaseLinks ? t('FOUNDING MEMBER') : t('PREMIUM')}</Text>
               <Text style={styles.sectionTitle}>{t('Everything in Free, plus')}</Text>
               <View style={styles.lines}>
                 {premiumLines.map((line) => (
@@ -154,7 +160,7 @@ export default function MembershipScreen() {
                   </View>
                 ))}
               </View>
-              {monthly && yearly && (
+              {config.externalPurchaseLinks && monthly && yearly && (
                 <>
                   <View accessibilityRole="radiogroup" style={styles.cadence}>
                     {(['MONTHLY', 'YEARLY'] as Cadence[]).map((option) => (
@@ -171,15 +177,21 @@ export default function MembershipScreen() {
                   <PriceBlock cadence={cadence} monthly={monthly} yearly={yearly} founder={founderAvailable} priceOf={priceOf} />
                 </>
               )}
-              <Button variant="premium" onPress={() => void Linking.openURL(`${config.webBaseUrl}/membership`)}>
-                {founderAvailable ? t('Claim your place') : t('Become a member')}
-              </Button>
-              <Text style={styles.footnote}>
-                {founderAvailable && founding.data
-                  ? `${t('Only {count} founding memberships available, then the standard price. Keep this price while your subscription stays active.', { count: founding.data.capacity })} `
-                  : ''}
-                {t('Membership is bought on the web for now; the app recognises it as soon as it is active. 14-day money-back guarantee.')}
-              </Text>
+              {config.externalPurchaseLinks ? (
+                <>
+                  <Button variant="premium" onPress={() => void Linking.openURL(`${config.webBaseUrl}/membership`)}>
+                    {founderAvailable ? t('Claim your place') : t('Become a member')}
+                  </Button>
+                  <Text style={styles.footnote}>
+                    {founderAvailable && founding.data
+                      ? `${t('Only {count} founding memberships available, then the standard price. Keep this price while your subscription stays active.', { count: founding.data.capacity })} `
+                      : ''}
+                    {t('Membership is bought on the web for now; the app recognises it as soon as it is active. 14-day money-back guarantee.')}
+                  </Text>
+                </>
+              ) : (
+                <Text style={styles.footnote}>{t('Membership cannot be bought in the app. The app recognises yours as soon as it is active.')}</Text>
+              )}
             </View>
           </>
         )}

@@ -10,9 +10,11 @@ import { Button } from '@/components/ui';
 import { AvatarMark } from '@/components/avatar-mark';
 import { api } from '@/src/api';
 import { channelTypes, privateChannelId } from '@/src/chat';
+import { chatUnavailableCopy, useChat } from '@/src/chat-client';
 import { config } from '@/src/config';
 import { useNotice } from '@/src/notice-context';
 import { languageName } from '@/src/languages';
+import { reportUser } from '@/src/moderation';
 import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import type { RelationshipAction, UserProfile } from '@/src/types';
 
@@ -23,6 +25,7 @@ export default function UserProfileScreen() {
   const { userId = '' } = useLocalSearchParams<{ userId: string }>();
   const queryClient = useQueryClient();
   const showNotice = useNotice();
+  const chat = useChat();
   const profile = useQuery({ queryKey: ['profile', userId], queryFn: () => api.userProfile(userId), enabled: Boolean(userId) });
   const relationship = useMutation({
     mutationFn: ({ id, action }: { id: string; action: RelationshipAction }) => api.manageRelationship(id, action),
@@ -120,6 +123,29 @@ export default function UserProfileScreen() {
           </View>
         </View>
 
+        <Pressable
+          onPress={() => Alert.alert(t('Report this reader?'), t('Their profile goes to the Almonium team for review. They are not told.'), [
+            { text: t('Cancel'), style: 'cancel' },
+            {
+              text: t('Report'),
+              style: 'destructive',
+              onPress: async () => {
+                if (!chat.client) {
+                  showNotice({ title: t('Could not report reader'), message: chatUnavailableCopy(chat.status, chat.error), tone: 'error' });
+                  return;
+                }
+                try {
+                  await reportUser(chat.client, user.id);
+                  showNotice({ title: t('Reported'), message: t('Thank you. We will take a look.'), tone: 'success' });
+                } catch (error) {
+                  showNotice({ title: t('Could not report reader'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
+                }
+              },
+            },
+          ])}
+          style={styles.blockAction}>
+          <Text style={styles.reportText}>{t('Report reader')}</Text>
+        </Pressable>
         {user.relationshipStatus !== 'BLOCKED' && (
           <Pressable
             onPress={() => Alert.alert(t('Block this reader?'), t('They will no longer be able to find or contact you.'), [
@@ -186,4 +212,5 @@ const useStyles = createThemedStyles((colors) => ({
   shareText: { color: colors.primary, fontSize: 14, fontWeight: '600' },
   blockAction: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   blockText: { color: colors.danger, fontSize: 13, fontWeight: '600' },
+  reportText: { color: colors.muted, fontSize: 13, fontWeight: '600' },
 }));

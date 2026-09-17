@@ -7,6 +7,12 @@ export const config = {
   webBaseUrl: process.env.EXPO_PUBLIC_WEB_URL || 'https://almonium.com',
   // Stamped by CI on every update and build; empty for a local bundle.
   gitSha: process.env.EXPO_PUBLIC_GIT_SHA || '',
+  // Whether a native build may show web prices and send the reader to almonium.com to buy or
+  // manage a membership. Both stores forbid that outside the United States storefront, and the
+  // app cannot tell storefronts apart without a billing module, so store builds ship with it off
+  // and only explain what membership adds. The web build has no such rule.
+  externalPurchaseLinks:
+    Platform.OS === 'web' || process.env.EXPO_PUBLIC_EXTERNAL_PURCHASE_LINKS === 'true',
   // Public Stream application key, the counterpart of the token the backend mints on /users/me.
   // It must belong to the same Stream application as the API this build talks to, so the default
   // is the staging key that pairs with the default local backend.

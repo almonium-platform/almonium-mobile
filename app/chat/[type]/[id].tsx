@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   Linking,
@@ -40,6 +41,7 @@ import {
   type ChatRow,
 } from '@/src/chat';
 import { languageName } from '@/src/languages';
+import { reportMessage } from '@/src/moderation';
 import { useNotice } from '@/src/notice-context';
 import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 
@@ -248,7 +250,29 @@ export default function ChatRoomScreen() {
         run: () => void markUnreadFrom(message),
       });
     }
+    if (!message.own && !message.deleted) {
+      actions.push({ key: 'report', label: t('Report message'), icon: 'flag-outline', run: () => confirmReport(message) });
+    }
     return actions;
+  }
+
+  function confirmReport(message: ChatMessage) {
+    Alert.alert(t('Report this message?'), t('It goes to the Almonium team for review. The sender is not told.'), [
+      { text: t('Cancel'), style: 'cancel' },
+      {
+        text: t('Report'),
+        style: 'destructive',
+        onPress: async () => {
+          if (!client) return;
+          try {
+            await reportMessage(client, message.id);
+            showNotice({ title: t('Reported'), message: t('Thank you. We will take a look.'), tone: 'success' });
+          } catch {
+            showNotice({ title: t('Could not report that message'), message: t('Try again.'), tone: 'error' });
+          }
+        },
+      },
+    ]);
   }
 
   async function saveToSelf(message: ChatMessage) {
