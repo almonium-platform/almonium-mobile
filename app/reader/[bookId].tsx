@@ -35,7 +35,6 @@ import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
 import { downloadedBooks, readDownloadedBook } from '@/src/offline-books';
 import { guestTranslationLanguage, readGuestProgress, writeGuestLastRead, writeGuestProgress } from '@/src/guest';
-import { writeReadingPlace } from '@/src/reading-place';
 import { faceStacks, readerFaceCss } from '@/src/reader-fonts';
 import {
   defaultReaderSettings,
@@ -301,10 +300,6 @@ export default function ReaderScreen() {
   // Chapters that can carry a list: processor anchors only. The arrows in the Words sheet walk these.
   const wordChapters = useMemo(() => chapters.filter(chapter => vocabularySequence(chapter)), [chapters]);
   const readingChapter = chapters[currentChapter] as ReaderChapter | undefined;
-  // The shelf's "chapter 3 of 24": the server keeps a percentage, so the chapter is noted on this phone.
-  useEffect(() => {
-    if (readingChapter && chapters.length) void writeReadingPlace(bookId, { chapter: chapterNumber(readingChapter), total: chapters.length });
-  }, [bookId, chapters.length, readingChapter]);
   const readingSequence = readingChapter ? vocabularySequence(readingChapter) : undefined;
   const wordsChapter = (wordsChapterIndex === null ? undefined : chapters[wordsChapterIndex])
     ?? (readingSequence ? readingChapter : wordChapters[0]);
@@ -606,7 +601,8 @@ export default function ReaderScreen() {
     setProgress(next);
     if (saveTimer.current) clearTimeout(saveTimer.current);
     if (sync) {
-      void sync.record(next);
+      // The place rides with the percentage, so the shelf can say "12% · chapter 3 of 24".
+      void sync.record(next, readingChapter && chapters.length ? { chapter: chapterNumber(readingChapter), chapterCount: chapters.length } : null);
       saveTimer.current = setTimeout(() => void flush(), 1500);
     } else if (slug) {
       saveTimer.current = setTimeout(() => {

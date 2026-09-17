@@ -15,9 +15,9 @@ const jwt = `${b64({ alg: 'RS256', typ: 'JWT' })}.${b64({ iss: 'https://secureto
 
 const book = (id, workSlug, title, author, level, wordCount, over = {}) => ({
   id, editionSlug: `${workSlug}-en-${level.toLowerCase()}`, workSlug, title, author, publicationYear: 1800, coverUrl: null, wordCount,
-  language: 'EN', cefrLevel: level, progressPercentage: null, hasParallelTranslation: true, hasTranslation: true, isTranslation: false, ...over,
+  language: 'EN', cefrLevel: level, progressPercentage: null, currentChapter: null, chapterCount: null, hasParallelTranslation: true, hasTranslation: true, isTranslation: false, ...over,
 });
-const frank = book('11111111-1111-4111-8111-111111111111', 'frankenstein', 'Frankenstein; or, The Modern Prometheus', 'Mary Shelley', 'C1', 75000, { progressPercentage: 12 });
+const frank = book('11111111-1111-4111-8111-111111111111', 'frankenstein', 'Frankenstein; or, The Modern Prometheus', 'Mary Shelley', 'C1', 75000, { progressPercentage: 12, currentChapter: 3, chapterCount: 24 });
 const pride = book('22222222-2222-4222-8222-222222222222', 'pride-and-prejudice', 'Pride and Prejudice', 'Jane Austen', 'B2', 122000);
 const time = book('33333333-3333-4333-8333-333333333333', 'the-time-machine', 'The Time Machine', 'H. G. Wells', 'B1', 33000);
 const available = [
@@ -61,9 +61,10 @@ page.on('pageerror', (error) => console.log('pageerror', error.message));
 await page.goto('http://localhost:8099/sign-in', { waitUntil: 'networkidle' });
 await page.evaluate(({ frank }) => {
   localStorage.setItem('almonium:offline-books', JSON.stringify([{ ...frank, downloadedAt: new Date().toISOString(), size: 812000 }]));
-  localStorage.setItem('almonium:reading-places', JSON.stringify({ [frank.id]: { chapter: 3, total: 24, at: new Date().toISOString() } }));
   localStorage.setItem('almonium:shelf-language', 'EN');
 }, { frank });
+// The first load also bundles the app; give Metro its time.
+await page.getByPlaceholder('Email').waitFor({ timeout: 180000 });
 await page.getByPlaceholder('Email').fill(email);
 await page.getByPlaceholder('Password').fill('password123');
 await page.getByText('Sign in', { exact: true }).last().click();

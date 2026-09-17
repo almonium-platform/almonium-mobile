@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { api } from '@/src/api';
-import { ProgressQueue } from '@/src/progress-utils';
+import { ProgressQueue, type ProgressPoint, type ReadingPlace } from '@/src/progress-utils';
 
 export class ReadingProgressSync {
   private readonly queue = new ProgressQueue();
@@ -16,17 +16,17 @@ export class ReadingProgressSync {
     this.storageKey = `almonium:pending-progress:${userId}:${bookId}`;
   }
 
+  /** The percentage left unsent last time, put back on the queue with its place; null when nothing waits. */
   async restorePending() {
     const value = await AsyncStorage.getItem(this.storageKey);
-    return value !== null && Number.isFinite(Number(value))
-      ? this.queue.record(Number(value))
-      : null;
+    const pending = parsePendingPoint(value);
+    return pending ? this.queue.record(pending.percentage, pending.place).percentage : null;
   }
 
-  record(percentage: number) {
-    const value = this.queue.record(percentage);
+  record(percentage: number, place: ReadingPlace | null = null) {
+    const value = this.queue.record(percentage, place);
     this.pendingWrite = this.pendingWrite.then(() =>
-      AsyncStorage.setItem(this.storageKey, String(value)),
+      AsyncStorage.setItem(this.storageKey, JSON.stringify(value)),
     );
     return this.pendingWrite;
   }
@@ -44,10 +44,25 @@ export class ReadingProgressSync {
     let target = this.queue.next();
     while (target !== null) {
       await this.pendingWrite;
-      await api.saveProgress(this.bookId, target);
+      await api.saveProgress(this.bookId, target.percentage, target.place);
       this.queue.markSaved(target);
       target = this.queue.next();
       if (target === null) await AsyncStorage.removeItem(this.storageKey);
     }
+  }
+}
+
+/** A stored point, or the bare percentage an earlier build wrote. */
+export function parsePendingPoint(value: string | null): ProgressPoint | null {
+  if (value === null) return null;
+  if (Number.isFinite(Number(value))) return { percentage: Number(value), place: null };
+  try {
+    const parsed = JSON.parse(value) as Partial<ProgressPoint>;
+    if (typeof parsed.percentage !== 'number' || !Number.isFinite(parsed.percentage)) return null;
+    const place = parsed.place;
+    const valid = place && Number.isInteger(place.chapter) && Number.isInteger(place.chapterCount) && place.chapter >= 1 && place.chapterCount >= place.chapter;
+    return { percentage: parsed.percentage, place: valid ? { chapter: place.chapter, chapterCount: place.chapterCount } : null };
+  } catch {
+    return null;
   }
 }

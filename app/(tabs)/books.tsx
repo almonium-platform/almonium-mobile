@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { onlineManager, useQuery } from '@tanstack/react-query';
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
@@ -14,7 +14,6 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { useNotice } from '@/src/notice-context';
 import { downloadedBooks } from '@/src/offline-books';
-import { readReadingPlaces, type ReadingPlace } from '@/src/reading-place';
 import { libraryEntries, shelfRows, shortTitle, type LibraryEntry, type ShelfRow } from '@/src/shelf';
 import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 
@@ -41,7 +40,6 @@ export default function BooksScreen() {
     [profile?.learners],
   );
   const [language, setLanguage] = useState(activeLanguages[0] || '');
-  const [places, setPlaces] = useState<Record<string, ReadingPlace>>({});
 
   useEffect(() => {
     void AsyncStorage.getItem(shelfLanguageKey).then((stored) => {
@@ -51,11 +49,6 @@ export default function BooksScreen() {
   useEffect(() => {
     if ((!language || !activeLanguages.includes(language)) && activeLanguages[0]) setLanguage(activeLanguages[0]);
   }, [activeLanguages, language]);
-  useFocusEffect(useCallback(() => {
-    let active = true;
-    void readReadingPlaces().then((value) => { if (active) setPlaces(value); });
-    return () => { active = false; };
-  }, []));
 
   function chooseLanguage(nextLanguage: string) {
     setLanguage(nextLanguage);
@@ -165,7 +158,7 @@ export default function BooksScreen() {
           <View style={styles.card}>
             {rows.map((row, index) => {
               const dim = offline && !row.offline;
-              const place = places[row.book.id];
+              const place = row.book.currentChapter && row.book.chapterCount ? { chapter: row.book.currentChapter, total: row.book.chapterCount } : null;
               const target = row.book.hasParallelTranslation && fluent ? `${row.book.language} → ${fluent}` : row.book.language;
               const line = [
                 target,

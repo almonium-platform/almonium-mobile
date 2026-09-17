@@ -31,6 +31,7 @@ import type {
   UserInfo,
 } from '@/src/types';
 import { config } from '@/src/config';
+import type { ReadingPlace } from '@/src/progress-utils';
 import { decodeJsonBody, errorMessageFromBody } from '@/src/http-errors';
 import { t } from './i18n';
 import type { DiscoverLookup } from '@/src/discover';
@@ -254,8 +255,8 @@ export const api = {
     if (!response.ok) throw new ApiError(await responseError(response), response.status);
     return response.text();
   },
-  saveProgress: (bookId: string, percentage: number) =>
-    request<void>(`/books/${bookId}/progress?percentage=${Math.round(percentage)}`, {
+  saveProgress: (bookId: string, percentage: number, place: ReadingPlace | null = null) =>
+    request<void>(`/books/${bookId}/progress?percentage=${Math.round(percentage)}${place ? `&chapter=${place.chapter}&chapterCount=${place.chapterCount}` : ''}`, {
       method: 'POST',
     }),
   deleteProgress: (bookId: string) =>

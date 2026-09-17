@@ -5,7 +5,7 @@ import type { BookSummary } from './types';
 
 const book = (over: Partial<BookSummary>): BookSummary => ({
   id: 'id', workSlug: 'work', title: 'Title', author: 'Some Author', publicationYear: 1800, coverUrl: null, wordCount: 10_000,
-  language: 'EN', cefrLevel: 'B2', progressPercentage: null, hasParallelTranslation: true, hasTranslation: true, isTranslation: false,
+  language: 'EN', cefrLevel: 'B2', progressPercentage: null, currentChapter: null, chapterCount: null, hasParallelTranslation: true, hasTranslation: true, isTranslation: false,
   ...over,
 });
 

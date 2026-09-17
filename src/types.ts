@@ -75,6 +75,9 @@ export interface BookSummary {
   language: string;
   cefrLevel: CefrLevel;
   progressPercentage: number | null;
+  /** The place beside the percentage, as the reader last numbered it; null until a reader sends it. */
+  currentChapter: number | null;
+  chapterCount: number | null;
   hasParallelTranslation: boolean;
   hasTranslation: boolean;
   isTranslation: boolean;
