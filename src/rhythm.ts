@@ -155,6 +155,17 @@ export function isEmptyRecord(rhythm: LanguageRhythm) {
 }
 
 /**
+ * Whether the record strip has anything to say. It needs one non-zero figure, and a tracked week
+ * is not one: the week a language was added counts as asked-for before anything was learned, and
+ * "0 · 0 · 0/1" is the four-zero strip the record must never show. Words, books, or a week met.
+ */
+export function hasRecord(stats: { wordsKept: number; booksFinished: number } | undefined, rhythm: LanguageRhythm | null) {
+  if (!stats) return false;
+  const pace = rhythm ? paceFraction(rhythm) : { met: 0, counted: 0 };
+  return stats.wordsKept > 0 || stats.booksFinished > 0 || pace.met > 0;
+}
+
+/**
  * The one-sentence record, in the register the web uses: weeks met against the target, then
  * what the tint means. A set-aside language names the date and refuses to count the weeks since.
  */

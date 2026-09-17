@@ -42,6 +42,10 @@ export const colors = {
   accentBorder: '#E9CADF',
   line: '#EDEBE8',
   border: '#D8CFD6',
+  // A segmented control's track and its selected segment: the track is a warm grey a step
+  // below the page ground, so the control reads as one object rather than a pill beside words.
+  track: '#ECE5EA',
+  trackThumb: '#FFFFFF',
   disabled: '#E8E2E6',
   disabledText: '#8B8290',
   danger: '#FA4666',
@@ -81,6 +85,8 @@ export const darkColors: ThemeColors = {
   accentBorder: '#60456F',
   line: '#332C3C',
   border: '#453D51',
+  track: '#272130',
+  trackThumb: '#3B3346',
   disabled: '#2A2433',
   disabledText: '#6E637A',
   danger: '#FF8FA3',
@@ -280,4 +286,6 @@ export const shadows = {
   card: raise(0.1, 3, 1),
   media: raise(0.15, 5, 2),
   field: raise(0.07, 4, 1),
+  /** The selected segment of a segmented control: lifted a hair off its track. */
+  segment: raise(0.08, 1, 1),
 } as const;

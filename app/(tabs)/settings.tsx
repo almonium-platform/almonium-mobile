@@ -12,7 +12,6 @@ import { LearningTab } from '@/components/settings/learning-tab';
 import { ProfileTab } from '@/components/settings/profile-tab';
 import { useAuth } from '@/src/auth-context';
 import { msg } from '@/src/i18n';
-import { languageName } from '@/src/languages';
 import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 
 type Tab = 'profile' | 'account' | 'learning' | 'app';
@@ -24,9 +23,11 @@ const tabs: { key: Tab; label: string }[] = [
 ];
 
 /**
- * Settings sit behind the avatar, not in a tab. Four sections in the web's order; the header
- * names the language, which is the one true fact a new account has. A `tab` param lets language
- * affordances elsewhere land on Learning instead of making people hunt for it.
+ * Settings sit behind the avatar, not in a tab. Four sections in the web's order. The header
+ * is one line of metadata under the handle — when you joined and how many languages — because
+ * the languages have a tab of their own and the first setting should start well above the fold.
+ * The tab row pins under the status bar once the header scrolls off, so switching tabs never
+ * means scrolling back up. A `tab` param lets language affordances elsewhere land on Learning.
  */
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -35,25 +36,28 @@ export default function SettingsScreen() {
   const { profile } = useAuth();
   const { tab: requestedTab } = useLocalSearchParams<{ tab?: string }>();
   const [tab, setTab] = useState<Tab>(tabs.some((item) => item.key === requestedTab) ? (requestedTab as Tab) : 'profile');
-  const activeLanguages = profile?.learners.filter((learner) => learner.active).map((learner) => languageName(learner.language)) ?? [];
+  const languages = profile?.learners.length ?? 0;
+  const month = formatMonth(profile?.subscription.startDate);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <View style={styles.topRow}>
-          <Pressable accessibilityLabel={t('Back')} onPress={() => router.back()} hitSlop={10} style={styles.back}>
-            <Ionicons name="chevron-back" size={24} color={colors.ink} />
-          </Pressable>
-        </View>
-        <View style={styles.heading}>
-          <AvatarMark avatarUrl={profile?.avatarUrl} username={profile?.username} premium={profile?.premium} size={64} />
-          <View style={styles.headingCopy}>
-            <Text style={styles.title}>@{profile?.username}</Text>
-            <Text style={styles.caption}>
-              {activeLanguages.length
-                ? t('Here since {month} · learning {languages}', { month: formatMonth(profile?.subscription.startDate), languages: activeLanguages.join(', ') })
-                : t('Here since {month}', { month: formatMonth(profile?.subscription.startDate) })}
-            </Text>
+      <ScrollView contentContainerStyle={styles.content} stickyHeaderIndices={[1]} keyboardShouldPersistTaps="handled">
+        <View style={styles.header}>
+          <View style={styles.topRow}>
+            <Pressable accessibilityLabel={t('Back')} onPress={() => router.back()} hitSlop={10} style={styles.back}>
+              <Ionicons name="chevron-back" size={24} color={colors.ink} />
+            </Pressable>
+          </View>
+          <View style={styles.heading}>
+            <AvatarMark avatarUrl={profile?.avatarUrl} username={profile?.username} premium={profile?.premium} size={48} />
+            <View style={styles.headingCopy}>
+              <Text numberOfLines={1} style={styles.title}>@{profile?.username}</Text>
+              <Text numberOfLines={1} style={styles.caption}>
+                {languages > 0
+                  ? t('Since {month} · {count, plural, one {# language} other {# languages}}', { month, count: languages })
+                  : t('Since {month}', { month })}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -70,10 +74,12 @@ export default function SettingsScreen() {
           ))}
         </View>
 
-        {tab === 'profile' && <ProfileTab />}
-        {tab === 'account' && <AccountTab />}
-        {tab === 'learning' && <LearningTab />}
-        {tab === 'app' && <AppTab />}
+        <View style={styles.body}>
+          {tab === 'profile' && <ProfileTab />}
+          {tab === 'account' && <AccountTab />}
+          {tab === 'learning' && <LearningTab />}
+          {tab === 'app' && <AppTab />}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -86,16 +92,19 @@ function formatMonth(value: string | null | undefined) {
 
 const useStyles = createThemedStyles((colors) => ({
   safe: { flex: 1, backgroundColor: colors.canvas },
-  content: { padding: 16, paddingBottom: 40, gap: 16 },
+  content: { paddingBottom: 40 },
+  header: { paddingHorizontal: 16, paddingBottom: 14 },
   topRow: { flexDirection: 'row' },
   back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginLeft: -10 },
-  heading: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  heading: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingTop: 4 },
   headingCopy: { flex: 1, gap: 3 },
-  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 26, lineHeight: serifLineHeight(26) },
-  caption: { color: colors.muted, fontSize: 13, lineHeight: 19 },
-  tabs: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.line },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: serifLineHeight(24) },
+  caption: { color: colors.muted, fontSize: 13, lineHeight: 18 },
+  // The pinned row paints its own ground so the content scrolling under it never shows through.
+  tabs: { flexDirection: 'row', marginHorizontal: 16, backgroundColor: colors.canvas, borderBottomWidth: 1, borderBottomColor: colors.line },
   tab: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent', marginBottom: -1 },
   tabActive: { borderBottomColor: colors.primary },
-  tabText: { color: colors.muted, fontSize: 13, fontWeight: '600' },
-  tabTextActive: { color: colors.primary },
+  tabText: { color: colors.muted, fontSize: 15 },
+  tabTextActive: { color: colors.primary, fontWeight: '600' },
+  body: { padding: 16, paddingTop: 20, gap: 16 },
 }));

@@ -333,7 +333,7 @@ export default function OnboardingScreen() {
 
       {step === 'PROFILE' && (
         <Card>
-          <AvatarPicker tileSize={52} gap={6} />
+          <AvatarPicker />
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>{t('Username')}</Text>
             <Field value={username} onChangeText={setUsername} placeholder={t('Username')} maxLength={20} autoCapitalize="none" />

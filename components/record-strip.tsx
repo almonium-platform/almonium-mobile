@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 
-import { paceFraction, type LanguageRhythm } from '@/src/rhythm';
+import { hasRecord, paceFraction, type LanguageRhythm } from '@/src/rhythm';
 import { createThemedStyles, fonts, serifLineHeight } from '@/src/theme';
 import type { LearningStats } from '@/src/types';
 
@@ -21,8 +21,7 @@ export function RecordStrip({
   const { t } = useTranslation();
   const styles = useStyles();
   const pace = rhythm ? paceFraction(rhythm) : { met: 0, counted: 0 };
-  const hasRecord = Boolean(stats && (stats.wordsKept > 0 || stats.booksFinished > 0 || pace.counted > 0));
-  if (!hasRecord) {
+  if (!hasRecord(stats, rhythm)) {
     return (
       <Text style={styles.empty}>
         {emptyCopy ??

@@ -18,6 +18,10 @@ interface Consequence {
  * challenge). The commit button names the action, and Cancel is worded as the safe outcome.
  * Surfaces that only need identity — changing an email, disconnecting a provider — skip the
  * consequence panel and take the plum button.
+ *
+ * One primary action per step, full width, and the way out is a text button beneath it: at
+ * phone width two pills side by side wrap the safe word onto two lines next to a dead button.
+ * The typed gate's placeholder never repeats the answer.
  */
 export function ReauthSheet({
   visible,
@@ -42,6 +46,7 @@ export function ReauthSheet({
   typedGate?: string;
 }) {
   const { t } = useTranslation();
+  const safeWord = destructive ? t('Keep my account') : t('Cancel');
   const styles = useStyles();
   const { firebaseUser, reauthenticateWithPassword, reauthenticateWithGoogle, reauthenticateWithApple } = useAuth();
   const [step, setStep] = useState<'intent' | 'identity'>(typedGate || consequences ? 'intent' : 'identity');
@@ -100,18 +105,17 @@ export function ReauthSheet({
           {!!typedGate && (
             <View style={styles.gate}>
               <Text style={styles.label}>{t('Type {name} to confirm', { name: typedGate })}</Text>
-              <Field value={typed} onChangeText={setTyped} placeholder={typedGate} autoCorrect={false} />
+              <Field value={typed} onChangeText={setTyped} placeholder={t('Username')} autoCorrect={false} />
             </View>
           )}
           <View style={styles.actions}>
-            <View style={styles.action}>
-              <Button variant="secondary" onPress={onClose}>{t('Keep my account')}</Button>
-            </View>
-            <View style={styles.action}>
-              <Button disabled={Boolean(typedGate) && typed.trim() !== typedGate} onPress={() => setStep('identity')}>
-                {t('Continue')}
-              </Button>
-            </View>
+            <Button
+              variant={destructive ? 'destructive' : 'primary'}
+              disabled={Boolean(typedGate) && typed.trim() !== typedGate}
+              onPress={() => setStep('identity')}>
+              {actionLabel}
+            </Button>
+            <Button variant="text" onPress={onClose}>{safeWord}</Button>
           </View>
         </>
       ) : (
@@ -144,18 +148,14 @@ export function ReauthSheet({
           )}
           {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
           <View style={styles.actions}>
-            <View style={styles.action}>
-              <Button variant="secondary" disabled={busy} onPress={onClose}>{t('Cancel')}</Button>
-            </View>
-            <View style={styles.action}>
-              <Button
-                variant={destructive ? 'destructive' : 'primary'}
-                loading={busy}
-                disabled={!method || (method === 'password' && !password)}
-                onPress={() => void confirm()}>
-                {actionLabel}
-              </Button>
-            </View>
+            <Button
+              variant={destructive ? 'destructive' : 'primary'}
+              loading={busy}
+              disabled={!method || (method === 'password' && !password)}
+              onPress={() => void confirm()}>
+              {actionLabel}
+            </Button>
+            <Button variant="text" disabled={busy} onPress={onClose}>{safeWord}</Button>
           </View>
         </>
       )}
@@ -173,6 +173,5 @@ const useStyles = createThemedStyles((colors) => ({
   gate: { gap: 7 },
   label: { color: colors.ink, fontSize: 14, fontWeight: '600' },
   error: { color: colors.danger, fontSize: 13, lineHeight: 19 },
-  actions: { flexDirection: 'row', gap: 10, paddingTop: 4 },
-  action: { flex: 1 },
+  actions: { gap: 6, paddingTop: 4 },
 }));

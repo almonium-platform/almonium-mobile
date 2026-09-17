@@ -203,7 +203,7 @@ export function AccountTab() {
             ? t('This removes your account, your saved words and your reading progress. It cannot be undone and support cannot restore it.')
             : t('This is a sensitive change, so we ask once more before it goes through.')
         }
-        actionLabel={guard === 'delete' ? t('Delete account') : guard === 'email' ? t('Change email') : t('Change password')}
+        actionLabel={guard === 'delete' ? t('Delete my account') : guard === 'email' ? t('Change email') : t('Change password')}
         consequences={
           guard === 'delete'
             ? [

@@ -58,7 +58,7 @@ export function Button({
 }: Omit<ComponentProps<typeof Pressable>, 'children'> & {
   children: ReactNode;
   loading?: boolean;
-  variant?: 'primary' | 'premium' | 'secondary' | 'danger' | 'destructive';
+  variant?: 'primary' | 'premium' | 'secondary' | 'danger' | 'destructive' | 'text';
 }) {
   const { colors, isDark } = useTheme();
   const styles = useStyles();
@@ -81,6 +81,7 @@ export function Button({
         styles.buttonText,
         variant === 'secondary' && styles.buttonTextSecondary,
         variant === 'danger' && styles.buttonTextDanger,
+        variant === 'text' && styles.buttonTextPlain,
         disabled && styles.buttonTextDisabled,
       ]}>
       {children}
@@ -97,9 +98,10 @@ export function Button({
         variant === 'secondary' && styles.buttonSecondary,
         variant === 'danger' && styles.buttonDanger,
         variant === 'destructive' && styles.buttonDestructive,
+        variant === 'text' && styles.buttonPlain,
         pressed && variant === 'primary' && styles.buttonPrimaryPressed,
         pressed && variant !== 'primary' && styles.pressed,
-        disabled && styles.disabled,
+        disabled && (variant === 'text' ? styles.disabledPlain : styles.disabled),
       ]}>
       {variant === 'premium' && !disabled ? (
         <LinearGradient
@@ -179,10 +181,14 @@ const useStyles = createThemedStyles((colors, isDark) => ({
     borderColor: colors.danger,
     backgroundColor: colors.surface,
   },
+  // The safe way out under one primary action: ink, no fill, no border. Never the only button.
+  buttonPlain: { minHeight: 46, paddingHorizontal: 20, backgroundColor: 'transparent' },
   buttonText: { color: colors.onPrimary, fontFamily: fonts.sansSemibold, fontSize: 16 },
   buttonTextSecondary: { color: colors.ink },
+  buttonTextPlain: { color: colors.ink, fontSize: 15 },
   buttonTextDanger: { color: colors.danger },
   buttonTextDisabled: { color: colors.disabledText },
   pressed: { opacity: 0.75 },
   disabled: { paddingHorizontal: 24, backgroundColor: colors.disabled, borderColor: colors.disabled },
+  disabledPlain: { opacity: 0.5 },
 }));

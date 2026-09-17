@@ -11,15 +11,17 @@ import { useNotice } from '@/src/notice-context';
 import { createThemedStyles } from '@/src/theme';
 
 /**
- * The one picker. Settings and the onboarding profile step draw the same row, because the picker
- * is the one place where the avatar is the subject rather than incidental: the engraving above,
- * the schematic ghost under it, one tap selects both, and no preview circle, since the engraving
- * is the preview. Selection is the ring; there is no caption and no check mark.
+ * The one picker. Settings and the onboarding profile step draw the same grid, because the
+ * picker is the one place where the avatar is the subject rather than incidental: the engraving
+ * above, the schematic ghost under it, one tap selects both, and no preview circle, since the
+ * engraving is the preview. Six choices sit in a 3×2 grid, so no drawing is ever orphaned on a
+ * row of its own. Selection is a ring on the disc and on its glyph separately (F11), never one
+ * capsule around the pair; there is no caption and no check mark.
  *
  * The ring moves on tap, not on the server's answer: choosing a drawing is cheap and reversible,
  * so the request runs behind the choice and only a failure puts the old ring back.
  */
-export function AvatarPicker({ tileSize = 56, gap = 9 }: { tileSize?: number; gap?: number }) {
+export function AvatarPicker({ tileSize = 64 }: { tileSize?: number }) {
   const { t } = useTranslation();
   const styles = useStyles();
   const { profile, patchProfile, refreshProfile } = useAuth();
@@ -51,9 +53,10 @@ export function AvatarPicker({ tileSize = 56, gap = 9 }: { tileSize?: number; ga
   return (
     <View style={styles.picker}>
       <Text style={styles.eyebrow}>{t('HOW YOU APPEAR')}</Text>
-      <View style={[styles.row, { gap }]}>
+      <View accessibilityRole="radiogroup" style={styles.grid}>
         {choices.map((choice) => {
           const selected = choice.url ? current === animalFromUrl(choice.url) : !current && !profile?.avatarUrl;
+          const ring = selected ? 'selection' : undefined;
           return (
             <Pressable
               key={choice.key}
@@ -62,19 +65,14 @@ export function AvatarPicker({ tileSize = 56, gap = 9 }: { tileSize?: number; ga
               accessibilityState={{ selected }}
               disabled={selected}
               onPress={() => void choose(choice.url)}
-              style={[styles.tile, selected && styles.tileSelected]}>
-              <AvatarMark
-                avatarUrl={choice.url}
-                username={profile?.username}
-                premium={profile?.premium}
-                size={tileSize}
-              />
-              <AvatarMark
-                avatarUrl={choice.url}
-                username={profile?.username}
-                premium={profile?.premium}
-                size={24}
-              />
+              style={({ pressed }) => [styles.tile, pressed && styles.pressed]}>
+              {/* Both marks keep their ringed footprint, so the grid does not shift when the ring moves. */}
+              <View style={[styles.slot, { width: tileSize + 10, height: tileSize + 10 }]}>
+                <AvatarMark avatarUrl={choice.url} username={profile?.username} premium={profile?.premium} size={tileSize} ring={ring} ringGap={3} ringOffset="transparent" />
+              </View>
+              <View style={[styles.slot, { width: 32, height: 32 }]}>
+                <AvatarMark avatarUrl={choice.url} username={profile?.username} premium={profile?.premium} size={24} ring={ring} ringGap={2} ringOffset="transparent" />
+              </View>
             </Pressable>
           );
         })}
@@ -84,18 +82,12 @@ export function AvatarPicker({ tileSize = 56, gap = 9 }: { tileSize?: number; ga
   );
 }
 
-const useStyles = createThemedStyles((colors, isDark) => ({
-  picker: { gap: 10 },
+const useStyles = createThemedStyles((colors) => ({
+  picker: { gap: 14 },
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' },
-  tile: {
-    alignItems: 'center',
-    gap: 8,
-    padding: 4,
-    borderRadius: 999,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  tileSelected: { borderColor: isDark ? '#CBA3E0' : '#872657' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 14 },
+  tile: { width: '33.333%', alignItems: 'center', gap: 6 },
+  slot: { alignItems: 'center', justifyContent: 'center' },
+  pressed: { opacity: 0.72 },
   helper: { color: colors.muted, fontSize: 13, lineHeight: 19 },
 }));

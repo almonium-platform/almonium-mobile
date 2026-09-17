@@ -17,7 +17,7 @@ import { useCrest } from '@/src/crest-context';
 import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
 import { useNotice } from '@/src/notice-context';
-import { cadenceLabel, paceFraction } from '@/src/rhythm';
+import { cadenceLabel, hasRecord, isEmptyRecord, paceFraction } from '@/src/rhythm';
 import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import { rhythmFor, useLearningStats, useRhythm } from '@/src/use-rhythm';
 
@@ -25,6 +25,8 @@ import { rhythmFor, useLearningStats, useRhythm } from '@/src/use-rhythm';
  * The profile tab: how you appear, your name, the record for the active language, the other
  * languages collapsed to a name and a fraction, interests, visibility, and the plan as one line.
  * A fresh profile never grades someone who has not started: no zero counters, no empty strip.
+ * The record's sentence and its one action sit on their own lines; side by side they fought for
+ * the width and the sentence lost its end.
  */
 export function ProfileTab() {
   const { t } = useTranslation();
@@ -54,6 +56,10 @@ export function ProfileTab() {
   const rhythm = useRhythm();
   const stats = useLearningStats(active?.language);
   const activeRhythm = rhythmFor(rhythm.data, active?.language);
+  const recorded = hasRecord(stats.data, activeRhythm);
+  // The bar can only be set once something has been learned (the harness hides it before then);
+  // until then the one useful action is the one that starts the record.
+  const paceEditable = Boolean(activeRhythm && activeRhythm.editable && !isEmptyRecord(activeRhythm));
   const interestsQuery = useQuery({ queryKey: ['interests'], queryFn: api.interests, staleTime: Infinity });
   const validName = /^[a-zA-Z0-9_]{3,20}$/.test(username.trim());
 
@@ -120,7 +126,7 @@ export function ProfileTab() {
             </View>
           </View>
         ) : (
-          <Row label={profile?.username ?? ''} note={t('Only used if you share a word pack.')}>
+          <Row label={profile?.username ?? ''} detail={t('Only used if you share a word pack.')}>
             <ActionPill label={t('Change')} onPress={() => setEditingName(true)} />
           </Row>
         )}
@@ -128,16 +134,22 @@ export function ProfileTab() {
 
       <Section eyebrow={t('YOUR RECORD')} title={active ? languageName(active.language) : undefined}>
         <View style={styles.block}>
-          <RecordStrip stats={stats.data} rhythm={activeRhythm} />
-          {activeRhythm && paceFraction(activeRhythm).counted > 0 ? (
-            <View style={styles.recordFoot}>
-              <Text style={styles.note}>{t('{cadence}. Tint shows time learning, not a score.', { cadence: cadenceLabel(activeRhythm.target) })}</Text>
-              <Pressable onPress={() => router.push('/(tabs)/home')} hitSlop={8}>
-                <Text style={styles.link}>{t('Change on home')}</Text>
-              </Pressable>
-            </View>
+          {recorded ? (
+            <>
+              <RecordStrip stats={stats.data} rhythm={activeRhythm} />
+              <Text style={styles.note}>{t('{cadence}. Tint shows time learning, not a score.', { cadence: cadenceLabel(activeRhythm?.target ?? null) })}</Text>
+            </>
           ) : (
-            <Button variant="secondary" onPress={() => router.push('/(tabs)/books')}>{t('Open the library')}</Button>
+            <Text style={styles.note}>{t('Your record starts with the first word you keep. {cadence}.', { cadence: cadenceLabel(activeRhythm?.target ?? null) })}</Text>
+          )}
+          {paceEditable ? (
+            <Pressable accessibilityRole="link" onPress={() => router.push('/(tabs)/home')} hitSlop={8} style={styles.recordAction}>
+              <Text style={styles.link}>{activeRhythm?.target === null ? t('Set a pace') : t('Change your pace')}</Text>
+            </Pressable>
+          ) : (
+            <Pressable accessibilityRole="link" onPress={() => router.push('/(tabs)/books')} hitSlop={8} style={styles.recordAction}>
+              <Text style={styles.link}>{t('Open the library')}</Text>
+            </Pressable>
           )}
         </View>
       </Section>
@@ -151,7 +163,7 @@ export function ProfileTab() {
             return (
               <Row
                 key={learner.id}
-                icon={<View style={[styles.swatch, { backgroundColor: crest }]} />}
+                icon={<View style={[styles.crest, { backgroundColor: crest }]} />}
                 label={languageName(learner.language)}
                 detail={learner.active ? `${learner.selfReportedLevel}` : t('Set aside')}
                 onPress={() => router.push({ pathname: '/language/[code]', params: { code: learner.language } })}>
@@ -249,11 +261,12 @@ const useStyles = createThemedStyles((colors) => ({
   nameEditor: { gap: 10, paddingTop: 4 },
   actions: { flexDirection: 'row', gap: 10 },
   action: { flex: 1 },
-  note: { color: colors.muted, fontSize: 13, lineHeight: 19 },
-  link: { color: colors.primary, fontSize: 13, fontWeight: '600' },
-  block: { gap: 12, paddingTop: 4 },
-  recordFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  swatch: { width: 12, height: 12, borderRadius: 6 },
+  note: { color: colors.muted, fontSize: 14, lineHeight: 21 },
+  link: { color: colors.primary, fontSize: 14, fontWeight: '600' },
+  block: { gap: 10, paddingTop: 4 },
+  recordAction: { alignSelf: 'flex-start', minHeight: 32, justifyContent: 'center' },
+  // D9: the language's colour as a 30pt square, not a dot.
+  crest: { width: 30, height: 30, borderRadius: 8 },
   fraction: { color: colors.muted, fontSize: 13 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingTop: 4 },
   chip: { minHeight: 36, justifyContent: 'center', borderRadius: 999, paddingHorizontal: 13, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface },

@@ -41,6 +41,8 @@ export const languageFeatures: Record<string, string> = {
  * One row per language, and the row is the whole record: colour, name, level, active. Known
  * languages stay neutral grey; only languages you are learning get a hue. On Free the switch
  * becomes a single choice made through Make active, so the account can never sit at zero.
+ * A language is known or learned, never both: each sheet excludes the other list, and a stored
+ * duplicate is hidden from I know and dropped on the next save rather than shown twice.
  */
 export function LearningTab() {
   const { t } = useTranslation();
@@ -71,6 +73,8 @@ export function LearningTab() {
     enabled: Boolean(firebaseUser),
   });
   const learners = useMemo(() => profile?.learners ?? [], [profile?.learners]);
+  const isLearner = (code: string) => learners.some((learner) => learner.language === code);
+  const known = (profile?.fluentLangs ?? []).filter((code) => !isLearner(code));
   const activeCount = learners.filter((learner) => learner.active).length;
   const allowance = policy.data?.allowance ?? activeLanguageAllowance(profile?.subscription);
   const unlimited = allowance === -1;
@@ -127,7 +131,7 @@ export function LearningTab() {
   async function saveFluent() {
     setSavingFluent(true);
     try {
-      await api.updateFluentLanguages(fluentDraft);
+      await api.updateFluentLanguages(fluentDraft.filter((code) => !isLearner(code)));
       await changed();
       setFluentVisible(false);
     } catch (error) {
@@ -167,9 +171,9 @@ export function LearningTab() {
     <View style={styles.tab}>
       <Section
         eyebrow={t('I KNOW')}
-        action={<ActionPill label={t('Edit')} onPress={() => { setFluentDraft(profile?.fluentLangs ?? []); setFluentVisible(true); }} />}>
+        action={<ActionPill label={t('Edit')} onPress={() => { setFluentDraft(known); setFluentVisible(true); }} />}>
         <View style={styles.chips}>
-          {(profile?.fluentLangs ?? []).map((code) => (
+          {known.map((code) => (
             <View key={code} style={styles.neutralChip}>
               <Text style={styles.neutralChipText}>{languageName(code)}</Text>
             </View>
@@ -177,7 +181,7 @@ export function LearningTab() {
         </View>
       </Section>
 
-      <Section eyebrow={t('I’M LEARNING')} title={unlimited ? undefined : t('{count} of {allowance} active', { count: activeCount, allowance })}>
+      <Section eyebrow={t('I’M LEARNING')} caption={t('{count} of {allowance} active', { count: activeCount, allowance: unlimited ? learners.length : allowance })}>
         {learners.map((learner) => {
           const crest = crestFor(learner.language);
           const busy = busyLanguage === learner.language;
@@ -187,7 +191,7 @@ export function LearningTab() {
               key={learner.id}
               icon={
                 <Pressable accessibilityLabel={t('Colour for {language}', { language: languageName(learner.language) })} onPress={() => setColourFor(learner.language)} hitSlop={10}>
-                  <View style={[styles.swatch, { backgroundColor: crest }]} />
+                  <View style={[styles.crest, { backgroundColor: crest }]} />
                 </Pressable>
               }
               label={languageName(learner.language)}
@@ -305,7 +309,7 @@ export function LearningTab() {
         <Text style={styles.note}>{t('Translations and parallel texts come in these.')}</Text>
         <View style={styles.chips}>
           {sortLanguages(languagesQuery.data ?? [])
-            .filter((code) => !learners.some((learner) => learner.language === code))
+            .filter((code) => !isLearner(code))
             .map((code) => {
               const selected = fluentDraft.includes(code);
               const full = !selected && fluentDraft.length >= fluentLimit;
@@ -400,7 +404,8 @@ const useStyles = createThemedStyles((colors) => ({
   chipSelected: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
   chipTextSelected: { color: colors.primary },
   chipDisabled: { opacity: 0.5 },
-  swatch: { width: 14, height: 14, borderRadius: 7 },
+  // D9: the language's colour as a 30pt square, not a dot. Tapping it opens the colour sheet.
+  crest: { width: 30, height: 30, borderRadius: 8 },
   levelPill: { minHeight: 36, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, borderWidth: 1, borderColor: colors.border, borderRadius: 999 },
   levelPillText: { color: colors.ink, fontSize: 13, fontWeight: '600' },
   addIcon: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 17, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.border },

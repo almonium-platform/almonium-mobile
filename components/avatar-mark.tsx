@@ -37,14 +37,17 @@ export function AvatarMark({
   size = 46,
   ring,
   ringOffset,
+  ringGap,
 }: {
   avatarUrl?: string | null;
   username?: string | null;
   premium?: boolean;
   size?: number;
   ring?: AvatarRing;
-  /** The colour behind the ring gap: white on paper, the card colour at night. */
+  /** The colour behind the ring gap: white on paper, the card colour at night, transparent to let the ground through. */
   ringOffset?: string;
+  /** The gap between disc and ring; the picker widens it so the ring reads as an outline, not a rim. */
+  ringGap?: number;
 }) {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
@@ -52,7 +55,7 @@ export function AvatarMark({
   const animal = animalFromUrl(avatarUrl);
   const legacyImage = !animal && avatarUrl ? avatarUrl : null;
   const ringWidth = size >= 40 ? 2 : 1.5;
-  const gap = ring ? (size >= 40 ? 2 : 1.5) : 0;
+  const gap = ring ? (ringGap ?? (size >= 40 ? 2 : 1.5)) : 0;
   const frame = { width: size, height: size, borderRadius: size / 2 };
   const label = animal
     ? premium

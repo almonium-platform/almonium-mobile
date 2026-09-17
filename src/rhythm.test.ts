@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   ActivityMeter,
   cadenceLabel,
+  hasRecord,
   isEmptyRecord,
   localDate,
   paceFraction,
@@ -49,6 +50,15 @@ describe('rhythm', () => {
 
   it('counts only weeks from the first session onward', () => {
     expect(paceFraction(german)).toEqual({ met: 3, counted: 4 });
+  });
+
+  it('never shows the four-zero strip: a tracked week without a word kept is no record', () => {
+    const fresh = { ...german, firstSessionAt: '2026-07-06', weeks: [week('2026-07-06', 5, false)] };
+    expect(paceFraction(fresh)).toEqual({ met: 0, counted: 1 });
+    expect(hasRecord({ wordsKept: 0, booksFinished: 0 }, fresh)).toBe(false);
+    expect(hasRecord({ wordsKept: 1, booksFinished: 0 }, fresh)).toBe(true);
+    expect(hasRecord({ wordsKept: 0, booksFinished: 0 }, german)).toBe(true);
+    expect(hasRecord(undefined, german)).toBe(false);
   });
 
   it('keeps the frozen fraction of a set-aside language', () => {

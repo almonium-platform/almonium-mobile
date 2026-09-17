@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Linking, Platform, Pressable, Switch, Text, View } from 'react-native';
 
-import { ActionPill, Row, Section } from '@/components/settings/shared';
+import { ActionPill, Row, Section, Segmented } from '@/components/settings/shared';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { buildStamp } from '@/src/build-info';
@@ -191,7 +191,7 @@ export function AppTab() {
             onChange={(value) => void setAppearance(value)}
           />
         </Row>
-        <Row label={t('Reduce motion')} detail={t('Stops slides and anything that moves across the screen. Fades and colour changes stay.')}>
+        <Row stack label={t('Reduce motion')} detail={t('Stops slides and anything that moves across the screen. Fades and colour changes stay.')}>
           <Segmented<MotionPreference>
             value={motion}
             options={[{ value: 'full', label: t('Off') }, { value: 'reduced', label: t('On') }, { value: 'system', label: t('System') }]}
@@ -251,6 +251,13 @@ export function AppTab() {
       </Section>
 
       <Section eyebrow={t('READER DEFAULTS')}>
+        <Row label={t('Page')}>
+          <Segmented<ReaderSettings['theme']>
+            value={reader.theme}
+            options={[{ value: 'paper', label: t('Paper') }, { value: 'night', label: t('Night') }]}
+            onChange={(theme) => updateReader({ theme })}
+          />
+        </Row>
         <Text style={styles.note}>{t('Size lives in the reader, where you can see the effect.')}</Text>
         <View style={styles.group}>
           <Text style={styles.groupLabel}>{t('TYPE')}</Text>
@@ -282,13 +289,6 @@ export function AppTab() {
             );
           })}
         </View>
-        <Row label={t('Page')}>
-          <Segmented<ReaderSettings['theme']>
-            value={reader.theme}
-            options={[{ value: 'paper', label: t('Paper') }, { value: 'night', label: t('Night') }]}
-            onChange={(theme) => updateReader({ theme })}
-          />
-        </Row>
       </Section>
 
       <Section eyebrow={t('DATA & STORAGE')}>
@@ -324,27 +324,6 @@ export function AppTab() {
   );
 }
 
-function Segmented<T extends string>({ value, options, onChange }: { value: T; options: { value: T; label: string }[]; onChange(value: T): void }) {
-  const styles = useStyles();
-  return (
-    <View accessibilityRole="radiogroup" style={styles.segmented}>
-      {options.map((option) => {
-        const selected = option.value === value;
-        return (
-          <Pressable
-            key={option.value}
-            accessibilityRole="radio"
-            accessibilityState={{ selected }}
-            onPress={() => onChange(option.value)}
-            style={[styles.segment, selected && styles.segmentSelected]}>
-            <Text style={[styles.segmentText, selected && styles.segmentTextSelected]}>{option.label}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
 const useStyles = createThemedStyles((colors) => ({
   tab: { gap: 18 },
   note: { color: colors.muted, fontSize: 13, lineHeight: 19 },
@@ -363,9 +342,4 @@ const useStyles = createThemedStyles((colors) => ({
   optionCopy: { flex: 1, gap: 2 },
   optionLabel: { color: colors.ink, fontSize: 15 },
   optionNote: { color: colors.metadata, fontSize: 12, lineHeight: 17 },
-  segmented: { flexDirection: 'row', borderRadius: 999, padding: 3, backgroundColor: colors.nested },
-  segment: { minHeight: 32, minWidth: 52, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10, borderRadius: 999 },
-  segmentSelected: { backgroundColor: colors.surface },
-  segmentText: { color: colors.muted, fontSize: 12, fontWeight: '600' },
-  segmentTextSelected: { color: colors.primaryDark },
 }));
