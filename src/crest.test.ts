@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { crestFor, crestRamp, defaultCrest, ensurePaletteColours, languageColours, mix } from './crest';
+import { contrast, crestFor, crestInk, crestRamp, defaultCrest, ensurePaletteColours, languageColours, mix } from './crest';
 
 describe('crest colours', () => {
   it('ships the eight web hues and nothing else', () => {
@@ -25,6 +25,15 @@ describe('crest colours', () => {
   it('falls back to the web default for an unknown language', () => {
     expect(crestFor({}, 'FR')).toBe(defaultCrest);
     expect(crestFor({ FR: '#638565' }, 'FR')).toBe('#638565');
+  });
+
+  it('darkens every hue until it reads as text on white, and lightens it at night', () => {
+    for (const colour of languageColours) {
+      expect(contrast(crestInk(colour.hex, '#ffffff'), '#ffffff')).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(crestInk(colour.hex, '#1E1A26'), '#1E1A26')).toBeGreaterThanOrEqual(4.5);
+    }
+    // A hue that already reads is left alone.
+    expect(crestInk('#2C2530', '#ffffff')).toBe('#2C2530');
   });
 
   it('draws six steps from the ground to the full hue', () => {

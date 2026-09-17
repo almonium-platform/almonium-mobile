@@ -12,15 +12,17 @@ import { Sheet } from '@/components/sheet';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { useChat } from '@/src/chat-client';
-import { crestTint } from '@/src/crest';
+import { crestInk, crestTint, mix } from '@/src/crest';
 import { useCrest } from '@/src/crest-context';
 import { languageName } from '@/src/languages';
 import { createThemedStyles, fonts, useTheme } from '@/src/theme';
 
 /**
- * Emblem, crest, bell, avatar; the 3px rail beneath carries the active language's own hue and is
- * the only chrome that carries language colour. The crest is a stack, not a caret: with two or
- * more active languages two hairline edges peek out below it in the next languages' hues.
+ * Emblem, crest, bell, avatar; the 3px rail beneath carries the active language's own hue and
+ * says which language you are in. The crest is a flat chip whose only job is to say that this
+ * can change: code in mono plus a caret when there is something to switch to, and no caret and
+ * no button when there is not, so a label never becomes a button that goes nowhere. Nothing
+ * in the app stacks, so the chip does not either (Mobile 5a).
  */
 export function AppHeader({
   language,
@@ -46,36 +48,31 @@ export function AppHeader({
   const [languagesVisible, setLanguagesVisible] = useState(false);
   // Active only: the switcher answers what you are doing now. Set-aside languages live on the profile.
   const learners = profile?.learners.filter((learner) => learner.active) ?? [];
-  const others = learners.filter((learner) => learner.language !== language).slice(0, 2);
   const crest = crestFor(language);
-  const tint = crestTint(crest, isDark ? colors.surface : colors.canvas);
+  // The chip takes the language tint: border at 40% over the bar, text darkened until it reads.
+  const chipBorder = mix(crest, colors.surface, 0.4);
+  const chipInk = crestInk(crest, colors.surface);
   const canSwitch = Boolean(onLanguageChange && learners.length > 1);
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       <View style={styles.row}>
         <BrandMark size={30} />
-        <View style={styles.crestSlot}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              canSwitch
-                ? t('Current language {name}, switch', { name: languageName(language) })
-                : t('Current language {name}', { name: languageName(language) })
-            }
-            disabled={!canSwitch}
-            onPress={() => setLanguagesVisible(true)}
-            style={({ pressed }) => [styles.crest, { borderColor: crest, backgroundColor: tint }, pressed && styles.pressed]}>
-            <Text style={[styles.crestText, { color: crest }]}>{language.toUpperCase()}</Text>
-          </Pressable>
-          {canSwitch &&
-            others.map((learner, index) => (
-              <View
-                key={learner.language}
-                pointerEvents="none"
-                style={[styles.deckEdge, { top: 30 + index * 3, marginHorizontal: 4 + index * 4, borderColor: crestFor(learner.language) }]}
-              />
-            ))}
-        </View>
+        {/* The tap target is 44pt tall around a 28pt chip; the padding is invisible. */}
+        <Pressable
+          accessibilityRole={canSwitch ? 'button' : 'text'}
+          accessibilityLabel={
+            canSwitch
+              ? t('Current language {name}, switch', { name: languageName(language) })
+              : t('Current language {name}', { name: languageName(language) })
+          }
+          disabled={!canSwitch}
+          onPress={() => setLanguagesVisible(true)}
+          style={({ pressed }) => [styles.crestTarget, pressed && styles.pressed]}>
+          <View style={[styles.crest, { borderColor: chipBorder }]}>
+            <Text style={[styles.crestText, { color: chipInk }]}>{language.toUpperCase()}</Text>
+            {canSwitch && <Ionicons name="chevron-down" size={10} color={chipInk} />}
+          </View>
+        </Pressable>
         <View style={styles.spacer} />
         <Pressable
           accessibilityRole="button"
@@ -152,18 +149,18 @@ const useStyles = createThemedStyles((colors) => ({
     paddingHorizontal: 16,
     paddingVertical: 5,
   },
-  crestSlot: { minWidth: 48, paddingBottom: 6 },
+  crestTarget: { minHeight: 44, justifyContent: 'center' },
   crest: {
-    minWidth: 48,
-    minHeight: 30,
+    height: 28,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 5,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderRadius: 999,
+    borderRadius: 8,
+    backgroundColor: colors.surface,
   },
-  crestText: { fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 0.8 },
-  deckEdge: { position: 'absolute', left: 0, right: 0, height: 4, borderTopWidth: 1, borderLeftWidth: 1, borderRightWidth: 1, borderBottomLeftRadius: 999, borderBottomRightRadius: 999 },
+  crestText: { fontFamily: fonts.mono, fontSize: 11, fontWeight: '500', letterSpacing: 0.5 },
   spacer: { flex: 1 },
   iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   badge: { position: 'absolute', top: 6, right: 5, minWidth: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: colors.surface, borderRadius: 999, paddingHorizontal: 5, paddingVertical: 1, backgroundColor: colors.chatMine },

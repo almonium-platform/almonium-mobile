@@ -74,3 +74,31 @@ export function crestRamp(crest: string, ground: string, empty: string) {
 export function crestTint(crest: string, ground: string) {
   return mix(crest, ground, 0.16);
 }
+
+function luminance(hex: string) {
+  const [r, g, b] = parseHex(hex).map((channel) => {
+    const c = channel / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** WCAG contrast between two colours, 1 to 21. */
+export function contrast(a: string, b: string) {
+  const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (light + 0.05) / (dark + 0.05);
+}
+
+/**
+ * The crest as text on a ground: the hue itself where it already reads, otherwise pushed toward
+ * ink (on paper) or toward white (at night) in small steps until it clears 4.5:1. All eight
+ * hues sit at one lightness, so each moves about the same distance and none ends up black.
+ */
+export function crestInk(crest: string, ground: string, minimum = 4.5) {
+  const toward = luminance(ground) > 0.5 ? '#000000' : '#ffffff';
+  let ink = crest;
+  for (let amount = 0; amount < 1 && contrast(ink, ground) < minimum; amount += 0.05) {
+    ink = mix(toward, crest, amount);
+  }
+  return ink;
+}
