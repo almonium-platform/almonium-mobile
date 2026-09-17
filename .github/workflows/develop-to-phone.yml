@@ -179,7 +179,7 @@ jobs:
             echo "### JS update published to the \`$EAS_CHANNEL\` channel"
             echo
             echo "- $message"
-            echo "- Runtime versions: $(jq -r '[.[] | .platform + \" \" + .runtimeVersion] | join(\", \")' update.json)"
+            echo "- Runtime versions: $(jq -r 'map(.platform + " " + .runtimeVersion) | join(", ")' update.json)"
             echo "- Update page: $page"
             echo
             echo "Installed builds download it in the background on the next launch and run it on the launch after that."
@@ -188,13 +188,15 @@ jobs:
       - name: Tell the phone an update is waiting (ntfy)
         if: env.NTFY_TOPIC != ''
         env:
-          UPDATE_PAGE: ${{ steps.update.outputs.page }}
+          # Tapping the notice opens this run, not the expo.dev update page: that page offers
+          # the APK for download, which reads as "install this", and an update needs no install.
+          RUN_PAGE: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'manual run' }}
         run: |
           curl -fsS \
             -H "Title: Almonium develop update published" \
             -H "Priority: low" \
             -H "Tags: arrow_down" \
-            -H "Click: $UPDATE_PAGE" \
-            -d "$(printf '%s\n' "$COMMIT_MESSAGE" | head -n 1). Open the app twice to run it." \
+            -H "Click: $RUN_PAGE" \
+            -d "$(printf '%s\n' "$COMMIT_MESSAGE" | head -n 1). Nothing to install: open the app, close it, open it again." \
             "https://ntfy.sh/$NTFY_TOPIC" > /dev/null
