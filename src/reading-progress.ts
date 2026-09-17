@@ -60,8 +60,8 @@ export function parsePendingPoint(value: string | null): ProgressPoint | null {
     const parsed = JSON.parse(value) as Partial<ProgressPoint>;
     if (typeof parsed.percentage !== 'number' || !Number.isFinite(parsed.percentage)) return null;
     const place = parsed.place;
-    const valid = place && Number.isInteger(place.chapter) && Number.isInteger(place.chapterCount) && place.chapter >= 1 && place.chapterCount >= place.chapter;
-    return { percentage: parsed.percentage, place: valid ? { chapter: place.chapter, chapterCount: place.chapterCount } : null };
+    const valid = place && Number.isInteger(place.chapter) && place.chapter >= 1;
+    return { percentage: parsed.percentage, place: valid ? { chapter: place.chapter } : null };
   } catch {
     return null;
   }

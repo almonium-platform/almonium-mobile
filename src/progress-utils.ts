@@ -2,10 +2,9 @@ export function clampProgress(percentage: number) {
   return Math.max(0, Math.min(100, Math.round(percentage)));
 }
 
-/** The chapter being read and how many the reader counted, as the shelf will say it back. */
+/** The chapter being read, as the processor numbers it; the count it is said against is the book's own. */
 export interface ReadingPlace {
   chapter: number;
-  chapterCount: number;
 }
 
 export interface ProgressPoint {
@@ -15,7 +14,7 @@ export interface ProgressPoint {
 
 export function samePoint(a: ProgressPoint | null, b: ProgressPoint | null) {
   if (!a || !b) return a === b;
-  return a.percentage === b.percentage && a.place?.chapter === b.place?.chapter && a.place?.chapterCount === b.place?.chapterCount;
+  return a.percentage === b.percentage && a.place?.chapter === b.place?.chapter;
 }
 
 export class ProgressQueue {

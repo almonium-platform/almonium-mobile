@@ -602,7 +602,7 @@ export default function ReaderScreen() {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     if (sync) {
       // The place rides with the percentage, so the shelf can say "12% · chapter 3 of 24".
-      void sync.record(next, readingChapter && chapters.length ? { chapter: chapterNumber(readingChapter), chapterCount: chapters.length } : null);
+      void sync.record(next, readingChapter ? { chapter: chapterNumber(readingChapter) } : null);
       saveTimer.current = setTimeout(() => void flush(), 1500);
     } else if (slug) {
       saveTimer.current = setTimeout(() => {

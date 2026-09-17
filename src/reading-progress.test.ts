@@ -27,14 +27,14 @@ describe('ProgressQueue', () => {
 
   it('carries the place with the percentage and keeps it between scrolls', () => {
     const queue = new ProgressQueue();
-    queue.record(12, { chapter: 3, chapterCount: 24 });
-    expect(queue.next()).toEqual({ percentage: 12, place: { chapter: 3, chapterCount: 24 } });
-    queue.markSaved({ percentage: 12, place: { chapter: 3, chapterCount: 24 } });
+    queue.record(12, { chapter: 3 });
+    expect(queue.next()).toEqual({ percentage: 12, place: { chapter: 3 } });
+    queue.markSaved({ percentage: 12, place: { chapter: 3 } });
     expect(queue.next()).toBeNull();
 
-    queue.record(12, { chapter: 4, chapterCount: 24 });
+    queue.record(12, { chapter: 4 });
     expect(queue.next()?.place?.chapter).toBe(4);
     queue.record(13);
-    expect(queue.next()).toEqual({ percentage: 13, place: { chapter: 4, chapterCount: 24 } });
+    expect(queue.next()).toEqual({ percentage: 13, place: { chapter: 4 } });
   });
 });

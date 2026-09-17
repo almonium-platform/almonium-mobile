@@ -256,7 +256,7 @@ export const api = {
     return response.text();
   },
   saveProgress: (bookId: string, percentage: number, place: ReadingPlace | null = null) =>
-    request<void>(`/books/${bookId}/progress?percentage=${Math.round(percentage)}${place ? `&chapter=${place.chapter}&chapterCount=${place.chapterCount}` : ''}`, {
+    request<void>(`/books/${bookId}/progress?percentage=${Math.round(percentage)}${place ? `&chapter=${place.chapter}` : ''}`, {
       method: 'POST',
     }),
   deleteProgress: (bookId: string) =>
