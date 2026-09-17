@@ -1,66 +1,61 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { onlineManager, useQuery } from '@tanstack/react-query';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  SectionList,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader } from '@/components/app-header';
-import { BookCard } from '@/components/book-card';
+import { BookCover } from '@/components/book-cover';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
-import { msg } from '@/src/i18n';
-import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { downloadedBooks } from '@/src/offline-books';
+import { readReadingPlaces, type ReadingPlace } from '@/src/reading-place';
+import { libraryEntries, shelfRows, shortTitle, type LibraryEntry, type ShelfRow } from '@/src/shelf';
 import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
-import type { BookSummary, CefrLevel } from '@/src/types';
 
 const shelfLanguageKey = 'almonium:shelf-language';
-const levelFilters: ('ALL' | CefrLevel)[] = ['ALL', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
-type LengthFilter = 'ALL' | 'SHORT' | 'MEDIUM' | 'LONG';
-const lengthLabels: Record<LengthFilter, string> = {
-  ALL: msg('Any'),
-  SHORT: msg('Short'),
-  MEDIUM: msg('Medium'),
-  LONG: msg('Long'),
-};
 
+/**
+ * The Read tab (design 4a): the shelf opens on the book. What you have started, each book once,
+ * in one white card of hairline rows; under it the library's entrance, a rail of covers and the
+ * count that opens the library screen. Search and filters live there, not here.
+ */
 export default function BooksScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
   const { firebaseUser, profile } = useAuth();
   const showNotice = useNotice();
+  const online = useSyncExternalStore(
+    useCallback((listen: () => void) => onlineManager.subscribe(listen), []),
+    () => onlineManager.isOnline(),
+    () => true,
+  );
   const activeLanguages = useMemo(
-    () =>
-      profile?.learners
-        .filter((learner) => learner.active)
-        .map((learner) => learner.language) || [],
+    () => profile?.learners.filter((learner) => learner.active).map((learner) => learner.language) || [],
     [profile?.learners],
   );
   const [language, setLanguage] = useState(activeLanguages[0] || '');
-  const [search, setSearch] = useState('');
-  const [levelFilter, setLevelFilter] = useState<'ALL' | CefrLevel>('ALL');
-  const [lengthFilter, setLengthFilter] = useState<LengthFilter>('ALL');
+  const [places, setPlaces] = useState<Record<string, ReadingPlace>>({});
 
   useEffect(() => {
     void AsyncStorage.getItem(shelfLanguageKey).then((stored) => {
       if (stored && activeLanguages.includes(stored)) setLanguage(stored);
     });
   }, [activeLanguages]);
+  useEffect(() => {
+    if ((!language || !activeLanguages.includes(language)) && activeLanguages[0]) setLanguage(activeLanguages[0]);
+  }, [activeLanguages, language]);
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    void readReadingPlaces().then((value) => { if (active) setPlaces(value); });
+    return () => { active = false; };
+  }, []));
 
   function chooseLanguage(nextLanguage: string) {
     setLanguage(nextLanguage);
@@ -73,40 +68,31 @@ export default function BooksScreen() {
     enabled: Boolean(language && firebaseUser),
   });
   const downloads = useQuery({ queryKey: ['offline-books'], queryFn: downloadedBooks });
+  // Without a connection the shelf is what was cached plus what was downloaded; nothing else changes.
+  const offline = !online || (query.isError && Boolean(query.data));
 
-  const sections = useMemo(() => {
-    if (!query.data && !downloads.data?.length) return [];
-    const needle = search.trim().toLocaleLowerCase();
-    const filter = (books: BookSummary[]) =>
-      books.filter((book) => {
-        const matchesSearch = !needle ||
-          book.title.toLocaleLowerCase().includes(needle) ||
-          book.author.toLocaleLowerCase().includes(needle);
-        const matchesLevel = levelFilter === 'ALL' || book.cefrLevel === levelFilter;
-        const matchesLength = lengthFilter === 'ALL' ||
-          (lengthFilter === 'SHORT' && book.wordCount < 15_000) ||
-          (lengthFilter === 'MEDIUM' && book.wordCount >= 15_000 && book.wordCount < 40_000) ||
-          (lengthFilter === 'LONG' && book.wordCount >= 40_000);
-        return matchesSearch && matchesLevel && matchesLength;
-      });
-    return [
-      { title: t('Downloads'), offline: true, data: filter((downloads.data ?? []).filter((book) => book.language === language)) },
-      { title: t('Continue reading'), offline: false, data: filter(query.data?.continueReading ?? []) },
-      { title: t('Favorites'), offline: false, data: filter(query.data?.favorites ?? []) },
-      { title: t('Available'), offline: false, data: filter(query.data?.available ?? []) },
-    ].filter((section) => section.data.length);
-  }, [downloads.data, language, lengthFilter, levelFilter, query.data, search, t]);
+  const rows = useMemo(
+    () => shelfRows(query.data?.continueReading ?? [], downloads.data ?? [], language),
+    [downloads.data, language, query.data?.continueReading],
+  );
+  const library = useMemo(() => {
+    if (!query.data) return [] as LibraryEntry[];
+    const shelfIds = new Set(rows.map((row) => row.book.id));
+    return libraryEntries([...query.data.available, ...query.data.favorites, ...query.data.continueReading], shelfIds);
+  }, [query.data, rows]);
+  const rail = useMemo(() => library.filter((entry) => !entry.onShelf).slice(0, 12), [library]);
+  const fluent = profile?.fluentLangs[0] ?? '';
 
-  async function resetProgress(book: BookSummary) {
-    if (!book.progressPercentage) return;
-    Alert.alert(t('Reset reading progress?'), t('{title} will return to the beginning.', { title: book.title }), [
+  async function resetProgress(row: ShelfRow) {
+    if (!row.progress) return;
+    Alert.alert(t('Reset reading progress?'), t('{title} will return to the beginning.', { title: row.book.title }), [
       { text: t('Cancel'), style: 'cancel' },
       {
         text: t('Reset'),
         style: 'destructive',
         onPress: async () => {
           try {
-            await api.deleteProgress(book.id);
+            await api.deleteProgress(row.book.id);
             await query.refetch();
           } catch (error) {
             showNotice({ title: t('Could not reset progress'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
@@ -114,6 +100,17 @@ export default function BooksScreen() {
         },
       },
     ]);
+  }
+
+  function openRow(row: ShelfRow) {
+    if (offline && !row.offline) return;
+    const { book } = row;
+    router.push({ pathname: '/reader/[bookId]', params: { bookId: book.id, language, title: book.title, ...(book.editionSlug ? { slug: book.editionSlug } : {}) } });
+  }
+
+  function openEntry(entry: LibraryEntry) {
+    const { book } = entry;
+    router.push({ pathname: '/book/[bookId]', params: { bookId: book.id, language, ...(book.editionSlug ? { slug: book.editionSlug } : {}) } });
   }
 
   if (!language) {
@@ -147,124 +144,137 @@ export default function BooksScreen() {
     );
   }
 
+  const count = rows.length;
   return (
     <View style={styles.screen}>
-      <AppHeader
-        language={language}
-        onLanguageChange={activeLanguages.length > 1 ? chooseLanguage : undefined}
-      />
-      <SectionList
-      sections={sections}
-      keyExtractor={(book, index) => `${book.id}-${index}`}
-      contentContainerStyle={styles.list}
-      stickySectionHeadersEnabled={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={query.isRefetching}
-          onRefresh={query.refetch}
-          tintColor={colors.primary}
-        />
-      }
-      ListHeaderComponent={
-        <View style={styles.header}>
+      <AppHeader language={language} onLanguageChange={activeLanguages.length > 1 ? chooseLanguage : undefined} />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={query.isRefetching} onRefresh={query.refetch} tintColor={colors.primary} />}>
+        <View style={styles.heading}>
           <Text style={styles.eyebrow}>{t('YOUR SHELF')}</Text>
-          <Text style={styles.heroTitle}>
-            {query.data?.continueReading.length
-              ? t('{count, plural, one {# book open} other {# books open}}', { count: query.data.continueReading.length })
-              : t('Choose your next page')}
+          <Text style={styles.title}>
+            {count
+              ? t('{count, plural, =1 {One book open} =2 {Two books open} =3 {Three books open} other {# books open}}', { count })
+              : t('Nothing open yet')}
           </Text>
-          <Text style={styles.subhead}>{t('Everything you have started, and where you stopped.')}</Text>
-          <View style={styles.search}>
-            <Ionicons name="search" size={19} color={colors.muted} />
-            <TextInput
-              value={search}
-              onChangeText={setSearch}
-              placeholder={t('Search {language} books', { language: languageName(language) })}
-              placeholderTextColor={colors.muted}
-              style={styles.searchInput}
-            />
+          {offline && <Text style={styles.subhead}>{t('No connection. Downloaded books open as usual.')}</Text>}
+        </View>
+
+        {count ? (
+          <View style={styles.card}>
+            {rows.map((row, index) => {
+              const dim = offline && !row.offline;
+              const place = places[row.book.id];
+              const target = row.book.hasParallelTranslation && fluent ? `${row.book.language} → ${fluent}` : row.book.language;
+              const line = [
+                target,
+                t('{level} edition', { level: row.book.cefrLevel }),
+                dim ? t('needs connection') : row.offline ? t('offline') : row.book.hasParallelTranslation ? null : t('no translation'),
+              ].filter(Boolean).join(' · ');
+              return (
+                <Pressable
+                  key={row.book.id}
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: dim }}
+                  onPress={() => openRow(row)}
+                  onLongPress={() => resetProgress(row)}
+                  style={({ pressed }) => [styles.row, index > 0 && styles.rowRule, dim && styles.rowDim, pressed && !dim && styles.pressed]}>
+                  <BookCover title={row.book.title} author={row.book.author} workSlug={row.book.workSlug} coverUrl={row.book.coverUrl} width={52} height={76} rule />
+                  <View style={styles.rowCopy}>
+                    <Text style={styles.rowTitle} numberOfLines={2}>{shortTitle(row.book.title)}</Text>
+                    <Text style={styles.rowMeta} numberOfLines={2}>{line}</Text>
+                    <View style={styles.track}><View style={[styles.bar, { width: `${row.progress}%` }]} /></View>
+                    <Text style={styles.rowPlace} numberOfLines={1}>
+                      {place
+                        ? t('{percentage}% · chapter {chapter} of {total}', { percentage: row.progress, chapter: place.chapter, total: place.total })
+                        : t('{percentage}%', { percentage: row.progress })}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
-          <View style={styles.filterGroup}>
-            <Text style={styles.filterLabel}>{t('LEVEL')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-              {levelFilters.map((value) => (
-                <FilterChip key={value} label={value === 'ALL' ? t('Any level') : value} selected={levelFilter === value} onPress={() => setLevelFilter(value)} />
-              ))}
-            </ScrollView>
-          </View>
-          <View style={styles.filterGroup}>
-            <Text style={styles.filterLabel}>{t('LENGTH')}</Text>
-            <View style={styles.filters}>
-              {(['ALL', 'SHORT', 'MEDIUM', 'LONG'] as const).map((value) => (
-                <FilterChip key={value} label={t(lengthLabels[value])} selected={lengthFilter === value} onPress={() => setLengthFilter(value)} />
-              ))}
+        ) : (
+          <View style={styles.card}>
+            <View style={styles.emptyRow}>
+              <Text style={styles.emptyRowTitle}>{t('Choose your next page')}</Text>
+              <Text style={styles.emptyRowText}>{t('A book you open sits here, with your place kept.')}</Text>
             </View>
           </View>
-          <Text style={styles.hint}>{t('Tip: hold a book to reset its progress.')}</Text>
-          {query.isError && query.data && (
-            <Text style={styles.offline}>{t('Showing your saved shelf. Reconnect to refresh it.')}</Text>
+        )}
+
+        <View style={styles.library}>
+          <View style={styles.libraryHead}>
+            <Text style={styles.eyebrow}>{t('LIBRARY')}</Text>
+            {offline || !library.length ? (
+              <Text style={styles.libraryNote}>{offline ? t('Back when you reconnect') : ''}</Text>
+            ) : (
+              <Pressable
+                accessibilityRole="link"
+                hitSlop={10}
+                onPress={() => router.push({ pathname: '/library', params: { language } })}
+                style={({ pressed }) => pressed && styles.pressed}>
+                <Text style={styles.libraryLink}>{t('All {count, plural, one {# book} other {# books}}', { count: library.length })}</Text>
+              </Pressable>
+            )}
+          </View>
+          {!offline && rail.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rail}>
+              {rail.map((entry) => (
+                <Pressable
+                  key={entry.workSlug}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('{title} by {author}', { title: entry.title, author: entry.author })}
+                  onPress={() => openEntry(entry)}
+                  style={({ pressed }) => pressed && styles.pressed}>
+                  <BookCover
+                    title={entry.title}
+                    author={entry.author}
+                    workSlug={entry.workSlug}
+                    coverUrl={entry.book.coverUrl}
+                    width={96}
+                    height={142}
+                    foot={entry.levels.length > 1 ? entry.levels.join(' · ') : undefined}
+                  />
+                </Pressable>
+              ))}
+            </ScrollView>
           )}
         </View>
-      }
-      renderSectionHeader={({ section }) => (
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-          <Text style={styles.sectionCount}>{section.data.length}</Text>
-        </View>
-      )}
-      renderItem={({ item, section }) => (
-        <BookCard book={item} language={language} offline={section.offline} onLongPress={() => resetProgress(item)} />
-      )}
-      SectionSeparatorComponent={() => <View style={styles.sectionGap} />}
-      ItemSeparatorComponent={() => <View style={styles.itemGap} />}
-      ListEmptyComponent={
-        <View style={styles.emptyInline}>
-          <Text style={styles.emptyTitle}>{search ? t('No matching books') : t('No books here yet')}</Text>
-          <Text style={styles.emptyText}>
-            {search ? t('Try a title or author with different words.') : t('Pull down to refresh this shelf.')}
-          </Text>
-        </View>
-      }
-      />
+      </ScrollView>
     </View>
-  );
-}
-
-function FilterChip({ label, selected, onPress }: { label: string; selected: boolean; onPress(): void }) {
-  const styles = useStyles();
-  return (
-    <Pressable accessibilityRole="radio" accessibilityState={{ selected }} onPress={onPress} style={[styles.filter, selected && styles.filterActive]}>
-      <Text style={[styles.filterText, selected && styles.filterTextActive]}>{label}</Text>
-    </Pressable>
   );
 }
 
 const useStyles = createThemedStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.canvas },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas },
-  list: { padding: 16, paddingBottom: 32, backgroundColor: colors.canvas, flexGrow: 1 },
-  header: { gap: 12, paddingBottom: 20 },
-  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 },
-  heroTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30), fontWeight: '600' },
+  content: { paddingTop: 18, paddingBottom: 32, gap: 16 },
+  heading: { gap: 5, paddingHorizontal: 16 },
+  eyebrow: { color: colors.primary, fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 1.5 },
+  title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 28, lineHeight: serifLineHeight(28) },
   subhead: { color: colors.muted, fontSize: 13.5, lineHeight: 20 },
-  search: { minHeight: 50, borderRadius: 999, paddingHorizontal: 16, gap: 9, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, ...shadows.field },
-  searchInput: { flex: 1, color: colors.ink, fontSize: 15 },
-  filterGroup: { gap: 6 },
-  filterLabel: { color: colors.metadata, fontSize: 9.5, fontWeight: '600', letterSpacing: 1.2 },
-  filters: { flexDirection: 'row', gap: 7, paddingRight: 3 },
-  filter: { minHeight: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 19, paddingHorizontal: 12, backgroundColor: colors.surface },
-  filterActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
-  filterText: { color: colors.muted, fontSize: 11.5, fontWeight: '600' },
-  filterTextActive: { color: colors.primary },
-  hint: { color: colors.muted, fontSize: 11 },
-  offline: { color: colors.primaryDark, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, borderRadius: 10, padding: 10 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 10 },
-  sectionTitle: { color: colors.ink, fontSize: 20, fontWeight: '600' },
-  sectionCount: { color: colors.primary, fontSize: 12, fontWeight: '600', backgroundColor: colors.accentSoft, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8 },
-  itemGap: { height: 12 },
-  sectionGap: { height: 24 },
+  card: { marginHorizontal: 16, paddingHorizontal: 18, paddingVertical: 6, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
+  rowRule: { borderTopWidth: 1, borderTopColor: colors.line },
+  rowDim: { opacity: 0.45 },
+  pressed: { opacity: 0.7 },
+  rowCopy: { flex: 1, gap: 4 },
+  rowTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 17, lineHeight: serifLineHeight(17) },
+  rowMeta: { color: colors.muted, fontFamily: fonts.mono, fontSize: 11 },
+  track: { height: 4, marginTop: 2, borderRadius: 999, backgroundColor: colors.track, overflow: 'hidden' },
+  bar: { height: 4, backgroundColor: colors.primary },
+  rowPlace: { color: colors.muted, fontSize: 11.5 },
+  emptyRow: { gap: 6, paddingVertical: 16 },
+  emptyRowTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 17, lineHeight: serifLineHeight(17) },
+  emptyRowText: { color: colors.muted, fontSize: 13.5, lineHeight: 20 },
+  library: { gap: 10 },
+  libraryHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, paddingHorizontal: 16 },
+  libraryLink: { color: colors.primary, fontFamily: fonts.sansSemibold, fontSize: 12.5 },
+  libraryNote: { color: colors.muted, fontSize: 12.5 },
+  rail: { flexDirection: 'row', gap: 12, paddingHorizontal: 16 },
   empty: { flex: 1, padding: 32, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: colors.canvas },
-  emptyInline: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyTitle: { color: colors.ink, fontWeight: '600', fontSize: 20 },
   emptyText: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center' },
 }));

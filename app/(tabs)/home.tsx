@@ -134,7 +134,9 @@ export default function HomeScreen() {
                 author={continueBook.author}
                 workSlug={continueBook.workSlug}
                 coverUrl={continueBook.coverUrl}
-                style={styles.cover}
+                width={84}
+                height={122}
+                rule
               />
               <View style={styles.continueCopy}>
                 <Text style={styles.eyebrow}>{t('CONTINUE READING')}</Text>
@@ -271,7 +273,6 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   card: { gap: 12, padding: 18, borderRadius: 28, backgroundColor: colors.surface, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },
   almo: { alignSelf: 'center' },
   continueRow: { flexDirection: 'row', gap: 16 },
-  cover: { width: 84, height: 122, borderRadius: 10 },
   continueCopy: { flex: 1, justifyContent: 'center', gap: 6 },
   eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
   bookTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 25, lineHeight: serifLineHeight(25), fontWeight: '600' },

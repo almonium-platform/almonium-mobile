@@ -162,6 +162,15 @@ export function AppTab() {
     }
   }
 
+  async function removeDownload(bookId: string) {
+    try {
+      await removeDownloadedBook(bookId);
+      await queryClient.invalidateQueries({ queryKey: ['offline-books'] });
+    } catch (error) {
+      showNotice({ title: t('Could not remove the download'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' });
+    }
+  }
+
   async function clearDownloads() {
     try {
       await Promise.all((downloads.data ?? []).map((book) => removeDownloadedBook(book.id)));
@@ -304,6 +313,11 @@ export function AppTab() {
           }>
           {!!downloads.data?.length && <ActionPill label={t('Clear')} onPress={() => void clearDownloads()} />}
         </Row>
+        {(downloads.data ?? []).map((book) => (
+          <Row key={book.id} label={book.title} detail={`${book.author} · ${formattedDownloadSize(book.size)}`}>
+            <ActionPill label={t('Remove')} onPress={() => void removeDownload(book.id)} />
+          </Row>
+        ))}
       </Section>
 
       <Section eyebrow={t('LEGAL')}>

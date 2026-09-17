@@ -102,7 +102,7 @@ export default function GuestLibraryScreen() {
         }
         renderItem={({ item }) => (
           <Pressable accessibilityRole="button" onPress={() => open(item)} style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
-            <BookCover title={item.title} author={item.author} workSlug={item.workSlug} coverUrl={item.coverUrl} style={styles.cover} />
+            <BookCover title={item.title} author={item.author} workSlug={item.workSlug} coverUrl={item.coverUrl} width={64} height={92} />
             <View style={styles.rowCopy}>
               <Text style={styles.rowTitle} numberOfLines={2}>{item.title}</Text>
               <Text style={styles.rowAuthor} numberOfLines={1}>{item.author}</Text>
@@ -153,7 +153,6 @@ const useStyles = createThemedStyles((colors, isDark) => ({
   continueBar: { height: 3, borderRadius: 2, backgroundColor: darkColors.primary },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: 14, padding: 14, borderRadius: 20, backgroundColor: colors.surface, ...(isDark ? { borderWidth: 1, borderColor: colors.line } : shadows.card) },
   pressed: { opacity: 0.8 },
-  cover: { width: 64, height: 92, borderRadius: 8, backgroundColor: colors.accentSoft },
   rowCopy: { flex: 1, gap: 5 },
   rowTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 17, lineHeight: serifLineHeight(17) },
   rowAuthor: { color: colors.muted, fontSize: 13 },

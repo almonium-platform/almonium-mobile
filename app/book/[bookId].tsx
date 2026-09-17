@@ -4,7 +4,7 @@ import { getLocales } from 'expo-localization';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 
 import { AlignmentRow } from '@/components/alignment-request';
 import { AuthSheet, type AuthReason } from '@/components/auth-sheet';
@@ -15,6 +15,7 @@ import { Button, Card } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
+import { useNotice } from '@/src/notice-context';
 import { downloadBook, downloadedBooks, formattedDownloadSize, removeDownloadedBook } from '@/src/offline-books';
 import { createThemedStyles, fonts, serifLineHeight, useTheme } from '@/src/theme';
 import { isUuid } from '@/src/uuid';
@@ -32,6 +33,7 @@ export default function BookDetailsScreen() {
   const validBookId = isUuid(bookId);
   const { firebaseUser, profile, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
+  const showNotice = useNotice();
   // Without an account the book is its public edition: addressed by slug, read without a token.
   const guest = !authLoading && !firebaseUser;
   const slug = params.slug;
@@ -85,6 +87,23 @@ export default function BookDetailsScreen() {
     mutationFn: () => removeDownloadedBook(bookId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['offline-books'] }),
   });
+  // Reset has its visible home here (design 4a, correction 6); the shelf's long-press is only a shortcut to the same alert.
+  const resetMutation = useMutation({
+    mutationFn: () => api.deleteProgress(bookId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['book', firebaseUser?.uid, bookId] }),
+        queryClient.invalidateQueries({ queryKey: ['bookshelf', firebaseUser?.uid] }),
+      ]);
+    },
+    onError: (error) => showNotice({ title: t('Could not reset progress'), message: error instanceof Error ? error.message : t('Try again.'), tone: 'error' }),
+  });
+  function confirmReset(title: string) {
+    Alert.alert(t('Reset reading progress?'), t('{title} will return to the beginning.', { title }), [
+      { text: t('Cancel'), style: 'cancel' },
+      { text: t('Reset'), style: 'destructive', onPress: () => resetMutation.mutate() },
+    ]);
+  }
 
   if (guest ? !slug : !validBookId || !language) {
     return (
@@ -129,7 +148,8 @@ export default function BookDetailsScreen() {
           author={book.author}
           workSlug={book.workSlug}
           coverUrl={book.coverUrl}
-          style={styles.cover}
+          width={126}
+          height={184}
         />
         <View style={styles.heroCopy}>
           <Text style={styles.title}>{book.title}</Text>
@@ -256,6 +276,16 @@ export default function BookDetailsScreen() {
       {chaptersQuery.data && chaptersQuery.data.length > 0 && (
         <Contents chapters={chaptersQuery.data} onOpen={(sequence) => router.push({ pathname: '/reader/[bookId]', params: { ...readerParams, chapter: String(sequence) } })} />
       )}
+      {!guest && !!book.progressPercentage && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ busy: resetMutation.isPending }}
+          disabled={resetMutation.isPending}
+          onPress={() => confirmReset(book.title)}
+          style={({ pressed }) => [styles.resetAction, pressed && styles.resetActionPressed]}>
+          <Text style={styles.resetActionText}>{t('Reset reading progress')}</Text>
+        </Pressable>
+      )}
 
       <AuthSheet reason={auth} onClose={() => setAuth(null)} onSignedIn={() => setAuth(null)} />
     </Screen>
@@ -337,7 +367,6 @@ const useStyles = createThemedStyles((colors) => ({
   errorTitle: { color: colors.ink, fontSize: 21, fontWeight: '600', textAlign: 'center' },
   errorText: { color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: 'center' },
   hero: { flexDirection: 'row', gap: 18, alignItems: 'flex-start' },
-  cover: { width: 126, height: 184, borderRadius: 15, backgroundColor: colors.accentSoft },
   heroCopy: { flex: 1, gap: 9, paddingTop: 4 },
   title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 27, lineHeight: serifLineHeight(27), fontWeight: '600' },
   author: { color: colors.muted, fontFamily: fonts.serif, fontSize: 18 },
@@ -371,6 +400,9 @@ const useStyles = createThemedStyles((colors) => ({
   contentsMore: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 },
   contentsMoreText: { color: colors.primary, fontSize: 14, fontWeight: '600' },
   translator: { color: colors.primary, fontSize: 14, fontStyle: 'italic' },
+  resetAction: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 },
+  resetActionPressed: { opacity: 0.7 },
+  resetActionText: { color: colors.muted, fontSize: 14, fontWeight: '600' },
   downloadRow: { minHeight: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderRadius: 20, paddingHorizontal: 15, backgroundColor: colors.successSoft },
   downloadCopy: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
   downloadText: { flex: 1, color: colors.ink, fontSize: 13, fontWeight: '600' },
