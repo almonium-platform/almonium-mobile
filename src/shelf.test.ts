@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { authorSurname, filterLibrary, hyphenateForWidth, libraryEntries, presentLevels, shelfRows, shortTitle, thousands } from './shelf';
+import { authorSurname, editionLabel, editionLevels, filterLibrary, hyphenateForWidth, libraryEntries, presentLevels, shelfRows, shortTitle, thousands } from './shelf';
 import type { BookSummary } from './types';
 
 const book = (over: Partial<BookSummary>): BookSummary => ({
@@ -59,6 +59,18 @@ describe('the library', () => {
     expect(filterLibrary(entries, '', 'C1', null).map((entry) => entry.title)).toEqual(['Frankenstein', 'Pride and Prejudice']);
     expect(filterLibrary(entries, '', null, 'MEDIUM').map((entry) => entry.title)).toEqual(['The Time Machine']);
     expect(filterLibrary(entries, '', 'B1', 'LONG')).toEqual([]);
+  });
+  it('says which editions a work actually has, original first, and promises no other level', () => {
+    const editions = editionLevels([
+      book({ id: 'b2', cefrLevel: 'B2', editionType: 'adaptation' }),
+      book({ id: 'c1', cefrLevel: 'C1', editionType: 'original' }),
+      book({ id: 'c1-again', cefrLevel: 'C1', editionType: 'original' }),
+      book({ id: 'uk', cefrLevel: 'C1', isTranslation: true, editionType: 'machine_translation' }),
+    ]);
+    const t = (key: string, options?: Record<string, unknown>) => key.replace('{level}', String(options?.level));
+    expect(editions.map((edition) => editionLabel(t, edition))).toEqual(['Original C1', 'Adapted B2', 'Translation C1']);
+    expect(libraryEntries([book({ id: 'b2', cefrLevel: 'B2', editionType: 'adaptation' }), book({ id: 'c1', cefrLevel: 'C1', editionType: 'original' })])[0].editions)
+      .toEqual([{ kind: 'original', level: 'C1' }, { kind: 'adapted', level: 'B2' }]);
   });
   it('rounds word counts to thousands', () => {
     expect(thousands(122_400)).toBe('122k');

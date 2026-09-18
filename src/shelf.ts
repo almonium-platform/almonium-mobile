@@ -63,6 +63,14 @@ export function shelfRows(started: BookSummary[], downloads: BookSummary[], lang
   return rows;
 }
 
+/** An edition's kind in words: the processor names it original, adaptation or a translation. */
+export type EditionKind = 'original' | 'adapted' | 'translation' | 'edition';
+
+export interface EditionLevel {
+  kind: EditionKind;
+  level: CefrLevel;
+}
+
 export interface LibraryEntry {
   /** The edition a tap opens: the one on the shelf if any, else the easiest. */
   book: BookSummary;
@@ -70,6 +78,8 @@ export interface LibraryEntry {
   title: string;
   author: string;
   levels: CefrLevel[];
+  /** The editions the work actually has, original first: what the foot says the book reaches (decision 13). */
+  editions: EditionLevel[];
   wordCount: number;
   onShelf: boolean;
 }
@@ -93,9 +103,43 @@ export function libraryEntries(books: BookSummary[], shelfIds: ReadonlySet<strin
     const onShelf = sorted.find((edition) => shelfIds.has(edition.id));
     const book = onShelf ?? sorted[0];
     const levels = [...new Set(sorted.map((edition) => edition.cefrLevel))].filter(Boolean) as CefrLevel[];
-    entries.push({ book, workSlug, title: book.title, author: book.author, levels, wordCount: book.wordCount, onShelf: Boolean(onShelf) });
+    entries.push({ book, workSlug, title: book.title, author: book.author, levels, editions: editionLevels(sorted), wordCount: book.wordCount, onShelf: Boolean(onShelf) });
   }
   return entries.sort((a, b) => (levelRank(a.levels[0]) - levelRank(b.levels[0])) || a.title.localeCompare(b.title));
+}
+
+export function editionKind(editionType: string | null | undefined, isTranslation = false): EditionKind {
+  switch (editionType) {
+    case 'original': return 'original';
+    case 'adaptation': return 'adapted';
+    case 'machine_translation':
+    case 'human_translation': return 'translation';
+    default: return isTranslation ? 'translation' : 'edition';
+  }
+}
+
+const kindOrder: Record<EditionKind, number> = { original: 0, adapted: 1, edition: 1, translation: 2 };
+
+/** Kind and level of each edition, original first then the easiest up, a repeated pair read once. */
+export function editionLevels(editions: BookSummary[]): EditionLevel[] {
+  const seen = new Set<string>();
+  return editions
+    .filter((edition) => Boolean(edition.cefrLevel))
+    .map((edition) => ({ kind: editionKind(edition.editionType, edition.isTranslation), level: edition.cefrLevel }))
+    .sort((a, b) => kindOrder[a.kind] - kindOrder[b.kind] || levelRank(a.level) - levelRank(b.level))
+    .filter((entry) => !seen.has(`${entry.kind}:${entry.level}`) && seen.add(`${entry.kind}:${entry.level}`));
+}
+
+type Translate = (key: string, options?: Record<string, unknown>) => string;
+
+/** "Original C1", "Adapted B2", "Translation C1": the words a foot or a line prints for one edition. */
+export function editionLabel(t: Translate, edition: EditionLevel): string {
+  switch (edition.kind) {
+    case 'original': return t('Original {level}', { level: edition.level });
+    case 'adapted': return t('Adapted {level}', { level: edition.level });
+    case 'translation': return t('Translation {level}', { level: edition.level });
+    default: return t('{level} edition', { level: edition.level });
+  }
 }
 
 /** The level chips: A1–C2 minus the levels with no book, in order. */

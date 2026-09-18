@@ -74,6 +74,10 @@ export interface BookSummary {
   wordCount: number;
   language: string;
   cefrLevel: CefrLevel;
+  /** original, adaptation, machine_translation or human_translation, as the processor names it. */
+  editionType?: string;
+  /** The lowest level a faithful adaptation of the work reached both of its gates at, found per book; null until one has. */
+  adaptsTo?: CefrLevel | null;
   progressPercentage: number | null;
   /** The chapter a reader stopped in, as the processor numbers it; null until a reader sends it. */
   currentChapter: number | null;

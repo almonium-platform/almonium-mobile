@@ -11,7 +11,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
 import { downloadedBooks } from '@/src/offline-books';
-import { filterLibrary, libraryEntries, presentLevels, shelfRows, thousands, type LengthFilter, type LibraryEntry } from '@/src/shelf';
+import { type LengthFilter, type LibraryEntry, editionLabel, filterLibrary, libraryEntries, presentLevels, shelfRows, thousands } from '@/src/shelf';
 import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import type { CefrLevel } from '@/src/types';
 
@@ -108,7 +108,7 @@ export default function LibraryScreen() {
                   <Text style={styles.rowTitle} numberOfLines={2}>{item.title}</Text>
                   <Text style={styles.rowAuthor} numberOfLines={1}>{item.author}</Text>
                   <Text style={styles.rowMeta} numberOfLines={1}>
-                    {[...item.levels, t('{count} words', { count: thousands(item.wordCount) }), item.onShelf ? t('on your shelf') : null].filter(Boolean).join(' · ')}
+                    {[...item.editions.map((edition) => editionLabel(t, edition)), t('{count} words', { count: thousands(item.wordCount) }), item.onShelf ? t('on your shelf') : null].filter(Boolean).join(' · ')}
                   </Text>
                 </View>
               </Pressable>

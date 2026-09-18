@@ -14,7 +14,7 @@ import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { useNotice } from '@/src/notice-context';
 import { downloadedBooks } from '@/src/offline-books';
-import { libraryEntries, shelfRows, shortTitle, type LibraryEntry, type ShelfRow } from '@/src/shelf';
+import { editionLabel, libraryEntries, shelfRows, shortTitle, type LibraryEntry, type ShelfRow } from '@/src/shelf';
 import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 
 const shelfLanguageKey = 'almonium:shelf-language';
@@ -228,7 +228,7 @@ export default function BooksScreen() {
                     coverUrl={entry.book.coverUrl}
                     width={96}
                     height={142}
-                    foot={entry.levels.length > 1 ? entry.levels.join(' · ') : undefined}
+                    foot={entry.editions.length > 1 ? entry.editions.map((edition) => editionLabel(t, edition)).join(' · ') : undefined}
                   />
                 </Pressable>
               ))}
