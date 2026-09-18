@@ -78,3 +78,19 @@ describe('the library', () => {
     expect(thousands(640)).toBe('640');
   });
 });
+
+
+describe('multiple adaptation levels in one work', () => {
+  it.each(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const)('opens the exact %s edition selected by the level filter', (level) => {
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
+    const entries = libraryEntries(levels.map((cefrLevel) => book({ id: cefrLevel, cefrLevel, editionType: 'adaptation' })), new Set(['C2']));
+    expect(filterLibrary(entries, '', level, null)[0].book.id).toBe(level);
+    expect(presentLevels(entries)).toEqual(levels);
+    expect(entries[0].book.id).toBe('C2');
+  });
+  it('applies the length filter to the edition that will actually open', () => {
+    const entries = libraryEntries([book({ id: 'a2', cefrLevel: 'A2', wordCount: 10000 }), book({ id: 'b1', cefrLevel: 'B1', wordCount: 50000 })]);
+    expect(filterLibrary(entries, '', 'B1', 'LONG')[0].book.id).toBe('b1');
+    expect(filterLibrary(entries, '', 'B1', 'SHORT')).toEqual([]);
+  });
+});

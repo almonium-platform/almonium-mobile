@@ -80,6 +80,8 @@ export interface LibraryEntry {
   levels: CefrLevel[];
   /** The editions the work actually has, original first: what the foot says the book reaches (decision 13). */
   editions: EditionLevel[];
+  /** Exact edition identities used when a level filter changes the opened book. */
+  variants: BookSummary[];
   wordCount: number;
   onShelf: boolean;
 }
@@ -103,7 +105,7 @@ export function libraryEntries(books: BookSummary[], shelfIds: ReadonlySet<strin
     const onShelf = sorted.find((edition) => shelfIds.has(edition.id));
     const book = onShelf ?? sorted[0];
     const levels = [...new Set(sorted.map((edition) => edition.cefrLevel))].filter(Boolean) as CefrLevel[];
-    entries.push({ book, workSlug, title: book.title, author: book.author, levels, editions: editionLevels(sorted), wordCount: book.wordCount, onShelf: Boolean(onShelf) });
+    entries.push({ book, workSlug, title: book.title, author: book.author, levels, editions: editionLevels(sorted), variants: sorted, wordCount: book.wordCount, onShelf: Boolean(onShelf) });
   }
   return entries.sort((a, b) => (levelRank(a.levels[0]) - levelRank(b.levels[0])) || a.title.localeCompare(b.title));
 }
@@ -157,7 +159,11 @@ export function matchesLength(wordCount: number, length: LengthFilter | null) {
 
 export function filterLibrary(entries: LibraryEntry[], search: string, level: CefrLevel | null, length: LengthFilter | null) {
   const needle = search.trim().toLocaleLowerCase();
-  return entries.filter((entry) =>
+  return entries.map((entry) => {
+    if (!level) return entry;
+    const book = entry.variants.find((variant) => variant.cefrLevel === level);
+    return book ? { ...entry, book, title: book.title, author: book.author, wordCount: book.wordCount } : entry;
+  }).filter((entry) =>
     (!needle || entry.title.toLocaleLowerCase().includes(needle) || entry.author.toLocaleLowerCase().includes(needle))
     && (!level || entry.levels.includes(level))
     && matchesLength(entry.wordCount, length));

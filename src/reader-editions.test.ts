@@ -37,3 +37,15 @@ describe('edition-addressed reading', () => {
     expect(parallelScript('EN', 'inline')).toContain("side === 'secondary'");
   });
 });
+
+
+describe('companion identity across adaptation levels', () => {
+  it.each(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const)('keeps %s identity separate from original-derived Ukrainian', (level) => {
+    const primary = {...adapted, cefrLevel: level, editionSlug: `book-${level}`};
+    const inherited = {...ukrainian, sourceEditionSlug: 'original'};
+    const direct = {...ukrainian, sourceEditionSlug: primary.editionSlug};
+    expect(editionLabel(primary)).toBe(`EN · ${level} · adaptation`);
+    expect(isOtherEditionTranslation(inherited, primary)).toBe(true);
+    expect(isOtherEditionTranslation(direct, primary)).toBe(false);
+  });
+});
