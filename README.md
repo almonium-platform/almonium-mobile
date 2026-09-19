@@ -84,9 +84,27 @@ EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID
 EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
 ```
 
-The iOS client ID also determines the URL scheme configured in `app.json`.
-OAuth client IDs are public identifiers; no provider secret belongs in the
-mobile app.
+The iOS client ID also determines the URL scheme configured per variant in
+`app.config.ts`. OAuth client IDs are public identifiers; no provider secret
+belongs in the mobile app.
+
+## App variants
+
+`app.config.ts` builds one of two installable identities from `APP_VARIANT`,
+which each EAS build profile sets in `eas.json`:
+
+| Variant | Profiles | Application id | Name | Scheme | Links |
+|---|---|---|---|---|---|
+| `production` (default) | `production`, `production-device` | `com.almonium.mobile` | Almonium | `almonium://` | almonium.com |
+| `staging` | `preview`, `development` | `com.almonium.mobile.staging` | Almonium Staging | `almonium-staging://` | staging.almonium.com |
+
+Both install side by side on one device. The variant decides only what the OS
+and the identity providers key on; the API, Firebase project and Stream
+application still come from the EAS environment. Each variant needs its own
+Apple App ID (EAS registers it on the first build), its own iOS and Android
+OAuth clients in the `almonium` Google Cloud project, and an iOS app entry in
+the Firebase project its environment authenticates against, or Sign in with
+Apple rejects the token audience.
 
 ## Authentication architecture
 

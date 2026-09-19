@@ -73,7 +73,7 @@ Google's Data safety.
 - Android permissions in the build: `INTERNET`, `ACCESS_NETWORK_STATE`,
   `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `VIBRATE`, `WAKE_LOCK` and
   launcher badge permissions from expo-notifications. Storage and
-  `SYSTEM_ALERT_WINDOW` are blocked in `app.json`. Nothing here needs a
+  `SYSTEM_ALERT_WINDOW` are blocked in `app.config.ts`. Nothing here needs a
   permissions declaration form.
 - iOS: `ITSAppUsesNonExemptEncryption` is false; no purpose strings are needed
   because no camera, photos, location or microphone are used.
