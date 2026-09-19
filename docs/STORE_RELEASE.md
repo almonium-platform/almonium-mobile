@@ -20,7 +20,7 @@ console work that only the account owner can do.
 
 | | Where | Status |
 |---|---|---|
-| App Store Connect app record for `com.almonium.mobile` | ASC → My Apps | needed; `eas submit` can create it from the ASC API key |
+| App Store Connect app record for `com.almonium.mobile` | ASC → My Apps → New App (or an interactive `eas submit -p ios` signed in with the Apple ID; the API key cannot create apps). Then put its numeric Apple ID in `eas.json` as `submit.production.ios.ascAppId`, which the `--non-interactive` CI submit requires | needed |
 | ASC API key on EAS for `--auto-submit` | `eas credentials -p ios` → App Store Connect API Key (key `9J9BXRQX7T`, see the iOS credentials memory) | check |
 | Google Play app for `com.almonium.mobile` | Play Console → Create app | needed |
 | Play service account JSON on EAS for `--auto-submit` | Play Console → Users and permissions → invite the service account; `eas credentials -p android` → Google Service Account | needed |
