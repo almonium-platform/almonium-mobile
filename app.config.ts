@@ -29,7 +29,7 @@ const identity = {
     applicationId: 'com.almonium.mobile.staging',
     scheme: 'almonium-staging',
     linkHost: 'staging.almonium.com',
-    googleIosUrlScheme: 'com.googleusercontent.apps.STAGING_IOS_CLIENT_ID',
+    googleIosUrlScheme: 'com.googleusercontent.apps.767352091621-t8mnbajectdi8715ff517qjnh557r4lv',
     // The same mark with a STAGING band, so the two installs read apart on a home screen.
     icon: './assets/images/icon-staging.png',
     androidForeground: './assets/images/android-icon-foreground-staging.png',
