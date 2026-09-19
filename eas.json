@@ -19,6 +19,10 @@
       "environment": "production",
       "autoIncrement": true,
       "channel": "production"
+    },
+    "production-device": {
+      "extends": "production",
+      "distribution": "internal"
     }
   },
   "submit": {
