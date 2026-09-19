@@ -55,7 +55,7 @@ export const premiumLines = [
   msg('Unlimited saved words, and three languages at once'),
   msg('Every book at your level — B1, B2 and C1 editions'),
   msg('Narrated audiobooks'),
-  msg('Import your own books, 3 a month'),
+  msg('Import your own books, up to 10 on your shelf'),
   msg('Ask for a missing alignment, 3 a month'),
   msg('Share word packs with friends'),
 ];

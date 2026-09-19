@@ -13,7 +13,7 @@ export type PlanFeature =
   | 'MAX_TARGET_LANGS'
   | 'MAX_ACTIVE_LANGS'
   | 'MAX_FLUENT_LANGS'
-  | 'MAX_BOOK_IMPORTS_PER_MONTH'
+  | 'MAX_BOOK_IMPORTS_ON_SHELF'
   | 'MAX_TRANSLATION_REQUESTS_PER_MONTH';
 
 export interface SubscriptionInfo {
