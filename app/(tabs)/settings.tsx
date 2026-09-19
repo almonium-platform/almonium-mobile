@@ -61,17 +61,19 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        <View accessibilityRole="tablist" style={styles.tabs}>
-          {tabs.map((item) => (
-            <Pressable
-              key={item.key}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: tab === item.key }}
-              onPress={() => setTab(item.key)}
-              style={[styles.tab, tab === item.key && styles.tabActive]}>
-              <Text style={[styles.tabText, tab === item.key && styles.tabTextActive]}>{t(item.label)}</Text>
-            </Pressable>
-          ))}
+        <View style={styles.tabsPinned}>
+          <View accessibilityRole="tablist" style={styles.tabs}>
+            {tabs.map((item) => (
+              <Pressable
+                key={item.key}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: tab === item.key }}
+                onPress={() => setTab(item.key)}
+                style={[styles.tab, tab === item.key && styles.tabActive]}>
+                <Text style={[styles.tabText, tab === item.key && styles.tabTextActive]}>{t(item.label)}</Text>
+              </Pressable>
+            ))}
+          </View>
         </View>
 
         <View style={styles.body}>
@@ -100,8 +102,11 @@ const useStyles = createThemedStyles((colors) => ({
   headingCopy: { flex: 1, gap: 3 },
   title: { color: colors.ink, fontFamily: fonts.serif, fontSize: 24, lineHeight: serifLineHeight(24) },
   caption: { color: colors.muted, fontSize: 13, lineHeight: 18 },
-  // The pinned row paints its own ground so the content scrolling under it never shows through.
-  tabs: { flexDirection: 'row', marginHorizontal: 16, backgroundColor: colors.canvas, borderBottomWidth: 1, borderBottomColor: colors.line },
+  // The pinned wrapper paints its own ground so the content scrolling under it never shows through.
+  // Native ScrollView moves the sticky child's style onto its own wrapper and gives the child
+  // `flex: 1`, so the row direction has to live one level below the sticky child or the tabs stack.
+  tabsPinned: { backgroundColor: colors.canvas },
+  tabs: { flexDirection: 'row', marginHorizontal: 16, borderBottomWidth: 1, borderBottomColor: colors.line },
   tab: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent', marginBottom: -1 },
   tabActive: { borderBottomColor: colors.primary },
   tabText: { color: colors.muted, fontSize: 15 },
