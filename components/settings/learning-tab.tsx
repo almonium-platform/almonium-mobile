@@ -5,6 +5,8 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Switch, Text, TextInput, View } from 'react-native';
 
+import { VarietyPicker } from '@/components/variety-picker';
+import { selectedVariety } from '@/src/language-varieties';
 import { PaywallModal } from '@/components/paywall-modal';
 import { ActionPill, LimitLine, Row, Section } from '@/components/settings/shared';
 import { Sheet } from '@/components/sheet';
@@ -53,6 +55,7 @@ export function LearningTab() {
   const showNotice = useNotice();
   const queryClient = useQueryClient();
   const [busyLanguage, setBusyLanguage] = useState<string | null>(null);
+  const [varietyFor, setVarietyFor] = useState<Learner | null>(null);
   const [levelFor, setLevelFor] = useState<Learner | null>(null);
   const [colourFor, setColourFor] = useState<string | null>(null);
   const [fluentVisible, setFluentVisible] = useState(false);
@@ -103,7 +106,7 @@ export function LearningTab() {
     ]);
   }
 
-  async function update(learner: Learner, updates: { active?: boolean; level?: CefrLevel }) {
+  async function update(learner: Learner, updates: { active?: boolean; level?: CefrLevel; variety?: string }) {
     setBusyLanguage(learner.language);
     try {
       await api.updateLearner(learner.language, updates);
@@ -187,44 +190,53 @@ export function LearningTab() {
           const busy = busyLanguage === learner.language;
           const words = wordsFor(learner.language);
           return (
-            <Row
-              key={learner.id}
-              icon={
-                <Pressable accessibilityLabel={t('Colour for {language}', { language: languageName(learner.language) })} onPress={() => setColourFor(learner.language)} hitSlop={10}>
-                  <View style={[styles.crest, { backgroundColor: crest }]} />
+            <View key={learner.id}>
+              <Row
+                icon={
+                  <Pressable accessibilityLabel={t('Colour for {language}', { language: languageName(learner.language) })} onPress={() => setColourFor(learner.language)} hitSlop={10}>
+                    <View style={[styles.crest, { backgroundColor: crest }]} />
+                  </Pressable>
+                }
+                label={languageName(learner.language)}
+                detail={
+                  learner.active
+                    ? words !== undefined ? t('{count, plural, one {# word kept} other {# words kept}}', { count: words }) : undefined
+                    : words !== undefined ? t('Read-only · {count, plural, one {# word kept} other {# words kept}}', { count: words }) : t('Read-only')
+                }
+                onPress={() => router.push({ pathname: '/language/[code]', params: { code: learner.language } })}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('Level {level}', { level: learner.selfReportedLevel })}
+                  disabled={busy}
+                  onPress={() => setLevelFor(learner)}
+                  style={styles.levelPill}>
+                  <Text style={styles.levelPillText}>{learner.selfReportedLevel}</Text>
+                  <Ionicons name="chevron-down" size={12} color={colors.muted} />
                 </Pressable>
-              }
-              label={languageName(learner.language)}
-              detail={
-                learner.active
-                  ? words !== undefined ? t('{count, plural, one {# word kept} other {# words kept}}', { count: words }) : undefined
-                  : words !== undefined ? t('Read-only · {count, plural, one {# word kept} other {# words kept}}', { count: words }) : t('Read-only')
-              }
-              onPress={() => router.push({ pathname: '/language/[code]', params: { code: learner.language } })}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('Level {level}', { level: learner.selfReportedLevel })}
-                disabled={busy}
-                onPress={() => setLevelFor(learner)}
-                style={styles.levelPill}>
-                <Text style={styles.levelPillText}>{learner.selfReportedLevel}</Text>
-                <Ionicons name="chevron-down" size={12} color={colors.muted} />
-              </Pressable>
-              {unlimited || allowance > 1 ? (
-                <Switch
-                  disabled={busy || (!learner.active && !unlimited && activeCount >= allowance) || (learner.active && activeCount <= 1)}
-                  value={learner.active}
-                  onValueChange={(active) => void update(learner, { active })}
-                  trackColor={{ false: colors.line, true: colors.accentBorder }}
-                  thumbColor={learner.active ? colors.primary : colors.muted}
-                  ios_backgroundColor={colors.line}
-                />
-              ) : (
-                !learner.active && (
-                  <ActionPill label={t('Make active')} busy={busy} disabled={inCooldown} onPress={() => void update(learner, { active: true })} />
-                )
+                {unlimited || allowance > 1 ? (
+                  <Switch
+                    disabled={busy || (!learner.active && !unlimited && activeCount >= allowance) || (learner.active && activeCount <= 1)}
+                    value={learner.active}
+                    onValueChange={(active) => void update(learner, { active })}
+                    trackColor={{ false: colors.line, true: colors.accentBorder }}
+                    thumbColor={learner.active ? colors.primary : colors.muted}
+                    ios_backgroundColor={colors.line}
+                  />
+                ) : (
+                  !learner.active && (
+                    <ActionPill label={t('Make active')} busy={busy} disabled={inCooldown} onPress={() => void update(learner, { active: true })} />
+                  )
+                )}
+              </Row>
+              {selectedVariety(learner.language, learner.variety) && (
+                <Pressable accessibilityRole="button" disabled={!learner.active || busy}
+                  accessibilityState={{disabled: !learner.active || busy}}
+                  onPress={() => setVarietyFor(learner)} style={styles.varietyRow}>
+                  <Text style={styles.note}>{t(selectedVariety(learner.language, learner.variety)!.name)}</Text>
+                  {learner.active && <Ionicons name="chevron-down" size={14} color={colors.muted} />}
+                </Pressable>
               )}
-            </Row>
+            </View>
           );
         })}
         <Row label={t('Another language')} onPress={openAdd}>
@@ -245,6 +257,16 @@ export function LearningTab() {
           </LimitLine>
         )}
       </Section>
+
+      <Sheet visible={varietyFor !== null} onClose={() => setVarietyFor(null)}>
+        {varietyFor && <VarietyPicker language={varietyFor.language} value={varietyFor.variety}
+          disabled={busyLanguage === varietyFor.language || !varietyFor.active}
+          onChange={tag => {
+            const learner = varietyFor;
+            setVarietyFor(null);
+            void update(learner, {variety: tag});
+          }} />}
+      </Sheet>
 
       {/* D9: the closed control is a code; the open list carries the sentence beside each code. */}
       <Sheet visible={levelFor !== null} onClose={() => setLevelFor(null)}>
@@ -398,6 +420,7 @@ export function LearningTab() {
 
 const useStyles = createThemedStyles((colors) => ({
   tab: { gap: 18 },
+  varietyRow: {flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingLeft: 44},
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingTop: 4 },
   neutralChip: { minHeight: 36, justifyContent: 'center', borderRadius: 999, paddingHorizontal: 13, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface },
   neutralChipText: { color: colors.ink, fontSize: 13, fontWeight: '500' },

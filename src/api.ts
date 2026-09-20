@@ -136,7 +136,7 @@ export const api = {
         targetLangsData: [{ language, cefrLevel }],
       }),
     }),
-  setupLevels: (levels: { language: string; cefrLevel: CefrLevel }[]) =>
+  setupLevels: (levels: { language: string; cefrLevel: CefrLevel; variety?: string }[]) =>
     request<void>('/onboarding/levels', {
       method: 'PUT',
       body: JSON.stringify(levels),
@@ -189,7 +189,7 @@ export const api = {
       body: JSON.stringify({ avatarUrl }),
     }),
   resetAvatar: () => request<void>('/profiles/me/avatars/current', { method: 'PATCH' }),
-  updateLearner: (language: string, updates: { active?: boolean; level?: CefrLevel }) =>
+  updateLearner: (language: string, updates: { active?: boolean; level?: CefrLevel; variety?: string }) =>
     request<Learner>(`/learners/${language}`, {
       method: 'PATCH',
       body: JSON.stringify(updates),

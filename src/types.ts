@@ -4,6 +4,7 @@ export interface Learner {
   id: string;
   language: string;
   selfReportedLevel: CefrLevel;
+  variety: string;
   active: boolean;
 }
 

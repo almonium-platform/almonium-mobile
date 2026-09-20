@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
+import { VarietyPicker } from '@/components/variety-picker';
+import { onboardingLanguageUpdates } from '@/src/language-varieties';
 import { Almo } from '@/components/almo';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { BrandMark } from '@/components/brand-mark';
@@ -81,7 +83,8 @@ export default function OnboardingScreen() {
   const [busy, setBusy] = useState(false);
   const [fluentLanguage, setFluentLanguage] = useState(profile?.fluentLangs[0] || '');
   const [targetLanguage, setTargetLanguage] = useState(profile?.learners[0]?.language || '');
-  const [level, setLevel] = useState<CefrLevel>(profile?.learners[0]?.selfReportedLevel || 'B1');
+  const [varietyDrafts, setVarietyDrafts] = useState<Record<string, string>>({});
+  const [levelDrafts, setLevelDrafts] = useState<Record<string, CefrLevel>>({});
   const [username, setUsername] = useState(profile?.username || '');
   const [selectedInterests, setSelectedInterests] = useState<number[]>(profile?.interests.map((interest) => interest.id) || []);
   const [errorMessage, setErrorMessage] = useState('');
@@ -129,10 +132,9 @@ export default function OnboardingScreen() {
     await run(() => api.setupLanguages([fluentLanguage], targetLanguage, 'B1'));
   }
 
-  async function saveLevel(chosen: CefrLevel = level) {
-    const language = profile?.learners[0]?.language || targetLanguage;
-    if (!language) return;
-    await run(() => api.setupLevels([{ language, cefrLevel: chosen }]));
+  async function saveLevel() {
+    if (!profile?.learners.length) return;
+    await run(() => api.setupLevels(onboardingLanguageUpdates(profile.learners, levelDrafts, varietyDrafts)));
   }
 
   async function saveInterests() {
@@ -271,35 +273,37 @@ export default function OnboardingScreen() {
 
       {step === 'LEVEL' && (
         <Card>
-          <View style={styles.levelOptions}>
-            {levels.map((candidate) => {
-              const selected = level === candidate;
-              return (
-                <Pressable
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  key={candidate}
-                  onPress={() => setLevel(candidate)}
-                  style={[styles.levelOption, selected && styles.levelOptionActive]}>
-                  <Text style={[styles.levelCode, selected && styles.levelCodeActive]}>{candidate}</Text>
-                  <Text style={styles.levelDescription}>{t(levelSentences[candidate])}</Text>
-                  {selected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
-                </Pressable>
-              );
-            })}
-            {/* A dashed sibling rather than a link, so it reads as a legitimate answer. */}
-            <Pressable
-              accessibilityRole="button"
-              disabled={busy}
-              onPress={() => { setLevel('B1'); void saveLevel('B1'); }}
-              style={[styles.levelOption, styles.levelOptionDashed]}>
-              <Text style={styles.levelCode}>?</Text>
-              <View style={styles.languageCopy}>
-                <Text style={styles.levelDescription}>{t('I’m not sure — start me at B1.')}</Text>
-                <Text style={styles.finePrintLeft}>{t('Books at B1 are a fair first test. Change it any time in Settings.')}</Text>
-              </View>
-            </Pressable>
-          </View>
+          {profile?.learners.map((learner) => (
+            <View key={learner.id} style={styles.levelOptions}>
+              <Text style={styles.levelDescription}>{t('How much {language} can you read?', {language: languageName(learner.language)})}</Text>
+              <VarietyPicker language={learner.language}
+                value={varietyDrafts[learner.language] ?? learner.variety}
+                disabled={busy}
+                onChange={tag => setVarietyDrafts(current => ({...current, [learner.language]: tag}))} />
+              {levels.map(candidate => {
+                const selected = (levelDrafts[learner.language] ?? learner.selfReportedLevel) === candidate;
+                return (
+                  <Pressable accessibilityRole="radio" accessibilityState={{checked: selected, disabled: busy}}
+                    key={candidate} disabled={busy}
+                    onPress={() => setLevelDrafts(current => ({...current, [learner.language]: candidate}))}
+                    style={[styles.levelOption, selected && styles.levelOptionActive]}>
+                    <Text style={[styles.levelCode, selected && styles.levelCodeActive]}>{candidate}</Text>
+                    <Text style={styles.levelDescription}>{t(levelSentences[candidate])}</Text>
+                    {selected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
+                  </Pressable>
+                );
+              })}
+              <Pressable accessibilityRole="button" disabled={busy}
+                onPress={() => setLevelDrafts(current => ({...current, [learner.language]: 'B1'}))}
+                style={[styles.levelOption, styles.levelOptionDashed]}>
+                <Text style={styles.levelCode}>?</Text>
+                <View style={styles.languageCopy}>
+                  <Text style={styles.levelDescription}>{t('I’m not sure — start me at B1.')}</Text>
+                  <Text style={styles.finePrintLeft}>{t('Books at B1 are a fair first test. Change it any time in Settings.')}</Text>
+                </View>
+              </Pressable>
+            </View>
+          ))}
           <Button loading={busy} onPress={() => void saveLevel()}>{t('Continue')}</Button>
         </Card>
       )}
@@ -356,7 +360,7 @@ export default function OnboardingScreen() {
           <Text style={styles.greetingCopy}>
             {t('{language}, {level}, {count, plural, one {# interest} other {# interests}}. You can change any of it later.', {
               language: languageName(profile?.learners[0]?.language || targetLanguage),
-              level: profile?.learners[0]?.selfReportedLevel || level,
+              level: profile?.learners[0]?.selfReportedLevel || 'B1',
               count: profile?.interests.length || 0,
             })}
           </Text>
