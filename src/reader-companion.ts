@@ -44,6 +44,7 @@ export function editionName(variant: BookEditionVariant) {
 /** The edition type in words, the row's second line; an indirect translation says what it translates. */
 export function editionTypeLabel(variant: BookEditionVariant, primary?: BookEditionVariant) {
   if (isOtherEditionTranslation(variant, primary)) return t('Translation of the original');
+  if (variant.editionType === 'adaptation' && variant.literaryRegister === 'lightly modernised') return t('Lightly modernised original');
   switch (variant.editionType) {
     case 'machine_translation': return t('Machine translation');
     case 'human_translation': return t('Translation');

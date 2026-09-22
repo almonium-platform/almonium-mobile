@@ -72,6 +72,14 @@ describe('the library', () => {
     expect(libraryEntries([book({ id: 'b2', cefrLevel: 'B2', editionType: 'adaptation' }), book({ id: 'c1', cefrLevel: 'C1', editionType: 'original' })])[0].editions)
       .toEqual([{ kind: 'original', level: 'C1' }, { kind: 'adapted', level: 'B2' }]);
   });
+  it('names a lightly modernised C1 edition separately from its original', () => {
+    const editions = editionLevels([
+      book({ id: 'original-c1', cefrLevel: 'C1', editionType: 'original' }),
+      book({ id: 'modern-c1', cefrLevel: 'C1', editionType: 'adaptation', literaryRegister: 'lightly modernised' }),
+    ]);
+    const t = (key: string, options?: Record<string, unknown>) => key.replace('{level}', String(options?.level));
+    expect(editions.map((edition) => editionLabel(t, edition))).toEqual(['Original C1', 'Lightly modernised C1']);
+  });
   it('rounds word counts to thousands', () => {
     expect(thousands(122_400)).toBe('122k');
     expect(thousands(27_500)).toBe('28k');

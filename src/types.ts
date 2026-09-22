@@ -77,6 +77,7 @@ export interface BookSummary {
   cefrLevel: CefrLevel;
   /** original, adaptation, machine_translation or human_translation, as the processor names it. */
   editionType?: string;
+  literaryRegister?: string;
   /** The lowest level a faithful adaptation of the work reached both of its gates at, found per book; null until one has. */
   adaptsTo?: CefrLevel | null;
   progressPercentage: number | null;
@@ -94,6 +95,7 @@ export interface BookEditionVariant {
   language: string;
   editionSlug?: string;
   editionType?: string;
+  literaryRegister?: string;
   cefrLevel?: CefrLevel | null;
   sourceEditionSlug?: string | null;
 }

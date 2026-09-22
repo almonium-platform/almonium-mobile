@@ -64,7 +64,7 @@ export function shelfRows(started: BookSummary[], downloads: BookSummary[], lang
 }
 
 /** An edition's kind in words: the processor names it original, adaptation or a translation. */
-export type EditionKind = 'original' | 'adapted' | 'translation' | 'edition';
+export type EditionKind = 'original' | 'modernised' | 'adapted' | 'translation' | 'edition';
 
 export interface EditionLevel {
   kind: EditionKind;
@@ -110,7 +110,8 @@ export function libraryEntries(books: BookSummary[], shelfIds: ReadonlySet<strin
   return entries.sort((a, b) => (levelRank(a.levels[0]) - levelRank(b.levels[0])) || a.title.localeCompare(b.title));
 }
 
-export function editionKind(editionType: string | null | undefined, isTranslation = false): EditionKind {
+export function editionKind(editionType: string | null | undefined, isTranslation = false, literaryRegister?: string): EditionKind {
+  if (editionType === 'adaptation' && literaryRegister === 'lightly modernised') return 'modernised';
   switch (editionType) {
     case 'original': return 'original';
     case 'adaptation': return 'adapted';
@@ -120,25 +121,26 @@ export function editionKind(editionType: string | null | undefined, isTranslatio
   }
 }
 
-const kindOrder: Record<EditionKind, number> = { original: 0, adapted: 1, edition: 1, translation: 2 };
+const kindOrder: Record<EditionKind, number> = { original: 0, modernised: 1, adapted: 2, edition: 2, translation: 3 };
 
 /** Kind and level of each edition, original first then the easiest up, a repeated pair read once. */
 export function editionLevels(editions: BookSummary[]): EditionLevel[] {
   const seen = new Set<string>();
   return editions
     .filter((edition) => Boolean(edition.cefrLevel))
-    .map((edition) => ({ kind: editionKind(edition.editionType, edition.isTranslation), level: edition.cefrLevel }))
+    .map((edition) => ({ kind: editionKind(edition.editionType, edition.isTranslation, edition.literaryRegister), level: edition.cefrLevel }))
     .sort((a, b) => kindOrder[a.kind] - kindOrder[b.kind] || levelRank(a.level) - levelRank(b.level))
     .filter((entry) => !seen.has(`${entry.kind}:${entry.level}`) && seen.add(`${entry.kind}:${entry.level}`));
 }
 
 type Translate = (key: string, options?: Record<string, unknown>) => string;
 
-/** "Original C1", "Adapted B2", "Translation C1": the words a foot or a line prints for one edition. */
+/** "Original C1", "Lightly modernised C1", "Adapted B2": labels for each available edition. */
 export function editionLabel(t: Translate, edition: EditionLevel): string {
   switch (edition.kind) {
     case 'original': return t('Original {level}', { level: edition.level });
     case 'adapted': return t('Adapted {level}', { level: edition.level });
+    case 'modernised': return t('Lightly modernised {level}', { level: edition.level });
     case 'translation': return t('Translation {level}', { level: edition.level });
     default: return t('{level} edition', { level: edition.level });
   }

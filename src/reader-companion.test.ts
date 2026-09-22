@@ -32,6 +32,7 @@ describe('companion choice', () => {
     expect(editionTypeLabel({ ...companion, sourceEditionSlug: 'frankenstein-en-original' }, primary)).toBe('Translation of the original');
     expect(editionTypeLabel({ ...companion, editionType: 'human_translation' }, primary)).toBe('Translation');
     expect(editionTypeLabel({ id: 'd', language: 'EN', editionType: 'original' })).toBe('Original');
+    expect(editionTypeLabel({ id: 'm', language: 'EN', editionType: 'adaptation', literaryRegister: 'lightly modernised' })).toBe('Lightly modernised original');
     expect(editionTypeLabel({ id: 'e', language: 'EN', editionType: 'graded_reader' })).toBe('graded reader');
   });
 });

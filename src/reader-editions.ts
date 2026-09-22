@@ -26,7 +26,9 @@ export function isOtherEditionTranslation(variant: BookEditionVariant, primary?:
 }
 
 export function editionLabel(variant: BookEditionVariant, primary?: BookEditionVariant) {
-  return [variant.language, variant.cefrLevel, variant.editionType?.replaceAll('_', ' '),
+  const kind = variant.editionType === 'adaptation' && variant.literaryRegister === 'lightly modernised'
+    ? 'lightly modernised original' : variant.editionType?.replaceAll('_', ' ');
+  return [variant.language, variant.cefrLevel, kind,
     isOtherEditionTranslation(variant, primary) ? 'based on another edition, not this adaptation' : null,
   ].filter(Boolean).join(' · ');
 }
