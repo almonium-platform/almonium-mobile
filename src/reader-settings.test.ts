@@ -10,6 +10,12 @@ describe('reader settings', () => {
     expect(defaultReaderSettings.parallel).toBe('on-demand');
   });
 
+  it('uses the current app theme only when no reader theme is saved', () => {
+    expect(normalizeReaderSettings(null, 'night').theme).toBe('night');
+    expect(normalizeReaderSettings({ theme: 'paper' }, 'night').theme).toBe('paper');
+    expect(normalizeReaderSettings({ theme: 'night' }, 'paper').theme).toBe('night');
+  });
+
   it('reads the older three-face and boolean-parallel shape', () => {
     expect(normalizeReaderSettings({ face: 'clear', parallel: true, fontSize: 40 })).toEqual({
       fontSize: 28,

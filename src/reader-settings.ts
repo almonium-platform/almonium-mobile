@@ -45,10 +45,10 @@ export const defaultReaderSettings: ReaderSettings = {
 const settingsKey = 'almonium:reader-settings';
 
 /** Older builds stored three system faces and a parallel boolean; both read into the new shape. */
-export function normalizeReaderSettings(value: unknown): ReaderSettings {
+export function normalizeReaderSettings(value: unknown, defaultTheme: ReaderTheme = defaultReaderSettings.theme): ReaderSettings {
   const stored = (value && typeof value === 'object' ? value : {}) as Record<string, unknown>;
   const fontSize = typeof stored.fontSize === 'number' ? Math.max(16, Math.min(28, stored.fontSize)) : defaultReaderSettings.fontSize;
-  const theme: ReaderTheme = stored.theme === 'night' ? 'night' : 'paper';
+  const theme: ReaderTheme = stored.theme === 'night' ? 'night' : stored.theme === 'paper' ? 'paper' : defaultTheme;
   const face: ReaderFace =
     stored.face === 'plex' || stored.face === 'clear'
       ? 'plex'
@@ -64,12 +64,12 @@ export function normalizeReaderSettings(value: unknown): ReaderSettings {
   return { fontSize, theme, face, parallel };
 }
 
-export async function loadReaderSettings(): Promise<ReaderSettings> {
+export async function loadReaderSettings(defaultTheme: ReaderTheme = defaultReaderSettings.theme): Promise<ReaderSettings> {
   try {
     const raw = await AsyncStorage.getItem(settingsKey);
-    return normalizeReaderSettings(raw ? JSON.parse(raw) : null);
+    return normalizeReaderSettings(raw ? JSON.parse(raw) : null, defaultTheme);
   } catch {
-    return defaultReaderSettings;
+    return { ...defaultReaderSettings, theme: defaultTheme };
   }
 }
 

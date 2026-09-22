@@ -203,7 +203,7 @@ const finishedKey = (bookId: string) => `almonium:finished:${bookId}`;
 
 export default function ReaderScreen() {
   const { t } = useTranslation();
-  const { colors, reduceMotion } = useTheme();
+  const { colors, isDark, ready: themeReady, reduceMotion } = useTheme();
   const styles = useStyles();
   const params = useLocalSearchParams<{ bookId: string; language?: string; title?: string; parallel?: string; slug?: string; chapter?: string }>();
   const bookId = params.bookId;
@@ -371,10 +371,6 @@ export default function ReaderScreen() {
     setWordsVisible(false);
     setContentsVisible(false);
     setSelection(null);
-    void loadReaderSettings().then((loaded) => {
-      setSettings(loaded);
-      setSettingsLoaded(true);
-    });
     void AsyncStorage.getItem(finishedKey(bookId)).then((value) => {
       finishedShown.current = value === 'true';
     });
@@ -390,6 +386,19 @@ export default function ReaderScreen() {
     // The link's choice is read once; the sheet owns it from here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookId]);
+
+  useEffect(() => {
+    if (!themeReady) return;
+    let active = true;
+    void loadReaderSettings(isDark ? 'night' : 'paper').then((loaded) => {
+      if (!active) return;
+      setSettings(loaded);
+      setSettingsLoaded(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [isDark, themeReady]);
 
   // A mode change is applied on the page; only a different companion reloads it.
   useEffect(() => {
