@@ -73,7 +73,7 @@ export function parallelScript(fluent: string, mode: ParallelMode, reduceMotion 
       function hitAt(target) {
         var el = target && target.nodeType === 1 ? target : target && target.parentElement;
         if (!el || !el.closest) return null;
-        if (el.closest('.almonium-chapter-end, .almonium-chapter-head, .almonium-demand, a, button')) return 'ignore';
+        if (el.closest('.almonium-chapter-end, .almonium-chapter-head, .almonium-demand, .almonium-gloss, a, button')) return 'ignore';
         var span = el.closest('.aligned-sentence[data-alignment], .almonium-companion[data-alignment]');
         var block = el.closest(BLOCKS);
         var origin = block && (block.__almoniumOrigin || block);

@@ -51,6 +51,7 @@ import { isUuid } from '@/src/uuid';
 import { editionCode, editionName, editionTypeLabel, loadCompanionChoice, noCompanion, saveCompanionChoice } from '@/src/reader-companion';
 import { chooseCompanion, companionEditions } from '@/src/reader-editions';
 import { parallelModeScript, parallelScript } from '@/src/reader-parallel';
+import { glossScript } from '@/src/reader-gloss';
 import {
   chapterDiscoveryScript, chapterEndScript, chapterEnrichment, chapterHeaderScript, chapterJumpScript, chapterLevelRange,
   chapterNumber, displayChapterTitle, parseReaderChapters, positionScript, type ReaderChapter,
@@ -142,6 +143,8 @@ function appearanceScript(settings: ReaderSettings, fontCss: string, progress: n
         .aligned-sentence, .segment, .almonium-companion { background: none; outline: none !important; -webkit-tap-highlight-color: transparent; }
         .almonium-lit { background: ${tint}; -webkit-box-decoration-break: clone; box-decoration-break: clone; border-radius: 2px; padding: 1px 0; }
         .almonium-selected { border-bottom: 2px solid ${accent}; }
+        .almonium-gloss { border-bottom: 1px dotted ${accent}; cursor: pointer; }
+        .almonium-gloss:focus { background: ${tint}; outline: none; }
         .almonium-head { margin-bottom: 0 !important; }
         .almonium-demand { margin: 0.45em 0 1.1em; }
         /* A paragraph split around the block continues under it, so the gap is a line's, not a paragraph's. */
@@ -255,6 +258,7 @@ export default function ReaderScreen() {
   const contentsScrolled = useRef(false);
   const [paywallContext, setPaywallContext] = useState<PaywallContext | null>(null);
   const [selection, setSelection] = useState<ReaderLookupSelection | null>(null);
+  const [gloss, setGloss] = useState<{ quote: string; body: string } | null>(null);
   const [senseIndex, setSenseIndex] = useState(0);
   const [savingWord, setSavingWord] = useState(false);
   const [wordSaved, setWordSaved] = useState(false);
@@ -548,7 +552,7 @@ export default function ReaderScreen() {
     if (message.startsWith('{')) {
       try {
         const payload = JSON.parse(message) as {
-          type?: string; text?: string; context?: string; companion?: unknown; chapters?: unknown; chapter?: unknown; chrome?: unknown; blockId?: unknown; lemma?: unknown; visible?: unknown;
+          type?: string; text?: string; context?: string; companion?: unknown; chapters?: unknown; chapter?: unknown; chrome?: unknown; blockId?: unknown; lemma?: unknown; visible?: unknown; quote?: unknown; body?: unknown;
         };
         if (payload.type === 'chapters') {
           const found = parseReaderChapters(payload.chapters);
@@ -596,6 +600,11 @@ export default function ReaderScreen() {
             const language = payload.companion === true && parallelActive ? parallelLanguage : undefined;
             setSelection({ entry, context: payload.context || entry, ...(language ? { language } : {}) });
           }
+        }
+        if (payload.type === 'gloss' && typeof payload.quote === 'string' && typeof payload.body === 'string'
+          && payload.quote.length <= 160 && payload.body.length <= 500) {
+          setGloss({ quote: payload.quote, body: payload.body });
+          return;
         }
       } catch {
         // Ignore messages from malformed book scripts.
@@ -847,7 +856,7 @@ export default function ReaderScreen() {
             key={parallelActive ? `companion-${companion?.editionSlug}` : 'single'}
             ref={webView}
             source={{ html: readerHtml(content) }}
-            injectedJavaScript={`${appearanceScript(settings, fontCss, progress)}${layoutScript(insets.current.top, insets.current.bottom)}${parallelActive && parallelLanguage ? parallelScript(parallelLanguage, settings.parallel, reduceMotion) : ''}${chapterDiscoveryScript}${positionScript}${baseProgressScript}${selectionScript}true;`}
+            injectedJavaScript={`${appearanceScript(settings, fontCss, progress)}${layoutScript(insets.current.top, insets.current.bottom)}${parallelActive && parallelLanguage ? parallelScript(parallelLanguage, settings.parallel, reduceMotion) : ''}${chapterDiscoveryScript}${positionScript}${baseProgressScript}${selectionScript}${glossScript}true;`}
             onLoadStart={() => { setChapters([]); setChaptersReady(false); setCurrentChapter(-1); setEndChapter(null); endOnScreen.current = null; injectedEnds.current.clear(); showChrome(true); }}
             onLoadEnd={() => webView.current?.injectJavaScript(layoutScript(insets.current.top, insets.current.bottom))}
             onMessage={onMessage}
@@ -1086,6 +1095,15 @@ export default function ReaderScreen() {
       {/* The word sheet: Discover's plate, with the reader dimmed behind it and never dismissed. */}
       <Sheet visible={Boolean(selection) && !wordFromList && !auth} onClose={() => setSelection(null)}>
         {wordCard}
+      </Sheet>
+
+      <Sheet visible={Boolean(gloss)} onClose={() => setGloss(null)}>
+        <View style={styles.settingsHeading}>
+          <Text style={styles.settingsTitle}>{t('Context')}</Text>
+          <Pressable accessibilityLabel={t('Close note')} onPress={() => setGloss(null)} hitSlop={8}><Text style={styles.done}>{t('Done')}</Text></Pressable>
+        </View>
+        <Text style={styles.settingsTitle}>{gloss?.quote}</Text>
+        <Text style={styles.optionNote}>{gloss?.body}</Text>
       </Sheet>
 
       {/* Reader type: three presets, size, translation mode, page. */}
