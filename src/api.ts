@@ -1,4 +1,5 @@
 import { auth } from '@/src/firebase';
+import type { VoiceAvailability } from './voice-availability';
 import { parallelEditionPath } from './reader-editions';
 import { parseChapterEnrichments } from './reader-chapters';
 import { parseChapterVocabulary } from './reader-vocabulary';
@@ -116,6 +117,8 @@ async function publicPost<T>(path: string, body: unknown): Promise<T> {
 }
 
 export const api = {
+  getVoices: (language?: string) =>
+    request<VoiceAvailability[]>(`/lang/voices${language ? `/${encodeURIComponent(language)}` : ''}`),
   requestEmailVerification: async () => {
     const user = auth.currentUser;
     if (!user) throw new ApiError(t('Sign in required'), 401);
