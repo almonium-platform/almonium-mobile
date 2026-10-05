@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { BookCover } from '@/components/book-cover';
+import { CatalogResults } from '@/components/catalog-results';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
@@ -24,7 +25,8 @@ const lengths: { value: LengthFilter; label: string }[] = [
 /**
  * The library (design 4a): every work in this language, one row each, pushed from the shelf.
  * Search and the level and length chips live here only; the level group shows the levels that
- * have a book. Sorted by level then title, no sort control.
+ * have a book. Sorted by level then title, no sort control. A search also lists, under the
+ * library, the notable books it does not have yet.
  */
 export default function LibraryScreen() {
   const { t } = useTranslation();
@@ -120,6 +122,8 @@ export default function LibraryScreen() {
             {!!entries.length && <Text style={styles.statusNote}>{t('Try a title or author with different words.')}</Text>}
           </View>
         )}
+        {/* Every notable book the library does not have, as rows under it (W1, W2). */}
+        <CatalogResults query={search} />
       </ScrollView>
     </View>
   );
