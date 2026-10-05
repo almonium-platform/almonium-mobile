@@ -36,6 +36,7 @@ import type { ReadingPlace } from '@/src/progress-utils';
 import { decodeJsonBody, errorMessageFromBody } from '@/src/http-errors';
 import { t } from './i18n';
 import type { DiscoverLookup } from '@/src/discover';
+import type { RightsReportReceipt, RightsReportRequest } from '@/src/rights-report';
 import type { LearningActivity, Rhythm, WeeklyTarget } from '@/src/rhythm';
 import type {
   ReviewAnswer,
@@ -237,6 +238,16 @@ export const api = {
     const response = await fetchWithTimeout(`${config.apiBaseUrl}${parallelEditionPath(editionSlug, companionSlug)}`);
     if (!response.ok) throw new ApiError(await responseError(response), response.status);
     return response.text();
+  },
+  /**
+   * The report button. Open to guests, who leave an email; a signed-in reader sends the usual
+   * bearer token, which the backend honours on /public paths, so the account address is used.
+   */
+  reportRights: (editionSlug: string, report: RightsReportRequest) => {
+    const path = `/public/books/${encodeURIComponent(editionSlug)}/rights-reports`;
+    return auth.currentUser
+      ? request<RightsReportReceipt>(path, { method: 'POST', body: JSON.stringify(report) })
+      : publicPost<RightsReportReceipt>(path, report);
   },
   bookChapters: (editionSlug: string) =>
     publicRequest<unknown>(`/public/books/${encodeURIComponent(editionSlug)}/chapters`).then(parseChapterEnrichments),
