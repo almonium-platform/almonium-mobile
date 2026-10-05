@@ -24,9 +24,11 @@ import { AuthSheet, type AuthReason } from '@/components/auth-sheet';
 import { GuestHeader } from '@/components/guest-header';
 import { PaywallModal, type PaywallContext } from '@/components/paywall-modal';
 import { Sheet } from '@/components/sheet';
+import { UnavailableInCountry } from '@/components/unavailable-in-country';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { isUnavailableInCountry } from '@/src/http-errors';
 import { ReadingProgressSync } from '@/src/reading-progress';
 import { createCardDraft } from '@/src/card-utils';
 import { normalizedLookupEntry } from '@/src/discover';
@@ -286,6 +288,8 @@ export default function ReaderScreen() {
       try {
         return await api.bookInfo(bookId);
       } catch (error) {
+        // A book its country may not open stays closed, downloaded copy or not.
+        if (isUnavailableInCountry(error)) throw error;
         const downloaded = (await downloadedBooks()).find((book) => book.id === bookId);
         if (!downloaded) throw error;
         return {
@@ -714,7 +718,12 @@ export default function ReaderScreen() {
   }
 
   const loading = !settingsLoaded || companionChoice === undefined || authLoading || textQuery.isLoading || infoQuery.isLoading || (parallelActive && parallelQuery.isLoading);
-  const error = textQuery.error || infoQuery.error || (parallelActive ? parallelQuery.error : null);
+  // 451 on the book itself is a plain page of its own; on the companion it is a reason in the usual error.
+  const unavailable = isUnavailableInCountry(textQuery.error) || isUnavailableInCountry(infoQuery.error);
+  const error = unavailable ? null : textQuery.error || infoQuery.error || (parallelActive ? parallelQuery.error : null);
+  const errorMessage = isUnavailableInCountry(error)
+    ? t('It isn’t available in your country.')
+    : error instanceof Error ? error.message : t('Please try again.');
   const content = parallelActive ? parallelQuery.data : textQuery.data;
   const savedInLanguage = itemsQuery.data?.length ?? 0;
   const lookup = selectionQuery.data;
@@ -829,7 +838,8 @@ export default function ReaderScreen() {
   return (
     <View style={[styles.container, night && styles.containerNight]}>
       <Stack.Screen options={{ headerShown: false }} />
-      {loading && (
+      {unavailable && <UnavailableInCountry guest={guest} />}
+      {loading && !unavailable && (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.status}>{t('Opening at your last page…')}</Text>
@@ -838,7 +848,7 @@ export default function ReaderScreen() {
       {error && (
         <View style={styles.center}>
           <Text style={styles.errorTitle}>{t('This page would not open.')}</Text>
-          <Text style={styles.status}>{error instanceof Error ? error.message : t('Please try again.')}</Text>
+          <Text style={styles.status}>{errorMessage}</Text>
           <Button
             onPress={() => {
               void textQuery.refetch();
@@ -850,7 +860,7 @@ export default function ReaderScreen() {
           {parallelActive && <Button variant="secondary" onPress={() => chooseCompanionEdition(noCompanion)}>{t('Read without a companion')}</Button>}
         </View>
       )}
-      {content && infoQuery.data && progress !== null && !loading && !error && (
+      {content && infoQuery.data && progress !== null && !loading && !error && !unavailable && (
         <>
           <WebView
             key={parallelActive ? `companion-${companion?.editionSlug}` : 'single'}

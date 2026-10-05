@@ -12,8 +12,10 @@ import { GuestHeaderActions } from '@/components/guest-header';
 import { BookCover } from '@/components/book-cover';
 import { Screen } from '@/components/screen';
 import { Button, Card } from '@/components/ui';
+import { UnavailableInCountry } from '@/components/unavailable-in-country';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { isUnavailableInCountry } from '@/src/http-errors';
 import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { downloadBook, downloadedBooks, formattedDownloadSize, removeDownloadedBook } from '@/src/offline-books';
@@ -118,6 +120,15 @@ export default function BookDetailsScreen() {
     return (
       <Screen contentStyle={styles.center}>
         <Text style={styles.loading}>{t('Opening book details…')}</Text>
+      </Screen>
+    );
+  }
+
+  if (isUnavailableInCountry(query.error)) {
+    return (
+      <Screen scroll={false}>
+        <Stack.Screen options={{ title: '' }} />
+        <UnavailableInCountry guest={guest} />
       </Screen>
     );
   }
