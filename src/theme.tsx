@@ -54,6 +54,9 @@ export const colors = {
   dangerSoft: '#FFE3E9',
   success: '#16BA7F',
   successSoft: '#E7F8F2',
+  // The step after the done ones in a row of progress bars (a book being prepared): the same green,
+  // lighter, so "next" reads as the success state still to come rather than a new accent.
+  successMuted: '#A6E3CB',
   // A state the reader cannot change, said without alarm: a book still under copyright. Amber,
   // matching the web client's chip; never a decoration or an action colour.
   caution: '#8A5A2A',
@@ -101,6 +104,7 @@ export const darkColors: ThemeColors = {
   dangerSoft: '#2A1A22',
   success: '#3DD69B',
   successSoft: '#12332A',
+  successMuted: '#1F6A50',
   caution: '#E2B98A',
   cautionSoft: '#3A2B1F',
   reader: '#E4DAE2',

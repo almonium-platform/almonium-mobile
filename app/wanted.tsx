@@ -12,7 +12,7 @@ import { useAuth } from '@/src/auth-context';
 import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
-import { type ArrivedRow, type WantedRow, readersLabel, wantedRowMeta } from '@/src/wanted';
+import { type ArrivedRow, type WantedRow, readersLabel, stageLabel, stageStates, wantedRowMeta } from '@/src/wanted';
 
 /**
  * The Wanted page (W3): what readers want, in one public order ranked by readers. Up to two works
@@ -123,7 +123,10 @@ function Segment({ label, selected, onPress }: { label: string; selected: boolea
   );
 }
 
-/** A work editorial has started: said plainly, with no stage bars or dates. */
+/**
+ * A work editorial has started: said plainly, never with a date. When it is being made from a free
+ * text, four small bars say how far it has come: done, the one being worked on, and the rest.
+ */
 function PreparedCard({ row }: { row: WantedRow }) {
   const { t } = useTranslation();
   const styles = useStyles();
@@ -132,7 +135,24 @@ function PreparedCard({ row }: { row: WantedRow }) {
       <Text style={styles.label}>{t('Being prepared')}</Text>
       <Text style={styles.preparedTitle}>{row.title}</Text>
       <Text style={styles.rowMeta}>{wantedRowMeta(row)}</Text>
+      {row.stagesDone !== null && <StageBars done={row.stagesDone} />}
       {row.wantedByMe && <Text style={styles.mine}>{t('You want this')}</Text>}
+    </View>
+  );
+}
+
+function StageBars({ done }: { done: number }) {
+  const { t } = useTranslation();
+  const styles = useStyles();
+  const bar = { done: styles.stageDone, next: styles.stageNext, rest: styles.stageRest } as const;
+  return (
+    <View accessible accessibilityLabel={t('{done} of 4 stages done', { done })} style={styles.stages}>
+      {stageStates(done).map(({ stage, state }) => (
+        <View key={stage} style={styles.stage}>
+          <View style={[styles.stageBar, bar[state]]} />
+          <Text style={[styles.stageLabel, state === 'done' && styles.stageLabelDone]} numberOfLines={2}>{stageLabel(stage)}</Text>
+        </View>
+      ))}
     </View>
   );
 }
@@ -167,6 +187,14 @@ const useStyles = createThemedStyles((colors) => ({
   prepared: { paddingVertical: 16, gap: 4 },
   label: { color: colors.primary, fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 1.2, textTransform: 'uppercase' },
   preparedTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 18, lineHeight: serifLineHeight(18) },
+  stages: { flexDirection: 'row', gap: 6, marginTop: 8 },
+  stage: { flex: 1, gap: 5 },
+  stageBar: { height: 5, borderRadius: 999 },
+  stageDone: { backgroundColor: colors.success },
+  stageNext: { backgroundColor: colors.successMuted },
+  stageRest: { backgroundColor: colors.border },
+  stageLabel: { color: colors.metadata, fontSize: 11, lineHeight: 14 },
+  stageLabelDone: { color: colors.muted },
   mine: { marginTop: 2, color: colors.primary, fontFamily: fonts.sansMedium, fontSize: 12.5 },
   row: { minHeight: 44, paddingVertical: 12, flexDirection: 'row', alignItems: 'center', gap: 14 },
   rowRule: { borderTopWidth: 1, borderTopColor: colors.line },

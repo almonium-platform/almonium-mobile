@@ -22,6 +22,11 @@ export interface WantedRow {
   readers: number | null;
   wantedByMe: boolean;
   status: WantStatus;
+  /**
+   * For a work being prepared from a free text, how many of the four stages are done, in order
+   * (0–4); null otherwise, and then the card shows no bars.
+   */
+  stagesDone: number | null;
 }
 
 export interface ArrivedRow {
@@ -53,10 +58,37 @@ export interface WantReceipt {
   readers: number | null;
 }
 
+/** The four stages of preparing a free text, in the order they are done. */
+export const preparationStages = ['text', 'chapters', 'level', 'shelf'] as const;
+export type PreparationStage = (typeof preparationStages)[number];
+export type StageState = 'done' | 'next' | 'rest';
+
+export function stageLabel(stage: PreparationStage): string {
+  switch (stage) {
+    case 'text': return t('Text');
+    case 'chapters': return t('Chapters');
+    case 'level': return t('Level & words');
+    case 'shelf': return t('On the shelf');
+  }
+}
+
+/** Each stage's bar: the done ones, the one being worked on next, and the rest. */
+export function stageStates(stagesDone: number): { stage: PreparationStage; state: StageState }[] {
+  return preparationStages.map((stage, index) => ({
+    stage,
+    state: index < stagesDone ? 'done' : index === stagesDone ? 'next' : 'rest',
+  }));
+}
+
 const text = (value: unknown) => (typeof value === 'string' && value ? value : null);
 const number = (value: unknown) => (typeof value === 'number' && Number.isFinite(value) ? value : null);
 const record = (value: unknown) => (value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null);
 const list = (value: unknown) => (Array.isArray(value) ? value : []);
+
+/** A whole count of the four stages; anything else reads as no bars rather than a guess. */
+function stageCount(value: unknown): number | null {
+  return Number.isInteger(value) && (value as number) >= 0 && (value as number) <= preparationStages.length ? (value as number) : null;
+}
 
 function parseWantedRow(value: unknown): WantedRow[] {
   const data = record(value);
@@ -74,6 +106,7 @@ function parseWantedRow(value: unknown): WantedRow[] {
     readers: number(data.readers),
     wantedByMe: data.wantedByMe === true,
     status: wantStatuses.find((status) => status === data.status) ?? 'OPEN',
+    stagesDone: stageCount(data.stagesDone),
   }];
 }
 
