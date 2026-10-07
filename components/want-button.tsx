@@ -32,7 +32,7 @@ export function WantButton({ catalogWorkId, language, wanted, queueLink = false 
         showNotice({
           title: wantedNoticeTitle(receipt.rank),
           tone: 'success',
-          action: queueLink ? { label: t('See the queue'), onPress: () => router.push('/wanted') } : undefined,
+          action: queueLink ? { label: t('See the queue'), onPress: () => router.push({ pathname: '/wanted', params: { language } }) } : undefined,
         });
       }
       await Promise.all([

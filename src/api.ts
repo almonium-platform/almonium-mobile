@@ -260,6 +260,14 @@ export const api = {
     const path = `/public/catalog/search?q=${encodeURIComponent(query)}&limit=${limit}${language ? `&language=${encodeURIComponent(language)}` : ''}`;
     return (auth.currentUser ? request<unknown>(path) : publicRequest<unknown>(path)).then(parseCatalogHits);
   },
+  /**
+   * Public Domain Day: the best-known works that become free on 1 January of `year`. Open to
+   * guests; like search, a language and a signed-in reader's token add the want counts.
+   */
+  comingFree: (year: number, language?: string, limit = 12) => {
+    const path = `/public/catalog/coming-free?year=${year}&limit=${limit}${language ? `&language=${encodeURIComponent(language)}` : ''}`;
+    return (auth.currentUser ? request<unknown>(path) : publicRequest<unknown>(path)).then(parseCatalogHits);
+  },
   /** "I want this": idempotent; 409 with a message when the work is under copyright or already on the shelf in that language. */
   wantBook: (catalogWorkId: string, language: string) =>
     request<unknown>('/books/wants', { method: 'POST', body: JSON.stringify({ catalogWorkId, language }) }).then(parseWantReceipt),

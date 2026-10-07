@@ -67,7 +67,7 @@ export default function LibraryScreen() {
           headerShadowVisible: false,
           // The public queue of books readers want (W3), next to the search that adds to it.
           headerRight: () => (
-            <Pressable accessibilityRole="link" hitSlop={6} onPress={() => router.push('/wanted')} style={({ pressed }) => [styles.headerLink, pressed && styles.pressed]}>
+            <Pressable accessibilityRole="link" hitSlop={6} onPress={() => router.push({ pathname: '/wanted', params: language ? { language } : {} })} style={({ pressed }) => [styles.headerLink, pressed && styles.pressed]}>
               <Text style={styles.headerLinkText}>{t('Wanted')}</Text>
             </Pressable>
           ),

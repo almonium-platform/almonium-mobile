@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Stack, router } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
@@ -9,8 +9,10 @@ import { Button } from '@/components/ui';
 import { WantButton } from '@/components/want-button';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { type CatalogHit, catalogMeta } from '@/src/catalog';
 import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
+import { freeInDaysLabel, freeOnLabel, publicDomainDayYear } from '@/src/public-domain';
 import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import { type ArrivedRow, type WantedRow, readersLabel, stageLabel, stageStates, wantedRowMeta } from '@/src/wanted';
 
@@ -18,13 +20,16 @@ import { type ArrivedRow, type WantedRow, readersLabel, stageLabel, stageStates,
  * The Wanted page (W3): what readers want, in one public order ranked by readers. Up to two works
  * editorial has started sit on their own cards; the queue follows, each row with its place and the
  * same "I want this" toggle as search; under it, wanted books that arrived in the last two weeks.
- * Order and state only, never dates: a rank is a strong hint to editorial, not a promise.
+ * Order and state only, never dates: a rank is a strong hint to editorial, not a promise. The one
+ * date the page does name is the law's: on Everyone's, the works that become free next 1 January.
  */
 export default function WantedScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useStyles();
-  const { firebaseUser } = useAuth();
+  const { firebaseUser, profile } = useAuth();
+  const params = useLocalSearchParams<{ language?: string }>();
+  const language = params.language || profile?.learners.find((learner) => learner.active)?.language || '';
   const showNotice = useNotice();
   const [mine, setMine] = useState(false);
   const [opening, setOpening] = useState<string | null>(null);
@@ -79,6 +84,7 @@ export default function WantedScreen() {
                 {data.queue.map((row, index) => <QueueRow key={`${row.catalogWorkId}-${row.language}`} row={row} first={index === 0} />)}
               </View>
             )}
+            {!mine && <ComingFree language={language} />}
             {data.recentlyArrived.length > 0 && (
               <>
                 <View style={styles.kickerRow}>
@@ -157,6 +163,53 @@ function StageBars({ done }: { done: number }) {
   );
 }
 
+/**
+ * Public Domain Day: the best-known works that become free on the next 1 January, with the days
+ * left. They cannot be wanted yet, so the rows carry no button. Hidden while loading, on an error
+ * and when the year brings nothing the catalogue knows.
+ */
+function ComingFree({ language }: { language: string }) {
+  const styles = useStyles();
+  const { firebaseUser } = useAuth();
+  const year = publicDomainDayYear();
+  const query = useQuery({
+    queryKey: ['coming-free', year, language, firebaseUser?.uid],
+    queryFn: () => api.comingFree(year, language || undefined),
+    staleTime: 60 * 60_000,
+    retry: false,
+  });
+  const hits = query.data ?? [];
+  if (!hits.length) return null;
+  const countdown = freeInDaysLabel(year);
+  return (
+    <>
+      <View style={styles.dayHeading}>
+        <Text accessibilityRole="header" style={styles.dayTitle}>{freeOnLabel(year)}</Text>
+        <Text style={styles.dayCountdown}>{countdown}</Text>
+      </View>
+      <View style={styles.card}>
+        {hits.map((hit, index) => <ComingFreeRow key={hit.id} hit={hit} countdown={countdown} first={index === 0} />)}
+      </View>
+    </>
+  );
+}
+
+function ComingFreeRow({ hit, countdown, first }: { hit: CatalogHit; countdown: string; first: boolean }) {
+  const styles = useStyles();
+  const meta = catalogMeta(hit);
+  const readers = readersLabel(hit.readers);
+  return (
+    <View style={[styles.row, !first && styles.rowRule]}>
+      <View style={styles.rowCopy}>
+        <Text style={styles.rowTitle} numberOfLines={2}>{hit.title}</Text>
+        {!!meta && <Text style={styles.rowMeta} numberOfLines={1}>{meta}</Text>}
+        {!!readers && <Text style={styles.readers}>{readers}</Text>}
+        <Text style={styles.readers}>{countdown}</Text>
+      </View>
+    </View>
+  );
+}
+
 function QueueRow({ row, first }: { row: WantedRow; first: boolean }) {
   const styles = useStyles();
   const readers = readersLabel(row.readers);
@@ -206,6 +259,9 @@ const useStyles = createThemedStyles((colors) => ({
   kickerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: 6 },
   kicker: { color: colors.muted, fontFamily: fonts.sansMedium, fontSize: 13 },
   rule: { flex: 1, height: 1, backgroundColor: colors.line },
+  dayHeading: { gap: 2, paddingHorizontal: 16, paddingTop: 10 },
+  dayTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 20, lineHeight: serifLineHeight(20) },
+  dayCountdown: { color: colors.muted, fontFamily: fonts.sansSemibold, fontSize: 13.5 },
   read: { minHeight: 36, minWidth: 64, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 14, borderRadius: 999, borderWidth: 1, borderColor: colors.primary, backgroundColor: colors.surface },
   readText: { color: colors.primary, fontFamily: fonts.sansSemibold, fontSize: 12.5 },
   loading: { paddingVertical: 40 },
