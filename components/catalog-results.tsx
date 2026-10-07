@@ -3,9 +3,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
+import { WantButton } from '@/components/want-button';
 import { api } from '@/src/api';
+import { useAuth } from '@/src/auth-context';
 import { type CatalogHit, catalogMeta, isCatalogQuery, planCatalogResults } from '@/src/catalog';
 import { createThemedStyles, fonts, serifLineHeight, shadows } from '@/src/theme';
+import { readersLabel } from '@/src/wanted';
 
 /** Rows shown before "Show N more". */
 const previewRows = 5;
@@ -16,11 +19,13 @@ const debounceMs = 300;
  * Under the library, while the reader searches (W1, W2): every notable book the shelf does not
  * have yet, as rows rather than covers. A dashed outline stands where a cover would be; nothing
  * here wears a lock. A book under copyright is said plainly once, on its own card. If the
- * catalogue fails, the library simply stands alone.
+ * catalogue fails, the library simply stands alone. A signed-in reader can want any of these books
+ * in the library's language; the row then says how many readers want it there.
  */
-export function CatalogResults({ query }: { query: string }) {
+export function CatalogResults({ query, language }: { query: string; language: string }) {
   const { t } = useTranslation();
   const styles = useStyles();
+  const { firebaseUser } = useAuth();
   const [settled, setSettled] = useState(query.trim());
   const [expanded, setExpanded] = useState(false);
 
@@ -31,8 +36,8 @@ export function CatalogResults({ query }: { query: string }) {
   useEffect(() => setExpanded(false), [settled]);
 
   const search = useQuery({
-    queryKey: ['catalog-search', settled],
-    queryFn: () => api.catalogSearch(settled),
+    queryKey: ['catalog-search', settled, language, firebaseUser?.uid],
+    queryFn: () => api.catalogSearch(settled, language || undefined),
     enabled: isCatalogQuery(settled),
     staleTime: 5 * 60_000,
     retry: false,
@@ -61,7 +66,11 @@ export function CatalogResults({ query }: { query: string }) {
                 <Text style={styles.rowTitle} numberOfLines={2}>{hit.title}</Text>
                 {!!catalogMeta(hit) && <Text style={styles.rowMeta} numberOfLines={1}>{catalogMeta(hit)}</Text>}
                 {hit.state === 'NOT_IN_YOUR_COUNTRY' && <Text style={styles.muted}>{t('Not available in your country')}</Text>}
+                {hit.state === 'WANTABLE' && !!readersLabel(hit.readers) && <Text style={styles.muted}>{readersLabel(hit.readers)}</Text>}
               </View>
+              {hit.state === 'WANTABLE' && !!firebaseUser && !!language && (
+                <WantButton catalogWorkId={hit.id} language={language} wanted={hit.wantedByMe} queueLink />
+              )}
             </View>
           ))}
         </View>

@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text } from 'react-native';
 
@@ -10,10 +11,16 @@ import { wantedNoticeTitle } from '@/src/wanted';
 /**
  * "I want this" and "✓ Wanted" (W1, W3): one tap wants the work in the language, the next takes
  * the want back without a word. A want is answered with its place in line; a refusal (under
- * copyright, already on the shelf) with the server's sentence. The Wanted page then asks again,
- * so counts and ranks stay the server's.
+ * copyright, already on the shelf) with the server's sentence. Search and the Wanted page then
+ * ask again, so counts and ranks stay the server's.
  */
-export function WantButton({ catalogWorkId, language, wanted }: { catalogWorkId: string; language: string; wanted: boolean }) {
+export function WantButton({ catalogWorkId, language, wanted, queueLink = false }: {
+  catalogWorkId: string;
+  language: string;
+  wanted: boolean;
+  /** Offer "See the queue" after a want; off on the Wanted page itself. */
+  queueLink?: boolean;
+}) {
   const { t } = useTranslation();
   const styles = useStyles();
   const queryClient = useQueryClient();
@@ -22,7 +29,11 @@ export function WantButton({ catalogWorkId, language, wanted }: { catalogWorkId:
     mutationFn: async (next: boolean) => (next ? api.wantBook(catalogWorkId, language) : api.withdrawWant(catalogWorkId, language)),
     onSuccess: async (receipt, next) => {
       if (next && receipt) {
-        showNotice({ title: wantedNoticeTitle(receipt.rank), tone: 'success' });
+        showNotice({
+          title: wantedNoticeTitle(receipt.rank),
+          tone: 'success',
+          action: queueLink ? { label: t('See the queue'), onPress: () => router.push('/wanted') } : undefined,
+        });
       }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['wanted'] }),

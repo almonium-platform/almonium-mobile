@@ -251,9 +251,15 @@ export const api = {
       ? request<RightsReportReceipt>(path, { method: 'POST', body: JSON.stringify(report) })
       : publicPost<RightsReportReceipt>(path, report);
   },
-  /** Every notable book, metadata only; open to guests. Each hit's state depends on the reader's country. */
-  catalogSearch: (query: string, limit = 20) =>
-    publicRequest<unknown>(`/public/catalog/search?q=${encodeURIComponent(query)}&limit=${limit}`).then(parseCatalogHits),
+  /**
+   * Every notable book, metadata only; open to guests. Each hit's state depends on the reader's
+   * country. With a language, a hit also says how many want it there and, for a signed-in reader
+   * (bearer token, honoured on /public paths), whether they do.
+   */
+  catalogSearch: (query: string, language?: string, limit = 20) => {
+    const path = `/public/catalog/search?q=${encodeURIComponent(query)}&limit=${limit}${language ? `&language=${encodeURIComponent(language)}` : ''}`;
+    return (auth.currentUser ? request<unknown>(path) : publicRequest<unknown>(path)).then(parseCatalogHits);
+  },
   /** "I want this": idempotent; 409 with a message when the work is under copyright or already on the shelf in that language. */
   wantBook: (catalogWorkId: string, language: string) =>
     request<unknown>('/books/wants', { method: 'POST', body: JSON.stringify({ catalogWorkId, language }) }).then(parseWantReceipt),

@@ -17,6 +17,10 @@ export interface CatalogHit {
   workSlug: string | null;
   /** The year it became free (WANTABLE) or the soonest it can (UNDER_COPYRIGHT); null when unknown. */
   freeFrom: number | null;
+  /** How many readers want it in the searched language; null below three, or with no language. */
+  readers: number | null;
+  /** Whether this reader wants it in the searched language; always false for a guest. */
+  wantedByMe: boolean;
 }
 
 const text = (value: unknown) => (typeof value === 'string' && value ? value : null);
@@ -42,6 +46,8 @@ export function parseCatalogHits(value: unknown): CatalogHit[] {
       state,
       workSlug: text(data.workSlug),
       freeFrom: number(data.freeFrom),
+      readers: number(data.readers),
+      wantedByMe: data.wantedByMe === true,
     }];
   });
 }

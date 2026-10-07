@@ -135,7 +135,7 @@ export default function LibraryScreen() {
           </View>
         )}
         {/* Every notable book the library does not have, as rows under it (W1, W2). */}
-        <CatalogResults query={search} />
+        <CatalogResults query={search} language={language} />
       </ScrollView>
     </View>
   );
