@@ -7,6 +7,7 @@ import { WantButton } from '@/components/want-button';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { type CatalogHit, catalogMeta, isCatalogQuery, planCatalogResults } from '@/src/catalog';
+import { freeFromLabel } from '@/src/public-domain';
 import { createThemedStyles, fonts, serifLineHeight, shadows } from '@/src/theme';
 import { readersLabel } from '@/src/wanted';
 
@@ -67,6 +68,7 @@ export function CatalogResults({ query, language }: { query: string; language: s
                 {!!catalogMeta(hit) && <Text style={styles.rowMeta} numberOfLines={1}>{catalogMeta(hit)}</Text>}
                 {hit.state === 'NOT_IN_YOUR_COUNTRY' && <Text style={styles.muted}>{t('Not available in your country')}</Text>}
                 {hit.state === 'WANTABLE' && !!readersLabel(hit.readers) && <Text style={styles.muted}>{readersLabel(hit.readers)}</Text>}
+                {!!freeFromLabel(hit) && <Text style={styles.muted}>{freeFromLabel(hit)}</Text>}
               </View>
               {hit.state === 'WANTABLE' && !!firebaseUser && !!language && (
                 <WantButton catalogWorkId={hit.id} language={language} wanted={hit.wantedByMe} queueLink />
@@ -88,13 +90,17 @@ function CopyrightCard({ hit }: { hit: CatalogHit }) {
   const { t } = useTranslation();
   const styles = useStyles();
   const meta = catalogMeta(hit);
+  const free = freeFromLabel(hit);
   return (
     <View style={[styles.card, styles.copyrightCard]}>
       <View style={[styles.outline, styles.outlineLarge]} />
       <View style={styles.copyrightCopy}>
         <Text style={styles.copyrightTitle}>{hit.title}</Text>
         {!!meta && <Text style={styles.rowMeta}>{meta}</Text>}
-        <View style={styles.chip}><Text style={styles.chipText}>{t('Under copyright')}</Text></View>
+        <View style={styles.chipRow}>
+          <View style={styles.chip}><Text style={styles.chipText}>{t('Under copyright')}</Text></View>
+          {!!free && <Text style={styles.countdown}>{free}</Text>}
+        </View>
         <Text style={styles.copyrightText}>{t('We can only publish books whose copyright has expired, so we can’t offer this one.')}</Text>
       </View>
     </View>
@@ -118,8 +124,10 @@ const useStyles = createThemedStyles((colors) => ({
   copyrightCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 14, paddingVertical: 16 },
   copyrightCopy: { flex: 1, alignItems: 'flex-start', gap: 5 },
   copyrightTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 18, lineHeight: serifLineHeight(18) },
-  chip: { marginTop: 2, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 999, backgroundColor: colors.cautionSoft },
+  chipRow: { marginTop: 2, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 10, rowGap: 4 },
+  chip: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 999, backgroundColor: colors.cautionSoft },
   chipText: { color: colors.caution, fontFamily: fonts.sansSemibold, fontSize: 11.5 },
+  countdown: { color: colors.muted, fontFamily: fonts.sansSemibold, fontSize: 12.5 },
   copyrightText: { color: colors.muted, fontSize: 13.5, lineHeight: 20 },
   more: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 16 },
   moreText: { color: colors.primary, fontFamily: fonts.sansSemibold, fontSize: 13.5 },
