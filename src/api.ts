@@ -3,6 +3,7 @@ import type { VoiceAvailability } from './voice-availability';
 import { parallelEditionPath } from './reader-editions';
 import { parseChapterEnrichments } from './reader-chapters';
 import { parseCatalogHits } from './catalog';
+import { parseWantedQueue, parseWantReceipt } from './wanted';
 import { parseChapterVocabulary } from './reader-vocabulary';
 import type {
   ActiveLanguagePolicy,
@@ -253,6 +254,14 @@ export const api = {
   /** Every notable book, metadata only; open to guests. Each hit's state depends on the reader's country. */
   catalogSearch: (query: string, limit = 20) =>
     publicRequest<unknown>(`/public/catalog/search?q=${encodeURIComponent(query)}&limit=${limit}`).then(parseCatalogHits),
+  /** "I want this": idempotent; 409 with a message when the work is under copyright or already on the shelf in that language. */
+  wantBook: (catalogWorkId: string, language: string) =>
+    request<unknown>('/books/wants', { method: 'POST', body: JSON.stringify({ catalogWorkId, language }) }).then(parseWantReceipt),
+  /** Takes a want back, silently. */
+  withdrawWant: (catalogWorkId: string, language: string) =>
+    request<void>(`/books/wants/${encodeURIComponent(catalogWorkId)}/${encodeURIComponent(language)}`, { method: 'DELETE' }),
+  /** The Wanted page: everyone's queue, or only the rows this reader wants. */
+  wanted: (mine: boolean) => request<unknown>(`/books/wanted?mine=${mine}`).then(parseWantedQueue),
   bookChapters: (editionSlug: string) =>
     publicRequest<unknown>(`/public/books/${encodeURIComponent(editionSlug)}/chapters`).then(parseChapterEnrichments),
   bookChapterVocabulary: (editionSlug: string, sequence: number) =>
