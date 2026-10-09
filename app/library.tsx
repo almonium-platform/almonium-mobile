@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { BookCover } from '@/components/book-cover';
+import { CatalogResults } from '@/components/catalog-results';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
@@ -24,7 +25,8 @@ const lengths: { value: LengthFilter; label: string }[] = [
 /**
  * The library (design 4a): every work in this language, one row each, pushed from the shelf.
  * Search and the level and length chips live here only; the level group shows the levels that
- * have a book. Sorted by level then title, no sort control.
+ * have a book. Sorted by level then title, no sort control. A search also lists, under the
+ * library, the notable books it does not have yet; the header leads to the Wanted queue.
  */
 export default function LibraryScreen() {
   const { t } = useTranslation();
@@ -58,7 +60,19 @@ export default function LibraryScreen() {
 
   return (
     <View style={styles.screen}>
-      <Stack.Screen options={{ title: '', headerBackTitle: t('Shelf'), headerShadowVisible: false }} />
+      <Stack.Screen
+        options={{
+          title: '',
+          headerBackTitle: t('Shelf'),
+          headerShadowVisible: false,
+          // The public queue of books readers want (W3), next to the search that adds to it.
+          headerRight: () => (
+            <Pressable accessibilityRole="link" hitSlop={6} onPress={() => router.push({ pathname: '/wanted', params: language ? { language } : {} })} style={({ pressed }) => [styles.headerLink, pressed && styles.pressed]}>
+              <Text style={styles.headerLinkText}>{t('Wanted')}</Text>
+            </Pressable>
+          ),
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <View style={styles.heading}>
           <Text style={styles.eyebrow}>{t('LIBRARY · {language}', { language: languageName(language).toUpperCase() })}</Text>
@@ -120,6 +134,8 @@ export default function LibraryScreen() {
             {!!entries.length && <Text style={styles.statusNote}>{t('Try a title or author with different words.')}</Text>}
           </View>
         )}
+        {/* Every notable book the library does not have, as rows under it (W1, W2). */}
+        <CatalogResults query={search} language={language} />
       </ScrollView>
     </View>
   );
@@ -150,6 +166,8 @@ const useStyles = createThemedStyles((colors) => ({
   chipTextActive: { color: colors.primary },
   chipDivider: { width: 1, marginVertical: 4, marginHorizontal: 4, backgroundColor: colors.border },
   pressed: { opacity: 0.7 },
+  headerLink: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 },
+  headerLinkText: { color: colors.primary, fontFamily: fonts.sansSemibold, fontSize: 14 },
   card: { marginHorizontal: 16, paddingHorizontal: 18, paddingVertical: 4, borderRadius: 24, backgroundColor: colors.surface, ...shadows.card },
   row: { paddingVertical: 12, flexDirection: 'row', alignItems: 'center', gap: 14 },
   rowRule: { borderTopWidth: 1, borderTopColor: colors.line },

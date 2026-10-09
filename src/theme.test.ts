@@ -28,6 +28,8 @@ describe('Almonium visual system', () => {
   it('reserves green for success rather than the brand accent', () => {
     expect(colors.success).toBe('#16BA7F');
     expect(colors.primary).not.toBe(colors.success);
+    expect(colors.successMuted).not.toBe(colors.success);
+    expect(darkColors.successMuted).not.toBe(darkColors.success);
   });
 
   it('defines the app-wide dark palette as semantic tokens', () => {

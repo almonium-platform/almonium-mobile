@@ -9,11 +9,14 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { AlignmentRow } from '@/components/alignment-request';
 import { AuthSheet, type AuthReason } from '@/components/auth-sheet';
 import { GuestHeaderActions } from '@/components/guest-header';
+import { RightsReportSheet } from '@/components/rights-report-sheet';
 import { BookCover } from '@/components/book-cover';
 import { Screen } from '@/components/screen';
 import { Button, Card } from '@/components/ui';
+import { UnavailableInCountry } from '@/components/unavailable-in-country';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
+import { isUnavailableInCountry } from '@/src/http-errors';
 import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { downloadBook, downloadedBooks, formattedDownloadSize, removeDownloadedBook } from '@/src/offline-books';
@@ -44,6 +47,7 @@ export default function BookDetailsScreen() {
 
   const [auth, setAuth] = useState<AuthReason | null>(null);
   const [devicePosition, setDevicePosition] = useState(0);
+  const [reporting, setReporting] = useState(false);
   useEffect(() => {
     if (guest && slug) void readGuestProgress(slug).then(setDevicePosition);
   }, [guest, slug]);
@@ -122,6 +126,15 @@ export default function BookDetailsScreen() {
     );
   }
 
+  if (isUnavailableInCountry(query.error)) {
+    return (
+      <Screen scroll={false}>
+        <Stack.Screen options={{ title: '' }} />
+        <UnavailableInCountry guest={guest} />
+      </Screen>
+    );
+  }
+
   if (query.isError || !query.data) {
     return (
       <Screen contentStyle={styles.center}>
@@ -137,6 +150,8 @@ export default function BookDetailsScreen() {
 
   const book = query.data;
   const pages = Math.max(1, Math.ceil(book.wordCount / 250));
+  // Open to guests too: anyone who sees the book can say its rights are wrong.
+  const reportSlug = book.editionSlug ?? slug;
   const readerParams = { bookId: String(book.id), language: language || book.language, title: book.title, ...(book.editionSlug ? { slug: book.editionSlug } : {}) };
 
   return (
@@ -287,7 +302,16 @@ export default function BookDetailsScreen() {
         </Pressable>
       )}
 
+      {!!reportSlug && (
+        <Pressable accessibilityRole="button" onPress={() => setReporting(true)} style={({ pressed }) => [styles.rightsAction, pressed && styles.resetActionPressed]}>
+          <Text style={styles.rightsActionText}>{t('Report a problem with this book’s rights')}</Text>
+        </Pressable>
+      )}
+
       <AuthSheet reason={auth} onClose={() => setAuth(null)} onSignedIn={() => setAuth(null)} />
+      {!!reportSlug && (
+        <RightsReportSheet visible={reporting} onClose={() => setReporting(false)} editionSlug={reportSlug} bookTitle={book.title} guest={guest} />
+      )}
     </Screen>
   );
 }
@@ -403,6 +427,8 @@ const useStyles = createThemedStyles((colors) => ({
   resetAction: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 },
   resetActionPressed: { opacity: 0.7 },
   resetActionText: { color: colors.muted, fontSize: 14, fontWeight: '600' },
+  rightsAction: { minHeight: 44, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
+  rightsActionText: { color: colors.muted, fontSize: 12.5, textDecorationLine: 'underline' },
   downloadRow: { minHeight: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderRadius: 20, paddingHorizontal: 15, backgroundColor: colors.successSoft },
   downloadCopy: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
   downloadText: { flex: 1, color: colors.ink, fontSize: 13, fontWeight: '600' },

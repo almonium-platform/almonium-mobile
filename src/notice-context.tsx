@@ -12,6 +12,8 @@ interface Notice {
   title: string;
   message?: string;
   tone?: NoticeTone;
+  /** One follow-up, such as "See the queue"; pressing it also dismisses the notice. */
+  action?: { label: string; onPress(): void };
 }
 
 const NoticeContext = createContext<((notice: Notice) => void) | null>(null);
@@ -45,6 +47,19 @@ export function NoticeProvider({ children }: PropsWithChildren) {
             <View style={styles.copy}>
               <Text style={styles.title}>{notice.title}</Text>
               {!!notice.message && <Text style={styles.message}>{notice.message}</Text>}
+              {notice.action && (
+                <Pressable
+                  accessibilityRole="button"
+                  hitSlop={8}
+                  onPress={() => {
+                    const action = notice.action;
+                    setNotice(null);
+                    action?.onPress();
+                  }}
+                  style={({ pressed }) => [styles.action, pressed && styles.pressed]}>
+                  <Text style={styles.actionText}>{notice.action.label}</Text>
+                </Pressable>
+              )}
             </View>
             <Pressable accessibilityLabel={t('Dismiss message')} hitSlop={8} onPress={() => setNotice(null)}>
               <Ionicons name="close" size={20} color={colors.muted} />
@@ -71,4 +86,7 @@ const useStyles = createThemedStyles((colors) => ({
   copy: { flex: 1, gap: 2 },
   title: { color: colors.ink, fontFamily: fonts.sansSemibold, fontSize: 14 },
   message: { color: colors.muted, fontSize: 12, lineHeight: 18 },
+  action: { alignSelf: 'flex-start', paddingTop: 6 },
+  actionText: { color: colors.primary, fontFamily: fonts.sansSemibold, fontSize: 13 },
+  pressed: { opacity: 0.7 },
 }));

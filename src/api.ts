@@ -2,6 +2,8 @@ import { auth } from '@/src/firebase';
 import type { VoiceAvailability } from './voice-availability';
 import { parallelEditionPath } from './reader-editions';
 import { parseChapterEnrichments } from './reader-chapters';
+import { parseCatalogHits } from './catalog';
+import { parseWantedQueue, parseWantReceipt } from './wanted';
 import { parseChapterVocabulary } from './reader-vocabulary';
 import type {
   ActiveLanguagePolicy,
@@ -36,6 +38,7 @@ import type { ReadingPlace } from '@/src/progress-utils';
 import { decodeJsonBody, errorMessageFromBody } from '@/src/http-errors';
 import { t } from './i18n';
 import type { DiscoverLookup } from '@/src/discover';
+import type { RightsReportReceipt, RightsReportRequest } from '@/src/rights-report';
 import type { LearningActivity, Rhythm, WeeklyTarget } from '@/src/rhythm';
 import type {
   ReviewAnswer,
@@ -238,6 +241,41 @@ export const api = {
     if (!response.ok) throw new ApiError(await responseError(response), response.status);
     return response.text();
   },
+  /**
+   * The report button. Open to guests, who leave an email; a signed-in reader sends the usual
+   * bearer token, which the backend honours on /public paths, so the account address is used.
+   */
+  reportRights: (editionSlug: string, report: RightsReportRequest) => {
+    const path = `/public/books/${encodeURIComponent(editionSlug)}/rights-reports`;
+    return auth.currentUser
+      ? request<RightsReportReceipt>(path, { method: 'POST', body: JSON.stringify(report) })
+      : publicPost<RightsReportReceipt>(path, report);
+  },
+  /**
+   * Every notable book, metadata only; open to guests. Each hit's state depends on the reader's
+   * country. With a language, a hit also says how many want it there and, for a signed-in reader
+   * (bearer token, honoured on /public paths), whether they do.
+   */
+  catalogSearch: (query: string, language?: string, limit = 20) => {
+    const path = `/public/catalog/search?q=${encodeURIComponent(query)}&limit=${limit}${language ? `&language=${encodeURIComponent(language)}` : ''}`;
+    return (auth.currentUser ? request<unknown>(path) : publicRequest<unknown>(path)).then(parseCatalogHits);
+  },
+  /**
+   * Public Domain Day: the best-known works that become free on 1 January of `year`. Open to
+   * guests; like search, a language and a signed-in reader's token add the want counts.
+   */
+  comingFree: (year: number, language?: string, limit = 12) => {
+    const path = `/public/catalog/coming-free?year=${year}&limit=${limit}${language ? `&language=${encodeURIComponent(language)}` : ''}`;
+    return (auth.currentUser ? request<unknown>(path) : publicRequest<unknown>(path)).then(parseCatalogHits);
+  },
+  /** "I want this": idempotent; 409 with a message when the work is under copyright or already on the shelf in that language. */
+  wantBook: (catalogWorkId: string, language: string) =>
+    request<unknown>('/books/wants', { method: 'POST', body: JSON.stringify({ catalogWorkId, language }) }).then(parseWantReceipt),
+  /** Takes a want back, silently. */
+  withdrawWant: (catalogWorkId: string, language: string) =>
+    request<void>(`/books/wants/${encodeURIComponent(catalogWorkId)}/${encodeURIComponent(language)}`, { method: 'DELETE' }),
+  /** The Wanted page: everyone's queue, or only the rows this reader wants. */
+  wanted: (mine: boolean) => request<unknown>(`/books/wanted?mine=${mine}`).then(parseWantedQueue),
   bookChapters: (editionSlug: string) =>
     publicRequest<unknown>(`/public/books/${encodeURIComponent(editionSlug)}/chapters`).then(parseChapterEnrichments),
   bookChapterVocabulary: (editionSlug: string, sequence: number) =>
