@@ -37,7 +37,7 @@ import { config } from '@/src/config';
 import type { ReadingPlace } from '@/src/progress-utils';
 import { decodeJsonBody, errorMessageFromBody } from '@/src/http-errors';
 import { t } from './i18n';
-import type { DiscoverLookup } from '@/src/discover';
+import { parseDiscoverLookup } from '@/src/discover';
 import type { RightsReportReceipt, RightsReportRequest } from '@/src/rights-report';
 import type { LearningActivity, Rhythm, WeeklyTarget } from '@/src/rhythm';
 import type {
@@ -159,9 +159,9 @@ export const api = {
   discover: (entry: string, language: string, translationLanguage: string, context?: string) => {
     const query = new URLSearchParams({ entry });
     if (context) query.set('context', context);
-    return publicRequest<DiscoverLookup>(
+    return publicRequest<unknown>(
       `/public/discover/lookup/${encodeURIComponent(language)}/${encodeURIComponent(translationLanguage)}?${query}`,
-    );
+    ).then(parseDiscoverLookup);
   },
   updateUsername: (username: string) =>
     request<void>('/users/me/username', {
