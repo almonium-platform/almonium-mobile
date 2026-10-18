@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +21,15 @@ import { Button } from '@/components/ui';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { createCardDraft } from '@/src/card-utils';
-import { normalizedLookupEntry, tokenizeSentence, type DiscoverLookup } from '@/src/discover';
+import { config } from '@/src/config';
+import {
+  clipUri,
+  normalizedLookupEntry,
+  orderedPronunciations,
+  tokenizeSentence,
+  type DiscoverLookup,
+} from '@/src/discover';
+import { selectedVariety } from '@/src/language-varieties';
 import { languageName } from '@/src/languages';
 import { freeSavedItemLimit } from '@/src/limits';
 import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
@@ -48,7 +57,15 @@ export default function LookupScreen() {
   const [saved, setSaved] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [paywallContext, setPaywallContext] = useState<PaywallContext | null>(null);
+  const [playingClip, setPlayingClip] = useState<string | null>(null);
   const handledSharedText = useRef('');
+  const player = useAudioPlayer();
+  const playback = useAudioPlayerStatus(player);
+
+  useEffect(() => {
+    // A dictionary is tapped to be heard; the silent switch should not swallow the word.
+    void setAudioModeAsync({ playsInSilentMode: true }).catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     void AsyncStorage.getItem(lookupLanguageKey).then((stored) => {
@@ -59,6 +76,12 @@ export default function LookupScreen() {
   const translationLanguage =
     profile?.fluentLangs.find((code) => code !== language) ?? (language === 'EN' ? 'UK' : 'EN');
   const selectedSense = lookup?.senses[senseIndex];
+  const learnerVariety = profile?.learners.find((learner) => learner.language === language)?.variety;
+  const pronunciations = useMemo(
+    () => (lookup ? orderedPronunciations(lookup.pronunciations, learnerVariety) : []),
+    [lookup, learnerVariety],
+  );
+  const hasClip = pronunciations.some((item) => item.clipUrl);
   const itemsQuery = useQuery({
     queryKey: ['cards', firebaseUser?.uid, language],
     queryFn: () => api.cards(language),
@@ -71,6 +94,7 @@ export default function LookupScreen() {
     onSuccess: (result) => {
       setLookup(result);
       setSenseIndex(0);
+      setPlayingClip(null);
       setSaved(false);
       setProduce(false);
       setHistory((current) => [result.entry, ...current.filter((item) => item !== result.entry)].slice(0, 6));
@@ -143,6 +167,16 @@ export default function LookupScreen() {
       return;
     }
     saveMutation.mutate();
+  }
+
+  function listen(uri: string) {
+    if (playingClip === uri && playback.playing) {
+      player.pause();
+      return;
+    }
+    setPlayingClip(uri);
+    player.replace({ uri });
+    player.play();
   }
 
   function openWord(value: string, sourceContext?: string) {
@@ -238,17 +272,60 @@ export default function LookupScreen() {
                 <Text style={styles.entry}>{selectedSense?.headword || lookup.entry}</Text>
                 <Text style={styles.entryMeta}>
                   {selectedSense?.partOfSpeech || t('word')}
-                  {selectedSense?.transcription ? ` · /${selectedSense.transcription}/` : ''}
+                  {selectedSense?.transcription && !pronunciations.length ? ` · /${selectedSense.transcription}/` : ''}
                   {lookup.frequency ? ` · ${lookup.frequency.band}` : ''}
                 </Text>
               </View>
-              <Pressable
-                accessibilityLabel={t('Learn about premium audio')}
-                onPress={() => setPaywallContext('audio')}
-                style={styles.audioButton}>
-                <Ionicons name="volume-medium-outline" size={20} color={colors.primary} />
-              </Pressable>
+              {!hasClip && (
+                <Pressable
+                  accessibilityLabel={t('Learn about premium audio')}
+                  onPress={() => setPaywallContext('audio')}
+                  style={styles.audioButton}>
+                  <Ionicons name="volume-medium-outline" size={20} color={colors.primary} />
+                </Pressable>
+              )}
             </View>
+
+            {pronunciations.length > 0 && (
+              <View style={styles.pronunciations}>
+                {pronunciations.map((item, index) => {
+                  // selectedVariety falls back to the language's first variety; only a real match gets its name.
+                  const variety = selectedVariety(lookup.language, item.variety);
+                  const varietyLabel =
+                    variety && variety.tag.toLowerCase() === item.variety?.toLowerCase()
+                      ? t(variety.label)
+                      : item.variety || t('Pronunciation');
+                  const uri = item.clipUrl ? clipUri(config.apiBaseUrl, item.clipUrl) : null;
+                  const active = uri !== null && playingClip === uri && playback.playing;
+                  return (
+                    <View key={`${item.variety ?? 'variety'}-${index}`} style={styles.pronunciation}>
+                      <View style={styles.pronunciationCopy}>
+                        <Text style={styles.pronunciationVariety}>{varietyLabel}</Text>
+                        {!!item.ipa && <Text style={styles.ipa}>/{item.ipa.replace(/^\/|\/$/g, '')}/</Text>}
+                        {item.clipStatus === 'unverified' && (
+                          <Text style={styles.unverified}>{t('unverified')}</Text>
+                        )}
+                      </View>
+                      {uri && (
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={t('Listen')}
+                          accessibilityState={{ selected: active }}
+                          onPress={() => listen(uri)}
+                          style={[styles.listen, active && styles.listenActive]}>
+                          <Ionicons
+                            name={active ? 'volume-high' : 'volume-medium-outline'}
+                            size={18}
+                            color={colors.primary}
+                          />
+                          <Text style={styles.listenText}>{t('Listen')}</Text>
+                        </Pressable>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+            )}
 
             <View style={styles.senses}>
               {lookup.senses.length ? (
@@ -264,12 +341,33 @@ export default function LookupScreen() {
                       {sense.index}
                     </Text>
                     <View style={styles.senseCopy}>
-                      <Text style={[styles.meaning, index !== senseIndex && styles.meaningMuted]}>
-                        {sense.translations.join(', ') || t('Meaning not supplied')}
-                      </Text>
+                      <View style={styles.meaningRow}>
+                        <Text style={[styles.meaning, index !== senseIndex && styles.meaningMuted]}>
+                          {sense.translations.join(', ') || t('Meaning not supplied')}
+                        </Text>
+                        {!!sense.cefr && (
+                          <View style={styles.cefr}>
+                            <Text style={styles.cefrText}>{sense.cefr}</Text>
+                          </View>
+                        )}
+                      </View>
+                      {!!sense.definition && (
+                        <Text style={[styles.definition, index !== senseIndex && styles.definitionMuted]}>
+                          {sense.definition}
+                        </Text>
+                      )}
                       {index === senseIndex && lookup.sourceContext && (
                         <Text style={styles.context}>“{lookup.sourceContext}”</Text>
                       )}
+                      {index === senseIndex &&
+                        sense.examples.map((example, exampleIndex) => (
+                          <View key={`${exampleIndex}-${example.text}`} style={styles.example}>
+                            <Text style={styles.context}>“{example.text}”</Text>
+                            {!!example.translation && (
+                              <Text style={styles.exampleTranslation}>{example.translation}</Text>
+                            )}
+                          </View>
+                        ))}
                     </View>
                     <Ionicons
                       name={index === senseIndex ? 'checkmark-circle' : 'ellipse-outline'}
@@ -366,14 +464,30 @@ const useStyles = createThemedStyles((colors) => ({
   entry: { color: colors.ink, fontFamily: fonts.serif, fontSize: 30, lineHeight: serifLineHeight(30) },
   entryMeta: { color: colors.metadata, fontFamily: fonts.sans, fontSize: 12 },
   audioButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderRadius: 22 },
+  pronunciations: { gap: 6 },
+  pronunciation: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  pronunciationCopy: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', gap: 8 },
+  pronunciationVariety: { color: colors.ink, fontFamily: fonts.sansMedium, fontSize: 13.5 },
+  ipa: { color: colors.muted, fontFamily: fonts.sans, fontSize: 14 },
+  unverified: { color: colors.metadata, fontFamily: fonts.sans, fontSize: 11.5, fontStyle: 'italic' },
+  listen: { minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, borderWidth: 1, borderColor: colors.border, borderRadius: 20 },
+  listenActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
+  listenText: { color: colors.primary, fontFamily: fonts.sansSemibold, fontSize: 13.5 },
   senses: { paddingHorizontal: 2 },
   sense: { minHeight: 66, flexDirection: 'row', alignItems: 'flex-start', gap: 11, paddingVertical: 12 },
   senseDivider: { borderTopWidth: 1, borderTopColor: colors.line },
   senseNumber: { minWidth: 18, paddingTop: 2, color: colors.primary, fontSize: 12 },
   senseNumberMuted: { color: colors.metadata },
   senseCopy: { flex: 1, gap: 5 },
-  meaning: { color: colors.ink, fontFamily: fonts.sansMedium, fontSize: 15, lineHeight: 22 },
+  meaningRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  meaning: { flex: 1, color: colors.ink, fontFamily: fonts.sansMedium, fontSize: 15, lineHeight: 22 },
   meaningMuted: { color: colors.muted, fontFamily: fonts.sans },
+  cefr: { marginTop: 2, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, backgroundColor: colors.accentSoft },
+  cefrText: { color: colors.primary, fontFamily: fonts.sansSemibold, fontSize: 11, letterSpacing: 0.5 },
+  definition: { color: colors.ink, fontFamily: fonts.sans, fontSize: 14, lineHeight: 20 },
+  definitionMuted: { color: colors.metadata },
+  example: { gap: 2 },
+  exampleTranslation: { color: colors.metadata, fontFamily: fonts.sans, fontSize: 13, lineHeight: 19 },
   context: { color: colors.muted, fontFamily: fonts.serifRegular, fontSize: 14, lineHeight: 21, fontStyle: 'italic' },
   intentRow: { flexDirection: 'row', gap: 8 },
   intentSelected: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: colors.primary, borderRadius: 22, backgroundColor: colors.accentSoft },

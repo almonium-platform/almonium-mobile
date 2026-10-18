@@ -113,6 +113,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     'expo-asset',
     'expo-localization',
+    // Playback of dictionary clips only: no microphone permission on either platform.
+    ['expo-audio', { microphonePermission: false, recordAudioAndroid: false }],
   ],
   experiments: {
     typedRoutes: true,
