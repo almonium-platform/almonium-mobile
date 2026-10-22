@@ -9,10 +9,11 @@ import { Button } from '@/components/ui';
 import { WantButton } from '@/components/want-button';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
-import { type CatalogHit, catalogMeta } from '@/src/catalog';
+import { type CatalogHit, catalogMeta, countryName } from '@/src/catalog';
 import { languageName } from '@/src/languages';
 import { useNotice } from '@/src/notice-context';
 import { freeInDaysLabel, freeOnLabel, publicDomainDayYear } from '@/src/public-domain';
+import { UnlockSheet } from '@/components/unlock-sheet';
 import { createThemedStyles, fonts, serifLineHeight, shadows, useTheme } from '@/src/theme';
 import { type ArrivedRow, type WantedRow, readersLabel, stageLabel, stageStates, wantedRowMeta } from '@/src/wanted';
 
@@ -164,13 +165,16 @@ function StageBars({ done }: { done: number }) {
 }
 
 /**
- * Public Domain Day: the best-known works that become free on the next 1 January, with the days
- * left. They cannot be wanted yet, so the rows carry no button. Hidden while loading, on an error
- * and when the year brings nothing the catalogue knows.
+ * Public Domain Day (W8): the best-known works that become free on the next 1 January where the
+ * reader is, with the days left. "Tell me" is a want with a date attached, and "Where it's free"
+ * opens the unlock list (W7). Hidden while loading, on an error and when the year brings nothing
+ * the catalogue knows.
  */
 function ComingFree({ language }: { language: string }) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const { firebaseUser } = useAuth();
+  const [unlocksFor, setUnlocksFor] = useState<CatalogHit | null>(null);
   const year = publicDomainDayYear();
   const query = useQuery({
     queryKey: ['coming-free', year, language, firebaseUser?.uid],
@@ -181,21 +185,27 @@ function ComingFree({ language }: { language: string }) {
   const hits = query.data ?? [];
   if (!hits.length) return null;
   const countdown = freeInDaysLabel(year);
+  const country = hits.find((hit) => hit.readerCountry)?.readerCountry ?? null;
+  const heading = country ? t('Free in {country} from 1 January', { country: countryName(country) }) : freeOnLabel(year);
   return (
     <>
       <View style={styles.dayHeading}>
-        <Text accessibilityRole="header" style={styles.dayTitle}>{freeOnLabel(year)}</Text>
+        <Text accessibilityRole="header" style={styles.dayTitle}>{heading}</Text>
         <Text style={styles.dayCountdown}>{countdown}</Text>
       </View>
       <View style={styles.card}>
-        {hits.map((hit, index) => <ComingFreeRow key={hit.id} hit={hit} countdown={countdown} first={index === 0} />)}
+        {hits.map((hit, index) => (
+          <ComingFreeRow key={hit.id} hit={hit} language={firebaseUser ? language : ''} first={index === 0} onWhereFree={() => setUnlocksFor(hit)} />
+        ))}
       </View>
+      <UnlockSheet catalogWorkId={unlocksFor?.id ?? null} title={unlocksFor ? catalogMeta(unlocksFor) ? `${unlocksFor.title} · ${catalogMeta(unlocksFor)}` : unlocksFor.title : ''} visible={unlocksFor !== null} onClose={() => setUnlocksFor(null)} />
     </>
   );
 }
 
-function ComingFreeRow({ hit, countdown, first }: { hit: CatalogHit; countdown: string; first: boolean }) {
+function ComingFreeRow({ hit, language, first, onWhereFree }: { hit: CatalogHit; language: string; first: boolean; onWhereFree(): void }) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const meta = catalogMeta(hit);
   const readers = readersLabel(hit.readers);
   return (
@@ -204,8 +214,13 @@ function ComingFreeRow({ hit, countdown, first }: { hit: CatalogHit; countdown: 
         <Text style={styles.rowTitle} numberOfLines={2}>{hit.title}</Text>
         {!!meta && <Text style={styles.rowMeta} numberOfLines={1}>{meta}</Text>}
         {!!readers && <Text style={styles.readers}>{readers}</Text>}
-        <Text style={styles.readers}>{countdown}</Text>
+        <Pressable accessibilityRole="button" hitSlop={6} onPress={onWhereFree}>
+          <Text style={styles.link}>{t('Where it’s free')}</Text>
+        </Pressable>
       </View>
+      {!!language && (
+        <WantButton catalogWorkId={hit.id} language={language} wanted={hit.wantedByMe} labels={{ want: t('Tell me'), wanted: t('✓ On the day') }} />
+      )}
     </View>
   );
 }
@@ -256,6 +271,7 @@ const useStyles = createThemedStyles((colors) => ({
   rowTitle: { color: colors.ink, fontFamily: fonts.serif, fontSize: 16, lineHeight: serifLineHeight(16) },
   rowMeta: { color: colors.metadata, fontSize: 12.5 },
   readers: { color: colors.muted, fontSize: 12.5 },
+  link: { color: colors.primary, fontFamily: fonts.sansSemibold, fontSize: 12.5, paddingTop: 2 },
   kickerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: 6 },
   kicker: { color: colors.muted, fontFamily: fonts.sansMedium, fontSize: 13 },
   rule: { flex: 1, height: 1, backgroundColor: colors.line },

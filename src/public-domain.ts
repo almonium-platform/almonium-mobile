@@ -44,3 +44,49 @@ export function freeFromLabel(hit: Pick<CatalogHit, 'state' | 'freeFrom'>, today
   }
   return hit.state === 'WANTABLE' && hit.freeFrom === year ? t('Free since 1 January') : null;
 }
+
+/** How many calendar years ahead a day may be for a card to count down to it; further out it names the date. */
+export const countdownYears = 5;
+
+/** What is left until midnight on 1 January, by the phone's clock (W6). */
+export interface LiveCountdown {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  /** Under a day away: the days tile is dropped. */
+  lastDay: boolean;
+}
+
+export function liveCountdown(year: number, now: Date = new Date()): LiveCountdown {
+  const midnight = new Date(year, 0, 1, 0, 0, 0, 0);
+  const left = Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
+  const days = Math.floor(left / 86_400);
+  return { days, hours: Math.floor((left % 86_400) / 3600), minutes: Math.floor((left % 3600) / 60), seconds: left % 60, lastDay: days === 0 };
+}
+
+/** What a reader's own unlock year says: a live countdown within five years, the date beyond; null when unknown or past. */
+export type ReaderFreeNote = { kind: 'live'; year: number } | { kind: 'date'; year: number };
+
+export function readerFreeNote(readerFreeFrom: number | null, today: Date = new Date()): ReaderFreeNote | null {
+  if (readerFreeFrom === null) return null;
+  const year = today.getFullYear();
+  if (readerFreeFrom <= year) return null;
+  return readerFreeFrom - year <= countdownYears ? { kind: 'live', year: readerFreeFrom } : { kind: 'date', year: readerFreeFrom };
+}
+
+/** The shelf's seasonal rail (W8) shows from 1 October to 31 December. */
+export function inUnlockSeason(today: Date = new Date()): boolean {
+  return today.getMonth() >= 9;
+}
+
+/** The first thirty days of a year: next year's arrivals have become this year's. */
+export function inArrivalSeason(today: Date = new Date()): boolean {
+  return today.getMonth() === 0 && today.getDate() <= 30;
+}
+
+/** "Free since 2007", "Free from 1 January 2027" or "Not checked yet": one group of the unlock list (W7). */
+export function unlockGroupLabel(year: number | null, today: Date = new Date()): string {
+  if (year === null) return t('Not checked yet');
+  return year <= today.getFullYear() ? t('Free since {year}', { year: String(year) }) : freeOnLabel(year).replace(/^Free on/, t('Free from'));
+}

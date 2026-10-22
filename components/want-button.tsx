@@ -14,12 +14,14 @@ import { wantedNoticeTitle } from '@/src/wanted';
  * copyright, already on the shelf) with the server's sentence. Search and the Wanted page then
  * ask again, so counts and ranks stay the server's.
  */
-export function WantButton({ catalogWorkId, language, wanted, queueLink = false }: {
+export function WantButton({ catalogWorkId, language, wanted, queueLink = false, labels }: {
   catalogWorkId: string;
   language: string;
   wanted: boolean;
   /** Offer "See the queue" after a want; off on the Wanted page itself. */
   queueLink?: boolean;
+  /** Other words for the two states: "Tell me" / "✓ On the day" for a work that frees up on a date (W8). */
+  labels?: { want: string; wanted: string };
 }) {
   const { t } = useTranslation();
   const styles = useStyles();
@@ -54,7 +56,7 @@ export function WantButton({ catalogWorkId, language, wanted, queueLink = false 
       hitSlop={6}
       onPress={() => mutation.mutate(!wanted)}
       style={({ pressed }) => [styles.button, shown && styles.wanted, pressed && styles.pressed]}>
-      <Text style={styles.text}>{shown ? t('✓ Wanted') : t('I want this')}</Text>
+      <Text style={styles.text}>{shown ? (labels?.wanted ?? t('✓ Wanted')) : (labels?.want ?? t('I want this'))}</Text>
     </Pressable>
   );
 }

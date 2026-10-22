@@ -2,7 +2,7 @@ import { auth } from '@/src/firebase';
 import type { VoiceAvailability } from './voice-availability';
 import { parallelEditionPath } from './reader-editions';
 import { parseChapterEnrichments } from './reader-chapters';
-import { parseCatalogHits } from './catalog';
+import { parseCatalogHits, parseWorkUnlocks } from './catalog';
 import { parseWantedQueue, parseWantReceipt } from './wanted';
 import { parseChapterVocabulary } from './reader-vocabulary';
 import type {
@@ -268,6 +268,9 @@ export const api = {
     const path = `/public/catalog/coming-free?year=${year}&limit=${limit}${language ? `&language=${encodeURIComponent(language)}` : ''}`;
     return (auth.currentUser ? request<unknown>(path) : publicRequest<unknown>(path)).then(parseCatalogHits);
   },
+  /** Where and when one work is free to read, country by country: the unlock list (W7). Open to guests. */
+  workUnlocks: (catalogWorkId: string) =>
+    publicRequest<unknown>(`/public/catalog/works/${encodeURIComponent(catalogWorkId)}/unlocks`).then(parseWorkUnlocks),
   /** "I want this": idempotent; 409 with a message when the work is under copyright or already on the shelf in that language. */
   wantBook: (catalogWorkId: string, language: string) =>
     request<unknown>('/books/wants', { method: 'POST', body: JSON.stringify({ catalogWorkId, language }) }).then(parseWantReceipt),
