@@ -67,6 +67,26 @@ Firebase's client configuration is intentionally public and has safe tracked
 defaults matching the web app. Never add a Firebase Admin/service-account key
 to this repository.
 
+## Product analytics (PostHog)
+
+Analytics goes through `src/analytics.ts`; screens never import PostHog. With no
+key set it is a silent no-op, so local dev and tests send nothing.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `EXPO_PUBLIC_POSTHOG_KEY` | _(empty: analytics off)_ | Public PostHog project API key (`phc_...`). |
+| `EXPO_PUBLIC_POSTHOG_HOST` | `https://eu.i.posthog.com` | PostHog ingestion host (EU cloud). |
+
+Set them per EAS environment (`eas env:create --environment production --name EXPO_PUBLIC_POSTHOG_KEY ...`).
+Users are identified by internal user id only and reset on logout; every event
+carries `platform` (`web`/`ios`/`android`). Events: `signup`, `first_lookup`,
+`first_save`, `review_session_completed`, `book_opened`, `book_progress`
+(`percent` 25/50/75/100), `share_link_created`, `share_link_opened`,
+`subscribe_started`, plus screen views named by route pattern (no ids).
+D1/D7/D30 return comes from PostHog retention insights. There is no touch
+autocapture and no input-text capture; session replay is off, and if enabled
+masks all inputs and images.
+
 ## Native provider setup
 
 Apple sign-in uses the `com.almonium.mobile` bundle identifier and requires an

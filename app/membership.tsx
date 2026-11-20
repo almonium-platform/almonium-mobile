@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { premiumLines } from '@/components/paywall-modal';
 import { Button } from '@/components/ui';
+import { analytics } from '@/src/analytics';
 import { api } from '@/src/api';
 import { useAuth } from '@/src/auth-context';
 import { config } from '@/src/config';
@@ -149,7 +150,7 @@ export default function MembershipScreen() {
                   <PriceBlock cadence={cadence} monthly={monthly} yearly={yearly} founder={founderAvailable} priceOf={priceOf} />
                 </>
               )}
-              <Button variant="premium" onPress={() => void Linking.openURL(`${config.webBaseUrl}/membership`)}>
+              <Button variant="premium" onPress={() => { analytics.track('subscribe_started', { source: 'membership' }); void Linking.openURL(`${config.webBaseUrl}/membership`); }}>
                 {founderAvailable ? 'Claim your place' : 'Become a member'}
               </Button>
               <Text style={styles.footnote}>

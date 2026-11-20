@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
+import { analytics } from '@/src/analytics';
 import { useAuth } from '@/src/auth-context';
 import {
   intentInstruction,
@@ -114,6 +115,7 @@ export default function ReviewScreen() {
       setResult(await api.reviewResult(session.sessionId));
       // Session complete is one of the two earned events on the phone.
       successHaptic();
+      analytics.track('review_session_completed');
       void activity.complete();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not load the session record.');
