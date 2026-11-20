@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AvatarMark } from '@/components/avatar-mark';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
+import { analytics } from '@/src/analytics';
 import { useAuth } from '@/src/auth-context';
 import { config } from '@/src/config';
 import { lightImpact } from '@/src/haptics';
@@ -29,6 +30,9 @@ export function SharedLinkScreen({ kind, id }: { kind: 'card' | 'deck'; id: stri
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [picking, setPicking] = useState(false);
 
+  useEffect(() => {
+    analytics.track('share_link_opened', { kind });
+  }, [kind, id]);
   const view = useQuery({
     queryKey: ['shared', kind, id],
     queryFn: async () => {

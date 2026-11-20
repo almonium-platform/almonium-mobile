@@ -27,6 +27,7 @@ import {
   useState,
 } from 'react';
 
+import { analytics } from '@/src/analytics';
 import { api } from '@/src/api';
 import { withoutStreamToken } from '@/src/chat';
 import { config } from '@/src/config';
@@ -163,6 +164,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
     [loadProfile],
   );
 
+  // Identity is the internal user id only, never email or name.
+  useEffect(() => {
+    if (profile?.id) analytics.identify(String(profile.id));
+  }, [profile?.id]);
+
   const value = useMemo<AuthState>(
     () => ({
       firebaseUser,
@@ -188,6 +194,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       },
       async register(email, password) {
         await createUserWithEmailAndPassword(auth, email.trim(), password);
+        analytics.track('signup', { method: 'email' });
         try {
           await api.requestEmailVerification();
         } finally {
@@ -229,6 +236,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
           await GoogleSignin.signOut().catch(() => undefined);
         }
         await signOut(auth);
+        analytics.reset();
         queryClient.clear();
         if (uid) await AsyncStorage.removeItem(profileCacheKey(uid));
         setProfile(null);

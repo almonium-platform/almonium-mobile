@@ -20,6 +20,7 @@ import { PaywallModal, type PaywallContext } from '@/components/paywall-modal';
 import { Sheet } from '@/components/sheet';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
+import { analytics, trackBookProgress, trackFirst } from '@/src/analytics';
 import { useAuth } from '@/src/auth-context';
 import { ReadingProgressSync } from '@/src/reading-progress';
 import { createCardDraft } from '@/src/card-utils';
@@ -242,7 +243,11 @@ export default function ReaderScreen() {
     (sourceLanguage === 'EN' ? 'UK' : 'EN');
   const selectionQuery = useQuery({
     queryKey: ['discover', selection?.entry, sourceLanguage, translationLanguage, selection?.context],
-    queryFn: () => api.discover(selection!.entry, sourceLanguage, translationLanguage, selection!.context),
+    queryFn: async () => {
+      const result = await api.discover(selection!.entry, sourceLanguage, translationLanguage, selection!.context);
+      void trackFirst('first_lookup', profile?.id);
+      return result;
+    },
     enabled: Boolean(selection && sourceLanguage),
   });
   const itemsQuery = useQuery({
@@ -282,11 +287,12 @@ export default function ReaderScreen() {
     if (!sync || !infoQuery.data) return;
     void sync.restorePending().then((pending) => {
       const restored = pending ?? infoQuery.data.progressPercentage ?? 0;
+      analytics.track('book_opened', { book_id: String(bookId) });
       progressRef.current = restored;
       setProgress(restored);
       if (pending !== null) void sync.flush().catch(() => undefined);
     });
-  }, [sync, infoQuery.data]);
+  }, [sync, infoQuery.data, bookId]);
 
   const flush = useCallback(async () => {
     if (!sync) return;
@@ -355,6 +361,7 @@ export default function ReaderScreen() {
     if (!sync || !Number.isFinite(percentage)) return;
     activity.tick();
     const next = Math.max(0, Math.min(100, Math.round(percentage)));
+    trackBookProgress(String(bookId), progressRef.current, next);
     progressRef.current = next;
     setProgress(next);
     void sync.record(next);
@@ -384,6 +391,7 @@ export default function ReaderScreen() {
       await api.createCard(draft);
       await queryClient.invalidateQueries({ queryKey: ['cards', firebaseUser?.uid] });
       lightImpact();
+      void trackFirst('first_save', profile?.id);
       setWordSaved(true);
     } catch (error) {
       setWordSaveError(error instanceof Error ? error.message : 'The word could not be kept.');

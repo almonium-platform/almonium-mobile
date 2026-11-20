@@ -6,7 +6,7 @@ import {
 import { Literata_400Regular, Literata_600SemiBold } from '@expo-google-fonts/literata';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
-import { router, Stack } from 'expo-router';
+import { router, Stack, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
@@ -15,6 +15,7 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { analytics } from '@/src/analytics';
 import { AuthProvider } from '@/src/auth-context';
 import { ChatProvider } from '@/src/chat-client';
 import { CrestProvider } from '@/src/crest-context';
@@ -32,6 +33,16 @@ if (Platform.OS !== 'web') {
       shouldShowList: true,
     }),
   });
+}
+
+/** Screen views keyed by route pattern (e.g. reader/[bookId]), so ids never reach analytics. */
+function ScreenTracker() {
+  const segments = useSegments();
+  const name = segments.filter((segment) => !segment.startsWith('(')).join('/') || 'index';
+  useEffect(() => {
+    analytics.screen(name);
+  }, [name]);
+  return null;
 }
 
 export default function RootLayout() {
@@ -104,6 +115,7 @@ function ThemedRootLayout() {
                   <Stack.Screen name="chat/index" options={{ headerShown: false }} />
                   <Stack.Screen name="chat/[type]/[id]" options={{ headerShown: false }} />
                 </Stack>
+                <ScreenTracker />
                 <StatusBar style={isDark ? 'light' : 'dark'} />
               </NoticeProvider>
             </ChatProvider>

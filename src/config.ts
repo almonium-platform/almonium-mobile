@@ -17,6 +17,11 @@ export const config = {
     appId:
       process.env.EXPO_PUBLIC_FIREBASE_APP_ID || '1:33380019461:web:6b4381869fdf5ec21ddb6c',
   },
+  // PostHog product analytics. No key means analytics is a silent no-op.
+  posthog: {
+    apiKey: process.env.EXPO_PUBLIC_POSTHOG_KEY || undefined,
+    host: process.env.EXPO_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com',
+  },
   google: {
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,

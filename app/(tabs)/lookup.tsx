@@ -17,6 +17,7 @@ import { AppHeader } from '@/components/app-header';
 import { PaywallModal, type PaywallContext } from '@/components/paywall-modal';
 import { Button } from '@/components/ui';
 import { api } from '@/src/api';
+import { trackFirst } from '@/src/analytics';
 import { useAuth } from '@/src/auth-context';
 import { createCardDraft } from '@/src/card-utils';
 import { normalizedLookupEntry, tokenizeSentence, type DiscoverLookup } from '@/src/discover';
@@ -67,6 +68,7 @@ export default function LookupScreen() {
     mutationFn: ({ entry, sourceContext }: { entry: string; sourceContext?: string }) =>
       api.discover(entry, language, translationLanguage, sourceContext),
     onSuccess: (result) => {
+      void trackFirst('first_lookup', profile?.id);
       setLookup(result);
       setSenseIndex(0);
       setSaved(false);
@@ -109,6 +111,7 @@ export default function LookupScreen() {
     },
     onSuccess: async () => {
       setSaved(true);
+      void trackFirst('first_save', profile?.id);
       await queryClient.invalidateQueries({ queryKey: ['cards', firebaseUser?.uid] });
     },
   });
